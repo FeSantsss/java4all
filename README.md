@@ -1,3 +1,11 @@
+# Java, Spring & Produção: do zero ao sistema completo
+
+POO do absoluto zero, os quatro pilares, coleções, generics, streams, threads e testes — seguidos da stack de produção inteira: Git, Docker, SQL/PostgreSQL, NoSQL/MongoDB, Redis, Kafka, todo o ecossistema Spring (Core, Web, Data JPA, Security), Testcontainers, CI/CD e deploy real — terminando no front-end em React/TypeScript consumindo a API com autenticação e tempo real. 
+
+!! Cada capítulo traz pré-requisitos completos, dificuldade, tempo estimado de estudo, analogias, segredos de quem já apanhou, e exercícios com solução.
+
+___
+
 ### 📚 Módulos Didáticos
 
 <details>
