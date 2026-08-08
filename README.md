@@ -1,8 +1,8 @@
 # Java, Spring & Produção: do zero ao sistema completo
 
-POO do absoluto zero, os quatro pilares, coleções, generics, streams, threads e testes — seguidos da stack de produção inteira: Git, Docker, SQL/PostgreSQL, NoSQL/MongoDB, Redis, Kafka, todo o ecossistema Spring (Core, Web, Data JPA, Security), Testcontainers, CI/CD e deploy real — terminando no front-end em React/TypeScript consumindo a API com autenticação e tempo real.
+Esta documentação detalha a metodologia de ensino, a arquitetura pedagógica e a estrutura programática completa do curso, projetada para guiar o estudante desde a lógica de programação e fundamentos do Java até tópicos avançados de engenharia de software, arquiteturas distribuídas e ecossistema Spring Boot em nível sênior.
 
-!! Cada capítulo traz pré-requisitos completos, dificuldade, tempo estimado de estudo, analogias, segredos de quem já apanhou, e exercícios com solução.
+!! Cada capítulo traz pré-requisitos completos, dificuldade, tempo estimado de estudo, analogias, segredos e exercícios com solução.
 
 ---
 
