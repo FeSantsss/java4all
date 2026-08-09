@@ -273,6 +273,11 @@
 
   /* modo revisão */
   .review-toggle{position:fixed;bottom:22px;right:86px;background:var(--bg-card);border:1px solid var(--line);color:var(--ink-dim);font-family:var(--mono);font-size:.7rem;padding:10px 14px;border-radius:26px;cursor:pointer;z-index:50;}
+
+  /* botão flutuante "voltar ao topo" -- aparece só depois de rolar a página */
+  .back-to-top{position:fixed;bottom:22px;left:22px;width:44px;height:44px;border-radius:50%;background:var(--bg-card);border:1px solid var(--line);color:var(--accent);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s, transform .2s, border-color .2s;}
+  .back-to-top.visible{opacity:1;pointer-events:auto;transform:translateY(0);}
+  .back-to-top:hover{border-color:var(--accent);}
   .review-toggle.active{color:var(--accent);border-color:var(--accent);}
   body.review-mode .section p, body.review-mode .section pre.code, body.review-mode .install-box, body.review-mode table.cmp { display:none; }
   body.review-mode .callout, body.review-mode .secret, body.review-mode .warn, body.review-mode .exercise, body.review-mode .rules-box { display:block; }
@@ -9253,10 +9258,12 @@ livro.getId() == 42L
 <div class="glossary-panel" id="glossary-panel">
   <div class="glossary-head">
     <input type="text" id="glossary-search" placeholder="Buscar em TODO o curso (ex: JWT, N+1, Big O, DDD)...">
+    <p style="margin:6px 0 0;font-size:.65rem;color:var(--ink-faint);font-family:var(--mono)">atalho: pressione <b style="color:var(--accent)">/</b> em qualquer lugar da página para abrir a busca</p>
     <p style="margin:8px 0 0;font-size:.68rem;color:var(--ink-faint);font-family:var(--mono)">busca no texto completo dos 80+ capítulos</p>  </div>
   <div class="glossary-list" id="glossary-list"></div>
 </div>
 <button class="review-toggle" id="review-toggle">👁 Modo revisão</button>
+<button class="back-to-top" id="back-to-top" title="Voltar ao topo" aria-label="Voltar ao topo">↑</button>
 
 <script>
   function toggleSolution(btn){
@@ -9563,6 +9570,31 @@ livro.getId() == 42L
     document.body.classList.toggle('review-mode');
     this.classList.toggle('active');
     this.textContent = document.body.classList.contains('review-mode') ? '👁 Sair da revisão' : '👁 Modo revisão';
+  });
+
+  // ---- botão voltar ao topo: aparece após rolar, some perto do topo ----
+  const backToTopBtn = document.getElementById('back-to-top');
+  function atualizarBackToTop(){
+    backToTopBtn.classList.toggle('visible', window.scrollY > 600);
+  }
+  window.addEventListener('scroll', atualizarBackToTop);
+  atualizarBackToTop();
+  backToTopBtn.addEventListener('click', ()=>{
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ---- atalho de teclado: pressionar "/" abre e foca a busca instantaneamente,
+  //      de qualquer lugar da página -- exceto quando já digitando em outro campo ----
+  document.addEventListener('keydown', (e)=>{
+    const alvoEhCampoDeTexto = ['INPUT','TEXTAREA'].includes(e.target.tagName);
+    if(e.key === '/' && !alvoEhCampoDeTexto){
+      e.preventDefault();
+      document.getElementById('glossary-panel').classList.add('open');
+      document.getElementById('glossary-search').focus();
+    }
+    if(e.key === 'Escape'){
+      document.getElementById('glossary-panel').classList.remove('open');
+    }
   });
 
   const heroCode =
