@@ -1,5 +1,15 @@
-const CACHE_NAME = 'stack-completa-java-v6';
-const COURSE_FILES = ['./', './index.html', './app.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'stack-completa-java-v9';
+const COURSE_FILES = ['./', './index.html', './curriculum-v2.js', './app.js', './manifest.webmanifest', './icon.svg'];
+
+async function fetchWithTimeout(request, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 async function cacheCourse() {
   const cache = await caches.open(CACHE_NAME);
@@ -30,7 +40,7 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     event.respondWith((async () => {
       try {
-        const response = await fetch(event.request);
+        const response = await fetchWithTimeout(event.request);
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
           cache.put('./index.html', response.clone());
@@ -45,7 +55,7 @@ self.addEventListener('fetch', event => {
 
   event.respondWith((async () => {
     try {
-      const response = await fetch(event.request);
+      const response = await fetchWithTimeout(event.request);
       if (response.ok) {
         const cache = await caches.open(CACHE_NAME);
         cache.put(event.request, response.clone());

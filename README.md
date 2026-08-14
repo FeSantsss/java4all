@@ -10,11 +10,12 @@ O curso é publicado no GitHub Pages e funciona diretamente pelo navegador. Não
 
 ## Estado atual
 
-* 112 capítulos.
+* 128 capítulos.
 * 20 fases organizadas por dependência pedagógica.
 * 10 mini-projetos práticos.
-* Conteúdo e estilos reunidos no `index.html`, com a lógica da aplicação isolada em `app.js`.
+* Conteúdo original e estilos reunidos no `index.html`, aprofundamentos curriculares em `curriculum-v2.js` e lógica da aplicação isolada em `app.js`.
 * 93 capítulos do material original preservados e reposicionados.
+* 16 capítulos de aprofundamento adicionados sem alterar os identificadores usados pelo progresso antigo.
 * Fundamentos adicionados antes de orientação a objetos.
 * Spring concluído antes de testes avançados, Docker, Kafka e arquitetura.
 * Nenhum capítulo aponta para um pré-requisito localizado adiante na trilha.
@@ -49,13 +50,13 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Navegação pelos botões anterior e próximo.
 * Links entre capítulos e seus pré-requisitos.
 * Exercícios com soluções reveláveis.
-* Quizzes interativos com correção imediata, resposta persistente e estatística de acertos.
+* Quizzes interativos com correção imediata, resposta persistente, checkpoints de projeto e estatística de acertos.
 * Checklists persistentes.
 * Botões para copiar exemplos de código.
 * Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
 * Glossário contextual com 88 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
-* Fila de repetição espaçada com quatro níveis de lembrança e intervalos adaptativos.
+* Fila de repetição espaçada com quatro níveis de lembrança, intervalos adaptativos e planejamento diário do que revisar ou adiar.
 * Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
 * Timer Pomodoro de 25 minutos com pausa de 5 minutos.
 * Conquistas desbloqueáveis por progresso, constância, prática e quizzes.
@@ -70,7 +71,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 
 ## Uso offline e instalação
 
-Abra o [curso no GitHub Pages](https://fesantsss.github.io/java-study-poo-claude/) pelo menos uma vez com internet. Nessa primeira visita, o Service Worker armazena o conteúdo integral no dispositivo. Depois disso, o mesmo endereço pode ser aberto sem conexão no mesmo navegador e perfil.
+Abra o [curso no GitHub Pages](https://fesantsss.github.io/java4all/) pelo menos uma vez com internet. Nessa primeira visita, o Service Worker armazena o conteúdo integral no dispositivo. Depois disso, o mesmo endereço pode ser aberto sem conexão no mesmo navegador e perfil.
 
 Para instalar como aplicativo:
 
@@ -84,7 +85,8 @@ Quando houver uma nova versão do curso, conecte-se à internet e recarregue a p
 
 Os arquivos offline são:
 
-* `index.html`: aplicação e conteúdo integral do curso;
+* `index.html`: estrutura da aplicação e conteúdo-base do curso;
+* `curriculum-v2.js`: capítulos de aprofundamento, checkpoints e critérios de qualidade dos projetos;
 * `app.js`: sistema de estudos e persistência;
 * `sw.js`: cache offline, atualização e fallback de navegação;
 * `manifest.webmanifest`: metadados do aplicativo instalável;
@@ -128,13 +130,13 @@ Marco prático: biblioteca orientada a objetos.
 
 ### 4. Java essencial
 
-Pacotes, exceções, Collections, Generics, Java moderno, Lambdas, Streams e Java I/O.
+Pacotes, exceções, Collections, Generics, Java moderno, records, sealed types, pattern matching, virtual threads, Lambdas, Streams e Java I/O.
 
 Marcos práticos: analisador de vendas e importador de pedidos.
 
 ### 5. Raciocínio algorítmico
 
-Complexidade Big O, recursão, ordenação e busca.
+Complexidade Big O, recursão, ordenação, busca, heaps, grafos, BFS/DFS, caminhos mínimos, programação dinâmica e benchmarking.
 
 ### 6. Base profissional
 
@@ -142,13 +144,13 @@ Git, Maven, Gradle, anotações, Reflection, JSON, logging, SOLID, injeção de 
 
 ### 7. Web e banco antes do Spring
 
-HTTP, APIs REST, SQL, PostgreSQL, migrations e JDBC.
+HTTP, APIs REST, SQL, PostgreSQL, migrations, JDBC, planos de execução, MVCC, isolamento, locks e concorrência.
 
 Marco prático: sistema de finanças pessoais com PostgreSQL e JDBC.
 
 ### 8. Spring: primeira API completa
 
-Spring Core, IoC, DI, DevTools, Lombok, Spring MVC, Spring Data JPA, DTOs, validação, tratamento de erros, paginação, OpenAPI, N+1 e CORS.
+Spring Core, Spring Boot, IoC, DI, configuração tipada, DevTools, Lombok, Spring MVC, Spring Data JPA, ciclo de vida de entidades, transações, DTOs, validação, Problem Details, idempotência, paginação, OpenAPI, N+1 e CORS.
 
 Marco prático: API de help desk.
 
@@ -160,7 +162,7 @@ Marco prático: motor de reservas testado.
 
 ### 10. Segurança da API
 
-Sessão, JWT, OAuth2, Spring Security, autorização por papéis e HTTPS.
+Sessão, JWT, OAuth 2.0, OpenID Connect, PKCE, Resource Server, Spring Security, autorização por escopo/propriedade e HTTPS.
 
 Marco prático: autenticação e RBAC aplicados à API.
 
@@ -178,21 +180,21 @@ Conceitos NoSQL, MongoDB, Redis e estratégias de hospedagem de bancos.
 
 ### 14. Spring avançado
 
-Resilience4j, WebClient, Spring AOP, Spring Cache e Actuator.
+Resilience4j, RestClient/WebClient, Spring AOP, Spring Cache, Actuator, logs estruturados, métricas, traces e SLOs.
 
 ### 15. Produção, CI/CD e deploy
 
-Secrets, GitHub Actions, práticas de produção, deploy do back-end, Spring Profiles e observabilidade.
+Secrets, GitHub Actions, supply chain, hardening, deploy progressivo, rollback, backup/restauração, Spring Profiles e observabilidade.
 
 Marco prático: deploy reproduzível, observável e reversível.
 
 ### 16. Mensageria depois do monólito
 
-Threads, fundamentos de mensageria, Kafka e Spring Kafka.
+Threads, fundamentos de mensageria, Kafka, Spring Kafka, schemas, retry/DLT, idempotência, outbox e exactly-once dentro de limites explícitos.
 
 ### 17. Arquitetura e sistemas distribuídos
 
-Aprofundamento em POO, JVM, IoC, concorrência, debugging, arquitetura de software, DDD, sistemas distribuídos, arquitetura orientada a eventos e testes de integração avançados.
+Aprofundamento em POO, JVM, IoC, concorrência, debugging, arquitetura de software, DDD estratégico, CAP/PACELC, consistência distribuída, arquitetura orientada a eventos e testes de integração avançados.
 
 Marco prático: sistema de pedidos orientado a eventos.
 
@@ -291,6 +293,7 @@ O navegador armazena:
 * rascunhos do Java Lab;
 * histórico diário de estudo;
 * fila, intervalos e domínio da revisão espaçada;
+* plano diário da revisão, com itens escolhidos e adiados somente naquele dia;
 * tema, tamanho de texto, meta diária e modos de leitura.
 
 Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limpar os dados do navegador pode apagar o progresso.
@@ -298,6 +301,14 @@ Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limp
 A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
 
 Não existe conta, banco de dados remoto ou sincronização automática entre dispositivos nesta versão. O progresso salvo no GitHub Pages pertence ao navegador e perfil utilizados. Outro navegador, perfil ou dispositivo terá uma área de armazenamento diferente. Use o backup JSON para transportar o progresso entre eles.
+
+## Planejamento diário da revisão
+
+A área **Central → Revisão** separa a fila vencida em três visualizações: todas, escolhidas para hoje e adiadas. Cada capítulo pode ser marcado ou desmarcado individualmente, e os botões **Selecionar todas** e **Adiar todas hoje** permitem organizar filas grandes de uma vez.
+
+Todos os itens vencidos entram selecionados por padrão. Ao desmarcar um item, o curso grava no IndexedDB apenas a decisão de não mostrá-lo na sessão daquele dia. Isso não conta como revisão, não aumenta o domínio e não muda a data nem o intervalo calculado pela repetição espaçada. Na mudança de data, o plano diário é recriado e os itens que continuarem vencidos voltam automaticamente à seleção.
+
+Ao avaliar um cartão como **Esqueci**, **Difícil**, **Lembrei** ou **Muito fácil**, a revisão é registrada normalmente, o novo intervalo é calculado e o capítulo sai da fila até a próxima data programada. O plano diário também faz parte da exportação e importação do backup JSON.
 
 ## Glossário contextual
 
@@ -314,6 +325,14 @@ O Java Lab oferece um runner didático totalmente local para `System.out.print/p
 Recursos completos da linguagem — classes colaborando entre si, Collections, Streams, threads, bibliotecas, Maven, Spring e acesso a banco — exigem uma JVM real. O botão **Baixar `.java`** permite levar o rascunho ao JDK sem perder o trabalho.
 
 Essa estrutura permite navegação dinâmica sem exigir framework, build ou instalação obrigatória.
+
+## Validação do material
+
+O script local `validate-course.js` não instala dependências nem altera arquivos. Ele verifica quantidade e ordem dos capítulos, correspondência entre catálogo e templates, IDs duplicados, pré-requisitos inexistentes, ligação dos scripts, inclusão no cache offline e reaparecimento de trechos técnicos já corrigidos.
+
+```bash
+node validate-course.js
+```
 
 ## Objetivo
 

@@ -207,6 +207,15 @@
     normalized.notes ||= {};
     normalized.quizAnswers ||= {};
     normalized.review ||= {};
+    const today = todayKey();
+    const savedReviewPlan = normalized.reviewPlan && typeof normalized.reviewPlan === 'object' ? normalized.reviewPlan : {};
+    const savedChoices = savedReviewPlan.choices && typeof savedReviewPlan.choices === 'object' ? savedReviewPlan.choices : {};
+    normalized.reviewPlan = savedReviewPlan.date === today
+      ? {
+          date: today,
+          choices: Object.fromEntries(Object.entries(savedChoices).filter(([, choice]) => choice === 'selected' || choice === 'deferred'))
+        }
+      : { date: today, choices: {} };
     normalized.labs ||= {};
     normalized.activity ||= {};
     normalized.settings ||= {};
@@ -217,7 +226,7 @@
     normalized.settings.focusMode ||= false;
     normalized.settings.reviewMode ||= false;
     normalized.settings.reduceMotion ||= false;
-    normalized.version = 2;
+    normalized.version = 3;
     return normalized;
   }
   state = normalizeState(await loadPersistedState());
@@ -231,6 +240,7 @@
   let noteSaveTimer = null;
   let labSaveTimer = null;
   let reviewQueue = [];
+  let reviewPlanFilter = 'all';
   let commandSelection = 0;
   let commandItems = [];
   let pomodoro = { remaining: 25 * 60, running: false, breakMode: false, timer: null };
@@ -248,6 +258,69 @@
   const counter = $('#chapter-counter');
   const studyOverlay = $('#study-overlay');
   const commandOverlay = $('#command-overlay');
+
+  function buildCourseNavigation() {
+    const navigation = $('#course-nav');
+    const phases = new Map();
+    chapters.forEach(chapter => {
+      if (!phases.has(chapter.phaseId)) phases.set(chapter.phaseId, { title: chapter.phaseTitle, chapters: [] });
+      phases.get(chapter.phaseId).chapters.push(chapter);
+    });
+    const fragment = document.createDocumentFragment();
+    phases.forEach((phase, phaseId) => {
+      const section = document.createElement('section');
+      section.className = 'nav-phase';
+      section.dataset.phase = phaseId;
+      const heading = document.createElement('h2');
+      heading.textContent = phase.title;
+      section.append(heading);
+      phase.chapters.forEach(chapter => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.chapter = chapter.id;
+        const status = document.createElement('span');
+        status.className = 'status-dot';
+        const label = document.createElement('span');
+        label.textContent = chapter.title;
+        button.append(status, label);
+        section.append(button);
+      });
+      fragment.append(section);
+    });
+    navigation.replaceChildren(fragment);
+  }
+
+  buildCourseNavigation();
+
+  const legacyNumbers = new Map();
+  chapters.forEach(chapter => {
+    const label = document.getElementById('template-' + chapter.id)?.content.querySelector('.section-num')?.textContent.trim();
+    if (!/^\d{1,3}$/.test(label || '')) return;
+    const normalized = String(Number(label));
+    if (!legacyNumbers.has(normalized)) legacyNumbers.set(normalized, []);
+    legacyNumbers.get(normalized).push(chapter);
+  });
+
+  function normalizeLegacyChapterReferences() {
+    const walker = document.createTreeWalker(mount, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.nodeValue.match(/capítulos?\s+\d/i)) continue;
+      if (node.parentElement?.closest('pre, code, a, .section-head, .topic-meta')) continue;
+      nodes.push(node);
+    }
+    nodes.forEach(node => {
+      node.nodeValue = node.nodeValue.replace(/\b(capítulo|capítulos)\s+(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?/gi, (full, prefix, start, end) => {
+        const first = legacyNumbers.get(String(Number(start)));
+        const last = end ? legacyNumbers.get(String(Number(end))) : null;
+        if (first?.length !== 1 || (end && last?.length !== 1)) return full;
+        const firstNumber = String(first[0].index + 1).padStart(3, '0');
+        const lastNumber = end ? String(last[0].index + 1).padStart(3, '0') : '';
+        return `${prefix} ${firstNumber}${lastNumber ? '–' + lastNumber : ''}`;
+      });
+    });
+  }
 
   function save() {
     if (isResettingData) return Promise.resolve(false);
@@ -508,6 +581,7 @@
       input.checked = Boolean(state.checklists[activeId]?.[inputIndex]);
       input.nextElementSibling?.classList.toggle('done', input.checked);
     });
+    normalizeLegacyChapterReferences();
     restoreQuizzes();
     highlightContextualTerms();
     updateReadingProgress();
@@ -568,6 +642,7 @@
       toast('Capítulo concluído! Ele entrou na sua fila de revisão.');
     } else {
       delete state.review[activeId];
+      delete state.reviewPlan.choices[activeId];
       save();
     }
     updateProgress();
@@ -670,10 +745,15 @@
       `<span class="achievement ${achievement.test() ? 'unlocked' : ''}">${achievement.test() ? '◆' : '◇'} ${escapeHtml(achievement.label)}</span>`
     ).join('');
 
-    const dueCount = chapters.filter(chapter => state.completed[chapter.id] && (!state.review[chapter.id] || state.review[chapter.id].due <= todayKey())).length;
+    ensureDailyReviewPlan();
+    const dueChapters = buildReviewQueue();
+    const selectedCount = dueChapters.filter(chapter => reviewChoice(chapter.id) === 'selected').length;
+    const deferredCount = dueChapters.length - selectedCount;
     const futureDates = Object.values(state.review).map(item => item.due).filter(date => date > todayKey()).sort();
-    $('#review-summary').textContent = dueCount
-      ? `${dueCount} ${dueCount === 1 ? 'capítulo espera' : 'capítulos esperam'} por você hoje.`
+    $('#review-summary').textContent = dueChapters.length
+      ? selectedCount
+        ? `${selectedCount} ${selectedCount === 1 ? 'revisão escolhida' : 'revisões escolhidas'} para hoje${deferredCount ? ` · ${deferredCount} ${deferredCount === 1 ? 'adiada' : 'adiadas'} somente neste dia` : ''}.`
+        : `Você adiou ${deferredCount === 1 ? 'a revisão pendente' : `as ${deferredCount} revisões pendentes`} somente por hoje.`
       : futureDates.length ? `Fila em dia. Próxima revisão em ${formatDate(futureDates[0])}.` : 'Conclua um capítulo para iniciar sua memória de longo prazo.';
   }
 
@@ -706,6 +786,41 @@
     return chapters.filter(chapter => state.completed[chapter.id] && (!state.review[chapter.id] || state.review[chapter.id].due <= todayKey()));
   }
 
+  function ensureDailyReviewPlan() {
+    const today = todayKey();
+    if (!state.reviewPlan || state.reviewPlan.date !== today || !state.reviewPlan.choices || typeof state.reviewPlan.choices !== 'object') {
+      state.reviewPlan = { date: today, choices: {} };
+      return true;
+    }
+    return false;
+  }
+
+  function reviewChoice(chapterId) {
+    return state.reviewPlan.choices[chapterId] === 'deferred' ? 'deferred' : 'selected';
+  }
+
+  function setReviewChoice(chapterId, choice) {
+    ensureDailyReviewPlan();
+    if (!buildReviewQueue().some(chapter => chapter.id === chapterId)) return;
+    state.reviewPlan.choices[chapterId] = choice === 'deferred' ? 'deferred' : 'selected';
+    save();
+    updateReviewPanel();
+    toast(choice === 'deferred'
+      ? 'Revisão adiada somente por hoje. Ela volta amanhã.'
+      : 'Revisão incluída no plano de hoje.');
+  }
+
+  function setAllReviewChoices(choice) {
+    const dueChapters = buildReviewQueue();
+    ensureDailyReviewPlan();
+    dueChapters.forEach(chapter => { state.reviewPlan.choices[chapter.id] = choice; });
+    save();
+    updateReviewPanel();
+    toast(choice === 'deferred'
+      ? 'Todas as revisões foram adiadas somente por hoje.'
+      : 'Todas as revisões foram incluídas no plano de hoje.');
+  }
+
   function reviewPrompt(chapter) {
     const template = document.getElementById('template-' + chapter.id);
     const headings = [...template.content.querySelectorAll('h3')].slice(0, 3).map(heading => heading.textContent.trim());
@@ -715,9 +830,14 @@
 
   function updateReviewPanel() {
     if (!$('#review-stage')) return;
-    reviewQueue = buildReviewQueue();
-    $('#review-count').textContent = `${reviewQueue.length} ${reviewQueue.length === 1 ? 'pendente' : 'pendentes'}`;
-    if (!reviewQueue.length) {
+    if (ensureDailyReviewPlan()) save();
+    const dueChapters = buildReviewQueue();
+    reviewQueue = dueChapters.filter(chapter => reviewChoice(chapter.id) === 'selected');
+    const deferredChapters = dueChapters.filter(chapter => reviewChoice(chapter.id) === 'deferred');
+    $('#review-count').textContent = dueChapters.length
+      ? `${reviewQueue.length} ${reviewQueue.length === 1 ? 'escolhida' : 'escolhidas'} · ${deferredChapters.length} ${deferredChapters.length === 1 ? 'adiada' : 'adiadas'}`
+      : 'fila em dia';
+    if (!dueChapters.length) {
       const future = chapters
         .filter(chapter => state.review[chapter.id]?.due > todayKey())
         .sort((a, b) => state.review[a.id].due.localeCompare(state.review[b.id].due));
@@ -725,16 +845,49 @@
       updateDashboard();
       return;
     }
+
+    const visibleChapters = dueChapters.filter(chapter => reviewPlanFilter === 'all' || reviewChoice(chapter.id) === reviewPlanFilter);
+    const plannerRows = visibleChapters.length
+      ? visibleChapters.map(chapter => {
+          const selected = reviewChoice(chapter.id) === 'selected';
+          const item = state.review[chapter.id] || { mastery: 0, reviews: 0 };
+          return `<label class="review-plan-item">
+            <input type="checkbox" data-review-plan-toggle="${chapter.id}" ${selected ? 'checked' : ''}>
+            <span class="review-plan-copy"><strong>${String(chapter.index + 1).padStart(3, '0')} · ${escapeHtml(chapter.title)}</strong><small>${item.reviews ? `${item.reviews} ${item.reviews === 1 ? 'revisão feita' : 'revisões feitas'} · domínio ${item.mastery || 0}/4` : 'Primeira revisão'}</small></span>
+            <span class="review-plan-state ${selected ? 'selected' : 'deferred'}">${selected ? 'Hoje' : 'Adiada'}</span>
+          </label>`;
+        }).join('')
+      : '<p class="review-plan-empty">Nenhum item nesta visualização.</p>';
+
+    const planner = `<section class="review-planner" aria-labelledby="review-plan-title">
+      <div class="review-plan-heading"><div><span class="hub-kicker">Plano de ${formatDate(todayKey())}</span><h3 id="review-plan-title">Escolha o que revisar hoje</h3><p>Desmarcar adia apenas neste dispositivo e somente até amanhã; o intervalo de memória não é alterado.</p></div>
+        <div class="setting-actions"><button class="ghost-btn" type="button" data-review-plan-bulk="selected">Selecionar todas</button><button class="ghost-btn" type="button" data-review-plan-bulk="deferred">Adiar todas hoje</button></div>
+      </div>
+      <div class="review-plan-filters" role="group" aria-label="Filtrar plano de revisão">
+        <button type="button" data-review-plan-filter="all" class="${reviewPlanFilter === 'all' ? 'active' : ''}" aria-pressed="${reviewPlanFilter === 'all'}">Todas <b>${dueChapters.length}</b></button>
+        <button type="button" data-review-plan-filter="selected" class="${reviewPlanFilter === 'selected' ? 'active' : ''}" aria-pressed="${reviewPlanFilter === 'selected'}">Hoje <b>${reviewQueue.length}</b></button>
+        <button type="button" data-review-plan-filter="deferred" class="${reviewPlanFilter === 'deferred' ? 'active' : ''}" aria-pressed="${reviewPlanFilter === 'deferred'}">Adiadas <b>${deferredChapters.length}</b></button>
+      </div>
+      <div class="review-plan-list">${plannerRows}</div>
+    </section>`;
+
+    if (!reviewQueue.length) {
+      $('#review-stage').innerHTML = `${planner}<div class="review-empty"><strong>Nenhuma revisão escolhida para hoje.</strong><br>${deferredChapters.length === 1 ? 'O item adiado reaparece' : `Os ${deferredChapters.length} itens adiados reaparecem`} automaticamente amanhã, ainda na fila.</div>`;
+      updateDashboard();
+      return;
+    }
+
     const chapter = reviewQueue[0];
     const item = state.review[chapter.id] || { mastery: 0, reviews: 0 };
     $('#review-stage').innerHTML = `
+      ${planner}
       <article class="review-card" data-review-id="${chapter.id}">
-        <span class="hub-kicker">${escapeHtml(chapter.phaseTitle)} · ${chapter.index + 1}/${chapters.length}</span>
+        <span class="hub-kicker">Próxima escolhida · ${escapeHtml(chapter.phaseTitle)} · ${chapter.index + 1}/${chapters.length}</span>
         <h3>${escapeHtml(chapter.title)}</h3>
         <p>${escapeHtml(reviewPrompt(chapter))}</p>
         <label class="form-label">Domínio atual · ${item.mastery || 0}/4</label>
         <div class="mastery-bar"><i style="width:${(item.mastery || 0) * 25}%"></i></div>
-        <div class="setting-actions" style="margin-top:16px"><button class="ghost-btn" type="button" data-review-open="${chapter.id}">Consultar capítulo</button></div>
+        <div class="setting-actions" style="margin-top:16px"><button class="ghost-btn" type="button" data-review-open="${chapter.id}">Consultar capítulo</button><button class="ghost-btn" type="button" data-review-plan-defer="${chapter.id}">Adiar este item hoje</button></div>
         <div class="review-actions">
           <button class="review-rate" type="button" data-review-rate="again">Esqueci<br><small>amanhã</small></button>
           <button class="review-rate" type="button" data-review-rate="hard">Difícil<br><small>em breve</small></button>
@@ -772,6 +925,7 @@
     item.reviewedAt = new Date().toISOString();
     item.due = addDays(todayKey(), interval);
     state.review[chapter.id] = item;
+    delete state.reviewPlan.choices[chapter.id];
     recordActivity('reviews');
     toast(`Próxima revisão: ${formatDate(item.due)}.`);
     updateReviewPanel();
@@ -989,7 +1143,7 @@
   function exportData() {
     const backup = {
       app: 'Stack Completa Java',
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
       chapterCount: chapters.length,
       data: state
@@ -1244,10 +1398,33 @@
   });
 
   $('#review-stage').addEventListener('click', event => {
+    const filter = event.target.closest('[data-review-plan-filter]')?.dataset.reviewPlanFilter;
+    if (filter) {
+      reviewPlanFilter = filter;
+      updateReviewPanel();
+      return;
+    }
+    const bulkChoice = event.target.closest('[data-review-plan-bulk]')?.dataset.reviewPlanBulk;
+    if (bulkChoice) {
+      setAllReviewChoices(bulkChoice);
+      return;
+    }
+    const deferredChapter = event.target.closest('[data-review-plan-defer]')?.dataset.reviewPlanDefer;
+    if (deferredChapter) {
+      setReviewChoice(deferredChapter, 'deferred');
+      return;
+    }
     const rating = event.target.closest('[data-review-rate]')?.dataset.reviewRate;
-    if (rating) rateReview(rating);
+    if (rating) {
+      rateReview(rating);
+      return;
+    }
     const chapterId = event.target.closest('[data-review-open]')?.dataset.reviewOpen;
     if (chapterId) { closeHub(); render(chapterId); }
+  });
+  $('#review-stage').addEventListener('change', event => {
+    const checkbox = event.target.closest('[data-review-plan-toggle]');
+    if (checkbox) setReviewChoice(checkbox.dataset.reviewPlanToggle, checkbox.checked ? 'selected' : 'deferred');
   });
 
   $('#lab-editor').addEventListener('input', () => {
