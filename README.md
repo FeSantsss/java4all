@@ -17,27 +17,68 @@ Curso interativo de Java e Spring distribuído como uma aplicação autônoma em
 
 * Navegação por capítulo sem recarregar a página.
 * Sumário dividido por fases.
-* Busca em todo o conteúdo.
+* Busca instantânea em todo o conteúdo e paleta de comandos com `Ctrl/Cmd + K`.
 * Filtro para mostrar somente mini-projetos.
+* Filtro de capítulos favoritos.
 * Progresso calculado por capítulos concluídos.
 * Progresso e checklists salvos no `localStorage` do navegador.
 * Retomada automática do último capítulo aberto.
 * Navegação pelos botões anterior e próximo.
 * Links entre capítulos e seus pré-requisitos.
 * Exercícios com soluções reveláveis.
-* Quizzes interativos com correção imediata.
+* Quizzes interativos com correção imediata, resposta persistente e estatística de acertos.
 * Checklists persistentes.
 * Botões para copiar exemplos de código.
+* Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
+* Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
+* Fila de repetição espaçada com quatro níveis de lembrança e intervalos adaptativos.
+* Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
+* Timer Pomodoro de 25 minutos com pausa de 5 minutos.
+* Conquistas desbloqueáveis por progresso, constância, prática e quizzes.
+* Temas escuro, claro e alto contraste.
+* Controle do tamanho do texto, modo foco, revisão rápida e redução de movimentos.
+* Barra de leitura do capítulo.
+* Exportação e importação de um backup JSON com todos os dados de estudo.
+* PWA instalável com cache integral do curso para uso sem internet.
+* Detecção de conexão e indicação explícita quando o navegador está offline.
 * Layout responsivo para desktop e dispositivos móveis.
 * Estilo específico para impressão.
+
+## Uso offline e instalação
+
+O conteúdo dos 112 capítulos está no próprio `index.html`, sem fontes, bibliotecas ou imagens externas. Abrir esse arquivo diretamente já permite estudar sem conexão.
+
+Para ativar a experiência instalável, o Service Worker e as atualizações automáticas do cache, sirva a pasta por `localhost`:
+
+```bash
+python3 -m http.server 8000
+```
+
+Depois, acesse `http://localhost:8000`. Na Central de estudos, abra **Preferências → Curso offline e instalável**. O navegador pode exibir o botão de instalação assim que os critérios de PWA forem atendidos.
+
+Os arquivos offline são:
+
+* `index.html`: aplicação e conteúdo integral do curso;
+* `app.js`: sistema de estudos e persistência;
+* `sw.js`: cache offline, atualização e fallback de navegação;
+* `manifest.webmanifest`: metadados do aplicativo instalável;
+* `icon.svg`: ícone vetorial do curso.
+
+O Service Worker usa uma estratégia de rede primeiro para navegação, mantendo a cópia em cache como fallback. Para os demais arquivos locais, usa cache primeiro e atualiza o armazenamento quando necessário.
 
 ## Atalhos
 
 | Atalho    | Ação                                      |
 | --------- | ----------------------------------------- |
 | `/`       | Abre o menu e posiciona o cursor na busca |
+| `Ctrl/Cmd + K` | Abre a paleta de comandos e capítulos |
 | `Alt + ←` | Abre o capítulo anterior                  |
 | `Alt + →` | Abre o próximo capítulo                   |
+| `F`       | Favorita ou remove o capítulo dos favoritos |
+| `N`       | Abre as anotações do capítulo             |
+| `R`       | Abre a fila de revisão espaçada           |
+| `L`       | Abre o Java Lab                           |
+| `C`       | Marca ou desmarca o capítulo como concluído |
 | `Esc`     | Fecha o menu lateral                      |
 
 ## Trilha de estudo
@@ -162,8 +203,23 @@ O navegador armazena localmente:
 * último capítulo aberto;
 * capítulos marcados como concluídos;
 * estado dos checklists.
+* favoritos;
+* respostas e resultados dos quizzes;
+* anotações por capítulo;
+* rascunhos do Java Lab;
+* histórico diário de estudo;
+* fila, intervalos e domínio da revisão espaçada;
+* tema, tamanho de texto, meta diária e modos de leitura.
 
 Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limpar os dados do navegador pode apagar o progresso.
+
+A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
+
+## Limites do Java Lab
+
+O Java Lab oferece um runner didático totalmente local para `System.out.print/println`, declarações de variáveis numéricas, `String`, operações aritméticas, concatenação e laços `for` simples. Ele foi pensado para experimentos rápidos de fundamentos sem conexão.
+
+Recursos completos da linguagem — classes colaborando entre si, Collections, Streams, threads, bibliotecas, Maven, Spring e acesso a banco — exigem uma JVM real. O botão **Baixar `.java`** permite levar o rascunho ao JDK sem perder o trabalho.
 
 Essa estrutura permite navegação dinâmica sem exigir framework ou processo de instalação.
 

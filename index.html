@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#14110d">
   <meta name="description" content="Trilha completa de Java e Spring, do básico à arquitetura avançada.">
+  <meta name="application-name" content="Stack Completa Java">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Stack Completa — Trilha Java</title>
   <style>  :root{
     --bg:#14110d;
@@ -365,26 +371,263 @@ template { display: none; }
   .course-main { margin: 0; }
   .chapter-mount > .section { max-width: none; }
 }
+
+/* ================================================================
+   STUDY OS — camada de produtividade, acessibilidade e aprendizagem
+   ================================================================ */
+:root { --reader-scale: 1; --panel: #18130e; --panel-strong: #241c13; --shadow: #0009; }
+body { font-size: calc(16px * var(--reader-scale)); }
+body[data-theme="light"] {
+  --bg:#f6f1e7; --bg-alt:#eee5d6; --bg-card:#fffaf1; --ink:#272017;
+  --ink-dim:#685d4d; --ink-faint:#8a7a664f; --line:#d7c9b5; --line-soft:#d7c9b566;
+  --panel:#fffaf1; --panel-strong:#f1e7d8; --shadow:#5e4c3233;
+}
+body[data-theme="contrast"] {
+  --bg:#050505; --bg-alt:#0d0d0d; --bg-card:#151515; --ink:#fff;
+  --ink-dim:#dedede; --ink-faint:#aaaaaa66; --line:#555; --line-soft:#4448;
+  --accent:#ffad45; --accent-2:#b5db80; --panel:#080808; --panel-strong:#181818;
+}
+body[data-theme="light"] .chapter-toolbar { background:#f6f1e7e8; }
+body[data-theme="contrast"] .chapter-toolbar { background:#050505eb; }
+body.focus-mode .course-sidebar { transform:translateX(-102%); }
+body.focus-mode .course-main { margin-left:0; }
+body.focus-mode .chapter-mount > .section { margin-inline:auto; }
+body.focus-mode .chapter-actions { margin-inline:auto; }
+body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { scroll-behavior:auto!important; animation:none!important; transition:none!important; }
+
+.reading-progress { position:fixed; inset:0 0 auto; z-index:100; height:3px; pointer-events:none; background:transparent; }
+.reading-progress > span { display:block; width:0; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); box-shadow:0 0 14px var(--accent); transition:width .08s linear; }
+.sidebar-tools { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:0 8px 10px; }
+.sidebar-tool { display:flex; align-items:center; justify-content:center; gap:7px; min-height:38px; padding:7px 9px; border:1px solid var(--line); border-radius:9px; background:var(--bg-card); color:var(--ink-dim); font:.68rem var(--mono); cursor:pointer; }
+.sidebar-tool:hover,.sidebar-tool.active { color:var(--accent); border-color:var(--accent); background:var(--accent-soft); }
+.sidebar-status { display:flex; align-items:center; gap:8px; margin:14px 10px 0; color:var(--ink-faint); font:.62rem var(--mono); }
+.connection-dot { width:7px; height:7px; border-radius:50%; background:var(--accent-2); box-shadow:0 0 9px var(--accent-2); }
+.connection-dot.offline { background:var(--accent); box-shadow:0 0 9px var(--accent); }
+.nav-phase button.favorite .status-dot::after { content:'★'; position:relative; left:11px; top:-9px; color:var(--accent); font-size:.55rem; }
+
+.toolbar-group { display:flex; align-items:center; gap:8px; }
+.toolbar-action { display:grid; place-items:center; width:30px; height:30px; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--bg-card); color:var(--ink-dim); cursor:pointer; font-size:.9rem; }
+.toolbar-action:hover,.toolbar-action.active { border-color:var(--accent); color:var(--accent); }
+.chapter-toolbar { max-width:none; align-items:center; }
+.chapter-toolbar .toolbar-context { display:flex; align-items:center; gap:12px; }
+.chapter-toolbar .toolbar-context span { white-space:nowrap; }
+.chapter-toolbar .chapter-mini-progress { width:72px; height:3px; overflow:hidden; border-radius:3px; background:var(--line); }
+.chapter-toolbar .chapter-mini-progress i { display:block; width:0; height:100%; background:var(--accent); }
+
+.study-overlay { position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; padding:22px; background:#000a; backdrop-filter:blur(7px); }
+.study-overlay.open { display:flex; }
+.study-hub { width:min(1080px,100%); height:min(760px,92vh); display:grid; grid-template-columns:210px 1fr; overflow:hidden; border:1px solid var(--line); border-radius:20px; background:var(--panel); box-shadow:0 30px 90px var(--shadow); }
+.hub-nav { display:flex; flex-direction:column; padding:22px 14px; border-right:1px solid var(--line); background:var(--bg-alt); }
+.hub-brand { padding:0 10px 20px; color:var(--ink); font:800 1.05rem var(--serif); }
+.hub-brand small { display:block; margin-top:3px; color:var(--ink-faint); font:600 .61rem var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+.hub-tab { display:flex; align-items:center; gap:10px; width:100%; padding:10px 11px; border:0; border-radius:9px; background:transparent; color:var(--ink-dim); text-align:left; cursor:pointer; font-size:.78rem; }
+.hub-tab:hover,.hub-tab.active { background:var(--accent-soft); color:var(--accent); }
+.hub-close { margin-top:auto; padding:9px; border:1px solid var(--line); border-radius:9px; background:transparent; color:var(--ink-dim); cursor:pointer; }
+.hub-content { min-width:0; overflow:auto; padding:30px clamp(20px,4vw,46px) 48px; }
+.hub-panel { display:none; max-width:820px; margin:auto; }
+.hub-panel.active { display:block; }
+.hub-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:24px; }
+.hub-heading h2 { margin:0; color:var(--ink); font:700 2rem/1.1 var(--serif); }
+.hub-heading p { margin:7px 0 0; color:var(--ink-dim); font-size:.82rem; }
+.hub-kicker { color:var(--accent); font:.66rem var(--mono); letter-spacing:.12em; text-transform:uppercase; }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0 28px; }
+.stat-card { padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--bg-card); }
+.stat-card b { display:block; color:var(--ink); font:700 1.55rem var(--serif); }
+.stat-card span { color:var(--ink-dim); font:.62rem var(--mono); text-transform:uppercase; letter-spacing:.07em; }
+.dashboard-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:14px; }
+.study-card { padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--bg-card); }
+.study-card h3 { margin:0 0 5px; color:var(--ink); font:700 1rem var(--sans); }
+.study-card > p { margin:0 0 15px; color:var(--ink-dim); font-size:.8rem; }
+.goal-ring { display:flex; align-items:center; gap:16px; }
+.goal-ring-visual { --goal:0deg; display:grid; place-items:center; width:76px; height:76px; flex:none; border-radius:50%; background:conic-gradient(var(--accent) var(--goal),var(--line) 0); }
+.goal-ring-visual::before { content:''; grid-area:1/1; width:60px; height:60px; border-radius:50%; background:var(--bg-card); }
+.goal-ring-visual b { z-index:1; grid-area:1/1; color:var(--ink); font:.8rem var(--mono); }
+.activity-grid { display:grid; grid-template-columns:repeat(14,1fr); gap:4px; margin-top:13px; }
+.activity-day { aspect-ratio:1; border-radius:3px; background:var(--line-soft); }
+.activity-day.l1 { background:#8aa06d55; }.activity-day.l2{background:#8aa06d99}.activity-day.l3{background:var(--accent-2)}
+.achievement-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.achievement { padding:7px 10px; border:1px solid var(--line); border-radius:999px; color:var(--ink-faint); font:.66rem var(--mono); }
+.achievement.unlocked { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+
+.primary-btn,.ghost-btn,.danger-btn { padding:9px 14px; border:1px solid var(--accent); border-radius:9px; background:var(--accent-soft); color:var(--accent); cursor:pointer; font:.72rem var(--mono); }
+.ghost-btn { border-color:var(--line); background:var(--bg-alt); color:var(--ink-dim); }
+.danger-btn { border-color:var(--danger); background:var(--danger-soft); color:var(--danger); }
+.primary-btn:hover,.ghost-btn:hover { filter:brightness(1.16); }
+.form-label { display:block; margin:18px 0 7px; color:var(--ink-dim); font:.66rem var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+.study-input,.study-select,.note-editor,.lab-editor { width:100%; border:1px solid var(--line); border-radius:10px; outline:0; background:var(--bg-alt); color:var(--ink); }
+.study-input,.study-select { padding:10px 12px; }
+.study-input:focus,.study-select:focus,.note-editor:focus,.lab-editor:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.note-editor { min-height:330px; padding:18px; resize:vertical; line-height:1.7; }
+.autosave-status { color:var(--accent-2); font:.65rem var(--mono); }
+.note-chapter-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+.note-chip { padding:6px 9px; border:1px solid var(--line); border-radius:999px; background:transparent; color:var(--ink-dim); cursor:pointer; font-size:.7rem; }
+
+.review-empty { padding:32px; border:1px dashed var(--line); border-radius:14px; color:var(--ink-dim); text-align:center; }
+.review-card { padding:22px; border:1px solid var(--line); border-radius:14px; background:var(--bg-card); }
+.review-card h3 { margin:5px 0 8px; color:var(--ink); font:700 1.3rem var(--serif); }
+.review-card p { color:var(--ink-dim); }
+.review-actions { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:18px; }
+.review-rate { padding:10px 6px; border:1px solid var(--line); border-radius:9px; background:var(--bg-alt); color:var(--ink-dim); cursor:pointer; font-size:.7rem; }
+.review-rate:hover { border-color:var(--accent); color:var(--accent); }
+.mastery-bar { height:6px; overflow:hidden; border-radius:6px; background:var(--line); }
+.mastery-bar i { display:block; width:0; height:100%; background:linear-gradient(90deg,var(--danger),var(--accent),var(--accent-2)); }
+
+.lab-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.lab-toolbar .study-select { width:auto; flex:1; min-width:180px; }
+.lab-editor { min-height:330px; padding:18px; resize:vertical; tab-size:4; font: .83rem/1.65 var(--mono); }
+.lab-console { min-height:120px; max-height:220px; overflow:auto; margin-top:10px; padding:15px; border:1px solid var(--line); border-radius:10px; background:#090806; color:#b9d69a; white-space:pre-wrap; font:.78rem/1.6 var(--mono); }
+.lab-console.error { color:#e88f78; }
+.support-note { margin-top:10px; color:var(--ink-faint); font-size:.7rem; }
+
+.setting-row { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:16px 0; border-bottom:1px solid var(--line-soft); }
+.setting-row strong { display:block; color:var(--ink); font-size:.84rem; }
+.setting-row small { display:block; max-width:52ch; margin-top:3px; color:var(--ink-dim); font-size:.7rem; }
+.setting-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.segmented { display:flex; padding:3px; border:1px solid var(--line); border-radius:9px; background:var(--bg-alt); }
+.segmented button { padding:6px 9px; border:0; border-radius:6px; background:transparent; color:var(--ink-dim); cursor:pointer; font-size:.68rem; }
+.segmented button.active { background:var(--accent-soft); color:var(--accent); }
+
+.command-box { width:min(680px,100%); max-height:min(650px,86vh); overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--panel); box-shadow:0 25px 80px var(--shadow); }
+.command-input { width:100%; padding:18px 20px; border:0; border-bottom:1px solid var(--line); outline:0; background:transparent; color:var(--ink); font-size:1rem; }
+.command-results { max-height:520px; overflow:auto; padding:8px; }
+.command-item { display:flex; justify-content:space-between; gap:12px; width:100%; padding:11px 12px; border:0; border-radius:9px; background:transparent; color:var(--ink-dim); text-align:left; cursor:pointer; }
+.command-item:hover,.command-item.selected { background:var(--accent-soft); color:var(--accent); }
+.command-item small { color:var(--ink-faint); }
+
+.toast-region { position:fixed; right:20px; bottom:20px; z-index:200; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.toast { max-width:360px; padding:12px 15px; border:1px solid var(--line); border-radius:10px; background:var(--panel-strong); color:var(--ink); box-shadow:0 12px 35px var(--shadow); font-size:.78rem; animation:toast-in .2s ease; }
+@keyframes toast-in { from { opacity:0; transform:translateY(8px); } }
+.offline-banner { position:fixed; left:50%; bottom:18px; z-index:90; display:none; transform:translateX(-50%); padding:8px 14px; border:1px solid var(--accent); border-radius:999px; background:var(--bg-card); color:var(--accent); font:.68rem var(--mono); box-shadow:0 10px 30px var(--shadow); }
+.offline-banner.visible { display:block; }
+.course-sidebar,.hub-content,.command-results,.lab-editor,pre { scrollbar-color:var(--accent) var(--bg-alt); scrollbar-width:thin; }
+
+@media (max-width:760px) {
+  .study-overlay { padding:0; align-items:stretch; }
+  .study-hub { height:100%; border:0; border-radius:0; grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .hub-nav { flex-direction:row; overflow-x:auto; padding:8px; border:0; border-bottom:1px solid var(--line); }
+  .hub-brand { display:none; }.hub-tab{width:auto;flex:none}.hub-close{margin:0 0 0 auto;flex:none}.hub-tab span:last-child{display:none}
+  .hub-content { padding:24px 18px 44px; }
+  .stat-grid { grid-template-columns:1fr 1fr; }.dashboard-grid{grid-template-columns:1fr}.review-actions{grid-template-columns:1fr 1fr}
+  .chapter-toolbar .chapter-mini-progress { display:none; }
+  .toolbar-action[data-desktop-only] { display:none; }
+}
+@media (max-width:480px) {
+  .stat-grid{gap:8px}.stat-card{padding:12px}.hub-heading h2{font-size:1.6rem}.setting-row{align-items:flex-start;flex-direction:column}
+  .chapter-toolbar{padding-inline:14px;gap:8px}.chapter-toolbar .toolbar-context{min-width:0;overflow:hidden}.chapter-toolbar #phase-label{display:block;max-width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #chapter-counter{font-size:0;white-space:nowrap}#chapter-counter::after{content:attr(data-short);font-size:.65rem}
+  .toolbar-group{gap:5px}.toolbar-action{width:28px;height:28px}
+}
+
+@media print {
+  .reading-progress,.study-overlay,.toast-region,.offline-banner,.toolbar-action { display:none!important; }
+  body { --bg:#fff; --ink:#111; --ink-dim:#333; --bg-card:#fafafa; --line:#ccc; }
+}
 </style>
 </head>
 <body>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div>
   <div class="course-app">
     <aside class="course-sidebar" id="course-sidebar">
       <header class="course-brand"><div class="course-brand-row"><span class="brand-mark">J</span><strong>Stack Completa</strong><button class="sidebar-close" id="sidebar-close" aria-label="Fechar sumário">×</button></div><p>Java → Spring → Produção</p></header>
       <div class="course-progress"><div class="course-progress-label"><span>Progresso real</span><strong id="progress-pct">0%</strong></div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
       <label class="course-search"><span>Buscar na trilha</span><input id="course-search" type="search" placeholder="Ex.: arrays, Spring, Kafka…" autocomplete="off"></label>
       <button class="practice-filter" id="practice-filter" type="button">Focar somente na prática</button>
+      <div class="sidebar-tools">
+        <button class="sidebar-tool" type="button" data-open-hub="dashboard">◈ Central</button>
+        <button class="sidebar-tool" id="favorites-filter" type="button">☆ Favoritos</button>
+        <button class="sidebar-tool" type="button" data-open-hub="review">↻ Revisão</button>
+        <button class="sidebar-tool" type="button" data-open-hub="lab">⌘ Java Lab</button>
+      </div>
       <nav id="course-nav" aria-label="Trilha do curso"><section class="nav-phase" data-phase="start"><h2>Comece aqui</h2><button type="button" data-chapter="intro"><span class="status-dot"></span><span>Introdução & ambiente</span></button><button type="button" data-chapter="primeiro-programa"><span class="status-dot"></span><span>Primeiro programa: escrever, compilar e executar</span></button></section><section class="nav-phase" data-phase="fundamentals"><h2>Fundamentos da linguagem</h2><button type="button" data-chapter="variaveis-tipos"><span class="status-dot"></span><span>Variáveis, tipos, memória e conversões</span></button><button type="button" data-chapter="operadores-expressoes"><span class="status-dot"></span><span>Operadores, expressões e precedência</span></button><button type="button" data-chapter="controle-fluxo"><span class="status-dot"></span><span>Decisões: if, else e switch</span></button><button type="button" data-chapter="lacos-repeticao"><span class="status-dot"></span><span>Repetição: while, for e controle de laços</span></button><button type="button" data-chapter="arrays-matrizes"><span class="status-dot"></span><span>Arrays, matrizes e raciocínio por índice</span></button><button type="button" data-chapter="strings-wrapper"><span class="status-dot"></span><span>String, imutabilidade e classes wrapper</span></button><button type="button" data-chapter="metodos-escopo"><span class="status-dot"></span><span>Métodos, parâmetros, retorno e escopo</span></button><button type="button" data-chapter="logica-programacao"><span class="status-dot"></span><span>Lógica de Programação & Pensamento Algorítmico</span></button><button type="button" data-chapter="mini-caixa-eletronico"><span class="status-dot"></span><span>Mini-projeto: caixa eletrônico no terminal</span></button></section><section class="nav-phase" data-phase="oop"><h2>Orientação a objetos</h2><button type="button" data-chapter="classes"><span class="status-dot"></span><span>Classes e objetos</span></button><button type="button" data-chapter="atributos"><span class="status-dot"></span><span>Atributos e métodos</span></button><button type="button" data-chapter="construtores"><span class="status-dot"></span><span>Construtores</span></button><button type="button" data-chapter="encapsulamento"><span class="status-dot"></span><span>Encapsulamento</span></button><button type="button" data-chapter="static"><span class="status-dot"></span><span>static, final e this</span></button><button type="button" data-chapter="heranca"><span class="status-dot"></span><span>Herança</span></button><button type="button" data-chapter="polimorfismo"><span class="status-dot"></span><span>Polimorfismo</span></button><button type="button" data-chapter="abstracao"><span class="status-dot"></span><span>Classes abstratas</span></button><button type="button" data-chapter="interfaces"><span class="status-dot"></span><span>Interfaces</span></button><button type="button" data-chapter="mini-biblioteca-cli"><span class="status-dot"></span><span>Mini-projeto: biblioteca orientada a objetos</span></button></section><section class="nav-phase" data-phase="core"><h2>Java essencial</h2><button type="button" data-chapter="pacotes"><span class="status-dot"></span><span>Pacotes & organização de projeto</span></button><button type="button" data-chapter="excecoes"><span class="status-dot"></span><span>Exceções</span></button><button type="button" data-chapter="colecoes"><span class="status-dot"></span><span>Coleções & ArrayList</span></button><button type="button" data-chapter="generics"><span class="status-dot"></span><span>Generics</span></button><button type="button" data-chapter="javamoderno"><span class="status-dot"></span><span>Java moderno: Optional, var, Date/Time</span></button><button type="button" data-chapter="streams"><span class="status-dot"></span><span>Lambdas & Streams</span></button><button type="button" data-chapter="java-io"><span class="status-dot"></span><span>Arquivos, Paths e Java I/O</span></button><button type="button" data-chapter="mini-analisador-vendas"><span class="status-dot"></span><span>Mini-projeto: analisador de vendas com Streams</span></button></section><section class="nav-phase" data-phase="algorithms"><h2>Raciocínio algorítmico</h2><button type="button" data-chapter="big-o"><span class="status-dot"></span><span>Complexidade de Algoritmos (Big O)</span></button><button type="button" data-chapter="recursao"><span class="status-dot"></span><span>Recursão</span></button><button type="button" data-chapter="ordenacao-busca"><span class="status-dot"></span><span>Algoritmos de Ordenação & Busca</span></button></section><section class="nav-phase" data-phase="engineering-foundation"><h2>Base profissional</h2><button type="button" data-chapter="git"><span class="status-dot"></span><span>Git & fluxo de trabalho</span></button><button type="button" data-chapter="build"><span class="status-dot"></span><span>Maven & Gradle</span></button><button type="button" data-chapter="anotacoes"><span class="status-dot"></span><span>Anotações & Reflection</span></button><button type="button" data-chapter="json"><span class="status-dot"></span><span>JSON & serialização</span></button><button type="button" data-chapter="logging"><span class="status-dot"></span><span>Logging & configuração externa</span></button><button type="button" data-chapter="mini-importador-pedidos"><span class="status-dot"></span><span>Mini-projeto: importador de pedidos</span></button><button type="button" data-chapter="solid"><span class="status-dot"></span><span>SOLID & boas práticas</span></button><button type="button" data-chapter="di"><span class="status-dot"></span><span>Injeção de dependência (na mão)</span></button><button type="button" data-chapter="padroes"><span class="status-dot"></span><span>Padrões de projeto essenciais</span></button><button type="button" data-chapter="clean-code"><span class="status-dot"></span><span>Clean Code & Refatoração</span></button><button type="button" data-chapter="projetospring"><span class="status-dot"></span><span>Projeto final — mini-framework pré-Spring</span></button></section><section class="nav-phase" data-phase="web-data"><h2>Web e banco antes do Spring</h2><button type="button" data-chapter="http"><span class="status-dot"></span><span>HTTP & APIs REST</span></button><button type="button" data-chapter="sql"><span class="status-dot"></span><span>SQL — fundamentos de banco relacional</span></button><button type="button" data-chapter="postgres"><span class="status-dot"></span><span>PostgreSQL na prática</span></button><button type="button" data-chapter="migrations"><span class="status-dot"></span><span>Migrations — versionando o schema</span></button><button type="button" data-chapter="jdbc"><span class="status-dot"></span><span>JDBC & banco de dados</span></button><button type="button" data-chapter="mini-financas-jdbc"><span class="status-dot"></span><span>Mini-projeto: finanças pessoais com PostgreSQL</span></button></section><section class="nav-phase" data-phase="spring"><h2>Spring: primeira API completa</h2><button type="button" data-chapter="spring-core"><span class="status-dot"></span><span>Spring Core — IoC/DI oficial</span></button><button type="button" data-chapter="devtools"><span class="status-dot"></span><span>Spring Boot DevTools</span></button><button type="button" data-chapter="lombok"><span class="status-dot"></span><span>Lombok — eliminando boilerplate</span></button><button type="button" data-chapter="spring-mvc"><span class="status-dot"></span><span>Spring Web / MVC — controllers REST</span></button><button type="button" data-chapter="spring-jpa"><span class="status-dot"></span><span>Spring Data JPA — repositories & relacionamentos</span></button><button type="button" data-chapter="dto-mapping"><span class="status-dot"></span><span>DTO Mapping — Entity ≠ DTO</span></button><button type="button" data-chapter="validacao-erros"><span class="status-dot"></span><span>Bean Validation & tratamento global de erros</span></button><button type="button" data-chapter="paginacao-swagger"><span class="status-dot"></span><span>Paginação, filtros & documentação com Swagger</span></button><button type="button" data-chapter="n-mais-1"><span class="status-dot"></span><span>O problema N+1</span></button><button type="button" data-chapter="cors-rate-limit"><span class="status-dot"></span><span>CORS & rate limiting</span></button><button type="button" data-chapter="mini-helpdesk-api"><span class="status-dot"></span><span>Mini-projeto: API de help desk com Spring</span></button></section><section class="nav-phase" data-phase="testing"><h2>Testes depois da aplicação</h2><button type="button" data-chapter="testes"><span class="status-dot"></span><span>Testes unitários</span></button><button type="button" data-chapter="mockito"><span class="status-dot"></span><span>Mockito — Mocks & Dublês de Teste</span></button><button type="button" data-chapter="mini-reservas-testadas"><span class="status-dot"></span><span>Mini-projeto: motor de reservas guiado por testes</span></button><button type="button" data-chapter="projeto"><span class="status-dot"></span><span>Projeto final — sistema de biblioteca</span></button></section><section class="nav-phase" data-phase="security"><h2>Segurança da API</h2><button type="button" data-chapter="autenticacao-conceitos"><span class="status-dot"></span><span>Autenticação: sessão vs JWT vs OAuth2</span></button><button type="button" data-chapter="spring-security"><span class="status-dot"></span><span>Spring Security na prática</span></button><button type="button" data-chapter="https"><span class="status-dot"></span><span>HTTPS & certificados</span></button><button type="button" data-chapter="mini-auth-rbac"><span class="status-dot"></span><span>Mini-projeto: autenticação e autorização por papéis</span></button></section><section class="nav-phase" data-phase="containers"><h2>Docker e ambiente reproduzível</h2><button type="button" data-chapter="docker-conceitos"><span class="status-dot"></span><span>Docker — conceitos & instalação</span></button><button type="button" data-chapter="dockerfile"><span class="status-dot"></span><span>Dockerfile & multi-stage build</span></button><button type="button" data-chapter="compose"><span class="status-dot"></span><span>Docker Compose — app + banco juntos</span></button></section><section class="nav-phase" data-phase="integration-testing"><h2>Testes de integração reais</h2><button type="button" data-chapter="testcontainers"><span class="status-dot"></span><span>Testcontainers & banco de teste isolado</span></button></section><section class="nav-phase" data-phase="advanced-data"><h2>NoSQL, cache e hospedagem</h2><button type="button" data-chapter="nosql"><span class="status-dot"></span><span>NoSQL — conceitos & quando usar</span></button><button type="button" data-chapter="mongodb"><span class="status-dot"></span><span>MongoDB na prática</span></button><button type="button" data-chapter="redis"><span class="status-dot"></span><span>Redis — cache & estruturas em memória</span></button><button type="button" data-chapter="hospedagem-db"><span class="status-dot"></span><span>Onde hospedar o banco: dev, teste & produção</span></button></section><section class="nav-phase" data-phase="spring-advanced"><h2>Spring avançado</h2><button type="button" data-chapter="resilience"><span class="status-dot"></span><span>Circuit Breaker com Resilience4j</span></button><button type="button" data-chapter="webclient"><span class="status-dot"></span><span>WebClient & RestTemplate — consumindo APIs externas</span></button><button type="button" data-chapter="spring-aop"><span class="status-dot"></span><span>Spring AOP — formalizando o dynamic proxy</span></button><button type="button" data-chapter="spring-cache"><span class="status-dot"></span><span>Spring Cache Abstraction</span></button><button type="button" data-chapter="actuator"><span class="status-dot"></span><span>Spring Boot Actuator & health checks</span></button></section><section class="nav-phase" data-phase="production"><h2>Produção, CI/CD e deploy</h2><button type="button" data-chapter="secrets"><span class="status-dot"></span><span>Variáveis de ambiente & secrets em produção</span></button><button type="button" data-chapter="cicd"><span class="status-dot"></span><span>CI/CD com GitHub Actions</span></button><button type="button" data-chapter="praticas-producao"><span class="status-dot"></span><span>Práticas de produção: parity, backup, feature flags & versionamento</span></button><button type="button" data-chapter="deploy-backend"><span class="status-dot"></span><span>Deploy do back-end em produção</span></button><button type="button" data-chapter="spring-profiles"><span class="status-dot"></span><span>Spring Profiles avançado</span></button><button type="button" data-chapter="mini-deploy-observavel"><span class="status-dot"></span><span>Mini-projeto: deploy reproduzível e observável</span></button></section><section class="nav-phase" data-phase="messaging"><h2>Mensageria depois do monólito</h2><button type="button" data-chapter="threads"><span class="status-dot"></span><span>Threads & concorrência</span></button><button type="button" data-chapter="mensageria"><span class="status-dot"></span><span>Mensageria — conceitos</span></button><button type="button" data-chapter="kafka"><span class="status-dot"></span><span>Kafka na prática</span></button><button type="button" data-chapter="spring-kafka"><span class="status-dot"></span><span>Spring Kafka — integração</span></button></section><section class="nav-phase" data-phase="architecture"><h2>Arquitetura e sistemas distribuídos</h2><button type="button" data-chapter="pilares-profundo"><span class="status-dot"></span><span>Os 4 Pilares da POO — Aprofundamento Unificado</span></button><button type="button" data-chapter="di-ioc-profundo"><span class="status-dot"></span><span>Injeção de Dependência, IoC & Ciclo de Vida de Beans — Aprofundamento</span></button><button type="button" data-chapter="jvm-profundo"><span class="status-dot"></span><span>JVM, Bytecode e Gerenciamento de Memória — Aprofundamento</span></button><button type="button" data-chapter="debugging"><span class="status-dot"></span><span>Técnicas de Debugging na Prática</span></button><button type="button" data-chapter="concorrencia-profunda"><span class="status-dot"></span><span>Concorrência, Threads, Race Conditions & Assíncrono — Aprofundamento</span></button><button type="button" data-chapter="arquitetura-software"><span class="status-dot"></span><span>Arquitetura de Software</span></button><button type="button" data-chapter="ddd"><span class="status-dot"></span><span>Domain-Driven Design (DDD)</span></button><button type="button" data-chapter="sistemas-distribuidos"><span class="status-dot"></span><span>Sistemas Distribuídos: CAP & trade-offs de arquitetura sênior</span></button><button type="button" data-chapter="event-driven-profundo"><span class="status-dot"></span><span>Arquitetura Event-Driven & Internals do Kafka — Aprofundamento</span></button><button type="button" data-chapter="testes-integracao-avancados"><span class="status-dot"></span><span>Testes de Integração Avançados: @SpringBootTest, @DataJpaTest & Testcontainers com Kafka</span></button><button type="button" data-chapter="mini-pedidos-eventos"><span class="status-dot"></span><span>Mini-projeto: pedidos orientados a eventos</span></button></section><section class="nav-phase" data-phase="advanced-algorithms"><h2>Estruturas avançadas</h2><button type="button" data-chapter="estruturas-avancadas"><span class="status-dot"></span><span>Estruturas de Dados Avançadas</span></button></section><section class="nav-phase" data-phase="team"><h2>Trabalho profissional em equipe</h2><button type="button" data-chapter="code-review-adr"><span class="status-dot"></span><span>Code Review & Architecture Decision Records</span></button><button type="button" data-chapter="agile"><span class="status-dot"></span><span>Metodologias Ágeis: Scrum & Kanban</span></button></section><section class="nav-phase" data-phase="integration"><h2>Integração com front-end</h2><button type="button" data-chapter="conectando-front-back"><span class="status-dot"></span><span>Conectando front-end e back-end</span></button><button type="button" data-chapter="auth-front-ts"><span class="status-dot"></span><span>Autenticação no front & pincelada de TypeScript</span></button><button type="button" data-chapter="websockets"><span class="status-dot"></span><span>WebSockets — quando HTTP não basta</span></button><button type="button" data-chapter="deploy-frontend"><span class="status-dot"></span><span>Deploy do front-end & monorepo vs poli-repo</span></button></section><section class="nav-phase" data-phase="finish"><h2>Projeto integrador e revisão</h2><button type="button" data-chapter="mapa-sistema"><span class="status-dot"></span><span>Glossário & mapa do sistema completo</span></button><button type="button" data-chapter="projeto-integrador"><span class="status-dot"></span><span>Projeto final — sistema completo de ponta a ponta</span></button><button type="button" data-chapter="quiz"><span class="status-dot"></span><span>Quiz de revisão</span></button></section><p class="empty-search" id="empty-search">Nenhum capítulo encontrado.</p></nav>
       <p class="keyboard-help">/ busca · Alt+← anterior · Alt+→ próximo · Esc fecha o menu</p>
+      <div class="sidebar-status"><span class="connection-dot" id="connection-dot"></span><span id="connection-label">Curso pronto</span></div>
     </aside>
     <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar sumário"></button>
     <button class="sidebar-open" id="sidebar-open" type="button">Trilha</button>
     <main class="course-main">
-      <div class="chapter-toolbar"><span id="phase-label"></span><span id="chapter-counter"></span></div>
+      <div class="chapter-toolbar">
+        <div class="toolbar-context"><span id="phase-label"></span><div class="chapter-mini-progress"><i id="chapter-mini-progress"></i></div></div>
+        <div class="toolbar-group">
+          <span id="chapter-counter"></span>
+          <button class="toolbar-action" id="favorite-chapter" type="button" title="Favoritar capítulo (F)" aria-label="Favoritar capítulo">☆</button>
+          <button class="toolbar-action" type="button" data-open-hub="notes" title="Anotações (N)" aria-label="Abrir anotações">✎</button>
+          <button class="toolbar-action" type="button" data-open-hub="dashboard" title="Central de estudos (Ctrl+K)" aria-label="Abrir central de estudos">◈</button>
+        </div>
+      </div>
       <div class="chapter-mount" id="chapter-mount"></div>
       <div class="chapter-actions"><button id="previous-chapter" type="button">Anterior</button><button class="complete" id="complete-chapter" type="button">Marcar como concluído</button><button id="next-chapter" type="button">Próximo</button></div>
     </main>
   </div>
+  <div class="study-overlay" id="study-overlay" role="dialog" aria-modal="true" aria-labelledby="hub-title">
+    <div class="study-hub">
+      <nav class="hub-nav" aria-label="Central de estudos">
+        <div class="hub-brand">Study OS<small>seu cockpit Java</small></div>
+        <button class="hub-tab active" type="button" data-hub-tab="dashboard"><span>◈</span><span>Visão geral</span></button>
+        <button class="hub-tab" type="button" data-hub-tab="notes"><span>✎</span><span>Anotações</span></button>
+        <button class="hub-tab" type="button" data-hub-tab="review"><span>↻</span><span>Revisão</span></button>
+        <button class="hub-tab" type="button" data-hub-tab="lab"><span>⌘</span><span>Java Lab</span></button>
+        <button class="hub-tab" type="button" data-hub-tab="settings"><span>⚙</span><span>Preferências</span></button>
+        <button class="hub-close" id="hub-close" type="button" aria-label="Fechar central">Fechar · Esc</button>
+      </nav>
+      <div class="hub-content">
+        <section class="hub-panel active" data-hub-panel="dashboard">
+          <div class="hub-heading"><div><span class="hub-kicker">Painel pessoal</span><h2 id="hub-title">Sua central de estudos</h2><p id="dashboard-message">Consistência vence intensidade. Continue de onde parou.</p></div><button class="primary-btn" id="continue-study" type="button">Continuar curso</button></div>
+          <div class="stat-grid">
+            <div class="stat-card"><b id="stat-completed">0</b><span>capítulos</span></div>
+            <div class="stat-card"><b id="stat-streak">0</b><span>dias seguidos</span></div>
+            <div class="stat-card"><b id="stat-time">0m</b><span>tempo focado</span></div>
+            <div class="stat-card"><b id="stat-score">—</b><span>acertos em quizzes</span></div>
+          </div>
+          <div class="dashboard-grid">
+            <article class="study-card"><h3>Meta de hoje</h3><p>O tempo conta enquanto o curso estiver visível.</p><div class="goal-ring"><div class="goal-ring-visual" id="goal-ring"><b id="goal-percent">0%</b></div><div><strong id="goal-copy">0 de 25 minutos</strong><label class="form-label" for="daily-goal">Meta diária</label><select class="study-select" id="daily-goal"><option value="15">15 min</option><option value="25">25 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="90">90 min</option></select></div></div></article>
+            <article class="study-card"><h3>Próxima revisão</h3><p id="review-summary">Nenhum conceito aguardando revisão.</p><button class="ghost-btn" type="button" data-open-hub="review">Abrir fila de revisão</button></article>
+            <article class="study-card"><h3>Timer de foco</h3><p id="pomodoro-mode">Sessão de concentração · 25 min</p><div class="goal-ring"><b id="pomodoro-display" style="font:700 2rem var(--serif);color:var(--ink)">25:00</b><div class="setting-actions"><button class="primary-btn" id="pomodoro-toggle" type="button">Iniciar</button><button class="ghost-btn" id="pomodoro-reset" type="button">Reiniciar</button></div></div></article>
+            <article class="study-card"><h3>Ritmo — últimas 8 semanas</h3><p>Cada quadrado representa um dia de estudo.</p><div class="activity-grid" id="activity-grid" aria-label="Histórico de atividade"></div></article>
+            <article class="study-card"><h3>Conquistas</h3><p>Marcos que provam sua evolução.</p><div class="achievement-list" id="achievement-list"></div></article>
+          </div>
+        </section>
+
+        <section class="hub-panel" data-hub-panel="notes">
+          <div class="hub-heading"><div><span class="hub-kicker">Segundo cérebro</span><h2>Anotações por capítulo</h2><p id="note-chapter-title">Suas ideias ficam apenas neste navegador.</p></div><span class="autosave-status" id="autosave-status">Salvo</span></div>
+          <textarea class="note-editor" id="note-editor" placeholder="Escreva dúvidas, analogias, exemplos próprios, comandos importantes e pontos para revisar…"></textarea>
+          <div class="setting-actions"><button class="ghost-btn" id="copy-note" type="button">Copiar anotação</button><button class="ghost-btn" id="download-note" type="button">Baixar .md</button><button class="danger-btn" id="clear-note" type="button">Limpar esta nota</button></div>
+          <label class="form-label">Capítulos com anotações</label><div class="note-chapter-list" id="note-chapter-list"></div>
+        </section>
+
+        <section class="hub-panel" data-hub-panel="review">
+          <div class="hub-heading"><div><span class="hub-kicker">Repetição espaçada</span><h2>Fila de revisão</h2><p>Avalie sua lembrança; o curso calcula quando este conceito deve voltar.</p></div><span class="hub-kicker" id="review-count">0 pendentes</span></div>
+          <div id="review-stage"></div>
+        </section>
+
+        <section class="hub-panel" data-hub-panel="lab">
+          <div class="hub-heading"><div><span class="hub-kicker">Laboratório offline</span><h2>Java Lab</h2><p>Rascunhe, salve e execute fundamentos sem sair do capítulo.</p></div><span class="autosave-status" id="lab-save-status">Rascunho salvo</span></div>
+          <div class="lab-toolbar"><select class="study-select" id="lab-snippets"><option value="chapter">Código deste capítulo</option><option value="hello">Hello World</option><option value="variables">Variáveis e cálculo</option><option value="loop">Laço for</option></select><button class="primary-btn" id="lab-run" type="button">▶ Executar</button><button class="ghost-btn" id="lab-copy" type="button">Copiar</button><button class="ghost-btn" id="lab-download" type="button">Baixar .java</button></div>
+          <textarea class="lab-editor" id="lab-editor" spellcheck="false" aria-label="Editor Java"></textarea>
+          <pre class="lab-console" id="lab-console" aria-live="polite">Pronto. O console aparecerá aqui.</pre>
+          <p class="support-note">Runner didático local: executa <code>System.out.print/println</code>, variáveis numéricas/String, cálculos e <code>for</code> simples. Para Java completo, baixe o arquivo e execute com o JDK.</p>
+        </section>
+
+        <section class="hub-panel" data-hub-panel="settings">
+          <div class="hub-heading"><div><span class="hub-kicker">Personalização e dados</span><h2>Preferências</h2><p>Configure leitura, backup, instalação e privacidade.</p></div></div>
+          <div class="setting-row"><div><strong>Tema de leitura</strong><small>Escuro, claro ou alto contraste.</small></div><div class="segmented" id="theme-control"><button type="button" data-theme-value="dark">Escuro</button><button type="button" data-theme-value="light">Claro</button><button type="button" data-theme-value="contrast">Contraste</button></div></div>
+          <div class="setting-row"><div><strong>Tamanho do texto</strong><small>Ajusta conteúdo, menus e painéis.</small></div><div class="segmented" id="font-control"><button type="button" data-font-value="0.9">A−</button><button type="button" data-font-value="1">A</button><button type="button" data-font-value="1.12">A+</button><button type="button" data-font-value="1.24">A++</button></div></div>
+          <div class="setting-row"><div><strong>Modo foco</strong><small>Oculta a trilha lateral e centraliza a leitura.</small></div><button class="ghost-btn" id="focus-toggle" type="button">Ativar</button></div>
+          <div class="setting-row"><div><strong>Modo revisão rápida</strong><small>Exibe exercícios, alertas e pontos-chave do capítulo.</small></div><button class="ghost-btn" id="review-mode-toggle" type="button">Ativar</button></div>
+          <div class="setting-row"><div><strong>Reduzir movimentos</strong><small>Remove animações e rolagens suaves.</small></div><button class="ghost-btn" id="motion-toggle" type="button">Ativar</button></div>
+          <div class="setting-row"><div><strong>Curso offline e instalável</strong><small id="offline-detail">Verificando suporte do navegador…</small></div><div class="setting-actions"><button class="primary-btn" id="install-app" type="button">Instalar app</button><button class="ghost-btn" id="refresh-offline" type="button">Atualizar cache</button></div></div>
+          <div class="setting-row"><div><strong>Backup do seu estudo</strong><small>Exporta progresso, respostas, notas, favoritos, revisões e preferências.</small></div><div class="setting-actions"><button class="ghost-btn" id="export-data" type="button">Exportar JSON</button><button class="ghost-btn" id="import-data" type="button">Importar backup</button><input id="import-file" type="file" accept="application/json" hidden></div></div>
+          <div class="setting-row"><div><strong>Recomeçar do zero</strong><small>Apaga somente os dados locais deste curso. O conteúdo offline permanece.</small></div><button class="danger-btn" id="reset-data" type="button">Apagar meus dados</button></div>
+          <p class="support-note" id="storage-status"></p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="study-overlay" id="command-overlay" role="dialog" aria-modal="true" aria-label="Comandos e busca rápida">
+    <div class="command-box"><input class="command-input" id="command-input" type="search" placeholder="Digite um capítulo ou ação…" autocomplete="off"><div class="command-results" id="command-results"></div></div>
+  </div>
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  <div class="offline-banner" id="offline-banner">Você está offline — o curso continua disponível.</div>
   <template id="template-intro">
 
     <!-- 00 INTRO -->
@@ -9514,139 +9757,6 @@ projeto-biblioteca/
       </div>
     </section></template>
   <script type="application/json" id="course-data">[{"id":"intro","index":0,"title":"Introdução & ambiente","phaseId":"start","phaseTitle":"Comece aqui"},{"id":"primeiro-programa","index":1,"title":"Primeiro programa: escrever, compilar e executar","phaseId":"start","phaseTitle":"Comece aqui"},{"id":"variaveis-tipos","index":2,"title":"Variáveis, tipos, memória e conversões","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"operadores-expressoes","index":3,"title":"Operadores, expressões e precedência","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"controle-fluxo","index":4,"title":"Decisões: if, else e switch","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"lacos-repeticao","index":5,"title":"Repetição: while, for e controle de laços","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"arrays-matrizes","index":6,"title":"Arrays, matrizes e raciocínio por índice","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"strings-wrapper","index":7,"title":"String, imutabilidade e classes wrapper","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"metodos-escopo","index":8,"title":"Métodos, parâmetros, retorno e escopo","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"logica-programacao","index":9,"title":"Lógica de Programação & Pensamento Algorítmico","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"mini-caixa-eletronico","index":10,"title":"Mini-projeto: caixa eletrônico no terminal","phaseId":"fundamentals","phaseTitle":"Fundamentos da linguagem"},{"id":"classes","index":11,"title":"Classes e objetos","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"atributos","index":12,"title":"Atributos e métodos","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"construtores","index":13,"title":"Construtores","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"encapsulamento","index":14,"title":"Encapsulamento","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"static","index":15,"title":"static, final e this","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"heranca","index":16,"title":"Herança","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"polimorfismo","index":17,"title":"Polimorfismo","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"abstracao","index":18,"title":"Classes abstratas","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"interfaces","index":19,"title":"Interfaces","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"mini-biblioteca-cli","index":20,"title":"Mini-projeto: biblioteca orientada a objetos","phaseId":"oop","phaseTitle":"Orientação a objetos"},{"id":"pacotes","index":21,"title":"Pacotes & organização de projeto","phaseId":"core","phaseTitle":"Java essencial"},{"id":"excecoes","index":22,"title":"Exceções","phaseId":"core","phaseTitle":"Java essencial"},{"id":"colecoes","index":23,"title":"Coleções & ArrayList","phaseId":"core","phaseTitle":"Java essencial"},{"id":"generics","index":24,"title":"Generics","phaseId":"core","phaseTitle":"Java essencial"},{"id":"javamoderno","index":25,"title":"Java moderno: Optional, var, Date/Time","phaseId":"core","phaseTitle":"Java essencial"},{"id":"streams","index":26,"title":"Lambdas & Streams","phaseId":"core","phaseTitle":"Java essencial"},{"id":"java-io","index":27,"title":"Arquivos, Paths e Java I/O","phaseId":"core","phaseTitle":"Java essencial"},{"id":"mini-analisador-vendas","index":28,"title":"Mini-projeto: analisador de vendas com Streams","phaseId":"core","phaseTitle":"Java essencial"},{"id":"big-o","index":29,"title":"Complexidade de Algoritmos (Big O)","phaseId":"algorithms","phaseTitle":"Raciocínio algorítmico"},{"id":"recursao","index":30,"title":"Recursão","phaseId":"algorithms","phaseTitle":"Raciocínio algorítmico"},{"id":"ordenacao-busca","index":31,"title":"Algoritmos de Ordenação & Busca","phaseId":"algorithms","phaseTitle":"Raciocínio algorítmico"},{"id":"git","index":32,"title":"Git & fluxo de trabalho","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"build","index":33,"title":"Maven & Gradle","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"anotacoes","index":34,"title":"Anotações & Reflection","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"json","index":35,"title":"JSON & serialização","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"logging","index":36,"title":"Logging & configuração externa","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"mini-importador-pedidos","index":37,"title":"Mini-projeto: importador de pedidos","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"solid","index":38,"title":"SOLID & boas práticas","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"di","index":39,"title":"Injeção de dependência (na mão)","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"padroes","index":40,"title":"Padrões de projeto essenciais","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"clean-code","index":41,"title":"Clean Code & Refatoração","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"projetospring","index":42,"title":"Projeto final — mini-framework pré-Spring","phaseId":"engineering-foundation","phaseTitle":"Base profissional"},{"id":"http","index":43,"title":"HTTP & APIs REST","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"sql","index":44,"title":"SQL — fundamentos de banco relacional","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"postgres","index":45,"title":"PostgreSQL na prática","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"migrations","index":46,"title":"Migrations — versionando o schema","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"jdbc","index":47,"title":"JDBC & banco de dados","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"mini-financas-jdbc","index":48,"title":"Mini-projeto: finanças pessoais com PostgreSQL","phaseId":"web-data","phaseTitle":"Web e banco antes do Spring"},{"id":"spring-core","index":49,"title":"Spring Core — IoC/DI oficial","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"devtools","index":50,"title":"Spring Boot DevTools","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"lombok","index":51,"title":"Lombok — eliminando boilerplate","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"spring-mvc","index":52,"title":"Spring Web / MVC — controllers REST","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"spring-jpa","index":53,"title":"Spring Data JPA — repositories & relacionamentos","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"dto-mapping","index":54,"title":"DTO Mapping — Entity ≠ DTO","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"validacao-erros","index":55,"title":"Bean Validation & tratamento global de erros","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"paginacao-swagger","index":56,"title":"Paginação, filtros & documentação com Swagger","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"n-mais-1","index":57,"title":"O problema N+1","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"cors-rate-limit","index":58,"title":"CORS & rate limiting","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"mini-helpdesk-api","index":59,"title":"Mini-projeto: API de help desk com Spring","phaseId":"spring","phaseTitle":"Spring: primeira API completa"},{"id":"testes","index":60,"title":"Testes unitários","phaseId":"testing","phaseTitle":"Testes depois da aplicação"},{"id":"mockito","index":61,"title":"Mockito — Mocks & Dublês de Teste","phaseId":"testing","phaseTitle":"Testes depois da aplicação"},{"id":"mini-reservas-testadas","index":62,"title":"Mini-projeto: motor de reservas guiado por testes","phaseId":"testing","phaseTitle":"Testes depois da aplicação"},{"id":"projeto","index":63,"title":"Projeto final — sistema de biblioteca","phaseId":"testing","phaseTitle":"Testes depois da aplicação"},{"id":"autenticacao-conceitos","index":64,"title":"Autenticação: sessão vs JWT vs OAuth2","phaseId":"security","phaseTitle":"Segurança da API"},{"id":"spring-security","index":65,"title":"Spring Security na prática","phaseId":"security","phaseTitle":"Segurança da API"},{"id":"https","index":66,"title":"HTTPS & certificados","phaseId":"security","phaseTitle":"Segurança da API"},{"id":"mini-auth-rbac","index":67,"title":"Mini-projeto: autenticação e autorização por papéis","phaseId":"security","phaseTitle":"Segurança da API"},{"id":"docker-conceitos","index":68,"title":"Docker — conceitos & instalação","phaseId":"containers","phaseTitle":"Docker e ambiente reproduzível"},{"id":"dockerfile","index":69,"title":"Dockerfile & multi-stage build","phaseId":"containers","phaseTitle":"Docker e ambiente reproduzível"},{"id":"compose","index":70,"title":"Docker Compose — app + banco juntos","phaseId":"containers","phaseTitle":"Docker e ambiente reproduzível"},{"id":"testcontainers","index":71,"title":"Testcontainers & banco de teste isolado","phaseId":"integration-testing","phaseTitle":"Testes de integração reais"},{"id":"nosql","index":72,"title":"NoSQL — conceitos & quando usar","phaseId":"advanced-data","phaseTitle":"NoSQL, cache e hospedagem"},{"id":"mongodb","index":73,"title":"MongoDB na prática","phaseId":"advanced-data","phaseTitle":"NoSQL, cache e hospedagem"},{"id":"redis","index":74,"title":"Redis — cache & estruturas em memória","phaseId":"advanced-data","phaseTitle":"NoSQL, cache e hospedagem"},{"id":"hospedagem-db","index":75,"title":"Onde hospedar o banco: dev, teste & produção","phaseId":"advanced-data","phaseTitle":"NoSQL, cache e hospedagem"},{"id":"resilience","index":76,"title":"Circuit Breaker com Resilience4j","phaseId":"spring-advanced","phaseTitle":"Spring avançado"},{"id":"webclient","index":77,"title":"WebClient & RestTemplate — consumindo APIs externas","phaseId":"spring-advanced","phaseTitle":"Spring avançado"},{"id":"spring-aop","index":78,"title":"Spring AOP — formalizando o dynamic proxy","phaseId":"spring-advanced","phaseTitle":"Spring avançado"},{"id":"spring-cache","index":79,"title":"Spring Cache Abstraction","phaseId":"spring-advanced","phaseTitle":"Spring avançado"},{"id":"actuator","index":80,"title":"Spring Boot Actuator & health checks","phaseId":"spring-advanced","phaseTitle":"Spring avançado"},{"id":"secrets","index":81,"title":"Variáveis de ambiente & secrets em produção","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"cicd","index":82,"title":"CI/CD com GitHub Actions","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"praticas-producao","index":83,"title":"Práticas de produção: parity, backup, feature flags & versionamento","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"deploy-backend","index":84,"title":"Deploy do back-end em produção","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"spring-profiles","index":85,"title":"Spring Profiles avançado","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"mini-deploy-observavel","index":86,"title":"Mini-projeto: deploy reproduzível e observável","phaseId":"production","phaseTitle":"Produção, CI/CD e deploy"},{"id":"threads","index":87,"title":"Threads & concorrência","phaseId":"messaging","phaseTitle":"Mensageria depois do monólito"},{"id":"mensageria","index":88,"title":"Mensageria — conceitos","phaseId":"messaging","phaseTitle":"Mensageria depois do monólito"},{"id":"kafka","index":89,"title":"Kafka na prática","phaseId":"messaging","phaseTitle":"Mensageria depois do monólito"},{"id":"spring-kafka","index":90,"title":"Spring Kafka — integração","phaseId":"messaging","phaseTitle":"Mensageria depois do monólito"},{"id":"pilares-profundo","index":91,"title":"Os 4 Pilares da POO — Aprofundamento Unificado","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"di-ioc-profundo","index":92,"title":"Injeção de Dependência, IoC & Ciclo de Vida de Beans — Aprofundamento","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"jvm-profundo","index":93,"title":"JVM, Bytecode e Gerenciamento de Memória — Aprofundamento","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"debugging","index":94,"title":"Técnicas de Debugging na Prática","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"concorrencia-profunda","index":95,"title":"Concorrência, Threads, Race Conditions & Assíncrono — Aprofundamento","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"arquitetura-software","index":96,"title":"Arquitetura de Software","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"ddd","index":97,"title":"Domain-Driven Design (DDD)","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"sistemas-distribuidos","index":98,"title":"Sistemas Distribuídos: CAP & trade-offs de arquitetura sênior","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"event-driven-profundo","index":99,"title":"Arquitetura Event-Driven & Internals do Kafka — Aprofundamento","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"testes-integracao-avancados","index":100,"title":"Testes de Integração Avançados: @SpringBootTest, @DataJpaTest & Testcontainers com Kafka","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"mini-pedidos-eventos","index":101,"title":"Mini-projeto: pedidos orientados a eventos","phaseId":"architecture","phaseTitle":"Arquitetura e sistemas distribuídos"},{"id":"estruturas-avancadas","index":102,"title":"Estruturas de Dados Avançadas","phaseId":"advanced-algorithms","phaseTitle":"Estruturas avançadas"},{"id":"code-review-adr","index":103,"title":"Code Review & Architecture Decision Records","phaseId":"team","phaseTitle":"Trabalho profissional em equipe"},{"id":"agile","index":104,"title":"Metodologias Ágeis: Scrum & Kanban","phaseId":"team","phaseTitle":"Trabalho profissional em equipe"},{"id":"conectando-front-back","index":105,"title":"Conectando front-end e back-end","phaseId":"integration","phaseTitle":"Integração com front-end"},{"id":"auth-front-ts","index":106,"title":"Autenticação no front & pincelada de TypeScript","phaseId":"integration","phaseTitle":"Integração com front-end"},{"id":"websockets","index":107,"title":"WebSockets — quando HTTP não basta","phaseId":"integration","phaseTitle":"Integração com front-end"},{"id":"deploy-frontend","index":108,"title":"Deploy do front-end & monorepo vs poli-repo","phaseId":"integration","phaseTitle":"Integração com front-end"},{"id":"mapa-sistema","index":109,"title":"Glossário & mapa do sistema completo","phaseId":"finish","phaseTitle":"Projeto integrador e revisão"},{"id":"projeto-integrador","index":110,"title":"Projeto final — sistema completo de ponta a ponta","phaseId":"finish","phaseTitle":"Projeto integrador e revisão"},{"id":"quiz","index":111,"title":"Quiz de revisão","phaseId":"finish","phaseTitle":"Projeto integrador e revisão"}]</script>
-  <script>
-(() => {
-  'use strict';
-  const chapters = JSON.parse(document.getElementById('course-data').textContent);
-  const byId = new Map(chapters.map(chapter => [chapter.id, chapter]));
-  const indexById = new Map(chapters.map((chapter, index) => [chapter.id, index]));
-  const stateKey = 'stack-completa:single:v1';
-  let state;
-  try { state = JSON.parse(localStorage.getItem(stateKey)) || {}; } catch { state = {}; }
-  state.completed ||= {};
-  state.checklists ||= {};
-  let activeId = byId.has(location.hash.slice(1)) ? location.hash.slice(1) : (byId.has(state.lastChapter) ? state.lastChapter : chapters[0].id);
-  let practiceOnly = false;
-
-  const mount = document.getElementById('chapter-mount');
-  const sidebar = document.getElementById('course-sidebar');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  const search = document.getElementById('course-search');
-  const previous = document.getElementById('previous-chapter');
-  const next = document.getElementById('next-chapter');
-  const complete = document.getElementById('complete-chapter');
-  const phaseLabel = document.getElementById('phase-label');
-  const counter = document.getElementById('chapter-counter');
-
-  const save = () => localStorage.setItem(stateKey, JSON.stringify(state));
-  const closeSidebar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('visible'); };
-  const openSidebar = () => { sidebar.classList.add('open'); backdrop.classList.add('visible'); };
-
-  function updateProgress() {
-    const done = chapters.filter(chapter => state.completed[chapter.id]).length;
-    const percentage = Math.round(done / chapters.length * 100);
-    document.getElementById('progress-pct').textContent = percentage + '%';
-    document.getElementById('progress-fill').style.width = percentage + '%';
-    document.querySelectorAll('[data-chapter]').forEach(button => button.querySelector('.status-dot').classList.toggle('done', Boolean(state.completed[button.dataset.chapter])));
-    complete.classList.toggle('done', Boolean(state.completed[activeId]));
-    complete.textContent = state.completed[activeId] ? 'Capítulo concluído' : 'Marcar como concluído';
-  }
-
-  function enhanceChapter() {
-    const index = indexById.get(activeId);
-    const number = mount.querySelector('.section-num');
-    if (number) number.textContent = String(index + 1).padStart(3, '0');
-    mount.querySelectorAll('.prereq-tag[href^="#"]').forEach(link => {
-      const prerequisite = byId.get(link.getAttribute('href').slice(1));
-      if (prerequisite) link.textContent = String(prerequisite.index + 1).padStart(3, '0') + ' · ' + prerequisite.title;
-    });
-    mount.querySelectorAll('pre.code').forEach(pre => {
-      if (pre.parentElement.classList.contains('code-wrap')) return;
-      const wrap = document.createElement('div');
-      wrap.className = 'code-wrap';
-      pre.before(wrap); wrap.append(pre);
-      const button = document.createElement('button');
-      button.type = 'button'; button.className = 'copy-btn'; button.textContent = 'Copiar';
-      wrap.append(button);
-    });
-    mount.querySelectorAll('.checklist input').forEach((input, index) => {
-      input.checked = Boolean(state.checklists[activeId]?.[index]);
-      input.nextElementSibling?.classList.toggle('done', input.checked);
-    });
-  }
-
-  function render(id, pushHash = true) {
-    if (!byId.has(id)) return;
-    activeId = id;
-    const chapter = byId.get(id);
-    mount.replaceChildren(document.getElementById('template-' + id).content.cloneNode(true));
-    phaseLabel.textContent = chapter.phaseTitle;
-    counter.textContent = (chapter.index + 1) + ' de ' + chapters.length;
-    previous.disabled = chapter.index === 0;
-    next.disabled = chapter.index === chapters.length - 1;
-    document.querySelectorAll('[data-chapter]').forEach(button => button.classList.toggle('active', button.dataset.chapter === id));
-    state.lastChapter = id; save(); updateProgress(); enhanceChapter(); closeSidebar();
-    if (pushHash) history.replaceState(null, '', '#' + id);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-
-  function filterNavigation() {
-    const query = search.value.trim().toLocaleLowerCase('pt-BR');
-    let visible = 0;
-    document.querySelectorAll('[data-chapter]').forEach(button => {
-      const chapter = byId.get(button.dataset.chapter);
-      const template = document.getElementById('template-' + chapter.id);
-      const matchesPractice = !practiceOnly || chapter.id.startsWith('mini-');
-      const matchesQuery = !query || (chapter.title + ' ' + template.content.textContent).toLocaleLowerCase('pt-BR').includes(query);
-      button.hidden = !(matchesPractice && matchesQuery);
-      if (!button.hidden) visible++;
-    });
-    document.querySelectorAll('.nav-phase').forEach(phase => phase.hidden = !phase.querySelector('[data-chapter]:not([hidden])'));
-    document.getElementById('empty-search').style.display = visible ? 'none' : 'block';
-  }
-
-  document.getElementById('course-nav').addEventListener('click', event => {
-    const button = event.target.closest('[data-chapter]');
-    if (button) render(button.dataset.chapter);
-  });
-  document.getElementById('practice-filter').addEventListener('click', event => {
-    practiceOnly = !practiceOnly; event.currentTarget.classList.toggle('active', practiceOnly);
-    event.currentTarget.textContent = practiceOnly ? 'Mostrando mini-projetos' : 'Focar somente na prática'; filterNavigation();
-  });
-  search.addEventListener('input', filterNavigation);
-  previous.addEventListener('click', () => render(chapters[indexById.get(activeId) - 1]?.id));
-  next.addEventListener('click', () => render(chapters[indexById.get(activeId) + 1]?.id));
-  complete.addEventListener('click', () => { state.completed[activeId] = !state.completed[activeId]; save(); updateProgress(); });
-  document.getElementById('sidebar-open').addEventListener('click', openSidebar);
-  document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
-  backdrop.addEventListener('click', closeSidebar);
-
-  mount.addEventListener('click', async event => {
-    const internal = event.target.closest('a[href^="#"]');
-    if (internal) { event.preventDefault(); render(internal.getAttribute('href').slice(1)); return; }
-    const reveal = event.target.closest('.reveal-btn');
-    if (reveal) { const solution = reveal.nextElementSibling; solution?.classList.toggle('open'); reveal.textContent = solution?.classList.contains('open') ? 'Ocultar solução' : 'Ver solução'; return; }
-    const option = event.target.closest('.quiz-opt');
-    if (option) { const quiz = option.closest('.quiz'); if (!quiz || quiz.dataset.answered) return; quiz.dataset.answered = '1'; quiz.querySelectorAll('.quiz-opt').forEach(item => { if (item.dataset.correct === 'true') item.classList.add('correct'); else if (item === option) item.classList.add('wrong'); }); const feedback = quiz.querySelector('.quiz-feedback'); if (feedback) feedback.textContent = option.dataset.correct === 'true' ? '✓ Correto.' : '✗ Revise a alternativa destacada.'; return; }
-    const copy = event.target.closest('.copy-btn');
-    if (copy) { await navigator.clipboard.writeText(copy.parentElement.querySelector('pre').innerText); copy.textContent = 'Copiado'; setTimeout(() => copy.textContent = 'Copiar', 1200); return; }
-    const tab = event.target.closest('.install-tab');
-    if (tab) { const box = tab.closest('.install-box'); const tabs = [...box.querySelectorAll('.install-tab')]; const panels = [...box.querySelectorAll('.install-panel')]; const index = tabs.indexOf(tab); tabs.forEach(item => item.classList.toggle('active', item === tab)); panels.forEach((item, itemIndex) => item.classList.toggle('active', itemIndex === index)); }
-  });
-  mount.addEventListener('change', event => {
-    if (!event.target.matches('.checklist input')) return;
-    const inputs = [...mount.querySelectorAll('.checklist input')]; const index = inputs.indexOf(event.target);
-    state.checklists[activeId] ||= {}; state.checklists[activeId][index] = event.target.checked; save();
-    event.target.nextElementSibling?.classList.toggle('done', event.target.checked);
-  });
-  document.addEventListener('keydown', event => {
-    if (event.key === '/' && !['INPUT', 'TEXTAREA'].includes(event.target.tagName)) { event.preventDefault(); openSidebar(); search.focus(); }
-    if (event.key === 'Escape') closeSidebar();
-    if (event.altKey && event.key === 'ArrowLeft') previous.click();
-    if (event.altKey && event.key === 'ArrowRight') next.click();
-  });
-  window.addEventListener('hashchange', () => render(location.hash.slice(1), false));
-  render(activeId);
-})();</script>
+  <script src="app.js"></script>
 </body>
 </html>
