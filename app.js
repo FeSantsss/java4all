@@ -250,7 +250,7 @@
     normalized.settings.focusMode ||= false;
     normalized.settings.reviewMode ||= false;
     normalized.settings.reduceMotion ||= false;
-    normalized.version = 6;
+    normalized.version = 7;
     return normalized;
   }
   state = normalizeState(await loadPersistedState());
@@ -851,11 +851,103 @@
       : 'Todas as revisões foram incluídas no plano de hoje.');
   }
 
-  function reviewPrompt(chapter) {
+  function reviewHash(value) {
+    return [...String(value)].reduce((hash, character) => ((hash * 31) + character.codePointAt(0)) >>> 0, 2166136261);
+  }
+
+  function shuffleReviewOptions(options, seed) {
+    return options
+      .map((option, index) => ({ option, order: reviewHash(`${seed}:${index}:${option.text}`) }))
+      .sort((left, right) => left.order - right.order)
+      .map(item => item.option);
+  }
+
+  function reviewHeadings(chapter) {
     const template = document.getElementById('template-' + chapter.id);
-    const headings = [...template.content.querySelectorAll('h3')].slice(0, 3).map(heading => heading.textContent.trim());
-    const focus = headings.length ? `Conecte estes pontos: ${headings.join(' · ')}.` : 'Explique o conceito central e dê um exemplo próprio.';
-    return `Sem consultar o capítulo, explique “${chapter.title}” em voz alta ou por escrito. ${focus}`;
+    if (!template) return [];
+    const generic = /^(exercício|solução|checkpoint|execução guiada|critérios|resumo|conclusão)$/i;
+    return [...new Set([...template.content.querySelectorAll('h3')]
+      .map(heading => heading.textContent.replace(/\s+/g, ' ').trim())
+      .filter(heading => heading.length >= 10 && !generic.test(heading)))];
+  }
+
+  function buildReviewOptions(correctText, distractors, seed, size = 4) {
+    const seen = new Set([normalizeSearchText(correctText)]);
+    const alternatives = [];
+    [...distractors]
+      .sort((left, right) => reviewHash(`${seed}:${left}`) - reviewHash(`${seed}:${right}`))
+      .forEach(text => {
+        const normalized = normalizeSearchText(text);
+        if (!normalized || seen.has(normalized) || alternatives.length >= size - 1) return;
+        seen.add(normalized);
+        alternatives.push({ text, correct: false });
+      });
+    return shuffleReviewOptions([{ text: correctText, correct: true }, ...alternatives], seed);
+  }
+
+  function buildReviewQuestion(chapter) {
+    const item = state.review[chapter.id] || { reviews: 0 };
+    const round = Number(item.reviews) || 0;
+    const seed = `${chapter.id}:${round}`;
+    const template = document.getElementById('template-' + chapter.id);
+    const quizzes = template ? [...template.content.querySelectorAll('.quiz')].map(quiz => {
+      const prompt = quiz.querySelector('.q')?.textContent.replace(/\s+/g, ' ').trim();
+      const options = [...quiz.querySelectorAll('.quiz-opt')].map(option => ({
+        text: option.textContent.replace(/\s+/g, ' ').trim(),
+        correct: option.dataset.correct === 'true'
+      })).filter(option => option.text);
+      return { prompt, options };
+    }).filter(question => question.prompt && question.options.length >= 2 && question.options.filter(option => option.correct).length === 1) : [];
+
+    if (quizzes.length) {
+      const source = quizzes[round % quizzes.length];
+      const options = shuffleReviewOptions(source.options, seed);
+      const correct = options.find(option => option.correct);
+      return {
+        source: 'checkpoint do capítulo',
+        prompt: source.prompt,
+        options,
+        explanation: `Resposta correta: ${correct.text}`
+      };
+    }
+
+    const concepts = glossaryTerms.filter(entry => entry.chapter === chapter.id);
+    if (concepts.length) {
+      const concept = concepts[round % concepts.length];
+      const distractors = glossaryTerms
+        .filter(entry => entry.key !== concept.key)
+        .map(entry => entry.definition);
+      return {
+        source: 'conceito do glossário',
+        prompt: `Qual alternativa define corretamente “${concept.term}”?`,
+        options: buildReviewOptions(concept.definition, distractors, seed),
+        explanation: `${concept.term}: ${concept.definition}`
+      };
+    }
+
+    const headings = reviewHeadings(chapter);
+    if (headings.length) {
+      const correctHeading = headings[round % headings.length];
+      const distractors = chapters
+        .filter(candidate => candidate.id !== chapter.id)
+        .flatMap(candidate => reviewHeadings(candidate).slice(0, 2));
+      return {
+        source: 'estrutura do capítulo',
+        prompt: `Qual tópico é desenvolvido diretamente em “${chapter.title}”?`,
+        options: buildReviewOptions(correctHeading, distractors, seed),
+        explanation: `“${correctHeading}” é uma seção deste capítulo.`
+      };
+    }
+
+    const distractors = chapters
+      .filter(candidate => candidate.phaseId !== chapter.phaseId)
+      .map(candidate => candidate.title);
+    return {
+      source: 'mapa da trilha',
+      prompt: `Qual capítulo pertence à fase “${chapter.phaseTitle}”?`,
+      options: buildReviewOptions(chapter.title, distractors, seed),
+      explanation: `“${chapter.title}” pertence à fase “${chapter.phaseTitle}”.`
+    };
   }
 
   function updateReviewPanel() {
@@ -909,56 +1001,76 @@
 
     const chapter = reviewQueue[0];
     const item = state.review[chapter.id] || { mastery: 0, reviews: 0 };
+    const question = buildReviewQuestion(chapter);
     $('#review-stage').innerHTML = `
       ${planner}
       <article class="review-card" data-review-id="${chapter.id}">
         <span class="hub-kicker">Próxima escolhida · ${escapeHtml(chapter.phaseTitle)} · ${chapter.index + 1}/${chapters.length}</span>
         <h3>${escapeHtml(chapter.title)}</h3>
-        <p>${escapeHtml(reviewPrompt(chapter))}</p>
+        <div class="review-question-meta"><span>Múltipla escolha</span><span>${escapeHtml(question.source)}</span></div>
+        <p class="review-question">${escapeHtml(question.prompt)}</p>
+        <div class="review-options" role="group" aria-label="Alternativas da revisão">
+          ${question.options.map((option, index) => `<button class="review-option" type="button" data-review-option="${index}"><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option.text)}</button>`).join('')}
+        </div>
+        <div class="review-feedback" id="review-feedback" role="status" aria-live="polite"></div>
         <label class="form-label">Domínio atual · ${item.mastery || 0}/4</label>
         <div class="mastery-bar"><i style="width:${(item.mastery || 0) * 25}%"></i></div>
-        <div class="setting-actions" style="margin-top:16px"><button class="ghost-btn" type="button" data-review-open="${chapter.id}">Consultar capítulo</button><button class="ghost-btn" type="button" data-review-plan-defer="${chapter.id}">Adiar este item hoje</button></div>
-        <div class="review-actions">
-          <button class="review-rate" type="button" data-review-rate="again">Esqueci<br><small>amanhã</small></button>
-          <button class="review-rate" type="button" data-review-rate="hard">Difícil<br><small>em breve</small></button>
-          <button class="review-rate" type="button" data-review-rate="good">Lembrei<br><small>intervalo maior</small></button>
-          <button class="review-rate" type="button" data-review-rate="easy">Muito fácil<br><small>intervalo longo</small></button>
+        <div class="review-card-actions">
+          <div class="setting-actions"><button class="ghost-btn" type="button" data-review-open="${chapter.id}">Consultar capítulo</button><button class="ghost-btn" type="button" data-review-plan-defer="${chapter.id}">Adiar este item hoje</button></div>
+          <button class="primary-btn" type="button" data-review-next hidden>${reviewQueue.length > 1 ? 'Próxima questão' : 'Concluir sessão'}</button>
         </div>
       </article>`;
     updateDashboard();
   }
 
-  function rateReview(rating) {
+  function answerReview(optionIndex) {
     const chapter = reviewQueue[0];
     if (!chapter) return;
+    const card = $('#review-stage [data-review-id]');
+    if (!card || card.dataset.answered === 'true') return;
+    const question = buildReviewQuestion(chapter);
+    const selected = question.options[optionIndex];
+    if (!selected) return;
+    const correctIndex = question.options.findIndex(option => option.correct);
+    const correct = optionIndex === correctIndex;
     const item = state.review[chapter.id] || { due: todayKey(), interval: 0, ease: 2.5, reviews: 0, mastery: 0 };
+    const currentEase = Number(item.ease) || 2.5;
     let interval;
-    if (rating === 'again') {
+    if (!correct) {
       interval = 1;
-      item.ease = Math.max(1.3, item.ease - 0.2);
-      item.mastery = 1;
-    } else if (rating === 'hard') {
-      interval = Math.max(2, Math.round((item.interval || 1) * 1.25));
-      item.ease = Math.max(1.3, item.ease - 0.15);
-      item.mastery = 2;
-    } else if (rating === 'good') {
-      interval = item.reviews === 0 ? 3 : item.reviews === 1 ? 7 : Math.max(7, Math.round(item.interval * item.ease));
-      item.mastery = 3;
+      item.ease = Math.max(1.3, currentEase - 0.2);
+      item.mastery = Math.max(0, (Number(item.mastery) || 0) - 1);
     } else {
-      item.ease = Math.min(3.1, item.ease + 0.15);
-      interval = item.reviews === 0 ? 7 : Math.max(14, Math.round((item.interval || 7) * item.ease));
-      item.mastery = 4;
+      interval = item.reviews === 0 ? 3 : item.reviews === 1 ? 7 : Math.max(7, Math.round((Number(item.interval) || 7) * currentEase));
+      item.ease = Math.min(3.1, currentEase + 0.05);
+      item.mastery = Math.min(4, (Number(item.mastery) || 0) + 1);
     }
     item.interval = interval;
     item.reviews += 1;
-    item.lastRating = rating;
+    item.attempts = (Number(item.attempts) || 0) + 1;
+    item.correctAnswers = (Number(item.correctAnswers) || 0) + (correct ? 1 : 0);
+    item.lastRating = correct ? 'correct' : 'incorrect';
+    item.lastQuestion = question.prompt;
+    item.lastAnswer = selected.text;
     item.reviewedAt = new Date().toISOString();
     item.due = addDays(todayKey(), interval);
     state.review[chapter.id] = item;
     delete state.reviewPlan.choices[chapter.id];
     recordActivity('reviews');
-    toast(`Próxima revisão: ${formatDate(item.due)}.`);
-    updateReviewPanel();
+    card.dataset.answered = 'true';
+    card.querySelectorAll('[data-review-option]').forEach((button, index) => {
+      button.disabled = true;
+      if (index === correctIndex) button.classList.add('correct');
+      if (index === optionIndex && !correct) button.classList.add('wrong');
+    });
+    const feedback = $('#review-feedback');
+    feedback.className = `review-feedback visible ${correct ? 'correct' : 'wrong'}`;
+    feedback.innerHTML = `<strong>${correct ? '✓ Resposta correta' : '✗ Resposta incorreta'}</strong><p>${escapeHtml(question.explanation)}</p><small>Próxima revisão: ${formatDate(item.due)}.</small>`;
+    card.querySelector('.form-label').textContent = `Domínio atualizado · ${item.mastery}/4`;
+    card.querySelector('.mastery-bar i').style.width = `${item.mastery * 25}%`;
+    card.querySelector('[data-review-next]').hidden = false;
+    card.querySelector('[data-review-plan-defer]').hidden = true;
+    updateDashboard();
   }
 
    const snippets = {
@@ -1173,7 +1285,7 @@
   function exportData() {
     const backup = {
       app: 'Stack Completa Java',
-      version: 6,
+      version: 7,
       exportedAt: new Date().toISOString(),
       chapterCount: chapters.length,
       data: state
@@ -1444,9 +1556,13 @@
       setReviewChoice(deferredChapter, 'deferred');
       return;
     }
-    const rating = event.target.closest('[data-review-rate]')?.dataset.reviewRate;
-    if (rating) {
-      rateReview(rating);
+    const option = event.target.closest('[data-review-option]')?.dataset.reviewOption;
+    if (option !== undefined) {
+      answerReview(Number(option));
+      return;
+    }
+    if (event.target.closest('[data-review-next]')) {
+      updateReviewPanel();
       return;
     }
     const chapterId = event.target.closest('[data-review-open]')?.dataset.reviewOpen;

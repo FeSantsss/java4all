@@ -513,9 +513,27 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .review-card { padding:22px; border:1px solid var(--line); border-radius:14px; background:var(--bg-card); }
 .review-card h3 { margin:5px 0 8px; color:var(--ink); font:700 1.3rem var(--serif); }
 .review-card p { color:var(--ink-dim); }
-.review-actions { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:18px; }
-.review-rate { padding:10px 6px; border:1px solid var(--line); border-radius:9px; background:var(--bg-alt); color:var(--ink-dim); cursor:pointer; font-size:.7rem; }
-.review-rate:hover { border-color:var(--accent); color:var(--accent); }
+.review-question-meta { display:flex; flex-wrap:wrap; gap:6px; margin:14px 0 8px; }
+.review-question-meta span { padding:5px 8px; border:1px solid var(--line); border-radius:999px; color:var(--ink-faint); font:.58rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.review-question-meta span:first-child { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+.review-question { margin:10px 0 15px; color:var(--ink)!important; font-size:.9rem; font-weight:650; line-height:1.55; }
+.review-options { display:grid; gap:8px; }
+.review-option { display:grid; grid-template-columns:28px minmax(0,1fr); align-items:center; gap:10px; width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:var(--bg-alt); color:var(--ink-dim); text-align:left; cursor:pointer; font-size:.75rem; line-height:1.5; }
+.review-option>span { display:grid; width:26px; height:26px; place-items:center; border:1px solid var(--line); border-radius:7px; color:var(--accent); font:700 .65rem var(--mono); }
+.review-option:hover:not(:disabled),.review-option:focus-visible { border-color:var(--accent); outline:0; background:var(--accent-soft); color:var(--ink); }
+.review-option:disabled { cursor:default; opacity:.7; }
+.review-option.correct { border-color:var(--accent-2); background:var(--accent-2-soft); color:var(--ink); opacity:1; }
+.review-option.correct>span { border-color:var(--accent-2); color:var(--accent-2); }
+.review-option.wrong { border-color:var(--danger); background:var(--danger-soft); color:var(--ink); opacity:1; }
+.review-option.wrong>span { border-color:var(--danger); color:var(--danger); }
+.review-feedback { display:none; margin-top:13px; padding:13px 15px; border:1px solid var(--line); border-radius:10px; background:var(--bg-alt); }
+.review-feedback.visible { display:block; }
+.review-feedback.correct { border-color:var(--accent-2); background:var(--accent-2-soft); }
+.review-feedback.wrong { border-color:var(--danger); background:var(--danger-soft); }
+.review-feedback strong { color:var(--ink); font-size:.76rem; }
+.review-feedback p { margin:6px 0!important; font-size:.72rem; line-height:1.5; }
+.review-feedback small { color:var(--ink-faint); font:.6rem var(--mono); }
+.review-card-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; }
 .mastery-bar { height:6px; overflow:hidden; border-radius:6px; background:var(--line); }
 .mastery-bar i { display:block; width:0; height:100%; background:linear-gradient(90deg,var(--danger),var(--accent),var(--accent-2)); }
 
@@ -573,12 +591,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   .hub-nav { flex-direction:row; overflow-x:auto; padding:8px; border:0; border-bottom:1px solid var(--line); }
   .hub-brand { display:none; }.hub-tab{width:auto;flex:none}.hub-close{margin:0 0 0 auto;flex:none}.hub-tab span:last-child{display:none}
   .hub-content { padding:24px 18px 44px; }
-  .stat-grid { grid-template-columns:1fr 1fr; }.dashboard-grid{grid-template-columns:1fr}.review-actions{grid-template-columns:1fr 1fr}.context-glossary-list{grid-template-columns:1fr}.review-plan-heading{display:block}.review-plan-heading .setting-actions{justify-content:flex-start;margin-top:13px}
+  .stat-grid { grid-template-columns:1fr 1fr; }.dashboard-grid{grid-template-columns:1fr}.context-glossary-list{grid-template-columns:1fr}.review-plan-heading{display:block}.review-plan-heading .setting-actions{justify-content:flex-start;margin-top:13px}
   .chapter-toolbar .chapter-mini-progress { display:none; }
   .toolbar-action[data-desktop-only] { display:none; }
 }
 @media (max-width:480px) {
   .stat-grid{gap:8px}.stat-card{padding:12px}.hub-heading h2{font-size:1.6rem}.setting-row{align-items:flex-start;flex-direction:column}
+  .review-card-actions{align-items:stretch;flex-direction:column}.review-card-actions>.primary-btn{width:100%}
   .chapter-toolbar{padding-inline:14px;gap:8px}.chapter-toolbar .toolbar-context{min-width:0;overflow:hidden}.chapter-toolbar #phase-label{display:block;max-width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #chapter-counter{font-size:0;white-space:nowrap}#chapter-counter::after{content:attr(data-short);font-size:.65rem}
   .toolbar-group{gap:5px}.toolbar-action{width:28px;height:28px}
@@ -665,7 +684,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         </section>
 
         <section class="hub-panel" data-hub-panel="review">
-          <div class="hub-heading"><div><span class="hub-kicker">Repetição espaçada</span><h2>Fila de revisão</h2><p>Monte o plano do dia e avalie sua lembrança; o curso calcula quando cada conceito deve voltar.</p></div><span class="hub-kicker" id="review-count" aria-live="polite">fila em dia</span></div>
+          <div class="hub-heading"><div><span class="hub-kicker">Repetição espaçada</span><h2>Fila de revisão</h2><p>Monte o plano do dia e responda questões de múltipla escolha; o curso corrige e calcula quando cada conceito deve voltar.</p></div><span class="hub-kicker" id="review-count" aria-live="polite">fila em dia</span></div>
           <div id="review-stage"></div>
         </section>
 

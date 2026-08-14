@@ -58,7 +58,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
 * Glossário contextual com 111 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
-* Fila de repetição espaçada com quatro níveis de lembrança, intervalos adaptativos e planejamento diário do que revisar ou adiar.
+* Fila de repetição espaçada com questões de múltipla escolha, correção imediata, intervalos adaptativos e planejamento diário do que revisar ou adiar.
 * Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
 * Timer Pomodoro de 25 minutos com pausa de 5 minutos.
 * Conquistas desbloqueáveis por progresso, constância, prática e quizzes.
@@ -309,7 +309,9 @@ A área **Central → Revisão** separa a fila vencida em três visualizações:
 
 Todos os itens vencidos entram selecionados por padrão. Ao desmarcar um item, o curso grava no IndexedDB apenas a decisão de não mostrá-lo na sessão daquele dia. Isso não conta como revisão, não aumenta o domínio e não muda a data nem o intervalo calculado pela repetição espaçada. Na mudança de data, o plano diário é recriado e os itens que continuarem vencidos voltam automaticamente à seleção.
 
-Ao avaliar um cartão como **Esqueci**, **Difícil**, **Lembrei** ou **Muito fácil**, a revisão é registrada normalmente, o novo intervalo é calculado e o capítulo sai da fila até a próxima data programada. O plano diário também faz parte da exportação e importação do backup JSON.
+Cada item escolhido vira uma questão de múltipla escolha. O sistema prioriza checkpoints já existentes no capítulo, depois conceitos do glossário e, quando necessário, tópicos reais da própria seção. As alternativas são embaralhadas de forma determinística para que a resposta correta não permaneça sempre na mesma posição.
+
+Ao responder, a alternativa correta é destacada e uma explicação aparece imediatamente. Um erro reduz o domínio e agenda o capítulo para o dia seguinte; um acerto aumenta o domínio e amplia progressivamente o intervalo. A tentativa, o resultado, a resposta dada e a próxima data são salvos no IndexedDB. O plano diário também faz parte da exportação e importação do backup JSON.
 
 ## Glossário contextual
 

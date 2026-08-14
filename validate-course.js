@@ -101,10 +101,12 @@ if (!app.includes('buildCourseNavigation();')) throw new Error('Sumário dinâmi
 if (!app.includes('normalizeSearchText(chapter.title).includes')) throw new Error('A busca não está limitada aos títulos dos capítulos.');
 if (!index.includes('[hidden] { display: none !important; }')) throw new Error('O CSS pode sobrescrever os resultados ocultos da busca.');
 if (!app.includes('reviewPlan') || !app.includes('data-review-plan-toggle')) throw new Error('Planejamento diário da revisão não está habilitado.');
-if (!app.includes('normalized.version = 6') || !app.includes('version: 6')) throw new Error('Versão do estado e do backup está inconsistente.');
+if (!app.includes('buildReviewQuestion') || !app.includes('data-review-option') || !app.includes('answerReview')) throw new Error('Revisões de múltipla escolha não estão habilitadas.');
+if (app.includes('data-review-rate')) throw new Error('A autoavaliação antiga ainda está ligada à revisão.');
+if (!app.includes('normalized.version = 7') || !app.includes('version: 7')) throw new Error('Versão do estado e do backup está inconsistente.');
 if (!index.includes('<script src="curriculum-v2.js"></script>')) throw new Error('curriculum-v2.js não está ligado ao index.');
 if (!serviceWorker.includes("'./curriculum-v2.js'")) throw new Error('A expansão curricular não está no cache offline.');
-if (!serviceWorker.includes("stack-completa-java-v14")) throw new Error('O cache offline não foi renovado após a limpeza da experiência de estudo.');
+if (!serviceWorker.includes("stack-completa-java-v15")) throw new Error('O cache offline não foi renovado para a revisão de múltipla escolha.');
 for (const removedMarker of ['experience-v3.js', 'STACK_EXPERIENCE_DATA', 'data-hub-panel="startup"', 'simulation-stage', 'visual-lab-stage']) {
   if (`${index}\n${app}\n${serviceWorker}`.includes(removedMarker)) throw new Error(`Implementação removida reapareceu: ${removedMarker}`);
 }
