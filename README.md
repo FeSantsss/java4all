@@ -4,7 +4,7 @@ Curso interativo e offline-first de Java e Spring. O conteúdo integral está no
 
 ## Acesse o curso
 
-**[Abrir Stack Completa — Java e Spring](https://fesantsss.github.io/java-study-poo-claude/)**
+**[Abrir Stack Completa — Java e Spring](https://fesantsss.github.io/java4all/)**
 
 O curso é publicado no GitHub Pages e funciona diretamente pelo navegador. Não é necessário clonar o repositório, instalar dependências, executar comandos ou configurar um servidor local para estudar.
 
