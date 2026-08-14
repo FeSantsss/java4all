@@ -29,7 +29,7 @@
     {
       "name": "Abrir revisão",
       "short_name": "Revisão",
-      "url": "./index.html#quiz"
+      "url": "./index.html?hub=review"
     }
   ]
 }

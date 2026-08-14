@@ -32,6 +32,17 @@
     ['JRE', 'Ambiente necessário para executar aplicações Java: JVM mais bibliotecas de runtime.', 'intro', ['Java Runtime Environment']],
     ['JVM', 'Máquina virtual que carrega e executa bytecode Java, gerenciando memória, threads e otimizações em runtime.', 'intro', ['Java Virtual Machine']],
     ['Bytecode', 'Representação intermediária gerada pelo compilador Java e executada pela JVM, normalmente armazenada em arquivos .class.', 'primeiro-programa'],
+    ['Terminal', 'Interface textual que exibe a saída de um processo e encaminha a ele comandos e dados digitados.', 'entrada-console'],
+    ['CLI', 'Interface de linha de comando: interação por texto, argumentos e comandos em vez de controles gráficos.', 'entrada-console', ['Command-line interface', 'interface de linha de comando']],
+    ['Entrada padrão', 'Canal de entrada do processo representado em Java por System.in; no terminal, normalmente recebe o que a pessoa digita.', 'entrada-console', ['standard input', 'stdin', 'System.in']],
+    ['Scanner', 'Classe da biblioteca Java que divide uma entrada em linhas ou tokens e converte representações textuais.', 'entrada-console'],
+    ['Buffer', 'Área temporária que mantém dados recebidos ou preparados até que sejam consumidos ou enviados.', 'entrada-console'],
+    ['Parsing', 'Conversão de uma representação textual segundo uma sintaxe para um valor estruturado ou tipado.', 'entrada-console', ['parse']],
+    ['EOF', 'Fim da entrada: sinal de que não existe outra linha ou byte disponível para leitura.', 'entrada-console', ['end of file', 'fim de arquivo']],
+    ['BigDecimal', 'Tipo Java para números decimais com precisão e escala controladas, indicado quando arredondamento exato importa.', 'entrada-console'],
+    ['Locale', 'Conjunto de convenções regionais de idioma, números, moeda, datas e ordenação.', 'entrada-console'],
+    ['Socket', 'Extremidade de comunicação entre processos que transporta bytes, normalmente através de uma rede.', 'entrada-console', ['sockets']],
+    ['Protocolo', 'Acordo que define formato, ordem, significado, erros e encerramento das mensagens trocadas.', 'entrada-console', ['protocolos']],
     ['JIT', 'Compilador Just-In-Time que transforma trechos frequentes de bytecode em código de máquina durante a execução.', 'jvm-profundo', ['Just-In-Time']],
     ['Garbage Collector', 'Componente da JVM que identifica objetos sem referências alcançáveis e recupera sua memória automaticamente.', 'jvm-profundo', ['GC', 'coletor de lixo']],
     ['Stack', 'Região associada a cada thread que armazena frames de métodos, parâmetros e variáveis locais.', 'jvm-profundo', ['pilha']],
@@ -49,6 +60,9 @@
     ['Lambda', 'Expressão compacta que fornece a implementação de uma interface funcional.', 'streams', ['lambdas']],
     ['Stream', 'Pipeline declarativo para processar sequências de elementos sem representar uma coleção de armazenamento.', 'streams', ['streams']],
     ['Optional', 'Contêiner que expressa explicitamente a presença ou ausência de um valor de retorno.', 'javamoderno'],
+    ['Record', 'Tipo Java compacto voltado a carregar um conjunto fixo de dados, com acessores, igualdade, hash e representação gerados.', 'java-21-profundo', ['records']],
+    ['Sealed type', 'Classe ou interface Java que restringe explicitamente quais tipos podem estendê-la ou implementá-la.', 'java-21-profundo', ['sealed', 'tipo selado']],
+    ['Virtual thread', 'Thread leve gerenciada pela JVM, adequada a grandes quantidades de tarefas que passam tempo bloqueadas em entrada e saída.', 'java-21-profundo', ['virtual threads', 'thread virtual', 'threads virtuais']],
     ['Big O', 'Notação que descreve como o custo de um algoritmo cresce conforme aumenta o tamanho da entrada.', 'big-o', ['complexidade assintótica']],
     ['Recursão', 'Técnica em que uma função resolve o problema chamando a si mesma sobre uma entrada menor, até alcançar um caso-base.', 'recursao'],
     ['Git', 'Sistema distribuído de controle de versão que registra a evolução do código e permite trabalho paralelo.', 'git'],
@@ -69,6 +83,7 @@
     ['Transação', 'Unidade lógica de trabalho que deve ser confirmada integralmente ou revertida.', 'sql', ['transaction']],
     ['ACID', 'Propriedades de atomicidade, consistência, isolamento e durabilidade esperadas de transações confiáveis.', 'sql'],
     ['Índice', 'Estrutura auxiliar que acelera buscas no banco ao custo de espaço e manutenção nas escritas.', 'postgres', ['index']],
+    ['MVCC', 'Controle de concorrência por múltiplas versões: mantém versões de linhas para oferecer snapshots e reduzir bloqueio entre leituras e escritas.', 'postgres-concorrencia', ['Multi-Version Concurrency Control']],
     ['Migration', 'Alteração versionada e reproduzível aplicada ao schema do banco de dados.', 'migrations', ['migrations', 'migração']],
     ['JDBC', 'API padrão do Java para abrir conexões, enviar SQL e processar resultados de bancos relacionais.', 'jdbc'],
     ['Bean', 'Objeto cujo ciclo de vida e dependências são gerenciados pelo contêiner Spring.', 'spring-core', ['beans']],
@@ -83,6 +98,8 @@
     ['Mock', 'Dublê configurável usado para controlar dependências e verificar interações durante um teste.', 'mockito', ['mocks']],
     ['JWT', 'Token assinado composto por header, payload e assinatura; carrega claims, mas não é criptografado por padrão.', 'autenticacao-conceitos', ['JSON Web Token']],
     ['OAuth2', 'Framework de autorização delegada que permite conceder acesso limitado sem compartilhar a senha do usuário.', 'autenticacao-conceitos', ['OAuth 2.0']],
+    ['OIDC', 'OpenID Connect: camada de identidade sobre OAuth 2.0 que padroniza autenticação e ID token.', 'security-oidc', ['OpenID Connect']],
+    ['PKCE', 'Proteção do fluxo Authorization Code que vincula cada código a um segredo temporário criado pelo cliente.', 'security-oidc', ['Proof Key for Code Exchange']],
     ['RBAC', 'Modelo de autorização no qual permissões são atribuídas a papéis associados aos usuários.', 'mini-auth-rbac', ['Role-Based Access Control']],
     ['TLS', 'Protocolo criptográfico que oferece confidencialidade, integridade e autenticação para conexões como HTTPS.', 'https'],
     ['Docker', 'Plataforma para empacotar e executar aplicações em containers reproduzíveis.', 'docker-conceitos'],
@@ -100,6 +117,8 @@
     ['Actuator', 'Conjunto de endpoints operacionais do Spring Boot para saúde, métricas e diagnóstico.', 'actuator'],
     ['CI/CD', 'Automação contínua de integração, testes e entrega ou implantação de software.', 'cicd', ['pipeline']],
     ['Observabilidade', 'Capacidade de compreender o estado interno de um sistema por métricas, logs e traces.', 'mini-deploy-observavel'],
+    ['SLO', 'Objetivo mensurável de confiabilidade de um serviço em uma janela, como 99,9% de sucesso em 30 dias.', 'observabilidade-pratica', ['Service Level Objective']],
+    ['SBOM', 'Inventário dos componentes e versões presentes em um artefato de software.', 'hardening-producao', ['Software Bill of Materials']],
     ['Thread', 'Fluxo de execução dentro de um processo, com stack própria e memória compartilhada com outras threads.', 'threads', ['threads']],
     ['Race condition', 'Falha dependente da ordem de execução concorrente quando acessos compartilhados não são coordenados.', 'concorrencia-profunda', ['condição de corrida']],
     ['Deadlock', 'Situação em que fluxos concorrentes aguardam indefinidamente recursos mantidos uns pelos outros.', 'concorrencia-profunda'],
@@ -108,12 +127,16 @@
     ['Tópico Kafka', 'Fluxo nomeado de registros no Kafka, dividido em partições.', 'kafka', ['topic']],
     ['Partição', 'Unidade ordenada e paralelizável de armazenamento de registros dentro de um tópico Kafka.', 'kafka', ['partition']],
     ['Consumer group', 'Grupo de consumidores que divide entre si as partições de um tópico.', 'kafka', ['grupo de consumidores']],
+    ['DLT', 'Dead-letter topic: tópico que recebe mensagens não processadas após a política de tentativas definida.', 'kafka-confiavel', ['dead-letter topic']],
+    ['Outbox', 'Tabela gravada na mesma transação do domínio para que eventos pendentes sejam publicados de forma recuperável.', 'kafka-confiavel', ['transactional outbox']],
     ['DDD', 'Abordagem de modelagem que aproxima o software do domínio e da linguagem usada pelos especialistas.', 'ddd', ['Domain-Driven Design']],
     ['Agregado', 'Fronteira de consistência no DDD, controlada por uma raiz que protege suas invariantes.', 'ddd', ['aggregate']],
     ['CAP', 'Princípio segundo o qual, diante de uma partição de rede, um sistema distribuído escolhe entre consistência e disponibilidade.', 'sistemas-distribuidos', ['teorema CAP']],
+    ['PACELC', 'Modelo que acrescenta ao CAP a troca entre latência e consistência quando não existe partição.', 'consistencia-distribuida'],
     ['Idempotência', 'Propriedade de uma operação que produz o mesmo efeito observável quando repetida com a mesma intenção.', 'sistemas-distribuidos', ['idempotency']],
     ['Event-driven', 'Estilo arquitetural no qual componentes publicam e reagem a eventos, reduzindo o acoplamento temporal.', 'event-driven-profundo', ['arquitetura orientada a eventos']],
     ['WebSocket', 'Protocolo de conexão persistente e bidirecional entre cliente e servidor.', 'websockets', ['WebSockets']],
+    ['BFF', 'Backend for Frontend: backend dedicado às necessidades de uma interface, capaz de intermediar APIs, sessão e tokens.', 'frontend-aplicacao', ['Backend for Frontend']],
     ['ADR', 'Registro curto que documenta uma decisão arquitetural, seu contexto e suas consequências.', 'code-review-adr', ['Architecture Decision Record']],
     ['WebHook', 'Chamada HTTP enviada automaticamente quando um evento ocorre em outro sistema.', 'conectando-front-back', ['webhook', 'webhooks']]
   ].map(([term, definition, chapter, aliases = []], index) => ({ key: `term-${index}`, term, definition, chapter, aliases }));
@@ -216,6 +239,7 @@
           choices: Object.fromEntries(Object.entries(savedChoices).filter(([, choice]) => choice === 'selected' || choice === 'deferred'))
         }
       : { date: today, choices: {} };
+    delete normalized.experience;
     normalized.labs ||= {};
     normalized.activity ||= {};
     normalized.settings ||= {};
@@ -226,7 +250,7 @@
     normalized.settings.focusMode ||= false;
     normalized.settings.reviewMode ||= false;
     normalized.settings.reduceMotion ||= false;
-    normalized.version = 3;
+    normalized.version = 6;
     return normalized;
   }
   state = normalizeState(await loadPersistedState());
@@ -937,7 +961,7 @@
     updateReviewPanel();
   }
 
-  const snippets = {
+   const snippets = {
     hello: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Olá, Java!");\n    }\n}`,
     variables: `public class Main {\n    public static void main(String[] args) {\n        int aulas = 7;\n        int minutos = 25;\n        int total = aulas * minutos;\n        System.out.println("Tempo total: " + total + " minutos");\n    }\n}`,
     loop: `public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i <= 5; i++) {\n            System.out.println("Iteração " + i);\n        }\n    }\n}`
@@ -1149,7 +1173,7 @@
   function exportData() {
     const backup = {
       app: 'Stack Completa Java',
-      version: 3,
+      version: 6,
       exportedAt: new Date().toISOString(),
       chapterCount: chapters.length,
       data: state
@@ -1500,7 +1524,7 @@
   $('#import-data').addEventListener('click', () => $('#import-file').click());
   $('#import-file').addEventListener('change', event => { if (event.target.files[0]) importData(event.target.files[0]); event.target.value = ''; });
   $('#reset-data').addEventListener('click', async () => {
-    if (!confirm('Apagar todo o seu progresso, notas, favoritos, respostas e revisões? Esta ação não pode ser desfeita sem um backup.')) return;
+    if (!confirm('Apagar todo o seu progresso, notas, favoritos, respostas, revisões e rascunhos? Esta ação não pode ser desfeita sem um backup.')) return;
     isResettingData = true;
     await storageWriteQueue.catch(() => undefined);
     if (database) await deleteDatabaseState();
@@ -1577,6 +1601,12 @@
   setupOffline();
   render(activeId);
   if (migratedFromLocalStorage) toast('Progresso migrado com segurança para o IndexedDB.');
-  const requestedHub = new URLSearchParams(location.search).get('hub');
+  const deepLink = new URLSearchParams(location.search);
+  const requestedHub = deepLink.get('hub');
+  const requestedSearch = deepLink.get('search');
+  if (requestedSearch) {
+    search.value = requestedSearch;
+    filterNavigation();
+  }
   if (['dashboard', 'notes', 'review', 'lab', 'glossary', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
 })();

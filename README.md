@@ -17,6 +17,8 @@ O curso é publicado no GitHub Pages e funciona diretamente pelo navegador. Não
 * 93 capítulos do material original preservados e reposicionados.
 * 16 capítulos de aprofundamento adicionados sem alterar os identificadores usados pelo progresso antigo.
 * Fundamentos adicionados antes de orientação a objetos.
+* Progressão em camadas nos assuntos novos: primeiro contato executável, modelo mental, casos-limite e aprofundamento.
+* Bases conceituais locais antes do primeiro código avançado, com siglas, papéis e conexões futuras explicados no próprio capítulo.
 * Spring concluído antes de testes avançados, Docker, Kafka e arquitetura.
 * Nenhum capítulo aponta para um pré-requisito localizado adiante na trilha.
 
@@ -54,7 +56,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Checklists persistentes.
 * Botões para copiar exemplos de código.
 * Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
-* Glossário contextual com 88 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
+* Glossário contextual com 111 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
 * Fila de repetição espaçada com quatro níveis de lembrança, intervalos adaptativos e planejamento diário do que revisar ou adiar.
 * Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
@@ -301,7 +303,6 @@ Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limp
 A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
 
 Não existe conta, banco de dados remoto ou sincronização automática entre dispositivos nesta versão. O progresso salvo no GitHub Pages pertence ao navegador e perfil utilizados. Outro navegador, perfil ou dispositivo terá uma área de armazenamento diferente. Use o backup JSON para transportar o progresso entre eles.
-
 ## Planejamento diário da revisão
 
 A área **Central → Revisão** separa a fila vencida em três visualizações: todas, escolhidas para hoje e adiadas. Cada capítulo pode ser marcado ou desmarcado individualmente, e os botões **Selecionar todas** e **Adiar todas hoje** permitem organizar filas grandes de uma vez.
@@ -314,7 +315,7 @@ Ao avaliar um cartão como **Esqueci**, **Difícil**, **Lembrei** ou **Muito fá
 
 Termos importantes aparecem destacados no texto dos capítulos. Ao selecionar um termo, o curso mostra uma definição curta e oferece um link para o capítulo em que o conceito é apresentado ou aprofundado.
 
-A área **Central → Glossário** reúne os 88 conceitos em uma lista pesquisável. A pesquisa considera o nome, aliases, definição e capítulo relacionado. O glossário não modifica nem reduz o conteúdo original: ele acrescenta uma camada de consulta sobre o capítulo renderizado.
+A área **Central → Glossário** reúne os 111 conceitos em uma lista pesquisável. A pesquisa considera o nome, aliases, definição e capítulo relacionado. O glossário não modifica nem reduz o conteúdo original: ele acrescenta uma camada de consulta sobre o capítulo renderizado.
 
 Para evitar poluição visual, cada conceito é destacado no máximo duas vezes por capítulo, com um limite geral de marcações na página. Blocos de código, links, títulos e controles interativos não são alterados.
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stack-completa-java-v10';
+const CACHE_NAME = 'stack-completa-java-v14';
 const COURSE_FILES = ['./', './index.html', './curriculum-v2.js', './app.js', './manifest.webmanifest', './icon.svg'];
 
 async function fetchWithTimeout(request, timeoutMs = 3500) {
