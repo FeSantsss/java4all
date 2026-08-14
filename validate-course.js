@@ -23,6 +23,8 @@ vm.runInNewContext(curriculum, { document, console });
 
 const chapters = JSON.parse(dataElement.textContent);
 const ids = chapters.map(chapter => chapter.id);
+const normalizeSearchText = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('pt-BR');
+const springSearchIds = chapters.filter(chapter => normalizeSearchText(chapter.title).includes('spring')).map(chapter => chapter.id);
 const templateIds = [...index.matchAll(/<template id="template-([^"]+)"/g)].map(match => match[1]);
 inserted.forEach(html => {
   const match = html.match(/^<template id="template-([^"]+)"/);
@@ -55,10 +57,13 @@ if (duplicateTemplateIds.length) throw new Error(`IDs de template duplicados: ${
 if (missingTemplates.length) throw new Error(`Capítulos sem template: ${missingTemplates.join(', ')}`);
 if (missingChapters.length) throw new Error(`Templates sem capítulo: ${missingChapters.join(', ')}`);
 if (invalidPrerequisites.length) throw new Error(`Pré-requisitos inexistentes: ${invalidPrerequisites.join(', ')}`);
+if (!springSearchIds.includes('spring-core') || springSearchIds.includes('lombok')) throw new Error('A busca por título não isola corretamente os capítulos de Spring.');
+if (!normalizeSearchText('Exceções').includes(normalizeSearchText('excecoes'))) throw new Error('A busca por título não ignora acentos.');
 if (chapters.some((chapter, index) => chapter.index !== index)) throw new Error('Índices de capítulos não são contíguos.');
 if ((index.match(/<template\b/g) || []).length !== (index.match(/<\/template>/g) || []).length) throw new Error('Templates do index.html não estão balanceados.');
 for (const fragment of bannedFragments) if (allCourseHtml.includes(fragment)) throw new Error(`Conteúdo obsoleto reapareceu: ${fragment}`);
 if (!app.includes('buildCourseNavigation();')) throw new Error('Sumário dinâmico não está habilitado.');
+if (!app.includes('normalizeSearchText(chapter.title).includes')) throw new Error('A busca não está limitada aos títulos dos capítulos.');
 if (!app.includes('reviewPlan') || !app.includes('data-review-plan-toggle')) throw new Error('Planejamento diário da revisão não está habilitado.');
 if (!index.includes('<script src="curriculum-v2.js"></script>')) throw new Error('curriculum-v2.js não está ligado ao index.');
 if (!serviceWorker.includes("'./curriculum-v2.js'")) throw new Error('A expansão curricular não está no cache offline.');

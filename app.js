@@ -357,8 +357,13 @@
   const glossaryPattern = new RegExp(glossaryAliases.map(item => item.alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'giu');
   const wordCharacter = /[\p{L}\p{N}_]/u;
 
-  function normalizeSearchText(value) {
-    return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+  function normalizeSearchText(value = '') {
+    return String(value)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLocaleLowerCase('pt-BR');
   }
 
   function highlightContextualTerms() {
@@ -616,21 +621,22 @@
   }
 
   function filterNavigation() {
-    const query = search.value.trim().toLocaleLowerCase('pt-BR');
+    const query = normalizeSearchText(search.value);
     let visible = 0;
     $$('[data-chapter]').forEach(button => {
       const chapter = byId.get(button.dataset.chapter);
       if (!chapter) return;
-      const template = document.getElementById('template-' + chapter.id);
       const matchesPractice = !practiceOnly || chapter.id.startsWith('mini-');
       const matchesFavorite = !favoritesOnly || state.favorites[chapter.id];
-      const haystack = `${chapter.title} ${chapter.phaseTitle} ${template.content.textContent}`.toLocaleLowerCase('pt-BR');
-      const matchesQuery = !query || haystack.includes(query);
+      const matchesQuery = !query || normalizeSearchText(chapter.title).includes(query);
       button.hidden = !(matchesPractice && matchesFavorite && matchesQuery);
       if (!button.hidden) visible++;
     });
     $$('.nav-phase').forEach(phase => phase.hidden = !phase.querySelector('[data-chapter]:not([hidden])'));
     $('#empty-search').style.display = visible ? 'none' : 'block';
+    $('#search-results').textContent = query
+      ? `${visible} ${visible === 1 ? 'título encontrado' : 'títulos encontrados'}.`
+      : '';
   }
 
   function toggleComplete() {
@@ -1195,9 +1201,9 @@
   ];
 
   function renderCommands(query) {
-    const needle = query.trim().toLocaleLowerCase('pt-BR');
-    const actions = commands.filter(command => !needle || command.title.toLocaleLowerCase('pt-BR').includes(needle));
-    const chapterMatches = chapters.filter(chapter => !needle || `${chapter.title} ${chapter.phaseTitle}`.toLocaleLowerCase('pt-BR').includes(needle)).slice(0, 30);
+    const needle = normalizeSearchText(query);
+    const actions = commands.filter(command => !needle || normalizeSearchText(command.title).includes(needle));
+    const chapterMatches = chapters.filter(chapter => !needle || normalizeSearchText(chapter.title).includes(needle)).slice(0, 30);
     commandItems = [
       ...actions.map(command => ({ ...command, kind: 'Ação' })),
       ...chapterMatches.map(chapter => ({ title: chapter.title, hint: `${chapter.index + 1} · ${chapter.phaseTitle}`, kind: 'Capítulo', action: () => render(chapter.id) }))

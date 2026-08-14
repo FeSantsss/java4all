@@ -41,7 +41,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 
 * Navegação por capítulo sem recarregar a página.
 * Sumário dividido por fases.
-* Busca instantânea em todo o conteúdo e paleta de comandos com `Ctrl/Cmd + K`.
+* Busca instantânea e precisa pelo título dos capítulos, sem diferença entre maiúsculas, minúsculas ou acentos, também disponível na paleta de comandos com `Ctrl/Cmd + K`.
 * Filtro para mostrar somente mini-projetos.
 * Filtro de capítulos favoritos.
 * Progresso calculado por capítulos concluídos.

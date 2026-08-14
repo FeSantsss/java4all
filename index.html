@@ -317,6 +317,8 @@ button, input { font: inherit; }
 .course-search span { display: block; margin-bottom: 6px; color: var(--ink-dim); font: .67rem var(--mono); text-transform: uppercase; letter-spacing: .08em; }
 .course-search input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; outline: 0; background: var(--bg-card); color: var(--ink); }
 .course-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.course-search small { display:block; margin-top:6px; color:var(--ink-faint); font-size:.62rem; line-height:1.45; }
+.course-search output { display:block; margin-top:3px; color:var(--accent); font:inherit; }
 .practice-filter { width: calc(100% - 16px); margin: 0 8px 8px; padding: 9px 11px; border: 1px dashed var(--line); border-radius: 8px; background: transparent; color: var(--ink-dim); font: .7rem var(--mono); cursor: pointer; }
 .practice-filter:hover, .practice-filter.active { border-color: var(--accent-2); background: var(--accent-2-soft); color: var(--accent-2); }
 .nav-phase { padding: 0; border: 0; }
@@ -579,7 +581,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
     <aside class="course-sidebar" id="course-sidebar">
       <header class="course-brand"><div class="course-brand-row"><span class="brand-mark">J</span><strong>Stack Completa</strong><button class="sidebar-close" id="sidebar-close" aria-label="Fechar sumário">×</button></div><p>Java → Spring → Produção</p></header>
       <div class="course-progress"><div class="course-progress-label"><span>Progresso real</span><strong id="progress-pct">0%</strong></div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
-      <label class="course-search"><span>Buscar na trilha</span><input id="course-search" type="search" placeholder="Ex.: arrays, Spring, Kafka…" autocomplete="off"></label>
+      <label class="course-search"><span>Buscar pelo título</span><input id="course-search" type="search" placeholder="Ex.: arrays, Spring, Kafka…" autocomplete="off" aria-describedby="search-title-hint"><small id="search-title-hint">Mostra somente capítulos cujo título contém o texto pesquisado.<output id="search-results" aria-live="polite"></output></small></label>
       <button class="practice-filter" id="practice-filter" type="button">Focar somente na prática</button>
       <div class="sidebar-tools">
         <button class="sidebar-tool" type="button" data-open-hub="dashboard">◈ Central</button>
