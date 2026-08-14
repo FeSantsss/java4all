@@ -1,5 +1,5 @@
-const CACHE_NAME = 'stack-completa-java-v16';
-const COURSE_FILES = ['./', './index.html', './curriculum-v2.js', './app.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'stack-completa-java-v17';
+const COURSE_FILES = ['./', './index.html', './vendor/marked.umd.js', './vendor/purify.min.js', './curriculum-v2.js', './app.js', './manifest.webmanifest', './icon.svg'];
 
 async function fetchWithTimeout(request, timeoutMs = 3500) {
   const controller = new AbortController();

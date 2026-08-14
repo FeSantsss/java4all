@@ -55,7 +55,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Quizzes interativos com correção imediata, resposta persistente, checkpoints de projeto e estatística de acertos.
 * Checklists persistentes.
 * Botões para copiar exemplos de código.
-* Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
+* Editor Markdown real por capítulo, com autosave, toolbar, contagem, checklists interativos, visualização sanitizada e modos editar, dividido ou visualizar.
 * Glossário contextual com 111 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
 * Fila de repetição espaçada com questões de múltipla escolha, correção imediata, intervalos adaptativos e planejamento diário do que revisar ou adiar.
@@ -95,6 +95,8 @@ Os arquivos offline são:
 * `index.html`: estrutura da aplicação e conteúdo-base do curso;
 * `curriculum-v2.js`: capítulos de aprofundamento, checkpoints e critérios de qualidade dos projetos;
 * `app.js`: sistema de estudos e persistência;
+* `vendor/marked.umd.js`: parser Markdown local;
+* `vendor/purify.min.js`: sanitização local da visualização Markdown;
 * `sw.js`: cache offline, atualização e fallback de navegação;
 * `manifest.webmanifest`: metadados do aplicativo instalável;
 * `icon.svg`: ícone vetorial do curso.
@@ -297,7 +299,7 @@ O navegador armazena:
 * estado dos checklists;
 * favoritos;
 * respostas e resultados dos quizzes;
-* anotações por capítulo;
+* fonte Markdown das anotações por capítulo e modo de visualização preferido;
 * rascunhos do Java Lab;
 * histórico diário de estudo;
 * fila, intervalos e domínio da revisão espaçada;
@@ -369,6 +371,24 @@ Em **Central → Domínio → Projetos**, cada mini-projeto ou projeto integrado
 A prontidão de cada requisito combina `65%` pela conclusão do capítulo e até `35%` pela média das evidências dos conceitos ligados a ele. O projeto aparece como preparado quando a média chega a pelo menos `70%` e todos os requisitos foram concluídos. A lista informa exatamente o que falta e permite abrir qualquer fundamento pendente.
 
 A recomendação nunca é uma trava: **Abrir mesmo assim** mantém todos os projetos acessíveis. Ela existe para tornar explícito por que um projeto pode estar difícil e quais conhecimentos devem ser fortalecidos antes ou durante a implementação.
+
+## Anotações em Markdown
+
+A área **Central → Anotações** é um editor Markdown completo. O texto digitado é a fonte original: ele é salvo sem conversão no IndexedDB, incluído integralmente no backup JSON, copiado como Markdown e baixado sem alterações em um arquivo `.md`.
+
+O editor oferece três modos persistentes:
+
+* **Editar** mostra somente a fonte Markdown;
+* **Dividido** mantém fonte e resultado lado a lado no desktop e empilhados em telas menores;
+* **Visualizar** usa toda a área para o documento renderizado.
+
+A barra de ferramentas insere títulos, negrito, itálico, texto riscado, código inline, links, listas, checklists, citações, blocos Java e tabelas sem impedir a digitação manual da sintaxe. `Ctrl/Cmd+B`, `Ctrl/Cmd+I` e `Ctrl/Cmd+K` formatam a seleção; `Ctrl/Cmd+Shift+E`, `S` e `P` alternam entre editar, dividido e visualizar. A tecla `Tab` insere dois espaços para indentação dentro do editor.
+
+A visualização suporta GitHub Flavored Markdown, incluindo tabelas, texto riscado e listas de tarefas. Checklists podem ser marcados diretamente na visualização: o marcador correspondente na fonte muda entre `[ ]` e `[x]` e entra no mesmo autosave. Links externos abrem em outra aba, imagens usam carregamento adiado e blocos de código preservam a identificação da linguagem.
+
+O HTML produzido pelo Markdown passa pelo DOMPurify antes de entrar na página. Scripts, estilos, formulários, frames, objetos incorporados e atributos perigosos são removidos; campos de entrada que não pertençam a checklists também são descartados. Se o parser ou o sanitizador não puder ser carregado, a fonte permanece editável e salva, sem tentar renderizar HTML inseguro.
+
+Marked 18.0.7 e DOMPurify 3.4.12 estão armazenados em `vendor/`, possuem versões fixadas, licenças incluídas e fazem parte do cache offline. Nenhuma CDN é necessária durante o estudo.
 
 ## Glossário contextual
 

@@ -5,6 +5,10 @@ const index = fs.readFileSync('index.html', 'utf8');
 const app = fs.readFileSync('app.js', 'utf8');
 const curriculum = fs.readFileSync('curriculum-v2.js', 'utf8');
 const serviceWorker = fs.readFileSync('sw.js', 'utf8');
+const marked = fs.readFileSync('vendor/marked.umd.js', 'utf8');
+const domPurify = fs.readFileSync('vendor/purify.min.js', 'utf8');
+const markedLicense = fs.readFileSync('vendor/marked.LICENSE.md', 'utf8');
+const domPurifyLicense = fs.readFileSync('vendor/DOMPurify.LICENSE', 'utf8');
 const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
 const glossaryBlock = app.match(/const glossaryTerms = \[([\s\S]*?)\n  \]\.map/);
 const dataMatch = index.match(/<script type="application\/json" id="course-data">([\s\S]*?)<\/script>/);
@@ -118,10 +122,16 @@ if (!app.includes('projectReadiness') || !app.includes('renderProjectReadiness')
 for (const stateField of ['normalized.mastery', 'normalized.errors', 'normalized.retrieval', 'normalized.diagnostic']) {
   if (!app.includes(stateField)) throw new Error(`Campo persistido ausente no modelo de aprendizagem: ${stateField}`);
 }
-if (!app.includes('normalized.version = 8') || !app.includes('version: 8')) throw new Error('Versão do estado e do backup está inconsistente.');
+if (!app.includes('normalized.version = 9') || !app.includes('version: 9')) throw new Error('Versão do estado e do backup está inconsistente.');
+if (!index.includes('<script src="vendor/marked.umd.js"></script>') || !index.includes('<script src="vendor/purify.min.js"></script>')) throw new Error('As bibliotecas locais do editor Markdown não estão ligadas ao index.');
+if (!marked.includes('marked v18.0.7') || !domPurify.includes('DOMPurify 3.4.12')) throw new Error('As versões vendorizadas do editor Markdown são inesperadas.');
+if (!markedLicense.toLowerCase().includes('mit license') || !domPurifyLicense.includes('Apache License')) throw new Error('As licenças das bibliotecas Markdown estão ausentes ou incompletas.');
+if (!app.includes('renderNotePreview') || !app.includes('DOMPurify.sanitize') || !app.includes('data-markdown-task') || !app.includes('applyMarkdownAction')) throw new Error('O editor Markdown seguro está incompleto.');
+if (!index.includes('data-note-view="edit"') || !index.includes('data-note-view="split"') || !index.includes('data-note-view="preview"')) throw new Error('Os modos do editor Markdown estão incompletos.');
 if (!index.includes('<script src="curriculum-v2.js"></script>')) throw new Error('curriculum-v2.js não está ligado ao index.');
 if (!serviceWorker.includes("'./curriculum-v2.js'")) throw new Error('A expansão curricular não está no cache offline.');
-if (!serviceWorker.includes("stack-completa-java-v16")) throw new Error('O cache offline não foi renovado para o sistema de aprendizagem.');
+if (!serviceWorker.includes("'./vendor/marked.umd.js'") || !serviceWorker.includes("'./vendor/purify.min.js'")) throw new Error('O editor Markdown não está disponível offline.');
+if (!serviceWorker.includes("stack-completa-java-v17")) throw new Error('O cache offline não foi renovado para o editor Markdown.');
 if (!manifest.shortcuts?.some(shortcut => shortcut.url === './index.html?hub=learning')) throw new Error('O atalho instalável para o mapa de domínio está ausente.');
 for (const removedMarker of ['experience-v3.js', 'STACK_EXPERIENCE_DATA', 'data-hub-panel="startup"', 'simulation-stage', 'visual-lab-stage']) {
   if (`${index}\n${app}\n${serviceWorker}`.includes(removedMarker)) throw new Error(`Implementação removida reapareceu: ${removedMarker}`);

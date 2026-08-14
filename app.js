@@ -227,7 +227,9 @@
     normalized.completed ||= {};
     normalized.checklists ||= {};
     normalized.favorites ||= {};
-    normalized.notes ||= {};
+    normalized.notes = normalized.notes && typeof normalized.notes === 'object' && !Array.isArray(normalized.notes)
+      ? Object.fromEntries(Object.entries(normalized.notes).filter(([, note]) => typeof note === 'string'))
+      : {};
     normalized.quizAnswers ||= {};
     normalized.review ||= {};
     normalized.mastery = normalized.mastery && typeof normalized.mastery === 'object' && !Array.isArray(normalized.mastery) ? normalized.mastery : {};
@@ -259,7 +261,7 @@
     delete normalized.experience;
     normalized.labs ||= {};
     normalized.activity ||= {};
-    normalized.settings ||= {};
+    normalized.settings = normalized.settings && typeof normalized.settings === 'object' && !Array.isArray(normalized.settings) ? normalized.settings : {};
     normalized.settings.theme ||= 'system';
     if (normalized.settings.theme === 'dark') normalized.settings.theme = 'system';
     normalized.settings.fontScale ||= 1;
@@ -267,7 +269,8 @@
     normalized.settings.focusMode ||= false;
     normalized.settings.reviewMode ||= false;
     normalized.settings.reduceMotion ||= false;
-    normalized.version = 8;
+    normalized.settings.noteView = ['edit', 'split', 'preview'].includes(normalized.settings.noteView) ? normalized.settings.noteView : 'split';
+    normalized.version = 9;
     return normalized;
   }
   state = normalizeState(await loadPersistedState());
@@ -279,6 +282,8 @@
   let favoritesOnly = false;
   let deferredInstallPrompt = null;
   let noteSaveTimer = null;
+  let noteDraftDirty = false;
+  let loadedNoteChapterId = null;
   let labSaveTimer = null;
   let reviewQueue = [];
   let reviewPlanFilter = 'all';
@@ -646,6 +651,7 @@
 
   function render(id, pushHash = true) {
     if (!byId.has(id)) return;
+    if (noteDraftDirty && loadedNoteChapterId && loadedNoteChapterId !== id) saveCurrentNote(loadedNoteChapterId, $('#note-editor').value, false);
     activeId = id;
     const chapter = byId.get(id);
     mount.replaceChildren(document.getElementById('template-' + id).content.cloneNode(true));
@@ -736,7 +742,7 @@
     if (tab === 'dashboard') updateDashboard();
     if (tab === 'notes') {
       updateNotesPanel();
-      setTimeout(() => $('#note-editor').focus(), 50);
+      setTimeout(focusNoteWorkspace, 50);
     }
     if (tab === 'review') updateReviewPanel();
     if (tab === 'learning') renderLearningPanel();
@@ -817,24 +823,209 @@
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(year, month - 1, day));
   }
 
+  function noteWordCount(markdown) {
+    const plainText = String(markdown)
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`[^`]*`/g, ' ')
+      .replace(/!?(?:\[([^\]]*)\])(?:\([^)]*\)|\[[^\]]*\])/g, '$1')
+      .replace(/[#>*_~|\[\]()-]/g, ' ')
+      .trim();
+    return plainText ? plainText.split(/\s+/u).length : 0;
+  }
+
+  function updateNoteCount(markdown = $('#note-editor').value) {
+    const words = noteWordCount(markdown);
+    const characters = String(markdown).length;
+    $('#note-count').textContent = `${words} ${words === 1 ? 'palavra' : 'palavras'} · ${characters} ${characters === 1 ? 'caractere' : 'caracteres'}`;
+  }
+
+  function renderNotePreview(markdown = $('#note-editor').value) {
+    const preview = $('#note-preview');
+    if (!preview) return;
+    if (!markdown.trim()) {
+      preview.innerHTML = '<div class="note-preview-empty">Comece a escrever para visualizar o Markdown.</div>';
+      updateNoteCount(markdown);
+      return;
+    }
+    if (!window.marked?.parse || !window.DOMPurify?.sanitize) {
+      preview.innerHTML = '<div class="note-preview-empty">O renderizador Markdown não pôde ser carregado. O texto original continua salvo.</div>';
+      updateNoteCount(markdown);
+      return;
+    }
+    try {
+      const rendered = window.marked.parse(markdown, { gfm: true, breaks: true, async: false });
+      preview.innerHTML = window.DOMPurify.sanitize(rendered, {
+        USE_PROFILES: { html: true },
+        FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'button', 'textarea', 'select', 'option', 'svg', 'math'],
+        FORBID_ATTR: ['style', 'srcset']
+      });
+      preview.querySelectorAll('a[href]').forEach(link => {
+        if (!link.getAttribute('href').startsWith('#')) {
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+        }
+      });
+      preview.querySelectorAll('img').forEach(image => {
+        image.loading = 'lazy';
+        image.referrerPolicy = 'no-referrer';
+      });
+      let taskIndex = 0;
+      preview.querySelectorAll('input').forEach(input => {
+        const listItem = input.closest('li');
+        if (input.type !== 'checkbox' || !input.disabled || !listItem) { input.remove(); return; }
+        listItem.classList.add('task-list-item');
+        listItem.parentElement?.classList.add('contains-task-list');
+        input.disabled = false;
+        input.dataset.markdownTask = String(taskIndex++);
+        input.setAttribute('aria-label', input.checked ? 'Marcar tarefa como pendente' : 'Marcar tarefa como concluída');
+      });
+    } catch {
+      preview.innerHTML = '<div class="note-preview-empty">Não foi possível visualizar este Markdown. O texto original permanece intacto e salvo.</div>';
+    }
+    updateNoteCount(markdown);
+  }
+
+  function renderNoteChapterList() {
+    const noteIds = chapters.filter(item => typeof state.notes[item.id] === 'string' && state.notes[item.id].trim());
+    $('#note-chapter-list').innerHTML = noteIds.length
+      ? noteIds.map(item => `<button class="note-chip ${item.id === activeId ? 'active' : ''}" type="button" data-note-chapter="${item.id}" ${item.id === activeId ? 'aria-current="true"' : ''}>${String(item.index + 1).padStart(3, '0')} · ${escapeHtml(item.title)}</button>`).join('')
+      : '<span class="support-note">Nenhuma anotação criada ainda.</span>';
+  }
+
+  function focusNoteWorkspace() {
+    const target = state.settings.noteView === 'preview' ? $('#note-preview') : $('#note-editor');
+    target?.focus({ preventScroll: true });
+  }
+
+  function setNoteView(view, persist = true, focus = true) {
+    if (!['edit', 'split', 'preview'].includes(view)) return;
+    state.settings.noteView = view;
+    $('#note-editor-grid').dataset.noteView = view;
+    $$('[data-note-view]').forEach(button => {
+      const active = button.dataset.noteView === view;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+    renderNotePreview();
+    if (persist) save();
+    if (focus) setTimeout(focusNoteWorkspace, 0);
+  }
+
   function updateNotesPanel() {
     if (!$('#note-editor')) return;
     const chapter = byId.get(activeId);
     $('#note-chapter-title').textContent = `${String(chapter.index + 1).padStart(3, '0')} · ${chapter.title}`;
-    if (document.activeElement !== $('#note-editor')) $('#note-editor').value = state.notes[activeId] || '';
-    const noteIds = chapters.filter(item => state.notes[item.id]?.trim());
-    $('#note-chapter-list').innerHTML = noteIds.length
-      ? noteIds.map(item => `<button class="note-chip" type="button" data-note-chapter="${item.id}">${String(item.index + 1).padStart(3, '0')} · ${escapeHtml(item.title)}</button>`).join('')
-      : '<span class="support-note">Nenhuma anotação criada ainda.</span>';
+    if (loadedNoteChapterId !== activeId) {
+      $('#note-editor').value = typeof state.notes[activeId] === 'string' ? state.notes[activeId] : '';
+      loadedNoteChapterId = activeId;
+      noteDraftDirty = false;
+    }
+    setNoteView(state.settings.noteView, false, false);
+    renderNoteChapterList();
+    $('#autosave-status').textContent = noteDraftDirty ? 'Alterações pendentes' : 'Salvo';
   }
 
-  function saveCurrentNote() {
+  function saveCurrentNote(chapterId = loadedNoteChapterId || activeId, value = $('#note-editor').value, refreshList = true) {
+    clearTimeout(noteSaveTimer);
+    if (!byId.has(chapterId)) return Promise.resolve(false);
+    if (value.trim()) state.notes[chapterId] = value;
+    else delete state.notes[chapterId];
+    const isVisibleDraft = chapterId === loadedNoteChapterId && $('#note-editor').value === value;
+    if (isVisibleDraft) noteDraftDirty = false;
+    const write = save();
+    if (refreshList) renderNoteChapterList();
+    write.then(success => {
+      if (chapterId !== loadedNoteChapterId || $('#note-editor').value !== value) return;
+      $('#autosave-status').textContent = success ? 'Salvo agora' : 'Falha ao salvar';
+      if (!success) noteDraftDirty = true;
+    });
+    return write;
+  }
+
+  function handleNoteInput() {
+    noteDraftDirty = true;
+    $('#autosave-status').textContent = 'Salvando…';
+    renderNotePreview();
+    clearTimeout(noteSaveTimer);
+    const chapterId = loadedNoteChapterId || activeId;
     const value = $('#note-editor').value;
-    if (value.trim()) state.notes[activeId] = value;
-    else delete state.notes[activeId];
-    save();
-    $('#autosave-status').textContent = 'Salvo agora';
-    updateNotesPanel();
+    noteSaveTimer = setTimeout(() => saveCurrentNote(chapterId, value), 450);
+  }
+
+  function replaceNoteSelection(replacement, start, end, selectionStart, selectionEnd) {
+    const editor = $('#note-editor');
+    editor.setRangeText(replacement, start, end, 'end');
+    editor.setSelectionRange(start + selectionStart, start + selectionEnd);
+    editor.focus();
+    handleNoteInput();
+  }
+
+  function formatNoteLines(action) {
+    const editor = $('#note-editor');
+    const lineStart = editor.value.lastIndexOf('\n', Math.max(0, editor.selectionStart - 1)) + 1;
+    const nextBreak = editor.value.indexOf('\n', editor.selectionEnd);
+    const lineEnd = nextBreak < 0 ? editor.value.length : nextBreak;
+    const original = editor.value.slice(lineStart, lineEnd) || 'item';
+    const lines = original.split('\n');
+    const withoutMarker = line => line.replace(/^\s*(?:#{1,6}\s+|>\s+|(?:[-+*]|\d+[.)])\s+(?:\[[ xX]\]\s+)?)/, '');
+    const replacement = lines.map((line, index) => {
+      const content = withoutMarker(line) || 'item';
+      if (action === 'heading') return `## ${content}`;
+      if (action === 'unordered-list') return `- ${content}`;
+      if (action === 'ordered-list') return `${index + 1}. ${content}`;
+      if (action === 'task') return `- [ ] ${content}`;
+      return `> ${content}`;
+    }).join('\n');
+    replaceNoteSelection(replacement, lineStart, lineEnd, 0, replacement.length);
+  }
+
+  function applyMarkdownAction(action) {
+    if (state.settings.noteView === 'preview') setNoteView('split', true, false);
+    const editor = $('#note-editor');
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = editor.value.slice(start, end);
+    const wrappers = {
+      bold: ['**', '**', 'texto em negrito'],
+      italic: ['*', '*', 'texto em itálico'],
+      strike: ['~~', '~~', 'texto riscado'],
+      'inline-code': ['`', '`', 'codigo']
+    };
+    if (wrappers[action]) {
+      const [before, after, placeholder] = wrappers[action];
+      const content = selected || placeholder;
+      replaceNoteSelection(`${before}${content}${after}`, start, end, before.length, before.length + content.length);
+      return;
+    }
+    if (['heading', 'unordered-list', 'ordered-list', 'task', 'quote'].includes(action)) { formatNoteLines(action); return; }
+    if (action === 'link') {
+      const label = selected || 'texto do link';
+      const url = 'https://exemplo.com';
+      replaceNoteSelection(`[${label}](${url})`, start, end, label.length + 3, label.length + 3 + url.length);
+      return;
+    }
+    if (action === 'code-block') {
+      const content = selected || 'System.out.println("Olá, Markdown!");';
+      const before = '```java\n';
+      replaceNoteSelection(`${before}${content}\n\`\`\``, start, end, before.length, before.length + content.length);
+      return;
+    }
+    if (action === 'table') {
+      const table = '| Conceito | Observação |\n| --- | --- |\n| Exemplo | Detalhe |';
+      replaceNoteSelection(table, start, end, 2, 10);
+    }
+  }
+
+  function toggleMarkdownTask(taskIndex, checked) {
+    const editor = $('#note-editor');
+    let current = -1;
+    const updated = editor.value.replace(/^(\s*(?:[-+*]|\d+[.)])\s+)\[([ xX])\]/gm, (match, prefix) => {
+      current += 1;
+      return current === taskIndex ? `${prefix}[${checked ? 'x' : ' '}]` : match;
+    });
+    if (updated === editor.value) return;
+    editor.value = updated;
+    handleNoteInput();
   }
 
   function buildReviewQueue() {
@@ -1783,7 +1974,7 @@
   function exportData() {
     const backup = {
       app: 'Stack Completa Java',
-      version: 8,
+      version: 9,
       exportedAt: new Date().toISOString(),
       chapterCount: chapters.length,
       data: state
@@ -2035,23 +2226,59 @@
 
   $('#daily-goal').addEventListener('change', event => { state.settings.dailyGoal = Number(event.target.value); save(); updateDashboard(); });
   $('#continue-study').addEventListener('click', closeHub);
-  $('#note-editor').addEventListener('input', () => {
-    $('#autosave-status').textContent = 'Salvando…';
-    clearTimeout(noteSaveTimer);
-    noteSaveTimer = setTimeout(saveCurrentNote, 450);
+  $('#note-editor').addEventListener('input', handleNoteInput);
+  $('#note-editor').addEventListener('keydown', event => {
+    const modifier = event.ctrlKey || event.metaKey;
+    const key = event.key.toLowerCase();
+    if (modifier && event.shiftKey && ['e', 's', 'p'].includes(key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      setNoteView({ e: 'edit', s: 'split', p: 'preview' }[key]);
+      return;
+    }
+    if (modifier && !event.shiftKey && ['b', 'i', 'k'].includes(key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      applyMarkdownAction({ b: 'bold', i: 'italic', k: 'link' }[key]);
+      return;
+    }
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      replaceNoteSelection('  ', event.currentTarget.selectionStart, event.currentTarget.selectionEnd, 2, 2);
+    }
+  });
+  $('#note-preview').addEventListener('keydown', event => {
+    const key = event.key.toLowerCase();
+    if (!(event.ctrlKey || event.metaKey) || !event.shiftKey || !['e', 's', 'p'].includes(key)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setNoteView({ e: 'edit', s: 'split', p: 'preview' }[key]);
+  });
+  $('#note-preview').addEventListener('change', event => {
+    const task = event.target.closest('[data-markdown-task]');
+    if (task) toggleMarkdownTask(Number(task.dataset.markdownTask), task.checked);
+  });
+  $('.note-view-tabs').addEventListener('click', event => {
+    const view = event.target.closest('[data-note-view]')?.dataset.noteView;
+    if (view) setNoteView(view);
+  });
+  $('.markdown-tools').addEventListener('click', event => {
+    const action = event.target.closest('[data-markdown-action]')?.dataset.markdownAction;
+    if (action) applyMarkdownAction(action);
   });
   $('#note-chapter-list').addEventListener('click', event => {
     const button = event.target.closest('[data-note-chapter]');
     if (button) { closeHub(); render(button.dataset.noteChapter); setTimeout(() => openHub('notes'), 80); }
   });
-  $('#copy-note').addEventListener('click', async () => { await copyText($('#note-editor').value); toast('Anotação copiada.'); });
+  $('#copy-note').addEventListener('click', async () => { await copyText($('#note-editor').value); toast('Markdown copiado.'); });
   $('#download-note').addEventListener('click', () => {
     const chapter = byId.get(activeId);
-    downloadText(`${String(chapter.index + 1).padStart(3, '0')}-${chapter.id}.md`, `# ${chapter.title}\n\n${$('#note-editor').value}`);
+    downloadText(`${String(chapter.index + 1).padStart(3, '0')}-${chapter.id}.md`, $('#note-editor').value, 'text/markdown;charset=utf-8');
   });
   $('#clear-note').addEventListener('click', () => {
     if (!$('#note-editor').value || confirm('Limpar definitivamente a anotação deste capítulo?')) {
       $('#note-editor').value = '';
+      renderNotePreview('');
       saveCurrentNote();
     }
   });
@@ -2295,5 +2522,5 @@
     search.value = requestedSearch;
     filterNavigation();
   }
-  if (['dashboard', 'notes', 'review', 'learning', 'lab', 'glossary', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
+  if (['dashboard', 'notes', 'review', 'learning', 'lab', 'glossary', 'settings'].includes(requestedHub)) openHub(requestedHub);
 })();
