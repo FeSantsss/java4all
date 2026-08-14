@@ -44,7 +44,7 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Filtro para mostrar somente mini-projetos.
 * Filtro de capítulos favoritos.
 * Progresso calculado por capítulos concluídos.
-* Progresso e checklists salvos no `localStorage` do navegador.
+* Progresso e checklists salvos no IndexedDB do navegador.
 * Retomada automática do último capítulo aberto.
 * Navegação pelos botões anterior e próximo.
 * Links entre capítulos e seus pré-requisitos.
@@ -53,12 +53,13 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Checklists persistentes.
 * Botões para copiar exemplos de código.
 * Anotações independentes por capítulo, com autosave, cópia e download em Markdown.
+* Glossário contextual com 88 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
 * Fila de repetição espaçada com quatro níveis de lembrança e intervalos adaptativos.
 * Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
 * Timer Pomodoro de 25 minutos com pausa de 5 minutos.
 * Conquistas desbloqueáveis por progresso, constância, prática e quizzes.
-* Temas escuro, claro e alto contraste.
+* Tema automático que usa Claro em sistemas claros e Alto contraste em sistemas escuros, além das duas escolhas manuais.
 * Controle do tamanho do texto, modo foco, revisão rápida e redução de movimentos.
 * Barra de leitura do capítulo.
 * Exportação e importação de um backup JSON com todos os dados de estudo.
@@ -103,6 +104,7 @@ O Service Worker usa uma estratégia de rede primeiro para os arquivos locais, a
 | `N`       | Abre as anotações do capítulo             |
 | `R`       | Abre a fila de revisão espaçada           |
 | `L`       | Abre o Java Lab                           |
+| `G`       | Abre o glossário contextual               |
 | `C`       | Marca ou desmarca o capítulo como concluído |
 | `Esc`     | Fecha o menu lateral                      |
 
@@ -266,7 +268,19 @@ Para aprofundamento profissional, use este curso em conjunto com documentação 
 
 ## Persistência local
 
-O navegador armazena localmente:
+O IndexedDB é o armazenamento principal dos dados de estudo. Ele oferece mais capacidade, transações e espaço para a evolução de anotações, rascunhos e histórico do que o `localStorage`.
+
+Na primeira abertura desta versão, o sistema procura automaticamente os dados antigos na chave `stack-completa:single:v1` do `localStorage`. Quando encontra:
+
+1. abre o banco `stack-completa-java` no IndexedDB;
+2. copia o estado completo para o banco;
+3. lê novamente o registro para verificar a gravação;
+4. remove a cópia antiga somente depois da verificação bem-sucedida;
+5. informa na tela que a migração foi concluída.
+
+Se o IndexedDB estiver indisponível ou for bloqueado pelo navegador, o curso continua funcionando com `localStorage` em modo de compatibilidade.
+
+O navegador armazena:
 
 * último capítulo aberto;
 * capítulos marcados como concluídos;
@@ -284,6 +298,14 @@ Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limp
 A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
 
 Não existe conta, banco de dados remoto ou sincronização automática entre dispositivos nesta versão. O progresso salvo no GitHub Pages pertence ao navegador e perfil utilizados. Outro navegador, perfil ou dispositivo terá uma área de armazenamento diferente. Use o backup JSON para transportar o progresso entre eles.
+
+## Glossário contextual
+
+Termos importantes aparecem destacados no texto dos capítulos. Ao selecionar um termo, o curso mostra uma definição curta e oferece um link para o capítulo em que o conceito é apresentado ou aprofundado.
+
+A área **Central → Glossário** reúne os 88 conceitos em uma lista pesquisável. A pesquisa considera o nome, aliases, definição e capítulo relacionado. O glossário não modifica nem reduz o conteúdo original: ele acrescenta uma camada de consulta sobre o capítulo renderizado.
+
+Para evitar poluição visual, cada conceito é destacado no máximo duas vezes por capítulo, com um limite geral de marcações na página. Blocos de código, links, títulos e controles interativos não são alterados.
 
 ## Limites do Java Lab
 

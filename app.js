@@ -1,10 +1,19 @@
-(() => {
+(async () => {
   'use strict';
 
   const chapters = JSON.parse(document.getElementById('course-data').textContent);
   const byId = new Map(chapters.map(chapter => [chapter.id, chapter]));
   const indexById = new Map(chapters.map((chapter, index) => [chapter.id, index]));
   const stateKey = 'stack-completa:single:v1';
+  const databaseName = 'stack-completa-java';
+  const databaseVersion = 1;
+  const stateStore = 'course-state';
+  const stateRecordKey = 'current';
+  let database = null;
+  let storageBackend = 'inicializando';
+  let storageWriteQueue = Promise.resolve();
+  let migratedFromLocalStorage = false;
+  let isResettingData = false;
   const todayKey = (date = new Date()) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -18,8 +27,177 @@
     return todayKey(date);
   };
 
+  const glossaryTerms = [
+    ['JDK', 'Kit de desenvolvimento que reúne compilador, ferramentas e runtime necessários para criar aplicações Java.', 'intro', ['Java Development Kit']],
+    ['JRE', 'Ambiente necessário para executar aplicações Java: JVM mais bibliotecas de runtime.', 'intro', ['Java Runtime Environment']],
+    ['JVM', 'Máquina virtual que carrega e executa bytecode Java, gerenciando memória, threads e otimizações em runtime.', 'intro', ['Java Virtual Machine']],
+    ['Bytecode', 'Representação intermediária gerada pelo compilador Java e executada pela JVM, normalmente armazenada em arquivos .class.', 'primeiro-programa'],
+    ['JIT', 'Compilador Just-In-Time que transforma trechos frequentes de bytecode em código de máquina durante a execução.', 'jvm-profundo', ['Just-In-Time']],
+    ['Garbage Collector', 'Componente da JVM que identifica objetos sem referências alcançáveis e recupera sua memória automaticamente.', 'jvm-profundo', ['GC', 'coletor de lixo']],
+    ['Stack', 'Região associada a cada thread que armazena frames de métodos, parâmetros e variáveis locais.', 'jvm-profundo', ['pilha']],
+    ['Heap', 'Região compartilhada da memória onde objetos e arrays são normalmente alocados.', 'jvm-profundo'],
+    ['Classe', 'Definição de estrutura e comportamento usada para criar objetos.', 'classes', ['class']],
+    ['Objeto', 'Instância concreta de uma classe, com identidade, estado e comportamento próprios.', 'classes'],
+    ['Encapsulamento', 'Proteção do estado interno de um objeto por meio de uma interface controlada de operações.', 'encapsulamento'],
+    ['Herança', 'Mecanismo pelo qual uma classe especializa outra e reutiliza membros compatíveis.', 'heranca'],
+    ['Polimorfismo', 'Capacidade de tratar implementações diferentes por um contrato comum, com o comportamento decidido em runtime.', 'polimorfismo'],
+    ['Abstração', 'Modelagem que destaca características essenciais e esconde detalhes desnecessários para quem usa o componente.', 'abstracao'],
+    ['Interface', 'Contrato de tipos que declara comportamentos sem exigir uma implementação concreta única.', 'interfaces'],
+    ['Exceção', 'Objeto que representa uma condição anormal e altera o fluxo normal de execução.', 'excecoes', ['exception']],
+    ['Collection', 'Família de interfaces e implementações para armazenar e manipular grupos de objetos.', 'colecoes', ['Collections', 'coleção']],
+    ['Generics', 'Sistema de parametrização de tipos que aumenta reutilização e segurança em tempo de compilação.', 'generics', ['genéricos']],
+    ['Lambda', 'Expressão compacta que fornece a implementação de uma interface funcional.', 'streams', ['lambdas']],
+    ['Stream', 'Pipeline declarativo para processar sequências de elementos sem representar uma coleção de armazenamento.', 'streams', ['streams']],
+    ['Optional', 'Contêiner que expressa explicitamente a presença ou ausência de um valor de retorno.', 'javamoderno'],
+    ['Big O', 'Notação que descreve como o custo de um algoritmo cresce conforme aumenta o tamanho da entrada.', 'big-o', ['complexidade assintótica']],
+    ['Recursão', 'Técnica em que uma função resolve o problema chamando a si mesma sobre uma entrada menor, até alcançar um caso-base.', 'recursao'],
+    ['Git', 'Sistema distribuído de controle de versão que registra a evolução do código e permite trabalho paralelo.', 'git'],
+    ['Commit', 'Registro imutável de um conjunto coerente de alterações no histórico do Git.', 'git'],
+    ['Maven', 'Ferramenta de build e gestão de dependências baseada em convenções e no arquivo pom.xml.', 'build'],
+    ['Gradle', 'Ferramenta de automação de build que usa uma DSL para configurar tarefas e dependências.', 'build'],
+    ['Reflection', 'API que permite inspecionar e manipular tipos, membros e anotações em tempo de execução.', 'anotacoes', ['reflexão']],
+    ['JSON', 'Formato textual de troca de dados baseado em objetos, arrays e valores simples.', 'json'],
+    ['Logging', 'Registro estruturado de eventos da aplicação para diagnóstico, auditoria e observabilidade.', 'logging', ['logs']],
+    ['SOLID', 'Conjunto de cinco princípios de design orientado a objetos voltados a coesão, extensão e baixo acoplamento.', 'solid'],
+    ['Injeção de dependência', 'Técnica em que um objeto recebe as colaborações de que precisa em vez de construí-las internamente.', 'di', ['DI', 'dependency injection']],
+    ['IoC', 'Inversão de Controle: o fluxo de criação e coordenação de componentes é transferido para um contêiner ou framework.', 'spring-core', ['inversão de controle']],
+    ['HTTP', 'Protocolo de requisição e resposta usado na comunicação entre clientes e servidores web.', 'http'],
+    ['REST', 'Estilo arquitetural que modela recursos e usa as semânticas do HTTP para manipulá-los.', 'http'],
+    ['Endpoint', 'Combinação de endereço e operação exposta por uma API para atender determinada interação.', 'http'],
+    ['Status HTTP', 'Código numérico que comunica o resultado de uma requisição, como 200, 404 ou 409.', 'http', ['status code']],
+    ['SQL', 'Linguagem declarativa usada para definir, consultar e modificar dados relacionais.', 'sql'],
+    ['Transação', 'Unidade lógica de trabalho que deve ser confirmada integralmente ou revertida.', 'sql', ['transaction']],
+    ['ACID', 'Propriedades de atomicidade, consistência, isolamento e durabilidade esperadas de transações confiáveis.', 'sql'],
+    ['Índice', 'Estrutura auxiliar que acelera buscas no banco ao custo de espaço e manutenção nas escritas.', 'postgres', ['index']],
+    ['Migration', 'Alteração versionada e reproduzível aplicada ao schema do banco de dados.', 'migrations', ['migrations', 'migração']],
+    ['JDBC', 'API padrão do Java para abrir conexões, enviar SQL e processar resultados de bancos relacionais.', 'jdbc'],
+    ['Bean', 'Objeto cujo ciclo de vida e dependências são gerenciados pelo contêiner Spring.', 'spring-core', ['beans']],
+    ['Spring MVC', 'Módulo web do Spring que organiza requisições HTTP, controllers, conversão de dados e respostas.', 'spring-mvc'],
+    ['JPA', 'Especificação Java de mapeamento objeto-relacional; implementações como Hibernate executam o trabalho concreto.', 'spring-jpa', ['Java Persistence API']],
+    ['Entity', 'Classe persistente mapeada para dados relacionais e identificada no contexto do JPA.', 'spring-jpa', ['entidade']],
+    ['DTO', 'Objeto criado para transportar dados através de uma fronteira sem expor diretamente o modelo interno.', 'dto-mapping', ['Data Transfer Object']],
+    ['Bean Validation', 'Modelo declarativo de validação baseado em constraints como @NotNull e @Size.', 'validacao-erros', ['validação']],
+    ['N+1', 'Problema em que uma consulta inicial dispara várias consultas adicionais, geralmente uma para cada item retornado.', 'n-mais-1'],
+    ['CORS', 'Política do navegador que controla quais origens podem acessar recursos de outra origem.', 'cors-rate-limit', ['Cross-Origin Resource Sharing']],
+    ['JUnit', 'Framework usado para escrever e executar testes automatizados em Java.', 'testes'],
+    ['Mock', 'Dublê configurável usado para controlar dependências e verificar interações durante um teste.', 'mockito', ['mocks']],
+    ['JWT', 'Token assinado composto por header, payload e assinatura; carrega claims, mas não é criptografado por padrão.', 'autenticacao-conceitos', ['JSON Web Token']],
+    ['OAuth2', 'Framework de autorização delegada que permite conceder acesso limitado sem compartilhar a senha do usuário.', 'autenticacao-conceitos', ['OAuth 2.0']],
+    ['RBAC', 'Modelo de autorização no qual permissões são atribuídas a papéis associados aos usuários.', 'mini-auth-rbac', ['Role-Based Access Control']],
+    ['TLS', 'Protocolo criptográfico que oferece confidencialidade, integridade e autenticação para conexões como HTTPS.', 'https'],
+    ['Docker', 'Plataforma para empacotar e executar aplicações em containers reproduzíveis.', 'docker-conceitos'],
+    ['Imagem Docker', 'Artefato imutável em camadas que contém aplicação, runtime e configuração necessários para criar containers.', 'dockerfile', ['Docker image']],
+    ['Container', 'Processo isolado iniciado a partir de uma imagem e compartilhando o kernel do host.', 'docker-conceitos', ['containers']],
+    ['Docker Compose', 'Ferramenta declarativa para definir e executar vários serviços relacionados.', 'compose', ['Compose']],
+    ['Testcontainers', 'Biblioteca que inicia containers descartáveis durante testes de integração.', 'testcontainers'],
+    ['NoSQL', 'Família de bancos não relacionais com modelos como documentos, chave-valor, colunas ou grafos.', 'nosql'],
+    ['MongoDB', 'Banco orientado a documentos que armazena estruturas semelhantes a JSON no formato BSON.', 'mongodb'],
+    ['Redis', 'Armazenamento em memória baseado em estruturas de dados, frequentemente usado para cache e coordenação.', 'redis'],
+    ['Cache', 'Cópia temporária de dados criada para reduzir latência e trabalho repetido.', 'spring-cache'],
+    ['Circuit Breaker', 'Padrão que interrompe chamadas a uma dependência instável para evitar falhas em cascata.', 'resilience'],
+    ['WebClient', 'Cliente HTTP reativo e não bloqueante fornecido pelo ecossistema Spring.', 'webclient'],
+    ['AOP', 'Programação orientada a aspectos, usada para aplicar comportamentos transversais como logs e transações.', 'spring-aop', ['Aspect-Oriented Programming']],
+    ['Actuator', 'Conjunto de endpoints operacionais do Spring Boot para saúde, métricas e diagnóstico.', 'actuator'],
+    ['CI/CD', 'Automação contínua de integração, testes e entrega ou implantação de software.', 'cicd', ['pipeline']],
+    ['Observabilidade', 'Capacidade de compreender o estado interno de um sistema por métricas, logs e traces.', 'mini-deploy-observavel'],
+    ['Thread', 'Fluxo de execução dentro de um processo, com stack própria e memória compartilhada com outras threads.', 'threads', ['threads']],
+    ['Race condition', 'Falha dependente da ordem de execução concorrente quando acessos compartilhados não são coordenados.', 'concorrencia-profunda', ['condição de corrida']],
+    ['Deadlock', 'Situação em que fluxos concorrentes aguardam indefinidamente recursos mantidos uns pelos outros.', 'concorrencia-profunda'],
+    ['Mensageria', 'Comunicação assíncrona baseada no envio de mensagens por meio de um broker ou canal.', 'mensageria'],
+    ['Kafka', 'Plataforma distribuída de streaming de eventos baseada em logs particionados e persistentes.', 'kafka', ['Apache Kafka']],
+    ['Tópico Kafka', 'Fluxo nomeado de registros no Kafka, dividido em partições.', 'kafka', ['topic']],
+    ['Partição', 'Unidade ordenada e paralelizável de armazenamento de registros dentro de um tópico Kafka.', 'kafka', ['partition']],
+    ['Consumer group', 'Grupo de consumidores que divide entre si as partições de um tópico.', 'kafka', ['grupo de consumidores']],
+    ['DDD', 'Abordagem de modelagem que aproxima o software do domínio e da linguagem usada pelos especialistas.', 'ddd', ['Domain-Driven Design']],
+    ['Agregado', 'Fronteira de consistência no DDD, controlada por uma raiz que protege suas invariantes.', 'ddd', ['aggregate']],
+    ['CAP', 'Princípio segundo o qual, diante de uma partição de rede, um sistema distribuído escolhe entre consistência e disponibilidade.', 'sistemas-distribuidos', ['teorema CAP']],
+    ['Idempotência', 'Propriedade de uma operação que produz o mesmo efeito observável quando repetida com a mesma intenção.', 'sistemas-distribuidos', ['idempotency']],
+    ['Event-driven', 'Estilo arquitetural no qual componentes publicam e reagem a eventos, reduzindo o acoplamento temporal.', 'event-driven-profundo', ['arquitetura orientada a eventos']],
+    ['WebSocket', 'Protocolo de conexão persistente e bidirecional entre cliente e servidor.', 'websockets', ['WebSockets']],
+    ['ADR', 'Registro curto que documenta uma decisão arquitetural, seu contexto e suas consequências.', 'code-review-adr', ['Architecture Decision Record']],
+    ['WebHook', 'Chamada HTTP enviada automaticamente quando um evento ocorre em outro sistema.', 'conectando-front-back', ['webhook', 'webhooks']]
+  ].map(([term, definition, chapter, aliases = []], index) => ({ key: `term-${index}`, term, definition, chapter, aliases }));
+  const glossaryByKey = new Map(glossaryTerms.map(entry => [entry.key, entry]));
+
+  function requestResult(request) {
+    return new Promise((resolve, reject) => {
+      request.addEventListener('success', () => resolve(request.result), { once: true });
+      request.addEventListener('error', () => reject(request.error || new Error('Falha no IndexedDB.')), { once: true });
+    });
+  }
+
+  function openDatabase() {
+    return new Promise((resolve, reject) => {
+      if (location.protocol === 'file:') { reject(new Error('Arquivos locais usam o modo de compatibilidade.')); return; }
+      if (!('indexedDB' in window)) { reject(new Error('IndexedDB indisponível.')); return; }
+      const request = indexedDB.open(databaseName, databaseVersion);
+      request.addEventListener('upgradeneeded', () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(stateStore)) db.createObjectStore(stateStore);
+      });
+      request.addEventListener('success', () => {
+        const db = request.result;
+        db.addEventListener('versionchange', () => db.close());
+        resolve(db);
+      }, { once: true });
+      request.addEventListener('blocked', () => reject(new Error('Atualização do banco bloqueada por outra aba.')), { once: true });
+      request.addEventListener('error', () => reject(request.error || new Error('Não foi possível abrir o IndexedDB.')), { once: true });
+    });
+  }
+
+  function readDatabaseState() {
+    const transaction = database.transaction(stateStore, 'readonly');
+    return requestResult(transaction.objectStore(stateStore).get(stateRecordKey));
+  }
+
+  function writeDatabaseState(value) {
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(stateStore, 'readwrite');
+      transaction.objectStore(stateStore).put(value, stateRecordKey);
+      transaction.addEventListener('complete', () => resolve(true), { once: true });
+      transaction.addEventListener('abort', () => reject(transaction.error || new Error('Gravação cancelada.')), { once: true });
+      transaction.addEventListener('error', () => reject(transaction.error || new Error('Falha ao gravar no IndexedDB.')), { once: true });
+    });
+  }
+
+  function deleteDatabaseState() {
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(stateStore, 'readwrite');
+      transaction.objectStore(stateStore).delete(stateRecordKey);
+      transaction.addEventListener('complete', () => resolve(true), { once: true });
+      transaction.addEventListener('abort', () => reject(transaction.error || new Error('Exclusão cancelada.')), { once: true });
+      transaction.addEventListener('error', () => reject(transaction.error || new Error('Falha ao excluir dados.')), { once: true });
+    });
+  }
+
+  function readLegacyState() {
+    try { return JSON.parse(localStorage.getItem(stateKey)) || null; } catch { return null; }
+  }
+
+  async function loadPersistedState() {
+    const legacyState = readLegacyState();
+    try {
+      database = await openDatabase();
+      storageBackend = 'IndexedDB';
+      const indexedState = await readDatabaseState();
+      if (indexedState) return indexedState;
+      if (legacyState) {
+        await writeDatabaseState(legacyState);
+        const verifiedState = await readDatabaseState();
+        if (!verifiedState) throw new Error('A verificação da migração falhou.');
+        try { localStorage.removeItem(stateKey); } catch { /* origem pode bloquear localStorage */ }
+        migratedFromLocalStorage = true;
+        return verifiedState;
+      }
+      return {};
+    } catch (error) {
+      database = null;
+      storageBackend = 'localStorage (compatibilidade)';
+      return legacyState || {};
+    }
+  }
+
   let state;
-  try { state = JSON.parse(localStorage.getItem(stateKey)) || {}; } catch { state = {}; }
 
   function normalizeState(candidate = {}) {
     const normalized = candidate && typeof candidate === 'object' ? candidate : {};
@@ -32,7 +210,8 @@
     normalized.labs ||= {};
     normalized.activity ||= {};
     normalized.settings ||= {};
-    normalized.settings.theme ||= 'dark';
+    normalized.settings.theme ||= 'system';
+    if (normalized.settings.theme === 'dark') normalized.settings.theme = 'system';
     normalized.settings.fontScale ||= 1;
     normalized.settings.dailyGoal ||= 25;
     normalized.settings.focusMode ||= false;
@@ -41,7 +220,7 @@
     normalized.version = 2;
     return normalized;
   }
-  state = normalizeState(state);
+  state = normalizeState(await loadPersistedState());
 
   let activeId = byId.has(location.hash.slice(1))
     ? location.hash.slice(1)
@@ -71,14 +250,24 @@
   const commandOverlay = $('#command-overlay');
 
   function save() {
+    if (isResettingData) return Promise.resolve(false);
     state.updatedAt = new Date().toISOString();
+    if (database) {
+      const snapshot = typeof structuredClone === 'function' ? structuredClone(state) : JSON.parse(JSON.stringify(state));
+      storageWriteQueue = storageWriteQueue
+        .catch(() => undefined)
+        .then(() => writeDatabaseState(snapshot))
+        .catch(() => { toast('Não foi possível salvar no IndexedDB. Verifique o espaço disponível.'); return false; });
+      updateStorageStatus();
+      return storageWriteQueue;
+    }
     try {
       localStorage.setItem(stateKey, JSON.stringify(state));
       updateStorageStatus();
-      return true;
-    } catch (error) {
+      return Promise.resolve(true);
+    } catch {
       toast('Não foi possível salvar. O armazenamento do navegador pode estar cheio.');
-      return false;
+      return Promise.resolve(false);
     }
   }
 
@@ -86,6 +275,107 @@
     return String(value).replace(/[&<>'"]/g, character => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     })[character]);
+  }
+
+  const glossaryAliases = glossaryTerms
+    .flatMap(entry => [entry.term, ...entry.aliases].map(alias => ({ alias, entry })))
+    .sort((first, second) => second.alias.length - first.alias.length);
+  const glossaryAliasLookup = new Map(glossaryAliases.map(item => [item.alias.toLocaleLowerCase('pt-BR'), item.entry]));
+  const glossaryPattern = new RegExp(glossaryAliases.map(item => item.alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'giu');
+  const wordCharacter = /[\p{L}\p{N}_]/u;
+
+  function normalizeSearchText(value) {
+    return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+  }
+
+  function highlightContextualTerms() {
+    const occurrences = new Map();
+    let totalHighlights = 0;
+    const textNodes = [];
+    const walker = document.createTreeWalker(mount, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const parent = node.parentElement;
+      if (!parent || !node.nodeValue.trim()) continue;
+      if (parent.closest('pre,code,a,button,textarea,input,select,.topic-meta,.section-head,.exercise-head,.glossary-popover')) continue;
+      if (!parent.closest('p,li,td,th,.callout,.secret,.warn,.study-tip,.analogy')) continue;
+      textNodes.push(node);
+    }
+
+    for (const node of textNodes) {
+      if (totalHighlights >= 36) break;
+      const text = node.nodeValue;
+      const matches = [];
+      glossaryPattern.lastIndex = 0;
+      let match;
+      while ((match = glossaryPattern.exec(text)) && totalHighlights + matches.length < 36) {
+        const before = match.index > 0 ? text[match.index - 1] : '';
+        const after = match.index + match[0].length < text.length ? text[match.index + match[0].length] : '';
+        if ((before && wordCharacter.test(before)) || (after && wordCharacter.test(after))) continue;
+        const entry = glossaryAliasLookup.get(match[0].toLocaleLowerCase('pt-BR'));
+        if (!entry || (occurrences.get(entry.key) || 0) + matches.filter(item => item.entry.key === entry.key).length >= 2) continue;
+        matches.push({ index: match.index, value: match[0], entry });
+      }
+      if (!matches.length) continue;
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const item of matches) {
+        fragment.append(document.createTextNode(text.slice(cursor, item.index)));
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'context-term';
+        button.dataset.glossaryKey = item.entry.key;
+        button.textContent = item.value;
+        button.setAttribute('aria-label', `Ver definição: ${item.entry.term}`);
+        fragment.append(button);
+        cursor = item.index + item.value.length;
+        occurrences.set(item.entry.key, (occurrences.get(item.entry.key) || 0) + 1);
+        totalHighlights++;
+      }
+      fragment.append(document.createTextNode(text.slice(cursor)));
+      node.replaceWith(fragment);
+    }
+  }
+
+  function positionGlossaryPopover(anchor) {
+    const popover = $('#glossary-popover');
+    const anchorRect = anchor.getBoundingClientRect();
+    const popoverRect = popover.getBoundingClientRect();
+    let left = Math.min(innerWidth - popoverRect.width - 12, Math.max(12, anchorRect.left));
+    let top = anchorRect.bottom + 9;
+    if (top + popoverRect.height > innerHeight - 12) top = Math.max(12, anchorRect.top - popoverRect.height - 9);
+    popover.style.left = left + 'px';
+    popover.style.top = top + 'px';
+  }
+
+  function openGlossaryPopover(entry, anchor) {
+    if (!entry || !anchor) return;
+    const popover = $('#glossary-popover');
+    $('#glossary-popover-title').textContent = entry.term;
+    $('#glossary-popover-definition').textContent = entry.definition;
+    $('#glossary-related-chapter').dataset.chapter = entry.chapter;
+    const related = byId.get(entry.chapter);
+    $('#glossary-related-chapter').textContent = related ? `Abrir capítulo ${related.index + 1}` : 'Abrir capítulo relacionado';
+    popover.classList.add('open');
+    positionGlossaryPopover(anchor);
+    popover.querySelector('.popover-close').focus({ preventScroll: true });
+  }
+
+  function closeGlossaryPopover() {
+    $('#glossary-popover').classList.remove('open');
+  }
+
+  function renderGlossary(query = '') {
+    const list = $('#context-glossary-list');
+    if (!list) return;
+    const needle = normalizeSearchText(query.trim());
+    const matches = glossaryTerms.filter(entry => !needle || normalizeSearchText(`${entry.term} ${entry.aliases.join(' ')} ${entry.definition} ${byId.get(entry.chapter)?.title || ''}`).includes(needle));
+    $('#glossary-total').textContent = `${glossaryTerms.length} conceitos`;
+    $('#glossary-results-count').textContent = `${matches.length} ${matches.length === 1 ? 'resultado' : 'resultados'}`;
+    list.innerHTML = matches.length ? matches.map(entry => {
+      const chapter = byId.get(entry.chapter);
+      return `<article class="context-glossary-card" tabindex="0" role="button" data-glossary-card="${entry.key}"><h3>${escapeHtml(entry.term)}</h3><p>${escapeHtml(entry.definition)}</p><small>${chapter ? `${String(chapter.index + 1).padStart(3, '0')} · ${escapeHtml(chapter.title)}` : 'Conceito transversal'}</small></article>`;
+    }).join('') : '<div class="review-empty">Nenhum conceito encontrado. Tente outro termo ou tecnologia.</div>';
   }
 
   function toast(message, duration = 2800) {
@@ -219,6 +509,7 @@
       input.nextElementSibling?.classList.toggle('done', input.checked);
     });
     restoreQuizzes();
+    highlightContextualTerms();
     updateReadingProgress();
   }
 
@@ -323,6 +614,10 @@
     if (tab === 'lab') {
       loadLabDraft();
       setTimeout(() => $('#lab-editor').focus(), 50);
+    }
+    if (tab === 'glossary') {
+      renderGlossary($('#glossary-search').value);
+      setTimeout(() => $('#glossary-search').focus(), 50);
     }
     if (tab === 'settings') updateSettingsUI();
   }
@@ -641,21 +936,34 @@
     }
   }
 
+  const systemDarkTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  const systemHighContrast = window.matchMedia('(prefers-contrast: more)');
+  const systemForcedColors = window.matchMedia('(forced-colors: active)');
+
+  function resolvedTheme() {
+    if (state.settings.theme === 'light' || state.settings.theme === 'contrast') return state.settings.theme;
+    if (systemHighContrast.matches || systemForcedColors.matches) return 'contrast';
+    return systemDarkTheme.matches ? 'contrast' : 'light';
+  }
+
   function applySettings() {
-    const theme = state.settings.theme === 'dark' ? '' : state.settings.theme;
-    if (theme) document.body.dataset.theme = theme;
-    else delete document.body.dataset.theme;
+    const theme = resolvedTheme();
+    document.body.dataset.theme = theme;
     document.documentElement.style.setProperty('--reader-scale', Number(state.settings.fontScale) || 1);
     document.body.classList.toggle('focus-mode', Boolean(state.settings.focusMode));
     document.body.classList.toggle('review-mode', Boolean(state.settings.reviewMode));
     document.body.classList.toggle('reduce-motion', Boolean(state.settings.reduceMotion));
-    $('meta[name="theme-color"]').content = state.settings.theme === 'light' ? '#f6f1e7' : state.settings.theme === 'contrast' ? '#050505' : '#14110d';
+    $('meta[name="theme-color"]').content = theme === 'light' ? '#f6f1e7' : '#050505';
     updateSettingsUI();
   }
 
   function updateSettingsUI() {
     if (!$('#theme-control')) return;
     $$('#theme-control button').forEach(button => button.classList.toggle('active', button.dataset.themeValue === state.settings.theme));
+    const systemStatus = $('#theme-system-status');
+    if (systemStatus) systemStatus.textContent = state.settings.theme === 'system'
+      ? `Seguindo o sistema: ${resolvedTheme() === 'contrast' ? 'alto contraste' : 'claro'}.`
+      : 'Escolha Sistema para acompanhar automaticamente o dispositivo.';
     $$('#font-control button').forEach(button => button.classList.toggle('active', Number(button.dataset.fontValue) === Number(state.settings.fontScale)));
     $('#focus-toggle').textContent = state.settings.focusMode ? 'Desativar' : 'Ativar';
     $('#review-mode-toggle').textContent = state.settings.reviewMode ? 'Desativar' : 'Ativar';
@@ -668,7 +976,7 @@
     const element = $('#storage-status');
     if (!element) return;
     const localSize = new Blob([JSON.stringify(state)]).size;
-    let message = `Seus dados de estudo ocupam ${(localSize / 1024).toFixed(1)} KB neste navegador.`;
+    let message = `Armazenamento principal: ${storageBackend}. Seus dados de estudo ocupam ${(localSize / 1024).toFixed(1)} KB.`;
     if (navigator.storage?.estimate) {
       try {
         const estimate = await navigator.storage.estimate();
@@ -697,7 +1005,7 @@
       if (!imported || typeof imported !== 'object' || (!imported.completed && !imported.notes && !imported.checklists)) throw new Error('estrutura incompatível');
       if (!confirm('Importar este backup substituirá os dados atuais deste curso. Continuar?')) return;
       state = normalizeState(imported);
-      save();
+      await save();
       toast('Backup importado. Recarregando o curso…');
       setTimeout(() => location.reload(), 600);
     } catch (error) {
@@ -725,6 +1033,7 @@
     { title: 'Criar anotação neste capítulo', hint: 'N', action: () => openHub('notes') },
     { title: 'Abrir fila de revisão', hint: 'R', action: () => openHub('review') },
     { title: 'Abrir Java Lab', hint: 'L', action: () => openHub('lab') },
+    { title: 'Pesquisar no glossário', hint: 'G', action: () => openHub('glossary') },
     { title: 'Abrir preferências e backup', hint: 'Configurações', action: () => openHub('settings') },
     { title: 'Favoritar/desfavoritar capítulo', hint: 'F', action: toggleFavorite },
     { title: 'Concluir/desmarcar capítulo', hint: 'C', action: toggleComplete },
@@ -852,6 +1161,8 @@
   commandOverlay.addEventListener('click', event => { if (event.target === commandOverlay) closeCommand(); });
 
   mount.addEventListener('click', async event => {
+    const contextualTerm = event.target.closest('[data-glossary-key]');
+    if (contextualTerm) { openGlossaryPopover(glossaryByKey.get(contextualTerm.dataset.glossaryKey), contextualTerm); return; }
     const internal = event.target.closest('a[href^="#"]');
     if (internal) { event.preventDefault(); render(internal.getAttribute('href').slice(1)); return; }
     const reveal = event.target.closest('.reveal-btn');
@@ -964,6 +1275,27 @@
   $('#lab-copy').addEventListener('click', async () => { await copyText($('#lab-editor').value); toast('Código copiado.'); });
   $('#lab-download').addEventListener('click', () => downloadText('Main.java', $('#lab-editor').value, 'text/x-java-source'));
 
+  $('#glossary-search').addEventListener('input', event => renderGlossary(event.target.value));
+  $('#context-glossary-list').addEventListener('click', event => {
+    const card = event.target.closest('[data-glossary-card]');
+    if (card) openGlossaryPopover(glossaryByKey.get(card.dataset.glossaryCard), card);
+  });
+  $('#context-glossary-list').addEventListener('keydown', event => {
+    const card = event.target.closest('[data-glossary-card]');
+    if (card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openGlossaryPopover(glossaryByKey.get(card.dataset.glossaryCard), card); }
+  });
+  $('#glossary-popover-close').addEventListener('click', closeGlossaryPopover);
+  $('#glossary-related-chapter').addEventListener('click', event => {
+    const chapter = event.currentTarget.dataset.chapter;
+    closeGlossaryPopover();
+    closeHub();
+    if (chapter) render(chapter);
+  });
+  $('#glossary-open-all').addEventListener('click', () => { closeGlossaryPopover(); openHub('glossary'); });
+  document.addEventListener('pointerdown', event => {
+    if ($('#glossary-popover').classList.contains('open') && !event.target.closest('#glossary-popover,[data-glossary-key],[data-glossary-card]')) closeGlossaryPopover();
+  });
+
   $('#theme-control').addEventListener('click', event => {
     const value = event.target.closest('[data-theme-value]')?.dataset.themeValue;
     if (!value) return;
@@ -984,9 +1316,12 @@
   $('#export-data').addEventListener('click', exportData);
   $('#import-data').addEventListener('click', () => $('#import-file').click());
   $('#import-file').addEventListener('change', event => { if (event.target.files[0]) importData(event.target.files[0]); event.target.value = ''; });
-  $('#reset-data').addEventListener('click', () => {
+  $('#reset-data').addEventListener('click', async () => {
     if (!confirm('Apagar todo o seu progresso, notas, favoritos, respostas e revisões? Esta ação não pode ser desfeita sem um backup.')) return;
-    localStorage.removeItem(stateKey);
+    isResettingData = true;
+    await storageWriteQueue.catch(() => undefined);
+    if (database) await deleteDatabaseState();
+    try { localStorage.removeItem(stateKey); } catch { /* armazenamento legado pode estar bloqueado */ }
     toast('Dados locais removidos. Recarregando…');
     setTimeout(() => location.reload(), 600);
   });
@@ -1008,7 +1343,7 @@
   document.addEventListener('keydown', event => {
     const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName) || event.target.isContentEditable;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openCommand(); return; }
-    if (event.key === 'Escape') { closeSidebar(); closeHub(); closeCommand(); return; }
+    if (event.key === 'Escape') { closeSidebar(); closeHub(); closeCommand(); closeGlossaryPopover(); return; }
     if (typing) return;
     if (event.key === '/') { event.preventDefault(); openSidebar(); search.focus(); }
     if (event.altKey && event.key === 'ArrowLeft') previous.click();
@@ -1018,15 +1353,21 @@
       if (event.key.toLowerCase() === 'n') openHub('notes');
       if (event.key.toLowerCase() === 'r') openHub('review');
       if (event.key.toLowerCase() === 'l') openHub('lab');
+      if (event.key.toLowerCase() === 'g') openHub('glossary');
       if (event.key.toLowerCase() === 'c') toggleComplete();
     }
   });
 
-  window.addEventListener('scroll', updateReadingProgress, { passive: true });
+  window.addEventListener('scroll', () => { updateReadingProgress(); closeGlossaryPopover(); }, { passive: true });
   window.addEventListener('resize', updateReadingProgress);
   window.addEventListener('hashchange', () => render(location.hash.slice(1), false));
   window.addEventListener('online', updateConnectionStatus);
   window.addEventListener('offline', updateConnectionStatus);
+  [systemDarkTheme, systemHighContrast, systemForcedColors].forEach(mediaQuery => {
+    const handleSystemThemeChange = () => { if (state.settings.theme === 'system') applySettings(); };
+    if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', handleSystemThemeChange);
+    else mediaQuery.addListener(handleSystemThemeChange);
+  });
   window.addEventListener('beforeinstallprompt', event => {
     event.preventDefault();
     deferredInstallPrompt = event;
@@ -1052,6 +1393,7 @@
   updatePomodoroDisplay();
   setupOffline();
   render(activeId);
+  if (migratedFromLocalStorage) toast('Progresso migrado com segurança para o IndexedDB.');
   const requestedHub = new URLSearchParams(location.search).get('hub');
-  if (['dashboard', 'notes', 'review', 'lab', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
+  if (['dashboard', 'notes', 'review', 'lab', 'glossary', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
 })();

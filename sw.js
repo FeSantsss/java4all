@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stack-completa-java-v3';
+const CACHE_NAME = 'stack-completa-java-v6';
 const COURSE_FILES = ['./', './index.html', './app.js', './manifest.webmanifest', './icon.svg'];
 
 async function cacheCourse() {
