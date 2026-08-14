@@ -5,11 +5,13 @@ const index = fs.readFileSync('index.html', 'utf8');
 const app = fs.readFileSync('app.js', 'utf8');
 const curriculum = fs.readFileSync('curriculum-v2.js', 'utf8');
 const serviceWorker = fs.readFileSync('sw.js', 'utf8');
+const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8'));
 const glossaryBlock = app.match(/const glossaryTerms = \[([\s\S]*?)\n  \]\.map/);
 const dataMatch = index.match(/<script type="application\/json" id="course-data">([\s\S]*?)<\/script>/);
 
 if (!dataMatch) throw new Error('course-data não encontrado.');
 if (!glossaryBlock) throw new Error('Glossário contextual não encontrado.');
+const glossaryEntries = vm.runInNewContext(`[${glossaryBlock[1]}]`);
 
 const inserted = [];
 const dataElement = {
@@ -53,6 +55,8 @@ for (const template of allCourseHtml.matchAll(/<template id="template-([^"]+)">(
 }
 const invalidExpansionLinks = [...new Set(inserted.flatMap(html => [...html.matchAll(/href="#([^"]+)"/g)].map(match => match[1])).filter(id => !ids.includes(id)))];
 const glossaryCount = (glossaryBlock[1].match(/^    \['/gm) || []).length;
+const invalidGlossaryChapters = glossaryEntries.filter(entry => !ids.includes(entry[2])).map(entry => `${entry[0]} -> ${entry[2]}`);
+const duplicateGlossaryTerms = glossaryEntries.map(entry => normalizeSearchText(entry[0])).filter((term, index, terms) => terms.indexOf(term) !== index);
 const expansionById = new Map(inserted.map(html => [html.match(/^<template id="template-([^"]+)"/)?.[1], html]));
 const expansionsWithoutFoundation = [...expansionById].filter(([, html]) => !html.includes('class="concept-foundation"')).map(([id]) => id);
 const expansionsWithCodeBeforeFoundation = [...expansionById].filter(([, html]) => {
@@ -87,6 +91,8 @@ if (invalidPrerequisites.length) throw new Error(`Pré-requisitos inexistentes: 
 if (forwardPrerequisites.length) throw new Error(`Pré-requisitos aparecem depois do capítulo: ${forwardPrerequisites.join(', ')}`);
 if (invalidExpansionLinks.length) throw new Error(`Pontes curriculares apontam para capítulos inexistentes: ${invalidExpansionLinks.join(', ')}`);
 if (glossaryCount !== 111) throw new Error(`Esperados 111 termos no glossário; encontrados ${glossaryCount}.`);
+if (invalidGlossaryChapters.length) throw new Error(`Conceitos apontam para capítulos inexistentes: ${invalidGlossaryChapters.join(', ')}`);
+if (duplicateGlossaryTerms.length) throw new Error(`Termos duplicados no mapa de domínio: ${duplicateGlossaryTerms.join(', ')}`);
 for (const term of ['CLI', 'Scanner', 'EOF', 'Socket', 'Protocolo', 'Virtual thread', 'MVCC', 'PKCE', 'SLO', 'SBOM', 'DLT', 'PACELC', 'BFF']) {
   if (!glossaryBlock[1].includes(`['${term}'`)) throw new Error(`Termo conceitual ausente do glossário: ${term}`);
 }
@@ -103,10 +109,20 @@ if (!index.includes('[hidden] { display: none !important; }')) throw new Error('
 if (!app.includes('reviewPlan') || !app.includes('data-review-plan-toggle')) throw new Error('Planejamento diário da revisão não está habilitado.');
 if (!app.includes('buildReviewQuestion') || !app.includes('data-review-option') || !app.includes('answerReview')) throw new Error('Revisões de múltipla escolha não estão habilitadas.');
 if (app.includes('data-review-rate')) throw new Error('A autoavaliação antiga ainda está ligada à revisão.');
-if (!app.includes('normalized.version = 7') || !app.includes('version: 7')) throw new Error('Versão do estado e do backup está inconsistente.');
+if (!index.includes('data-hub-panel="learning"') || !index.includes('data-learning-view="overview"') || !index.includes('data-learning-view="errors"') || !index.includes('data-learning-view="diagnostic"') || !index.includes('data-learning-view="projects"')) throw new Error('A central de domínio está incompleta.');
+if (!app.includes('recordLearningEvidence') || !app.includes('masteryStatus') || !app.includes('renderMasteryOverview')) throw new Error('O mapa de domínio unificado não está habilitado.');
+if (!app.includes('injectRetrievalPrompt') || !app.includes('data-retrieval-option') || !app.includes("source: 'retrieval'")) throw new Error('A recuperação antes da explicação não está habilitada.');
+if (!app.includes('renderErrorNotebook') || !app.includes('data-error-option') || !app.includes('answerErrorPractice')) throw new Error('O caderno automático de erros não está habilitado.');
+if (!app.includes('startDiagnostic') || !app.includes('data-diagnostic-option') || !app.includes('weakConceptTerms') || !app.includes('strongConceptTerms')) throw new Error('O teste diagnóstico está incompleto.');
+if (!app.includes('projectReadiness') || !app.includes('renderProjectReadiness') || !app.includes('data-learning-chapter')) throw new Error('A prontidão por projeto não está habilitada.');
+for (const stateField of ['normalized.mastery', 'normalized.errors', 'normalized.retrieval', 'normalized.diagnostic']) {
+  if (!app.includes(stateField)) throw new Error(`Campo persistido ausente no modelo de aprendizagem: ${stateField}`);
+}
+if (!app.includes('normalized.version = 8') || !app.includes('version: 8')) throw new Error('Versão do estado e do backup está inconsistente.');
 if (!index.includes('<script src="curriculum-v2.js"></script>')) throw new Error('curriculum-v2.js não está ligado ao index.');
 if (!serviceWorker.includes("'./curriculum-v2.js'")) throw new Error('A expansão curricular não está no cache offline.');
-if (!serviceWorker.includes("stack-completa-java-v15")) throw new Error('O cache offline não foi renovado para a revisão de múltipla escolha.');
+if (!serviceWorker.includes("stack-completa-java-v16")) throw new Error('O cache offline não foi renovado para o sistema de aprendizagem.');
+if (!manifest.shortcuts?.some(shortcut => shortcut.url === './index.html?hub=learning')) throw new Error('O atalho instalável para o mapa de domínio está ausente.');
 for (const removedMarker of ['experience-v3.js', 'STACK_EXPERIENCE_DATA', 'data-hub-panel="startup"', 'simulation-stage', 'visual-lab-stage']) {
   if (`${index}\n${app}\n${serviceWorker}`.includes(removedMarker)) throw new Error(`Implementação removida reapareceu: ${removedMarker}`);
 }

@@ -537,6 +537,121 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .mastery-bar { height:6px; overflow:hidden; border-radius:6px; background:var(--line); }
 .mastery-bar i { display:block; width:0; height:100%; background:linear-gradient(90deg,var(--danger),var(--accent),var(--accent-2)); }
 
+.retrieval-card { margin:20px 0 30px; padding:19px; border:1px solid var(--accent); border-radius:14px; background:linear-gradient(135deg,var(--accent-soft),var(--bg-card)); }
+.retrieval-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.retrieval-head h3 { margin:5px 0 0!important; color:var(--ink); font:750 1.05rem var(--serif)!important; }
+.retrieval-purpose { flex:none; padding:5px 8px; border:1px solid var(--line); border-radius:999px; color:var(--ink-faint); font:.58rem var(--mono); text-transform:uppercase; }
+.retrieval-card>p { margin:10px 0; color:var(--ink-dim); font-size:.78rem; line-height:1.55; }
+.retrieval-card .retrieval-question { margin:14px 0 10px; color:var(--ink); font-weight:700; }
+.retrieval-options { display:grid; gap:7px; }
+.retrieval-card .review-option { background:var(--bg-card); }
+.retrieval-feedback { display:none; margin-top:12px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; }
+.retrieval-feedback.visible { display:block; }
+.retrieval-feedback.correct { border-color:var(--accent-2); background:var(--accent-2-soft); }
+.retrieval-feedback.wrong { border-color:var(--accent); background:var(--accent-soft); }
+.retrieval-feedback strong { color:var(--ink); font-size:.75rem; }
+.retrieval-feedback p { margin:5px 0 0; color:var(--ink-dim); font-size:.72rem; line-height:1.5; }
+.retrieval-continue { margin-top:12px; }
+
+.learning-tabs { display:flex; gap:5px; margin-bottom:18px; padding:4px; overflow:auto; border:1px solid var(--line); border-radius:11px; background:var(--bg-alt); }
+.learning-tabs button { flex:1; min-width:max-content; padding:9px 12px; border:0; border-radius:8px; background:transparent; color:var(--ink-dim); cursor:pointer; font:.68rem var(--mono); }
+.learning-tabs button.active { background:var(--accent-soft); color:var(--accent); }
+.learning-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:15px; }
+.learning-stat-grid article { padding:14px; border:1px solid var(--line); border-radius:11px; background:var(--bg-card); }
+.learning-stat-grid article.needs-review { border-color:var(--danger); background:var(--danger-soft); }
+.learning-stat-grid b,.learning-stat-grid span { display:block; }
+.learning-stat-grid b { color:var(--ink); font:800 1.55rem var(--serif); }
+.learning-stat-grid span { margin-top:3px; color:var(--ink-faint); font:.58rem var(--mono); text-transform:uppercase; }
+.mastery-toolbar { display:grid; grid-template-columns:1fr 220px; gap:8px; margin-bottom:10px; }
+.learning-explanation { margin:0 0 14px; padding:11px 13px; border-left:2px solid var(--accent); background:var(--accent-soft); color:var(--ink-dim); font-size:.7rem; line-height:1.5; }
+.mastery-list { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mastery-concept { padding:14px; border:1px solid var(--line); border-radius:11px; background:var(--bg-card); }
+.mastery-concept.review { border-color:var(--danger); }
+.mastery-concept-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.mastery-concept-head h4 { margin:7px 0 0; color:var(--ink); font-size:.82rem; }
+.mastery-concept-head>b { color:var(--ink-dim); font:750 .8rem var(--mono); }
+.mastery-status { display:inline-flex; padding:4px 7px; border:1px solid var(--line); border-radius:999px; color:var(--ink-faint); font:.55rem var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+.mastery-status.learning { border-color:var(--accent); color:var(--accent); }
+.mastery-status.understood { border-color:var(--accent-2); color:var(--accent-2); }
+.mastery-status.consolidated { border-color:var(--accent-2); background:var(--accent-2-soft); color:var(--accent-2); }
+.mastery-status.review { border-color:var(--danger); background:var(--danger-soft); color:var(--danger); }
+.mastery-concept>p { min-height:3em; margin:9px 0; color:var(--ink-dim); font-size:.68rem; line-height:1.5; }
+.mastery-track,.project-readiness-track { height:5px; overflow:hidden; border-radius:6px; background:var(--line-soft); }
+.mastery-track i,.project-readiness-track i { display:block; height:100%; background:linear-gradient(90deg,var(--danger),var(--accent),var(--accent-2)); }
+.mastery-concept footer { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:9px; }
+.mastery-concept footer span { color:var(--ink-faint); font:.57rem var(--mono); }
+.mastery-concept footer button { padding:4px 7px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--ink-dim); cursor:pointer; font:.58rem var(--mono); }
+
+.error-notebook-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:14px; }
+.error-notebook-head h3,.project-readiness-intro h3,.diagnostic-intro h3 { margin:0 0 5px; color:var(--ink); font:750 1.1rem var(--serif); }
+.error-notebook-head p,.project-readiness-intro p,.diagnostic-intro p { margin:0; max-width:65ch; color:var(--ink-dim); font-size:.72rem; line-height:1.55; }
+.learning-filter-group { display:flex; gap:4px; flex:none; padding:3px; border:1px solid var(--line); border-radius:9px; background:var(--bg-alt); }
+.learning-filter-group button { padding:7px 9px; border:0; border-radius:6px; background:transparent; color:var(--ink-dim); cursor:pointer; font:.6rem var(--mono); }
+.learning-filter-group button.active { background:var(--accent-soft); color:var(--accent); }
+.error-list { display:grid; gap:8px; }
+.error-item { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px; border:1px solid var(--line); border-left:3px solid var(--danger); border-radius:10px; background:var(--bg-card); }
+.error-item.resolved { border-left-color:var(--accent-2); opacity:.8; }
+.error-item h4 { display:inline; margin:0 0 0 7px; color:var(--ink); font-size:.8rem; }
+.error-item p { margin:8px 0 5px; color:var(--ink-dim); font-size:.7rem; line-height:1.5; }
+.error-item small { color:var(--ink-faint); font:.57rem var(--mono); }
+.error-practice { margin-bottom:18px; padding:18px; border:1px solid var(--danger); border-radius:13px; background:var(--danger-soft); }
+.error-practice.resolved { border-color:var(--accent-2); background:var(--accent-2-soft); }
+.error-practice h3 { margin:7px 0 13px; color:var(--ink); font:700 1rem var(--serif); }
+.error-answer-context { margin:-4px 0 12px; color:var(--ink-dim); font-size:.66rem; line-height:1.5; }
+.error-answer-context strong { color:var(--ink); }
+
+.diagnostic-intro { display:grid; grid-template-columns:1.25fr .75fr; gap:20px; align-items:end; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--bg-card); }
+.diagnostic-start { display:grid; gap:8px; }
+.diagnostic-start .form-label { margin-top:0; }
+.diagnostic-result { display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:center; margin-top:14px; padding:18px; border:1px solid var(--line); border-radius:13px; background:var(--bg-card); }
+.diagnostic-result h3 { margin:7px 0 4px; color:var(--ink); }
+.diagnostic-result p { color:var(--ink-dim); font-size:.72rem; }
+.diagnostic-score { display:grid; width:120px; min-height:100px; place-content:center; border:2px solid var(--accent); border-radius:15px; text-align:center; }
+.diagnostic-score b { color:var(--accent); font:850 1.8rem var(--serif); }
+.diagnostic-score span { max-width:90px; color:var(--ink-faint); font:.55rem var(--mono); }
+.diagnostic-breakdown { display:grid; grid-column:1/-1; grid-template-columns:1fr 1fr; gap:9px; }
+.diagnostic-breakdown section { padding:11px; border:1px solid var(--line-soft); border-radius:9px; background:var(--bg-alt); }
+.diagnostic-breakdown h4 { margin:0 0 7px; color:var(--ink); font-size:.7rem; }
+.diagnostic-breakdown section div { display:flex; flex-wrap:wrap; gap:5px; }
+.diagnostic-breakdown span { padding:4px 7px; border:1px solid var(--line); border-radius:999px; color:var(--ink-dim); font:.56rem var(--mono); }
+.diagnostic-breakdown small { color:var(--ink-faint); font-size:.62rem; }
+.diagnostic-active { padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--bg-card); }
+.diagnostic-active h3 { margin:9px 0 15px; color:var(--ink); font:750 1.15rem var(--serif); line-height:1.35; }
+.diagnostic-progress { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:12px; margin-bottom:18px; color:var(--ink-faint); font:.6rem var(--mono); }
+.diagnostic-progress>div { height:5px; overflow:hidden; border-radius:6px; background:var(--line); }
+.diagnostic-progress i { display:block; height:100%; background:var(--accent); }
+.diagnostic-next { margin-top:13px; }
+.diagnostic-cancel { display:block; margin-top:13px; padding:0; border:0; background:transparent; color:var(--ink-faint); cursor:pointer; font:.6rem var(--mono); }
+.diagnostic-history { display:grid; gap:6px; margin-top:14px; }
+.diagnostic-history>h3 { margin:0 0 3px; color:var(--ink); font-size:.8rem; }
+.diagnostic-history article { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 13px; border:1px solid var(--line); border-radius:9px; background:var(--bg-card); }
+.diagnostic-history strong,.diagnostic-history small { display:block; }
+.diagnostic-history strong { color:var(--ink); font-size:.68rem; }
+.diagnostic-history small { margin-top:3px; color:var(--ink-faint); font:.55rem var(--mono); }
+.diagnostic-history article>span { flex:none; color:var(--accent); font:.65rem var(--mono); }
+
+.project-readiness-intro { margin-bottom:14px; padding:14px 16px; border-left:3px solid var(--accent); background:var(--accent-soft); }
+.project-readiness-list { display:grid; gap:10px; }
+.project-readiness { padding:17px; border:1px solid var(--line); border-radius:13px; background:var(--bg-card); }
+.project-readiness.ready,.project-readiness.completed { border-color:var(--accent-2); }
+.project-readiness>header { display:flex; justify-content:space-between; gap:16px; }
+.project-readiness h3 { margin:7px 0 3px; color:var(--ink); font:720 1rem var(--serif); }
+.project-readiness header p { margin:0; color:var(--ink-faint); font:.6rem var(--mono); }
+.readiness-score { flex:none; text-align:right; }
+.readiness-score b,.readiness-score span { display:block; }
+.readiness-score b { color:var(--accent); font:800 1.2rem var(--serif); }
+.readiness-score span { color:var(--ink-faint); font:.55rem var(--mono); }
+.project-readiness-track { margin:12px 0; }
+.project-readiness details { border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft); }
+.project-readiness summary { padding:10px 0; color:var(--ink-dim); cursor:pointer; font:.65rem var(--mono); }
+.project-requirements { display:grid; gap:6px; padding-bottom:10px; }
+.project-requirements button { display:grid; grid-template-columns:auto 1fr; gap:9px; padding:9px; border:1px solid var(--line-soft); border-radius:8px; background:var(--bg-alt); color:var(--ink-dim); text-align:left; cursor:pointer; font-size:.68rem; }
+.project-requirements button>span:first-child { color:var(--accent-2); }
+.project-requirements small { display:block; margin-top:2px; color:var(--ink-faint); font:.56rem var(--mono); }
+.project-readiness>footer { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:12px; }
+.project-readiness>footer p { margin:0; color:var(--ink-dim); font-size:.67rem; line-height:1.5; }
+.project-readiness>footer button { flex:none; }
+
 .lab-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
 .lab-toolbar .study-select { width:auto; flex:1; min-width:180px; }
 .lab-editor { min-height:330px; padding:18px; resize:vertical; tab-size:4; font: .83rem/1.65 var(--mono); }
@@ -592,12 +707,14 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   .hub-brand { display:none; }.hub-tab{width:auto;flex:none}.hub-close{margin:0 0 0 auto;flex:none}.hub-tab span:last-child{display:none}
   .hub-content { padding:24px 18px 44px; }
   .stat-grid { grid-template-columns:1fr 1fr; }.dashboard-grid{grid-template-columns:1fr}.context-glossary-list{grid-template-columns:1fr}.review-plan-heading{display:block}.review-plan-heading .setting-actions{justify-content:flex-start;margin-top:13px}
+  .learning-stat-grid{grid-template-columns:1fr 1fr}.mastery-list,.mastery-toolbar,.diagnostic-intro{grid-template-columns:1fr}.error-notebook-head{display:block}.learning-filter-group{margin-top:12px;overflow:auto}.project-readiness>footer{align-items:stretch;flex-direction:column}.project-readiness>footer button{width:100%}
   .chapter-toolbar .chapter-mini-progress { display:none; }
   .toolbar-action[data-desktop-only] { display:none; }
 }
 @media (max-width:480px) {
   .stat-grid{gap:8px}.stat-card{padding:12px}.hub-heading h2{font-size:1.6rem}.setting-row{align-items:flex-start;flex-direction:column}
   .review-card-actions{align-items:stretch;flex-direction:column}.review-card-actions>.primary-btn{width:100%}
+  .retrieval-head,.project-readiness>header{align-items:flex-start;flex-direction:column}.readiness-score{text-align:left}.diagnostic-result,.diagnostic-breakdown{grid-template-columns:1fr}.diagnostic-score{width:100%;min-height:80px}
   .chapter-toolbar{padding-inline:14px;gap:8px}.chapter-toolbar .toolbar-context{min-width:0;overflow:hidden}.chapter-toolbar #phase-label{display:block;max-width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #chapter-counter{font-size:0;white-space:nowrap}#chapter-counter::after{content:attr(data-short);font-size:.65rem}
   .toolbar-group{gap:5px}.toolbar-action{width:28px;height:28px}
@@ -622,12 +739,13 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <button class="sidebar-tool" type="button" data-open-hub="dashboard">◈ Central</button>
         <button class="sidebar-tool" id="favorites-filter" type="button">☆ Favoritos</button>
         <button class="sidebar-tool" type="button" data-open-hub="review">↻ Revisão</button>
+        <button class="sidebar-tool" type="button" data-open-hub="learning">◇ Domínio</button>
         <button class="sidebar-tool" type="button" data-open-hub="lab">⌘ Java Lab</button>
         <button class="sidebar-tool" type="button" data-open-hub="glossary">⌕ Glossário</button>
         <button class="sidebar-tool" type="button" data-open-hub="settings">⚙ Preferências</button>
       </div>
       <nav id="course-nav" aria-label="Trilha do curso"><section class="nav-phase" data-phase="start"><h2>Comece aqui</h2><button type="button" data-chapter="intro"><span class="status-dot"></span><span>Introdução & ambiente</span></button><button type="button" data-chapter="primeiro-programa"><span class="status-dot"></span><span>Primeiro programa: escrever, compilar e executar</span></button></section><section class="nav-phase" data-phase="fundamentals"><h2>Fundamentos da linguagem</h2><button type="button" data-chapter="variaveis-tipos"><span class="status-dot"></span><span>Variáveis, tipos, memória e conversões</span></button><button type="button" data-chapter="operadores-expressoes"><span class="status-dot"></span><span>Operadores, expressões e precedência</span></button><button type="button" data-chapter="controle-fluxo"><span class="status-dot"></span><span>Decisões: if, else e switch</span></button><button type="button" data-chapter="lacos-repeticao"><span class="status-dot"></span><span>Repetição: while, for e controle de laços</span></button><button type="button" data-chapter="arrays-matrizes"><span class="status-dot"></span><span>Arrays, matrizes e raciocínio por índice</span></button><button type="button" data-chapter="strings-wrapper"><span class="status-dot"></span><span>String, imutabilidade e classes wrapper</span></button><button type="button" data-chapter="metodos-escopo"><span class="status-dot"></span><span>Métodos, parâmetros, retorno e escopo</span></button><button type="button" data-chapter="logica-programacao"><span class="status-dot"></span><span>Lógica de Programação & Pensamento Algorítmico</span></button><button type="button" data-chapter="mini-caixa-eletronico"><span class="status-dot"></span><span>Mini-projeto: caixa eletrônico no terminal</span></button></section><section class="nav-phase" data-phase="oop"><h2>Orientação a objetos</h2><button type="button" data-chapter="classes"><span class="status-dot"></span><span>Classes e objetos</span></button><button type="button" data-chapter="atributos"><span class="status-dot"></span><span>Atributos e métodos</span></button><button type="button" data-chapter="construtores"><span class="status-dot"></span><span>Construtores</span></button><button type="button" data-chapter="encapsulamento"><span class="status-dot"></span><span>Encapsulamento</span></button><button type="button" data-chapter="static"><span class="status-dot"></span><span>static, final e this</span></button><button type="button" data-chapter="heranca"><span class="status-dot"></span><span>Herança</span></button><button type="button" data-chapter="polimorfismo"><span class="status-dot"></span><span>Polimorfismo</span></button><button type="button" data-chapter="abstracao"><span class="status-dot"></span><span>Classes abstratas</span></button><button type="button" data-chapter="interfaces"><span class="status-dot"></span><span>Interfaces</span></button><button type="button" data-chapter="mini-biblioteca-cli"><span class="status-dot"></span><span>Mini-projeto: biblioteca orientada a objetos</span></button></section><section class="nav-phase" data-phase="core"><h2>Java essencial</h2><button type="button" data-chapter="pacotes"><span class="status-dot"></span><span>Pacotes & organização de projeto</span></button><button type="button" data-chapter="excecoes"><span class="status-dot"></span><span>Exceções</span></button><button type="button" data-chapter="colecoes"><span class="status-dot"></span><span>Coleções & ArrayList</span></button><button type="button" data-chapter="generics"><span class="status-dot"></span><span>Generics</span></button><button type="button" data-chapter="javamoderno"><span class="status-dot"></span><span>Java moderno: Optional, var, Date/Time</span></button><button type="button" data-chapter="streams"><span class="status-dot"></span><span>Lambdas & Streams</span></button><button type="button" data-chapter="java-io"><span class="status-dot"></span><span>Arquivos, Paths e Java I/O</span></button><button type="button" data-chapter="mini-analisador-vendas"><span class="status-dot"></span><span>Mini-projeto: analisador de vendas com Streams</span></button></section><section class="nav-phase" data-phase="algorithms"><h2>Raciocínio algorítmico</h2><button type="button" data-chapter="big-o"><span class="status-dot"></span><span>Complexidade de Algoritmos (Big O)</span></button><button type="button" data-chapter="recursao"><span class="status-dot"></span><span>Recursão</span></button><button type="button" data-chapter="ordenacao-busca"><span class="status-dot"></span><span>Algoritmos de Ordenação & Busca</span></button></section><section class="nav-phase" data-phase="engineering-foundation"><h2>Base profissional</h2><button type="button" data-chapter="git"><span class="status-dot"></span><span>Git & fluxo de trabalho</span></button><button type="button" data-chapter="build"><span class="status-dot"></span><span>Maven & Gradle</span></button><button type="button" data-chapter="anotacoes"><span class="status-dot"></span><span>Anotações & Reflection</span></button><button type="button" data-chapter="json"><span class="status-dot"></span><span>JSON & serialização</span></button><button type="button" data-chapter="logging"><span class="status-dot"></span><span>Logging & configuração externa</span></button><button type="button" data-chapter="mini-importador-pedidos"><span class="status-dot"></span><span>Mini-projeto: importador de pedidos</span></button><button type="button" data-chapter="solid"><span class="status-dot"></span><span>SOLID & boas práticas</span></button><button type="button" data-chapter="di"><span class="status-dot"></span><span>Injeção de dependência (na mão)</span></button><button type="button" data-chapter="padroes"><span class="status-dot"></span><span>Padrões de projeto essenciais</span></button><button type="button" data-chapter="clean-code"><span class="status-dot"></span><span>Clean Code & Refatoração</span></button><button type="button" data-chapter="projetospring"><span class="status-dot"></span><span>Projeto final — mini-framework pré-Spring</span></button></section><section class="nav-phase" data-phase="web-data"><h2>Web e banco antes do Spring</h2><button type="button" data-chapter="http"><span class="status-dot"></span><span>HTTP & APIs REST</span></button><button type="button" data-chapter="sql"><span class="status-dot"></span><span>SQL — fundamentos de banco relacional</span></button><button type="button" data-chapter="postgres"><span class="status-dot"></span><span>PostgreSQL na prática</span></button><button type="button" data-chapter="migrations"><span class="status-dot"></span><span>Migrations — versionando o schema</span></button><button type="button" data-chapter="jdbc"><span class="status-dot"></span><span>JDBC & banco de dados</span></button><button type="button" data-chapter="mini-financas-jdbc"><span class="status-dot"></span><span>Mini-projeto: finanças pessoais com PostgreSQL</span></button></section><section class="nav-phase" data-phase="spring"><h2>Spring: primeira API completa</h2><button type="button" data-chapter="spring-core"><span class="status-dot"></span><span>Spring Core — IoC/DI oficial</span></button><button type="button" data-chapter="devtools"><span class="status-dot"></span><span>Spring Boot DevTools</span></button><button type="button" data-chapter="lombok"><span class="status-dot"></span><span>Lombok — eliminando boilerplate</span></button><button type="button" data-chapter="spring-mvc"><span class="status-dot"></span><span>Spring Web / MVC — controllers REST</span></button><button type="button" data-chapter="spring-jpa"><span class="status-dot"></span><span>Spring Data JPA — repositories & relacionamentos</span></button><button type="button" data-chapter="dto-mapping"><span class="status-dot"></span><span>DTO Mapping — Entity ≠ DTO</span></button><button type="button" data-chapter="validacao-erros"><span class="status-dot"></span><span>Bean Validation & tratamento global de erros</span></button><button type="button" data-chapter="paginacao-swagger"><span class="status-dot"></span><span>Paginação, filtros & documentação com Swagger</span></button><button type="button" data-chapter="n-mais-1"><span class="status-dot"></span><span>O problema N+1</span></button><button type="button" data-chapter="cors-rate-limit"><span class="status-dot"></span><span>CORS & rate limiting</span></button><button type="button" data-chapter="mini-helpdesk-api"><span class="status-dot"></span><span>Mini-projeto: API de help desk com Spring</span></button></section><section class="nav-phase" data-phase="testing"><h2>Testes depois da aplicação</h2><button type="button" data-chapter="testes"><span class="status-dot"></span><span>Testes unitários</span></button><button type="button" data-chapter="mockito"><span class="status-dot"></span><span>Mockito — Mocks & Dublês de Teste</span></button><button type="button" data-chapter="mini-reservas-testadas"><span class="status-dot"></span><span>Mini-projeto: motor de reservas guiado por testes</span></button><button type="button" data-chapter="projeto"><span class="status-dot"></span><span>Projeto final — sistema de biblioteca</span></button></section><section class="nav-phase" data-phase="security"><h2>Segurança da API</h2><button type="button" data-chapter="autenticacao-conceitos"><span class="status-dot"></span><span>Autenticação: sessão vs JWT vs OAuth2</span></button><button type="button" data-chapter="spring-security"><span class="status-dot"></span><span>Spring Security na prática</span></button><button type="button" data-chapter="https"><span class="status-dot"></span><span>HTTPS & certificados</span></button><button type="button" data-chapter="mini-auth-rbac"><span class="status-dot"></span><span>Mini-projeto: autenticação e autorização por papéis</span></button></section><section class="nav-phase" data-phase="containers"><h2>Docker e ambiente reproduzível</h2><button type="button" data-chapter="docker-conceitos"><span class="status-dot"></span><span>Docker — conceitos & instalação</span></button><button type="button" data-chapter="dockerfile"><span class="status-dot"></span><span>Dockerfile & multi-stage build</span></button><button type="button" data-chapter="compose"><span class="status-dot"></span><span>Docker Compose — app + banco juntos</span></button></section><section class="nav-phase" data-phase="integration-testing"><h2>Testes de integração reais</h2><button type="button" data-chapter="testcontainers"><span class="status-dot"></span><span>Testcontainers & banco de teste isolado</span></button></section><section class="nav-phase" data-phase="advanced-data"><h2>NoSQL, cache e hospedagem</h2><button type="button" data-chapter="nosql"><span class="status-dot"></span><span>NoSQL — conceitos & quando usar</span></button><button type="button" data-chapter="mongodb"><span class="status-dot"></span><span>MongoDB na prática</span></button><button type="button" data-chapter="redis"><span class="status-dot"></span><span>Redis — cache & estruturas em memória</span></button><button type="button" data-chapter="hospedagem-db"><span class="status-dot"></span><span>Onde hospedar o banco: dev, teste & produção</span></button></section><section class="nav-phase" data-phase="spring-advanced"><h2>Spring avançado</h2><button type="button" data-chapter="resilience"><span class="status-dot"></span><span>Circuit Breaker com Resilience4j</span></button><button type="button" data-chapter="webclient"><span class="status-dot"></span><span>WebClient & RestTemplate — consumindo APIs externas</span></button><button type="button" data-chapter="spring-aop"><span class="status-dot"></span><span>Spring AOP — formalizando o dynamic proxy</span></button><button type="button" data-chapter="spring-cache"><span class="status-dot"></span><span>Spring Cache Abstraction</span></button><button type="button" data-chapter="actuator"><span class="status-dot"></span><span>Spring Boot Actuator & health checks</span></button></section><section class="nav-phase" data-phase="production"><h2>Produção, CI/CD e deploy</h2><button type="button" data-chapter="secrets"><span class="status-dot"></span><span>Variáveis de ambiente & secrets em produção</span></button><button type="button" data-chapter="cicd"><span class="status-dot"></span><span>CI/CD com GitHub Actions</span></button><button type="button" data-chapter="praticas-producao"><span class="status-dot"></span><span>Práticas de produção: parity, backup, feature flags & versionamento</span></button><button type="button" data-chapter="deploy-backend"><span class="status-dot"></span><span>Deploy do back-end em produção</span></button><button type="button" data-chapter="spring-profiles"><span class="status-dot"></span><span>Spring Profiles avançado</span></button><button type="button" data-chapter="mini-deploy-observavel"><span class="status-dot"></span><span>Mini-projeto: deploy reproduzível e observável</span></button></section><section class="nav-phase" data-phase="messaging"><h2>Mensageria depois do monólito</h2><button type="button" data-chapter="threads"><span class="status-dot"></span><span>Threads & concorrência</span></button><button type="button" data-chapter="mensageria"><span class="status-dot"></span><span>Mensageria — conceitos</span></button><button type="button" data-chapter="kafka"><span class="status-dot"></span><span>Kafka na prática</span></button><button type="button" data-chapter="spring-kafka"><span class="status-dot"></span><span>Spring Kafka — integração</span></button></section><section class="nav-phase" data-phase="architecture"><h2>Arquitetura e sistemas distribuídos</h2><button type="button" data-chapter="pilares-profundo"><span class="status-dot"></span><span>Os 4 Pilares da POO — Aprofundamento Unificado</span></button><button type="button" data-chapter="di-ioc-profundo"><span class="status-dot"></span><span>Injeção de Dependência, IoC & Ciclo de Vida de Beans — Aprofundamento</span></button><button type="button" data-chapter="jvm-profundo"><span class="status-dot"></span><span>JVM, Bytecode e Gerenciamento de Memória — Aprofundamento</span></button><button type="button" data-chapter="debugging"><span class="status-dot"></span><span>Técnicas de Debugging na Prática</span></button><button type="button" data-chapter="concorrencia-profunda"><span class="status-dot"></span><span>Concorrência, Threads, Race Conditions & Assíncrono — Aprofundamento</span></button><button type="button" data-chapter="arquitetura-software"><span class="status-dot"></span><span>Arquitetura de Software</span></button><button type="button" data-chapter="ddd"><span class="status-dot"></span><span>Domain-Driven Design (DDD)</span></button><button type="button" data-chapter="sistemas-distribuidos"><span class="status-dot"></span><span>Sistemas Distribuídos: CAP & trade-offs de arquitetura sênior</span></button><button type="button" data-chapter="event-driven-profundo"><span class="status-dot"></span><span>Arquitetura Event-Driven & Internals do Kafka — Aprofundamento</span></button><button type="button" data-chapter="testes-integracao-avancados"><span class="status-dot"></span><span>Testes de Integração Avançados: @SpringBootTest, @DataJpaTest & Testcontainers com Kafka</span></button><button type="button" data-chapter="mini-pedidos-eventos"><span class="status-dot"></span><span>Mini-projeto: pedidos orientados a eventos</span></button></section><section class="nav-phase" data-phase="advanced-algorithms"><h2>Estruturas avançadas</h2><button type="button" data-chapter="estruturas-avancadas"><span class="status-dot"></span><span>Estruturas de Dados Avançadas</span></button></section><section class="nav-phase" data-phase="team"><h2>Trabalho profissional em equipe</h2><button type="button" data-chapter="code-review-adr"><span class="status-dot"></span><span>Code Review & Architecture Decision Records</span></button><button type="button" data-chapter="agile"><span class="status-dot"></span><span>Metodologias Ágeis: Scrum & Kanban</span></button></section><section class="nav-phase" data-phase="integration"><h2>Integração com front-end</h2><button type="button" data-chapter="conectando-front-back"><span class="status-dot"></span><span>Conectando front-end e back-end</span></button><button type="button" data-chapter="auth-front-ts"><span class="status-dot"></span><span>Autenticação no front & pincelada de TypeScript</span></button><button type="button" data-chapter="websockets"><span class="status-dot"></span><span>WebSockets — quando HTTP não basta</span></button><button type="button" data-chapter="deploy-frontend"><span class="status-dot"></span><span>Deploy do front-end & monorepo vs poli-repo</span></button></section><section class="nav-phase" data-phase="finish"><h2>Projeto integrador e revisão</h2><button type="button" data-chapter="mapa-sistema"><span class="status-dot"></span><span>Glossário & mapa do sistema completo</span></button><button type="button" data-chapter="projeto-integrador"><span class="status-dot"></span><span>Projeto final — sistema completo de ponta a ponta</span></button><button type="button" data-chapter="quiz"><span class="status-dot"></span><span>Quiz de revisão</span></button></section><p class="empty-search" id="empty-search">Nenhum capítulo encontrado.</p></nav>
-      <p class="keyboard-help">/ busca · F favorito · N notas · R revisão · L Java Lab · G glossário · C concluir · Alt+←/→ navega · Esc fecha</p>
+      <p class="keyboard-help">/ busca · F favorito · N notas · R revisão · M domínio · L Java Lab · G glossário · C concluir · Alt+←/→ navega · Esc fecha</p>
       <div class="sidebar-status"><span class="connection-dot" id="connection-dot"></span><span id="connection-label">Curso pronto</span></div>
     </aside>
     <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar sumário"></button>
@@ -653,6 +771,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <button class="hub-tab active" type="button" data-hub-tab="dashboard"><span>◈</span><span>Visão geral</span></button>
         <button class="hub-tab" type="button" data-hub-tab="notes"><span>✎</span><span>Anotações</span></button>
         <button class="hub-tab" type="button" data-hub-tab="review"><span>↻</span><span>Revisão</span></button>
+        <button class="hub-tab" type="button" data-hub-tab="learning"><span>◇</span><span>Domínio</span></button>
         <button class="hub-tab" type="button" data-hub-tab="lab"><span>⌘</span><span>Java Lab</span></button>
         <button class="hub-tab" type="button" data-hub-tab="glossary"><span>⌕</span><span>Glossário</span></button>
         <button class="hub-tab" type="button" data-hub-tab="settings"><span>⚙</span><span>Preferências</span></button>
@@ -673,6 +792,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
             <article class="study-card"><h3>Timer de foco</h3><p id="pomodoro-mode">Sessão de concentração · 25 min</p><div class="goal-ring"><b id="pomodoro-display" style="font:700 2rem var(--serif);color:var(--ink)">25:00</b><div class="setting-actions"><button class="primary-btn" id="pomodoro-toggle" type="button">Iniciar</button><button class="ghost-btn" id="pomodoro-reset" type="button">Reiniciar</button></div></div></article>
             <article class="study-card"><h3>Ritmo — últimas 8 semanas</h3><p>Cada quadrado representa um dia de estudo.</p><div class="activity-grid" id="activity-grid" aria-label="Histórico de atividade"></div></article>
             <article class="study-card"><h3>Conquistas</h3><p>Marcos que provam sua evolução.</p><div class="achievement-list" id="achievement-list"></div></article>
+            <article class="study-card"><h3>Domínio e pontos fracos</h3><p id="learning-dashboard-copy">Responda questões para construir seu mapa de domínio.</p><button class="primary-btn" type="button" data-open-hub="learning">Abrir mapa de aprendizagem</button></article>
           </div>
         </section>
 
@@ -686,6 +806,17 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
         <section class="hub-panel" data-hub-panel="review">
           <div class="hub-heading"><div><span class="hub-kicker">Repetição espaçada</span><h2>Fila de revisão</h2><p>Monte o plano do dia e responda questões de múltipla escolha; o curso corrige e calcula quando cada conceito deve voltar.</p></div><span class="hub-kicker" id="review-count" aria-live="polite">fila em dia</span></div>
           <div id="review-stage"></div>
+        </section>
+
+        <section class="hub-panel" data-hub-panel="learning">
+          <div class="hub-heading"><div><span class="hub-kicker">Evidências de aprendizagem</span><h2>Mapa de domínio</h2><p>Diagnóstico, tentativas, revisões e erros trabalham sobre os mesmos conceitos.</p></div><span class="hub-kicker" id="learning-summary" aria-live="polite"></span></div>
+          <div class="learning-tabs" role="tablist" aria-label="Áreas do mapa de aprendizagem">
+            <button type="button" role="tab" data-learning-view="overview">Conceitos</button>
+            <button type="button" role="tab" data-learning-view="errors">Caderno de erros</button>
+            <button type="button" role="tab" data-learning-view="diagnostic">Diagnóstico</button>
+            <button type="button" role="tab" data-learning-view="projects">Projetos</button>
+          </div>
+          <div id="learning-stage"></div>
         </section>
 
         <section class="hub-panel" data-hub-panel="lab">
@@ -710,7 +841,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
           <div class="setting-row"><div><strong>Modo revisão rápida</strong><small>Exibe exercícios, alertas e pontos-chave do capítulo.</small></div><button class="ghost-btn" id="review-mode-toggle" type="button">Ativar</button></div>
           <div class="setting-row"><div><strong>Reduzir movimentos</strong><small>Remove animações e rolagens suaves.</small></div><button class="ghost-btn" id="motion-toggle" type="button">Ativar</button></div>
           <div class="setting-row"><div><strong>Curso offline e instalável</strong><small id="offline-detail">Verificando suporte do navegador…</small></div><div class="setting-actions"><button class="primary-btn" id="install-app" type="button">Instalar app</button><button class="ghost-btn" id="refresh-offline" type="button">Atualizar cache</button></div></div>
-          <div class="setting-row"><div><strong>Backup do seu estudo</strong><small>Exporta do IndexedDB o progresso, respostas, notas, favoritos, revisões, rascunhos e preferências.</small></div><div class="setting-actions"><button class="ghost-btn" id="export-data" type="button">Exportar JSON</button><button class="ghost-btn" id="import-data" type="button">Importar backup</button><input id="import-file" type="file" accept="application/json" hidden></div></div>
+          <div class="setting-row"><div><strong>Backup do seu estudo</strong><small>Exporta do IndexedDB o progresso, respostas, notas, favoritos, revisões, domínio, erros, diagnósticos, rascunhos e preferências.</small></div><div class="setting-actions"><button class="ghost-btn" id="export-data" type="button">Exportar JSON</button><button class="ghost-btn" id="import-data" type="button">Importar backup</button><input id="import-file" type="file" accept="application/json" hidden></div></div>
           <div class="setting-row"><div><strong>Recomeçar do zero</strong><small>Apaga somente os dados locais deste curso. O conteúdo offline permanece.</small></div><button class="danger-btn" id="reset-data" type="button">Apagar meus dados</button></div>
           <p class="support-note" id="storage-status"></p>
         </section>

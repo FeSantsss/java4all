@@ -30,6 +30,11 @@
       "name": "Abrir revisão",
       "short_name": "Revisão",
       "url": "./index.html?hub=review"
+    },
+    {
+      "name": "Abrir mapa de domínio",
+      "short_name": "Domínio",
+      "url": "./index.html?hub=learning"
     }
   ]
 }

@@ -59,6 +59,11 @@ Para considerar um assunto realmente aprendido, o estudante deve conseguir:
 * Glossário contextual com 111 conceitos clicáveis, pesquisa e navegação ao capítulo relacionado.
 * Java Lab com rascunho persistente, exemplos, console didático offline e download `.java`.
 * Fila de repetição espaçada com questões de múltipla escolha, correção imediata, intervalos adaptativos e planejamento diário do que revisar ou adiar.
+* Recuperação ativa antes da explicação de cada capítulo, sem nota e sem bloquear a leitura.
+* Mapa de domínio por conceito, calculado a partir de evidências reais em diferentes tipos de atividade.
+* Caderno automático de erros com contexto, correção guiada e histórico de itens pendentes ou resolvidos.
+* Diagnóstico do curso completo ou de uma fase, com pontos fortes, lacunas e recomendação de onde começar.
+* Projetos acompanhados por prontidão: requisitos explícitos, conclusão dos fundamentos e evidências por conceito, sem bloquear o acesso.
 * Meta diária, sequência de dias, tempo focado e mapa de atividade das últimas oito semanas.
 * Timer Pomodoro de 25 minutos com pausa de 5 minutos.
 * Conquistas desbloqueáveis por progresso, constância, prática e quizzes.
@@ -107,6 +112,7 @@ O Service Worker usa uma estratégia de rede primeiro para os arquivos locais, a
 | `F`       | Favorita ou remove o capítulo dos favoritos |
 | `N`       | Abre as anotações do capítulo             |
 | `R`       | Abre a fila de revisão espaçada           |
+| `M`       | Abre o mapa de domínio e pontos fracos    |
 | `L`       | Abre o Java Lab                           |
 | `G`       | Abre o glossário contextual               |
 | `C`       | Marca ou desmarca o capítulo como concluído |
@@ -296,6 +302,10 @@ O navegador armazena:
 * histórico diário de estudo;
 * fila, intervalos e domínio da revisão espaçada;
 * plano diário da revisão, com itens escolhidos e adiados somente naquele dia;
+* respostas das recuperações antes da explicação;
+* pontuação, precisão, sequência e fontes de evidência de cada conceito;
+* caderno automático de erros, tentativas de correção e resolução;
+* diagnóstico em andamento e os 20 resultados mais recentes;
 * tema, tamanho de texto, meta diária e modos de leitura.
 
 Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limpar os dados do navegador pode apagar o progresso.
@@ -303,6 +313,7 @@ Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limp
 A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
 
 Não existe conta, banco de dados remoto ou sincronização automática entre dispositivos nesta versão. O progresso salvo no GitHub Pages pertence ao navegador e perfil utilizados. Outro navegador, perfil ou dispositivo terá uma área de armazenamento diferente. Use o backup JSON para transportar o progresso entre eles.
+
 ## Planejamento diário da revisão
 
 A área **Central → Revisão** separa a fila vencida em três visualizações: todas, escolhidas para hoje e adiadas. Cada capítulo pode ser marcado ou desmarcado individualmente, e os botões **Selecionar todas** e **Adiar todas hoje** permitem organizar filas grandes de uma vez.
@@ -312,6 +323,52 @@ Todos os itens vencidos entram selecionados por padrão. Ao desmarcar um item, o
 Cada item escolhido vira uma questão de múltipla escolha. O sistema prioriza checkpoints já existentes no capítulo, depois conceitos do glossário e, quando necessário, tópicos reais da própria seção. As alternativas são embaralhadas de forma determinística para que a resposta correta não permaneça sempre na mesma posição.
 
 Ao responder, a alternativa correta é destacada e uma explicação aparece imediatamente. Um erro reduz o domínio e agenda o capítulo para o dia seguinte; um acerto aumenta o domínio e amplia progressivamente o intervalo. A tentativa, o resultado, a resposta dada e a próxima data são salvos no IndexedDB. O plano diário também faz parte da exportação e importação do backup JSON.
+
+## Domínio, diagnóstico e caderno de erros
+
+A área **Central → Domínio** concentra cinco mecanismos que compartilham o mesmo modelo de aprendizagem. O objetivo não é premiar cliques ou tempo de tela: abrir um capítulo e marcá-lo como concluído não aumenta sozinho o domínio de um conceito.
+
+### Recuperação antes da explicação
+
+Cada capítulo começa com uma questão curta antes do texto principal. Ela convida o estudante a tentar recuperar um conhecimento anterior ou prever o significado do conceito que será estudado. A atividade não vale nota, não bloqueia o capítulo e mostra a explicação imediatamente após a escolha. A resposta fica salva para não reaparecer como uma tentativa nova a cada recarregamento.
+
+O ideal é responder antes de rolar a página, mesmo sem certeza. Um erro nessa etapa não reduz a pontuação do conceito, mas fica registrado no caderno para que a dúvida não desapareça sem correção.
+
+### Mapa de domínio por conceito
+
+O mapa reúne os 111 conceitos do glossário e uma competência de capítulo para as seções que não possuem termo próprio. A pontuação vai de 0 a 100 e recebe evidências com pesos diferentes:
+
+* recuperação inicial correta: `+8`;
+* diagnóstico: `+16` por acerto e `−6` por erro;
+* quiz do capítulo: `+14` por acerto e `−10` por erro;
+* revisão espaçada: `+20` por acerto e `−16` por erro;
+* correção no caderno: `+24` por acerto e `−8` por nova tentativa incorreta.
+
+Os estados exibidos são **Não estudado**, **Em aprendizado**, **Compreendido**, **Consolidado** e **Precisa revisar**. Uma pendência no caderno mantém o conceito em revisão mesmo que sua pontuação anterior seja alta. A tela permite pesquisar por conceito ou capítulo e filtrar por estado.
+
+Esses números são indicadores de prática, não uma certificação. Para confirmar domínio, ainda é necessário explicar, implementar, testar e aplicar o conceito fora do exemplo visto.
+
+### Caderno automático de erros
+
+Respostas incorretas na recuperação inicial, nos quizzes, na revisão, no diagnóstico ou no próprio caderno são registradas automaticamente com pergunta, alternativas, escolha feita, resposta correta, explicação, capítulo e número de tentativas. Não é necessário cadastrar o erro manualmente.
+
+Em **Central → Domínio → Caderno de erros**, escolha **Corrigir agora**, responda novamente e use **Consultar capítulo** quando precisar reconstruir a explicação. Um acerto resolve a pendência e permanece disponível na visualização **Corrigidos**; um novo erro mantém o item em **Pendentes** e permite outra tentativa. Acertar posteriormente a mesma questão em outra atividade também pode resolver o registro correspondente.
+
+### Teste diagnóstico
+
+O diagnóstico serve para escolher um ponto de partida ou reavaliar lacunas depois de um período de estudo. Antes de iniciar, selecione o curso completo ou uma fase. O curso completo distribui até 20 questões pelas fases; uma fase usa até 10 capítulos espaçados ao longo daquele trecho da trilha.
+
+Cada resposta recebe correção imediata. Ao terminar, o painel mostra precisão, base demonstrada, conceitos que devem ser revisados primeiro e um capítulo sugerido. O diagnóstico atual fica salvo se a página for recarregada, e os 20 resultados concluídos mais recentes permanecem no backup. Encerrar antes do final descarta apenas o resultado agregado; as evidências das questões já respondidas continuam válidas.
+
+O diagnóstico não marca capítulos como concluídos, não pula fundamentos automaticamente e não esconde conteúdo. Ele orienta, mas a decisão de onde estudar continua com o aluno.
+
+### Prontidão para projetos
+
+Em **Central → Domínio → Projetos**, cada mini-projeto ou projeto integrador mostra seus requisitos reais. Quando o capítulo possui links explícitos de pré-requisito, eles são usados; nos demais casos, o sistema seleciona os fundamentos não-projeto imediatamente anteriores.
+
+A prontidão de cada requisito combina `65%` pela conclusão do capítulo e até `35%` pela média das evidências dos conceitos ligados a ele. O projeto aparece como preparado quando a média chega a pelo menos `70%` e todos os requisitos foram concluídos. A lista informa exatamente o que falta e permite abrir qualquer fundamento pendente.
+
+A recomendação nunca é uma trava: **Abrir mesmo assim** mantém todos os projetos acessíveis. Ela existe para tornar explícito por que um projeto pode estar difícil e quais conhecimentos devem ser fortalecidos antes ou durante a implementação.
 
 ## Glossário contextual
 
@@ -331,7 +388,7 @@ Essa estrutura permite navegação dinâmica sem exigir framework, build ou inst
 
 ## Validação do material
 
-O script local `validate-course.js` não instala dependências nem altera arquivos. Ele verifica quantidade e ordem dos capítulos, correspondência entre catálogo e templates, IDs duplicados, pré-requisitos inexistentes, ligação dos scripts, inclusão no cache offline e reaparecimento de trechos técnicos já corrigidos.
+O script local `validate-course.js` não instala dependências nem altera arquivos. Ele verifica quantidade e ordem dos capítulos, correspondência entre catálogo e templates, IDs duplicados, pré-requisitos inexistentes, ligação dos scripts, inclusão no cache offline, versão do estado persistido, presença dos cinco mecanismos de aprendizagem e reaparecimento de trechos técnicos já corrigidos.
 
 ```bash
 node validate-course.js

@@ -230,6 +230,23 @@
     normalized.notes ||= {};
     normalized.quizAnswers ||= {};
     normalized.review ||= {};
+    normalized.mastery = normalized.mastery && typeof normalized.mastery === 'object' && !Array.isArray(normalized.mastery) ? normalized.mastery : {};
+    normalized.errors = normalized.errors && typeof normalized.errors === 'object' && !Array.isArray(normalized.errors) ? normalized.errors : {};
+    normalized.retrieval = normalized.retrieval && typeof normalized.retrieval === 'object' && !Array.isArray(normalized.retrieval) ? normalized.retrieval : {};
+    normalized.diagnostic = normalized.diagnostic && typeof normalized.diagnostic === 'object' && !Array.isArray(normalized.diagnostic) ? normalized.diagnostic : {};
+    normalized.diagnostic.runs = Array.isArray(normalized.diagnostic.runs) ? normalized.diagnostic.runs : [];
+    normalized.diagnostic.active = normalized.diagnostic.active && typeof normalized.diagnostic.active === 'object'
+      ? normalized.diagnostic.active
+      : null;
+    normalized.mastery = Object.fromEntries(Object.entries(normalized.mastery).filter(([, record]) => record && typeof record === 'object' && !Array.isArray(record)));
+    normalized.errors = Object.fromEntries(Object.entries(normalized.errors).filter(([, error]) => error && typeof error === 'object' && !Array.isArray(error)));
+    normalized.retrieval = Object.fromEntries(Object.entries(normalized.retrieval).filter(([, answer]) => answer && typeof answer === 'object' && !Array.isArray(answer)));
+    normalized.diagnostic.runs = normalized.diagnostic.runs.filter(run => run && typeof run === 'object' && !Array.isArray(run)).slice(0, 20);
+    if (normalized.diagnostic.active) {
+      normalized.diagnostic.active.questions = Array.isArray(normalized.diagnostic.active.questions) ? normalized.diagnostic.active.questions : [];
+      normalized.diagnostic.active.answers = Array.isArray(normalized.diagnostic.active.answers) ? normalized.diagnostic.active.answers : [];
+      normalized.diagnostic.active.current = Math.max(0, Number(normalized.diagnostic.active.current) || 0);
+    }
     const today = todayKey();
     const savedReviewPlan = normalized.reviewPlan && typeof normalized.reviewPlan === 'object' ? normalized.reviewPlan : {};
     const savedChoices = savedReviewPlan.choices && typeof savedReviewPlan.choices === 'object' ? savedReviewPlan.choices : {};
@@ -250,7 +267,7 @@
     normalized.settings.focusMode ||= false;
     normalized.settings.reviewMode ||= false;
     normalized.settings.reduceMotion ||= false;
-    normalized.version = 7;
+    normalized.version = 8;
     return normalized;
   }
   state = normalizeState(await loadPersistedState());
@@ -265,6 +282,11 @@
   let labSaveTimer = null;
   let reviewQueue = [];
   let reviewPlanFilter = 'all';
+  let learningHubView = 'overview';
+  let masteryStatusFilter = 'all';
+  let masterySearch = '';
+  let errorFilter = 'open';
+  let activeErrorId = null;
   let commandSelection = 0;
   let commandItems = [];
   let pomodoro = { remaining: 25 * 60, running: false, breakMode: false, timer: null };
@@ -399,7 +421,7 @@
       const node = walker.currentNode;
       const parent = node.parentElement;
       if (!parent || !node.nodeValue.trim()) continue;
-      if (parent.closest('pre,code,a,button,textarea,input,select,.topic-meta,.section-head,.exercise-head,.glossary-popover')) continue;
+      if (parent.closest('pre,code,a,button,textarea,input,select,.topic-meta,.section-head,.exercise-head,.glossary-popover,.retrieval-card')) continue;
       if (!parent.closest('p,li,td,th,.callout,.secret,.warn,.study-tip,.analogy')) continue;
       textNodes.push(node);
     }
@@ -534,11 +556,11 @@
 
   function calculateStreak() {
     let cursor = todayKey();
-    if (!(state.activity[cursor]?.minutes || state.activity[cursor]?.chapters || state.activity[cursor]?.quizzes || state.activity[cursor]?.reviews)) {
+    if (!(state.activity[cursor]?.minutes || state.activity[cursor]?.chapters || state.activity[cursor]?.quizzes || state.activity[cursor]?.reviews || state.activity[cursor]?.retrievals || state.activity[cursor]?.diagnostics)) {
       cursor = addDays(cursor, -1);
     }
     let streak = 0;
-    while (state.activity[cursor]?.minutes || state.activity[cursor]?.chapters || state.activity[cursor]?.quizzes || state.activity[cursor]?.reviews) {
+    while (state.activity[cursor]?.minutes || state.activity[cursor]?.chapters || state.activity[cursor]?.quizzes || state.activity[cursor]?.reviews || state.activity[cursor]?.retrievals || state.activity[cursor]?.diagnostics) {
       streak++;
       cursor = addDays(cursor, -1);
     }
@@ -611,6 +633,7 @@
       input.nextElementSibling?.classList.toggle('done', input.checked);
     });
     normalizeLegacyChapterReferences();
+    injectRetrievalPrompt();
     restoreQuizzes();
     highlightContextualTerms();
     updateReadingProgress();
@@ -716,6 +739,7 @@
       setTimeout(() => $('#note-editor').focus(), 50);
     }
     if (tab === 'review') updateReviewPanel();
+    if (tab === 'learning') renderLearningPanel();
     if (tab === 'lab') {
       loadLabDraft();
       setTimeout(() => $('#lab-editor').focus(), 50);
@@ -764,7 +788,7 @@
     activityGrid.replaceChildren();
     for (let offset = 55; offset >= 0; offset--) {
       const key = addDays(todayKey(), -offset);
-      const amount = (state.activity[key]?.minutes || 0) + (state.activity[key]?.chapters || 0) * 10 + (state.activity[key]?.reviews || 0) * 5;
+      const amount = (state.activity[key]?.minutes || 0) + (state.activity[key]?.chapters || 0) * 10 + (state.activity[key]?.reviews || 0) * 5 + (state.activity[key]?.retrievals || 0) * 2 + (state.activity[key]?.diagnostics || 0) * 2;
       const day = document.createElement('span');
       day.className = 'activity-day' + (amount >= 45 ? ' l3' : amount >= 20 ? ' l2' : amount > 0 ? ' l1' : '');
       day.title = `${key}: ${state.activity[key]?.minutes || 0} min`;
@@ -785,6 +809,7 @@
         ? `${selectedCount} ${selectedCount === 1 ? 'revisão escolhida' : 'revisões escolhidas'} para hoje${deferredCount ? ` · ${deferredCount} ${deferredCount === 1 ? 'adiada' : 'adiadas'} somente neste dia` : ''}.`
         : `Você adiou ${deferredCount === 1 ? 'a revisão pendente' : `as ${deferredCount} revisões pendentes`} somente por hoje.`
       : futureDates.length ? `Fila em dia. Próxima revisão em ${formatDate(futureDates[0])}.` : 'Conclua um capítulo para iniciar sua memória de longo prazo.';
+    updateLearningDashboard();
   }
 
   function formatDate(dateKey) {
@@ -885,9 +910,41 @@
     return shuffleReviewOptions([{ text: correctText, correct: true }, ...alternatives], seed);
   }
 
-  function buildReviewQuestion(chapter) {
+  function chapterConcepts(chapter) {
+    if (!chapter) return [];
+    const concepts = glossaryTerms.filter(entry => entry.chapter === chapter.id);
+    return concepts.length ? concepts : [{
+      key: `chapter:${chapter.id}`,
+      term: chapter.title,
+      definition: `Conhecimentos centrais do capítulo “${chapter.title}”.`,
+      chapter: chapter.id,
+      aliases: []
+    }];
+  }
+
+  function finalizeLearningQuestion(chapter, question, concept, source) {
+    return {
+      ...question,
+      id: `${chapter.id}:${reviewHash(`${source}:${question.prompt}`)}`,
+      chapterId: chapter.id,
+      conceptKey: concept.key,
+      conceptTerm: concept.term,
+      source
+    };
+  }
+
+  function conceptForQuestion(chapter, text, fallbackIndex = 0) {
+    const concepts = chapterConcepts(chapter);
+    if (!concepts.length) return null;
+    const haystack = normalizeSearchText(text);
+    return concepts.find(concept => [concept.term, ...(concept.aliases || [])]
+      .some(label => normalizeSearchText(label).length >= 3 && haystack.includes(normalizeSearchText(label))))
+      || concepts[fallbackIndex % concepts.length];
+  }
+
+  function buildReviewQuestion(chapter, roundOverride) {
     const item = state.review[chapter.id] || { reviews: 0 };
-    const round = Number(item.reviews) || 0;
+    const round = Number.isFinite(roundOverride) ? roundOverride : (Number(item.reviews) || 0);
     const seed = `${chapter.id}:${round}`;
     const template = document.getElementById('template-' + chapter.id);
     const quizzes = template ? [...template.content.querySelectorAll('.quiz')].map(quiz => {
@@ -903,12 +960,11 @@
       const source = quizzes[round % quizzes.length];
       const options = shuffleReviewOptions(source.options, seed);
       const correct = options.find(option => option.correct);
-      return {
-        source: 'checkpoint do capítulo',
+      return finalizeLearningQuestion(chapter, {
         prompt: source.prompt,
         options,
         explanation: `Resposta correta: ${correct.text}`
-      };
+      }, conceptForQuestion(chapter, `${source.prompt} ${source.options.map(option => option.text).join(' ')}`, round), 'checkpoint do capítulo');
     }
 
     const concepts = glossaryTerms.filter(entry => entry.chapter === chapter.id);
@@ -917,12 +973,11 @@
       const distractors = glossaryTerms
         .filter(entry => entry.key !== concept.key)
         .map(entry => entry.definition);
-      return {
-        source: 'conceito do glossário',
+      return finalizeLearningQuestion(chapter, {
         prompt: `Qual alternativa define corretamente “${concept.term}”?`,
         options: buildReviewOptions(concept.definition, distractors, seed),
         explanation: `${concept.term}: ${concept.definition}`
-      };
+      }, concept, 'conceito do glossário');
     }
 
     const headings = reviewHeadings(chapter);
@@ -931,23 +986,172 @@
       const distractors = chapters
         .filter(candidate => candidate.id !== chapter.id)
         .flatMap(candidate => reviewHeadings(candidate).slice(0, 2));
-      return {
-        source: 'estrutura do capítulo',
+      const concept = chapterConcepts(chapter)[0];
+      return finalizeLearningQuestion(chapter, {
         prompt: `Qual tópico é desenvolvido diretamente em “${chapter.title}”?`,
         options: buildReviewOptions(correctHeading, distractors, seed),
         explanation: `“${correctHeading}” é uma seção deste capítulo.`
-      };
+      }, concept, 'estrutura do capítulo');
     }
 
     const distractors = chapters
       .filter(candidate => candidate.phaseId !== chapter.phaseId)
       .map(candidate => candidate.title);
-    return {
-      source: 'mapa da trilha',
+    const concept = chapterConcepts(chapter)[0];
+    return finalizeLearningQuestion(chapter, {
       prompt: `Qual capítulo pertence à fase “${chapter.phaseTitle}”?`,
       options: buildReviewOptions(chapter.title, distractors, seed),
       explanation: `“${chapter.title}” pertence à fase “${chapter.phaseTitle}”.`
+    }, concept, 'mapa da trilha');
+  }
+
+  function masteryCatalog() {
+    const entries = [...glossaryTerms];
+    const linkedChapters = new Set(entries.map(entry => entry.chapter));
+    chapters.filter(chapter => !linkedChapters.has(chapter.id)).forEach(chapter => entries.push(chapterConcepts(chapter)[0]));
+    return entries;
+  }
+
+  function masteryRecord(conceptKey) {
+    const saved = state.mastery[conceptKey];
+    return saved && typeof saved === 'object' && !Array.isArray(saved)
+      ? saved
+      : { score: 0, attempts: 0, correct: 0, streak: 0, needsReview: false, sources: {} };
+  }
+
+  function unresolvedErrorsForConcept(conceptKey) {
+    return Object.values(state.errors).filter(error => error.conceptKey === conceptKey && !error.resolved);
+  }
+
+  function masteryStatus(conceptKey) {
+    const record = masteryRecord(conceptKey);
+    if (!record.attempts) return { id: 'not-started', label: 'Não estudado' };
+    if (record.needsReview || unresolvedErrorsForConcept(conceptKey).length) return { id: 'review', label: 'Precisa revisar' };
+    if (record.score < 45) return { id: 'learning', label: 'Em aprendizado' };
+    if (record.score < 80) return { id: 'understood', label: 'Compreendido' };
+    return { id: 'consolidated', label: 'Consolidado' };
+  }
+
+  function recordLearningEvidence({ chapter, question, selectedIndex, source }) {
+    if (!chapter || !question || !Array.isArray(question.options)) return null;
+    const selected = question.options[selectedIndex];
+    const correctIndex = question.options.findIndex(option => option.correct);
+    if (!selected || correctIndex < 0) return null;
+    const correct = selectedIndex === correctIndex;
+    const weights = {
+      retrieval: { correct: 8, wrong: 0 },
+      diagnostic: { correct: 16, wrong: -6 },
+      quiz: { correct: 14, wrong: -10 },
+      review: { correct: 20, wrong: -16 },
+      error: { correct: 24, wrong: -8 }
     };
+    const weight = weights[source] || weights.quiz;
+    const record = masteryRecord(question.conceptKey);
+    record.score = Math.max(0, Math.min(100, (Number(record.score) || 0) + (correct ? weight.correct : weight.wrong)));
+    record.attempts = (Number(record.attempts) || 0) + 1;
+    record.correct = (Number(record.correct) || 0) + (correct ? 1 : 0);
+    record.streak = correct ? (Number(record.streak) || 0) + 1 : 0;
+    record.needsReview = correct ? false : source !== 'retrieval';
+    record.lastSeen = new Date().toISOString();
+    record.lastSource = source;
+    record.sources ||= {};
+    record.sources[source] = (Number(record.sources[source]) || 0) + 1;
+    state.mastery[question.conceptKey] = record;
+
+    const errorId = `${chapter.id}:${question.id}`;
+    if (!correct) {
+      const previous = state.errors[errorId] || {};
+      state.errors[errorId] = {
+        ...previous,
+        id: errorId,
+        questionId: question.id,
+        chapterId: chapter.id,
+        conceptKey: question.conceptKey,
+        conceptTerm: question.conceptTerm,
+        prompt: question.prompt,
+        options: question.options.map(option => option.text),
+        correctIndex,
+        selectedIndex,
+        explanation: question.explanation,
+        source,
+        attempts: (Number(previous.attempts) || 0) + 1,
+        resolved: false,
+        createdAt: previous.createdAt || new Date().toISOString(),
+        lastWrongAt: new Date().toISOString()
+      };
+    } else {
+      Object.values(state.errors).forEach(error => {
+        const sameQuestion = error.id === errorId
+          || (error.chapterId === chapter.id
+            && error.conceptKey === question.conceptKey
+            && normalizeSearchText(error.prompt) === normalizeSearchText(question.prompt));
+        if (!sameQuestion || error.resolved) return;
+        error.resolved = true;
+        error.resolvedAt = new Date().toISOString();
+      });
+    }
+    return { correct, correctIndex, selected, record, errorId };
+  }
+
+  function buildRetrievalQuestion(chapter) {
+    const linkedConcepts = glossaryTerms.filter(entry => entry.chapter === chapter.id);
+    if (!linkedConcepts.length) return buildReviewQuestion(chapter, 0);
+    const concept = linkedConcepts[0];
+    const phaseDistractors = glossaryTerms.filter(entry => entry.key !== concept.key && byId.get(entry.chapter)?.phaseId === chapter.phaseId);
+    const otherDistractors = glossaryTerms.filter(entry => entry.key !== concept.key && byId.get(entry.chapter)?.phaseId !== chapter.phaseId);
+    const distractors = (phaseDistractors.length >= 3 ? phaseDistractors : [...phaseDistractors, ...otherDistractors]).map(entry => entry.definition);
+    return finalizeLearningQuestion(chapter, {
+      prompt: `Antes de ler: qual alternativa melhor descreve “${concept.term}”?`,
+      options: buildReviewOptions(concept.definition, distractors, `${chapter.id}:retrieval`),
+      explanation: `${concept.term}: ${concept.definition}`
+    }, concept, 'recuperação inicial');
+  }
+
+  function injectRetrievalPrompt() {
+    if (mount.querySelector('.retrieval-card')) return;
+    const chapter = byId.get(activeId);
+    if (!chapter) return;
+    const question = buildRetrievalQuestion(chapter);
+    const answer = state.retrieval[chapter.id];
+    const answered = answer?.questionId === question.id;
+    const correctIndex = question.options.findIndex(option => option.correct);
+    const card = document.createElement('section');
+    card.className = `retrieval-card${answered ? ' answered' : ''}`;
+    card.setAttribute('aria-labelledby', 'retrieval-title');
+    card.innerHTML = `<div class="retrieval-head"><div><span class="concept-level">recuperação antes da explicação</span><h3 id="retrieval-title">Tente responder antes de continuar</h3></div><span class="retrieval-purpose">Não vale nota</span></div>
+      <p>Primeiro tente recuperar ou prever. Errar aqui é útil: a tentativa prepara sua atenção para a explicação do capítulo.</p>
+      <p class="retrieval-question">${escapeHtml(question.prompt)}</p>
+      <div class="retrieval-options" role="group" aria-label="Alternativas da pergunta inicial">
+        ${question.options.map((option, index) => {
+          const stateClass = answered ? index === correctIndex ? ' correct' : index === answer.selectedIndex ? ' wrong' : '' : '';
+          return `<button class="review-option${stateClass}" type="button" data-retrieval-option="${index}" ${answered ? 'disabled' : ''}><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option.text)}</button>`;
+        }).join('')}
+      </div>
+      <div class="retrieval-feedback${answered ? ` visible ${answer.correct ? ' correct' : ' wrong'}` : ''}" role="status" aria-live="polite">${answered ? `<strong>${answer.correct ? '✓ Sua previsão estava correta' : 'Agora você já sabe o que procurar na explicação'}</strong><p>${escapeHtml(question.explanation)}</p>` : ''}</div>
+      ${answered ? '<button class="ghost-btn retrieval-continue" type="button" data-retrieval-continue>Continuar a leitura ↓</button>' : ''}`;
+    const anchor = mount.querySelector('.topic-meta') || mount.querySelector('.section-head');
+    if (anchor) anchor.insertAdjacentElement('afterend', card);
+    else mount.prepend(card);
+  }
+
+  function answerRetrieval(optionIndex) {
+    const chapter = byId.get(activeId);
+    if (!chapter || state.retrieval[chapter.id]?.questionId === buildRetrievalQuestion(chapter).id) return;
+    const question = buildRetrievalQuestion(chapter);
+    const result = recordLearningEvidence({ chapter, question, selectedIndex: optionIndex, source: 'retrieval' });
+    if (!result) return;
+    state.retrieval[chapter.id] = {
+      questionId: question.id,
+      conceptKey: question.conceptKey,
+      selectedIndex: optionIndex,
+      correct: result.correct,
+      answeredAt: new Date().toISOString()
+    };
+    recordActivity('retrievals');
+    mount.querySelector('.retrieval-card')?.remove();
+    injectRetrievalPrompt();
+    updateLearningDashboard();
+    mount.querySelector('[data-retrieval-continue]')?.focus({ preventScroll: true });
   }
 
   function updateReviewPanel() {
@@ -1055,6 +1259,7 @@
     item.reviewedAt = new Date().toISOString();
     item.due = addDays(todayKey(), interval);
     state.review[chapter.id] = item;
+    recordLearningEvidence({ chapter, question, selectedIndex: optionIndex, source: 'review' });
     delete state.reviewPlan.choices[chapter.id];
     recordActivity('reviews');
     card.dataset.answered = 'true';
@@ -1073,7 +1278,300 @@
     updateDashboard();
   }
 
-   const snippets = {
+  function uniqueMasteryCatalog() {
+    return [...new Map(masteryCatalog().map(concept => [concept.key, concept])).values()];
+  }
+
+  function learningStats() {
+    const catalog = uniqueMasteryCatalog();
+    const statuses = catalog.map(concept => masteryStatus(concept.key));
+    const unresolved = Object.values(state.errors).filter(error => !error.resolved).length;
+    return {
+      total: catalog.length,
+      studied: statuses.filter(status => status.id !== 'not-started').length,
+      understood: statuses.filter(status => status.id === 'understood' || status.id === 'consolidated').length,
+      consolidated: statuses.filter(status => status.id === 'consolidated').length,
+      review: statuses.filter(status => status.id === 'review').length,
+      unresolved
+    };
+  }
+
+  function updateLearningDashboard() {
+    const stats = learningStats();
+    const copy = $('#learning-dashboard-copy');
+    if (copy) copy.textContent = stats.studied
+      ? `${stats.understood} conceitos compreendidos ou consolidados · ${stats.unresolved} ${stats.unresolved === 1 ? 'erro pendente' : 'erros pendentes'}.`
+      : 'Responda recuperações, quizzes ou um diagnóstico para construir seu mapa de domínio.';
+    if ($('#learning-summary')) $('#learning-summary').textContent = `${stats.understood}/${stats.total} dominados · ${stats.unresolved} erros`;
+  }
+
+  function renderLearningPanel() {
+    if (!$('#learning-stage')) return;
+    $$('.learning-tabs [data-learning-view]').forEach(button => {
+      const active = button.dataset.learningView === learningHubView;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', String(active));
+    });
+    updateLearningDashboard();
+    if (learningHubView === 'errors') renderErrorNotebook();
+    else if (learningHubView === 'diagnostic') renderDiagnostic();
+    else if (learningHubView === 'projects') renderProjectReadiness();
+    else renderMasteryOverview();
+  }
+
+  function renderMasteryOverview() {
+    const stats = learningStats();
+    const catalog = uniqueMasteryCatalog();
+    const filtered = catalog.filter(concept => {
+      const status = masteryStatus(concept.key);
+      const chapter = byId.get(concept.chapter);
+      const matchesStatus = masteryStatusFilter === 'all' || status.id === masteryStatusFilter;
+      const matchesSearch = !masterySearch || normalizeSearchText(`${concept.term} ${concept.definition} ${chapter?.title || ''}`).includes(normalizeSearchText(masterySearch));
+      return matchesStatus && matchesSearch;
+    });
+    const cards = filtered.map(concept => {
+      const record = masteryRecord(concept.key);
+      const status = masteryStatus(concept.key);
+      const chapter = byId.get(concept.chapter);
+      const attempts = Math.max(0, Number(record.attempts) || 0);
+      const score = Math.max(0, Math.min(100, Number(record.score) || 0));
+      const accuracy = attempts ? Math.max(0, Math.min(100, Math.round((Number(record.correct) || 0) / attempts * 100))) : 0;
+      return `<article class="mastery-concept ${status.id}">
+        <div class="mastery-concept-head"><div><span class="mastery-status ${status.id}">${status.label}</span><h4>${escapeHtml(concept.term)}</h4></div><b>${Math.round(score)}%</b></div>
+        <p>${escapeHtml(concept.definition)}</p>
+        <div class="mastery-track"><i style="width:${Math.round(score)}%"></i></div>
+        <footer><span>${attempts ? `${attempts} evidências · ${accuracy}% de acerto` : 'Sem evidência ainda'}</span><button type="button" data-learning-chapter="${concept.chapter}">${chapter ? `Cap. ${chapter.index + 1}` : 'Abrir'}</button></footer>
+      </article>`;
+    }).join('');
+    $('#learning-stage').innerHTML = `<section class="learning-stat-grid">
+      <article><b>${stats.studied}</b><span>conceitos praticados</span></article>
+      <article><b>${stats.understood}</b><span>compreendidos</span></article>
+      <article><b>${stats.consolidated}</b><span>consolidados</span></article>
+      <article class="needs-review"><b>${stats.review}</b><span>precisam de revisão</span></article>
+    </section>
+    <div class="mastery-toolbar"><input class="study-input" id="mastery-search" type="search" value="${escapeHtml(masterySearch)}" placeholder="Buscar conceito ou capítulo…"><select class="study-select" id="mastery-status-filter"><option value="all">Todos os estados</option><option value="not-started">Não estudado</option><option value="learning">Em aprendizado</option><option value="understood">Compreendido</option><option value="consolidated">Consolidado</option><option value="review">Precisa revisar</option></select></div>
+    <p class="learning-explanation">O domínio usa evidências de diagnóstico, recuperação inicial, quizzes, revisões e correções do caderno de erros. Abrir ou concluir uma página, sozinho, não prova aprendizagem.</p>
+    <div class="mastery-list">${cards || '<div class="review-empty">Nenhum conceito corresponde aos filtros.</div>'}</div>`;
+    $('#mastery-status-filter').value = masteryStatusFilter;
+  }
+
+  function renderErrorNotebook() {
+    const errors = Object.values(state.errors)
+      .filter(error => errorFilter === 'all' || (errorFilter === 'resolved' ? error.resolved : !error.resolved))
+      .sort((left, right) => String(right.lastWrongAt || right.createdAt).localeCompare(String(left.lastWrongAt || left.createdAt)));
+    const openCount = Object.values(state.errors).filter(error => !error.resolved).length;
+    const resolvedCount = Object.values(state.errors).filter(error => error.resolved).length;
+    const practiceCandidate = activeErrorId ? state.errors[activeErrorId] : null;
+    const practice = practiceCandidate && Array.isArray(practiceCandidate.options) && Number.isInteger(practiceCandidate.correctIndex)
+      ? practiceCandidate
+      : null;
+    const showPracticeResult = Boolean(practice?.lastPracticeAt || practice?.resolved);
+    const shownSelection = practice?.lastPracticeSelected ?? practice?.selectedIndex;
+    const previousAnswer = practice && Number.isInteger(practice.selectedIndex) ? practice.options[practice.selectedIndex] : '';
+    const practiceHtml = practice ? `<article class="error-practice ${practice.resolved ? 'resolved' : ''}" data-error-practice-card="${escapeHtml(practice.id)}">
+      <span class="hub-kicker">Correção ativa · ${escapeHtml(practice.conceptTerm)}</span><h3>${escapeHtml(practice.prompt)}</h3>
+      ${previousAnswer ? `<p class="error-answer-context">Resposta que gerou a pendência: <strong>${escapeHtml(previousAnswer)}</strong>${practice.source ? ` · ${escapeHtml(practice.source)}` : ''}</p>` : ''}
+      <div class="review-options">${practice.options.map((option, index) => `<button class="review-option ${showPracticeResult ? index === practice.correctIndex ? 'correct' : index === shownSelection && !practice.lastPracticeCorrect ? 'wrong' : '' : ''}" type="button" data-error-option="${index}" ${showPracticeResult ? 'disabled' : ''}><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option)}</button>`).join('')}</div>
+      ${showPracticeResult ? `<div class="review-feedback visible ${practice.resolved ? 'correct' : 'wrong'}"><strong>${practice.resolved ? '✓ Erro corrigido' : '✗ Ainda precisa de revisão'}</strong><p>${escapeHtml(practice.explanation || 'Consulte o capítulo relacionado e tente explicar por que a alternativa destacada está correta.')}</p></div>` : ''}
+      <div class="review-card-actions"><button class="ghost-btn" type="button" data-learning-chapter="${escapeHtml(practice.chapterId)}">Consultar capítulo</button><button class="ghost-btn" type="button" data-error-close>Fechar prática</button></div>
+    </article>` : '';
+    const list = errors.map(error => {
+      const chapter = byId.get(error.chapterId);
+      const attempts = Math.max(1, Number(error.attempts) || 1);
+      return `<article class="error-item ${error.resolved ? 'resolved' : ''}"><div><span class="mastery-status ${error.resolved ? 'consolidated' : 'review'}">${error.resolved ? 'Corrigido' : 'Pendente'}</span><h4>${escapeHtml(error.conceptTerm)}</h4><p>${escapeHtml(error.prompt)}</p><small>${chapter ? `${String(chapter.index + 1).padStart(3, '0')} · ${escapeHtml(chapter.title)}` : ''} · ${attempts} ${attempts === 1 ? 'erro' : 'erros'}</small></div><button class="ghost-btn" type="button" data-error-practice="${escapeHtml(error.id)}">${error.resolved ? 'Ver correção' : 'Corrigir agora'}</button></article>`;
+    }).join('');
+    $('#learning-stage').innerHTML = `${practiceHtml}<div class="error-notebook-head"><div><h3>Caderno automático de erros</h3><p>Uma resposta errada em qualquer atividade entra aqui com contexto, alternativa escolhida e explicação.</p></div><div class="learning-filter-group"><button type="button" data-error-filter="open">Pendentes ${openCount}</button><button type="button" data-error-filter="resolved">Corrigidos ${resolvedCount}</button><button type="button" data-error-filter="all">Todos</button></div></div><div class="error-list">${list || '<div class="review-empty">Nenhum erro nesta visualização.</div>'}</div>`;
+    $$('[data-error-filter]').forEach(button => button.classList.toggle('active', button.dataset.errorFilter === errorFilter));
+  }
+
+  function answerErrorPractice(optionIndex) {
+    const error = state.errors[activeErrorId];
+    const chapter = error ? byId.get(error.chapterId) : null;
+    if (!error || !chapter || error.lastPracticeAt || !Array.isArray(error.options) || !Number.isInteger(error.correctIndex)) return;
+    const options = error.options.map((text, index) => ({ text, correct: index === error.correctIndex }));
+    const question = { id: error.questionId, chapterId: chapter.id, conceptKey: error.conceptKey, conceptTerm: error.conceptTerm, prompt: error.prompt, options, explanation: error.explanation, source: 'caderno de erros' };
+    const result = recordLearningEvidence({ chapter, question, selectedIndex: optionIndex, source: 'error' });
+    const updated = state.errors[activeErrorId];
+    updated.practiceAttempts = (Number(updated.practiceAttempts) || 0) + 1;
+    updated.lastPracticeAt = new Date().toISOString();
+    updated.lastPracticeSelected = optionIndex;
+    updated.lastPracticeCorrect = result.correct;
+    if (result.correct) { updated.resolved = true; updated.resolvedAt = new Date().toISOString(); }
+    recordActivity('reviews');
+    renderLearningPanel();
+    updateDashboard();
+  }
+
+  function phaseOptionsHtml(selectedScope) {
+    const phases = [...new Map(chapters.map(chapter => [chapter.phaseId, chapter.phaseTitle])).entries()];
+    return `<option value="all" ${selectedScope === 'all' ? 'selected' : ''}>Curso completo · até 20 questões</option>${phases.map(([id, title]) => `<option value="${id}" ${selectedScope === id ? 'selected' : ''}>${escapeHtml(title)}</option>`).join('')}`;
+  }
+
+  function pickEvenly(items, limit) {
+    if (items.length <= limit) return [...items];
+    return Array.from({ length: limit }, (_, index) => items[Math.floor(index * items.length / limit)]);
+  }
+
+  function startDiagnostic(scope) {
+    let selectedChapters;
+    if (scope === 'all') {
+      const byPhase = new Map();
+      chapters.forEach(chapter => {
+        if (!byPhase.has(chapter.phaseId)) byPhase.set(chapter.phaseId, []);
+        byPhase.get(chapter.phaseId).push(chapter);
+      });
+      selectedChapters = pickEvenly([...byPhase.values()], 20).map(group => group[Math.floor(group.length / 2)]);
+    } else {
+      selectedChapters = pickEvenly(chapters.filter(chapter => chapter.phaseId === scope), 10);
+    }
+    if (!selectedChapters.length) {
+      toast('Não há capítulos disponíveis para este diagnóstico.');
+      return;
+    }
+    const runNumber = state.diagnostic.runs.length;
+    state.diagnostic.active = {
+      id: `diagnostic:${Date.now()}`,
+      scope,
+      current: 0,
+      questions: selectedChapters.map((chapter, index) => buildReviewQuestion(chapter, runNumber + index + 1)),
+      answers: [],
+      feedback: null,
+      startedAt: new Date().toISOString()
+    };
+    save();
+    renderDiagnostic();
+  }
+
+  function answerDiagnostic(optionIndex) {
+    const run = state.diagnostic.active;
+    if (!run || run.feedback) return;
+    const question = run.questions[run.current];
+    const chapter = question ? byId.get(question.chapterId) : null;
+    if (!chapter || !Array.isArray(question.options)) return;
+    const result = recordLearningEvidence({ chapter, question, selectedIndex: optionIndex, source: 'diagnostic' });
+    if (!result) return;
+    const answer = { chapterId: chapter.id, conceptKey: question.conceptKey, conceptTerm: question.conceptTerm, prompt: question.prompt, selectedIndex: optionIndex, correct: result.correct, correctIndex: result.correctIndex };
+    run.answers.push(answer);
+    run.feedback = answer;
+    recordActivity('diagnostics');
+    renderDiagnostic();
+    updateDashboard();
+  }
+
+  function advanceDiagnostic() {
+    const run = state.diagnostic.active;
+    if (!run?.feedback) return;
+    if (run.current < run.questions.length - 1) {
+      run.current += 1;
+      run.feedback = null;
+      save();
+      renderDiagnostic();
+      return;
+    }
+    const correct = run.answers.filter(answer => answer.correct).length;
+    const weakAnswers = run.answers.filter(answer => !answer.correct);
+    const suggested = weakAnswers.map(answer => byId.get(answer.chapterId)).find(Boolean)
+      || chapters.find(chapter => run.scope === 'all' || chapter.phaseId === run.scope);
+    state.diagnostic.runs.unshift({
+      id: run.id,
+      scope: run.scope,
+      total: run.answers.length,
+      correct,
+      accuracy: Math.round(correct / Math.max(1, run.answers.length) * 100),
+      weakConcepts: [...new Set(weakAnswers.map(answer => answer.conceptKey))],
+      weakConceptTerms: [...new Set(weakAnswers.map(answer => answer.conceptTerm))],
+      strongConceptTerms: [...new Set(run.answers.filter(answer => answer.correct).map(answer => answer.conceptTerm))],
+      weakChapters: [...new Set(weakAnswers.map(answer => answer.chapterId))],
+      strongChapters: [...new Set(run.answers.filter(answer => answer.correct).map(answer => answer.chapterId))],
+      suggestedChapter: suggested?.id,
+      completedAt: new Date().toISOString()
+    });
+    state.diagnostic.runs = state.diagnostic.runs.slice(0, 20);
+    state.diagnostic.active = null;
+    save();
+    renderDiagnostic();
+    updateDashboard();
+  }
+
+  function renderDiagnostic() {
+    const run = state.diagnostic.active;
+    if (run) {
+      const question = Array.isArray(run.questions) ? run.questions[Number(run.current) || 0] : null;
+      if (!question || !Array.isArray(question.options) || !question.options.some(option => option.correct)) {
+        state.diagnostic.active = null;
+        save();
+        toast('O diagnóstico incompleto era incompatível e foi descartado. Seu histórico foi preservado.');
+        renderDiagnostic();
+        return;
+      }
+      const feedback = run.feedback;
+      const correctIndex = question.options.findIndex(option => option.correct);
+      $('#learning-stage').innerHTML = `<article class="diagnostic-active"><div class="diagnostic-progress"><span>Questão ${run.current + 1} de ${run.questions.length}</span><div><i style="width:${(run.current + (feedback ? 1 : 0)) / run.questions.length * 100}%"></i></div></div><span class="hub-kicker">${escapeHtml(byId.get(question.chapterId)?.phaseTitle || '')} · ${escapeHtml(question.conceptTerm)}</span><h3>${escapeHtml(question.prompt)}</h3><div class="review-options">${question.options.map((option, index) => `<button class="review-option ${feedback ? index === correctIndex ? 'correct' : index === feedback.selectedIndex && !feedback.correct ? 'wrong' : '' : ''}" type="button" data-diagnostic-option="${index}" ${feedback ? 'disabled' : ''}><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option.text)}</button>`).join('')}</div>${feedback ? `<div class="review-feedback visible ${feedback.correct ? 'correct' : 'wrong'}"><strong>${feedback.correct ? '✓ Correto' : '✗ Incorreto'}</strong><p>${escapeHtml(question.explanation)}</p></div><button class="primary-btn diagnostic-next" type="button" data-diagnostic-next>${run.current === run.questions.length - 1 ? 'Ver resultado' : 'Próxima questão'}</button>` : ''}<button class="diagnostic-cancel" type="button" data-diagnostic-cancel>Encerrar sem concluir</button></article>`;
+      return;
+    }
+    const last = state.diagnostic.runs[0];
+    const suggested = last?.suggestedChapter ? byId.get(last.suggestedChapter) : null;
+    const validScopes = new Set(['all', ...chapters.map(chapter => chapter.phaseId)]);
+    const selectedScope = validScopes.has(last?.scope) ? last.scope : 'all';
+    const strongTerms = Array.isArray(last?.strongConceptTerms) ? last.strongConceptTerms : [];
+    const weakTerms = Array.isArray(last?.weakConceptTerms) ? last.weakConceptTerms : [];
+    const accuracy = Math.max(0, Math.min(100, Number(last?.accuracy) || 0));
+    const total = Math.max(0, Number(last?.total) || 0);
+    const correct = Math.max(0, Math.min(total, Number(last?.correct) || 0));
+    const phaseNames = new Map(chapters.map(chapter => [chapter.phaseId, chapter.phaseTitle]));
+    const history = state.diagnostic.runs.slice(1).map(entry => {
+      const entryTotal = Math.max(0, Number(entry.total) || 0);
+      const entryCorrect = Math.max(0, Math.min(entryTotal, Number(entry.correct) || 0));
+      const entryAccuracy = Math.max(0, Math.min(100, Number(entry.accuracy) || 0));
+      const entryWeak = Array.isArray(entry.weakConceptTerms) ? entry.weakConceptTerms.length : 0;
+      const timestamp = new Date(entry.completedAt);
+      const dateLabel = Number.isNaN(timestamp.getTime()) ? 'Data indisponível' : timestamp.toLocaleDateString('pt-BR');
+      const scopeLabel = entry.scope === 'all' ? 'Curso completo' : phaseNames.get(entry.scope) || 'Fase removida';
+      return `<article><div><strong>${escapeHtml(scopeLabel)}</strong><small>${escapeHtml(dateLabel)} · ${entryWeak} ${entryWeak === 1 ? 'lacuna' : 'lacunas'}</small></div><span>${entryCorrect}/${entryTotal} · ${entryAccuracy}%</span></article>`;
+    }).join('');
+    $('#learning-stage').innerHTML = `<section class="diagnostic-intro"><div><span class="hub-kicker">Ponto de partida</span><h3>Descubra o que já domina e onde começar</h3><p>O diagnóstico não conclui capítulos automaticamente. Ele coleta evidências, identifica lacunas e recomenda um ponto de entrada sem esconder o restante da trilha.</p></div><div class="diagnostic-start"><label class="form-label" for="diagnostic-scope">Escopo</label><select class="study-select" id="diagnostic-scope">${phaseOptionsHtml(selectedScope)}</select><button class="primary-btn" type="button" data-diagnostic-start>Iniciar diagnóstico</button></div></section>${last ? `<article class="diagnostic-result"><div class="diagnostic-score"><b>${accuracy}%</b><span>${correct} de ${total} respostas corretas</span></div><div><span class="mastery-status ${accuracy >= 80 ? 'consolidated' : accuracy >= 50 ? 'understood' : 'review'}">${accuracy >= 80 ? 'Base forte' : accuracy >= 50 ? 'Base parcial' : 'Fundamentos frágeis'}</span><h3>Último resultado</h3><p>${weakTerms.length ? `${weakTerms.length} conceitos entraram no mapa como pontos de atenção.` : 'Nenhuma lacuna foi detectada nesta amostra.'}</p>${suggested ? `<button class="ghost-btn" type="button" data-learning-chapter="${suggested.id}">Começar por ${escapeHtml(suggested.title)}</button>` : ''}</div><div class="diagnostic-breakdown"><section><h4>Base demonstrada</h4><div>${strongTerms.length ? strongTerms.map(term => `<span>${escapeHtml(term)}</span>`).join('') : '<small>Ainda sem acertos suficientes nesta amostra.</small>'}</div></section><section><h4>Revisar primeiro</h4><div>${weakTerms.length ? weakTerms.map(term => `<span>${escapeHtml(term)}</span>`).join('') : '<small>Nenhum ponto fraco detectado.</small>'}</div></section></div></article>` : ''}${history ? `<section class="diagnostic-history"><h3>Resultados anteriores</h3>${history}</section>` : ''}`;
+  }
+
+  function projectChapters() {
+    return chapters.filter(chapter => chapter.id.startsWith('mini-') || ['projeto', 'projetospring', 'projeto-integrador'].includes(chapter.id));
+  }
+
+  function projectPrerequisites(project) {
+    const template = document.getElementById('template-' + project.id);
+    const explicit = template ? [...template.content.querySelectorAll('.prereq-tag[href^="#"]')].map(link => link.getAttribute('href').slice(1)).filter(id => byId.has(id)) : [];
+    if (explicit.length) return [...new Set(explicit)];
+    return chapters.slice(Math.max(0, project.index - 4), project.index).filter(chapter => !projectChapters().some(item => item.id === chapter.id)).slice(-3).map(chapter => chapter.id);
+  }
+
+  function chapterEvidenceScore(chapterId) {
+    const concepts = chapterConcepts(byId.get(chapterId));
+    if (!concepts.length) return 0;
+    return Math.round(concepts.reduce((total, concept) => total + Number(masteryRecord(concept.key).score || 0), 0) / concepts.length);
+  }
+
+  function projectReadiness(project) {
+    const prerequisites = projectPrerequisites(project).map(id => {
+      const chapter = byId.get(id);
+      const completed = Boolean(state.completed[id]);
+      const evidence = chapterEvidenceScore(id);
+      return { chapter, completed, evidence, score: (completed ? 65 : 0) + Math.round(evidence * .35) };
+    });
+    const score = prerequisites.length ? Math.round(prerequisites.reduce((total, item) => total + item.score, 0) / prerequisites.length) : 100;
+    return { prerequisites, score, ready: score >= 70 && prerequisites.every(item => item.completed) };
+  }
+
+  function renderProjectReadiness() {
+    const cards = projectChapters().map(project => {
+      const readiness = projectReadiness(project);
+      const status = state.completed[project.id] ? 'completed' : readiness.ready ? 'ready' : 'preparing';
+      const statusLabel = status === 'completed' ? 'Concluído' : status === 'ready' ? 'Preparado para começar' : 'Preparação pendente';
+      const requirements = readiness.prerequisites.map(item => `<button type="button" data-learning-chapter="${item.chapter.id}"><span>${item.completed ? '✓' : '○'}</span><span>${escapeHtml(item.chapter.title)}<small>${item.completed ? `concluído · evidência ${item.evidence}%` : 'capítulo ainda não concluído'}</small></span></button>`).join('');
+      return `<article class="project-readiness ${status}"><header><div><span class="mastery-status ${status === 'ready' || status === 'completed' ? 'consolidated' : 'learning'}">${statusLabel}</span><h3>${escapeHtml(project.title)}</h3><p>${escapeHtml(project.phaseTitle)}</p></div><div class="readiness-score"><b>${readiness.score}%</b><span>prontidão</span></div></header><div class="project-readiness-track"><i style="width:${readiness.score}%"></i></div><details><summary>Ver requisitos (${readiness.prerequisites.filter(item => item.completed).length}/${readiness.prerequisites.length})</summary><div class="project-requirements">${requirements || '<p>Este projeto não possui pré-requisito obrigatório.</p>'}</div></details><footer><p>${readiness.ready ? 'Você concluiu os fundamentos e já produziu evidências suficientes para tentar.' : 'Você pode abrir o projeto agora, mas os itens pendentes indicam onde a implementação provavelmente ficará difícil.'}</p><button class="primary-btn" type="button" data-learning-chapter="${project.id}">${readiness.ready ? 'Começar projeto' : 'Abrir mesmo assim'}</button></footer></article>`;
+    }).join('');
+    $('#learning-stage').innerHTML = `<div class="project-readiness-intro"><h3>Projetos recomendados pelo seu preparo</h3><p>A prontidão combina capítulos concluídos e evidências reais por conceito. Ela orienta a sequência, mas nunca bloqueia o acesso ao projeto.</p></div><div class="project-readiness-list">${cards}</div>`;
+  }
+
+  const snippets = {
     hello: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Olá, Java!");\n    }\n}`,
     variables: `public class Main {\n    public static void main(String[] args) {\n        int aulas = 7;\n        int minutos = 25;\n        int total = aulas * minutos;\n        System.out.println("Tempo total: " + total + " minutos");\n    }\n}`,
     loop: `public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i <= 5; i++) {\n            System.out.println("Iteração " + i);\n        }\n    }\n}`
@@ -1285,7 +1783,7 @@
   function exportData() {
     const backup = {
       app: 'Stack Completa Java',
-      version: 7,
+      version: 8,
       exportedAt: new Date().toISOString(),
       chapterCount: chapters.length,
       data: state
@@ -1328,6 +1826,7 @@
     { title: 'Abrir visão geral', hint: 'Central', action: () => openHub('dashboard') },
     { title: 'Criar anotação neste capítulo', hint: 'N', action: () => openHub('notes') },
     { title: 'Abrir fila de revisão', hint: 'R', action: () => openHub('review') },
+    { title: 'Abrir mapa de domínio e erros', hint: 'M', action: () => openHub('learning') },
     { title: 'Abrir Java Lab', hint: 'L', action: () => openHub('lab') },
     { title: 'Pesquisar no glossário', hint: 'G', action: () => openHub('glossary') },
     { title: 'Abrir preferências e backup', hint: 'Configurações', action: () => openHub('settings') },
@@ -1457,6 +1956,12 @@
   commandOverlay.addEventListener('click', event => { if (event.target === commandOverlay) closeCommand(); });
 
   mount.addEventListener('click', async event => {
+    const retrievalOption = event.target.closest('[data-retrieval-option]')?.dataset.retrievalOption;
+    if (retrievalOption !== undefined) { answerRetrieval(Number(retrievalOption)); return; }
+    if (event.target.closest('[data-retrieval-continue]')) {
+      event.target.closest('.retrieval-card')?.nextElementSibling?.scrollIntoView({ behavior: state.settings.reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
     const contextualTerm = event.target.closest('[data-glossary-key]');
     if (contextualTerm) { openGlossaryPopover(glossaryByKey.get(contextualTerm.dataset.glossaryKey), contextualTerm); return; }
     const internal = event.target.closest('a[href^="#"]');
@@ -1483,6 +1988,18 @@
       const feedback = quiz.querySelector('.quiz-feedback');
       if (feedback) feedback.textContent = correct ? '✓ Correto — resposta salva.' : '✗ Revise a alternativa destacada.';
       state.quizAnswers[`${activeId}:${quizIndex}`] = { selected, correct, answeredAt: new Date().toISOString() };
+      const chapter = byId.get(activeId);
+      const questionOptions = [...quiz.querySelectorAll('.quiz-opt')].map(item => ({
+        text: item.textContent.replace(/\s+/g, ' ').trim(),
+        correct: item.dataset.correct === 'true'
+      }));
+      const prompt = quiz.querySelector('.q')?.textContent.replace(/\s+/g, ' ').trim() || `Questão do capítulo “${chapter.title}”`;
+      const question = finalizeLearningQuestion(chapter, {
+        prompt,
+        options: questionOptions,
+        explanation: `Resposta correta: ${questionOptions.find(item => item.correct)?.text || ''}`
+      }, conceptForQuestion(chapter, `${prompt} ${questionOptions.map(item => item.text).join(' ')}`, quizIndex), 'quiz do capítulo');
+      recordLearningEvidence({ chapter, question, selectedIndex: selected, source: 'quiz' });
       recordActivity('quizzes');
       updateDashboard();
       return;
@@ -1573,6 +2090,57 @@
     if (checkbox) setReviewChoice(checkbox.dataset.reviewPlanToggle, checkbox.checked ? 'selected' : 'deferred');
   });
 
+  $('.learning-tabs').addEventListener('click', event => {
+    const view = event.target.closest('[data-learning-view]')?.dataset.learningView;
+    if (!view) return;
+    learningHubView = view;
+    activeErrorId = null;
+    renderLearningPanel();
+  });
+  $('#learning-stage').addEventListener('click', event => {
+    const chapterId = event.target.closest('[data-learning-chapter]')?.dataset.learningChapter;
+    if (chapterId && byId.has(chapterId)) { closeHub(); render(chapterId); return; }
+    const errorFilterValue = event.target.closest('[data-error-filter]')?.dataset.errorFilter;
+    if (errorFilterValue) { errorFilter = errorFilterValue; activeErrorId = null; renderErrorNotebook(); return; }
+    const practiceId = event.target.closest('[data-error-practice]')?.dataset.errorPractice;
+    if (practiceId && state.errors[practiceId]) {
+      activeErrorId = practiceId;
+      if (!state.errors[practiceId].resolved) {
+        delete state.errors[practiceId].lastPracticeAt;
+        delete state.errors[practiceId].lastPracticeSelected;
+        delete state.errors[practiceId].lastPracticeCorrect;
+      }
+      renderErrorNotebook();
+      return;
+    }
+    if (event.target.closest('[data-error-close]')) { activeErrorId = null; renderErrorNotebook(); return; }
+    const errorOption = event.target.closest('[data-error-option]')?.dataset.errorOption;
+    if (errorOption !== undefined) { answerErrorPractice(Number(errorOption)); return; }
+    if (event.target.closest('[data-diagnostic-start]')) { startDiagnostic($('#diagnostic-scope').value); return; }
+    const diagnosticOption = event.target.closest('[data-diagnostic-option]')?.dataset.diagnosticOption;
+    if (diagnosticOption !== undefined) { answerDiagnostic(Number(diagnosticOption)); return; }
+    if (event.target.closest('[data-diagnostic-next]')) { advanceDiagnostic(); return; }
+    if (event.target.closest('[data-diagnostic-cancel]') && confirm('Encerrar este diagnóstico sem salvar um resultado final? As evidências das questões já respondidas permanecem.')) {
+      state.diagnostic.active = null;
+      save();
+      renderDiagnostic();
+    }
+  });
+  $('#learning-stage').addEventListener('change', event => {
+    if (event.target.id === 'mastery-status-filter') {
+      masteryStatusFilter = event.target.value;
+      renderMasteryOverview();
+    }
+  });
+  $('#learning-stage').addEventListener('input', event => {
+    if (event.target.id !== 'mastery-search') return;
+    masterySearch = event.target.value;
+    renderMasteryOverview();
+    const field = $('#mastery-search');
+    field.focus();
+    field.setSelectionRange(field.value.length, field.value.length);
+  });
+
   $('#lab-editor').addEventListener('input', () => {
     $('#lab-save-status').textContent = 'Salvando…';
     clearTimeout(labSaveTimer);
@@ -1640,7 +2208,7 @@
   $('#import-data').addEventListener('click', () => $('#import-file').click());
   $('#import-file').addEventListener('change', event => { if (event.target.files[0]) importData(event.target.files[0]); event.target.value = ''; });
   $('#reset-data').addEventListener('click', async () => {
-    if (!confirm('Apagar todo o seu progresso, notas, favoritos, respostas, revisões e rascunhos? Esta ação não pode ser desfeita sem um backup.')) return;
+    if (!confirm('Apagar todo o seu progresso, notas, favoritos, respostas, revisões, mapa de domínio, caderno de erros, diagnósticos e rascunhos? Esta ação não pode ser desfeita sem um backup.')) return;
     isResettingData = true;
     await storageWriteQueue.catch(() => undefined);
     if (database) await deleteDatabaseState();
@@ -1675,6 +2243,7 @@
       if (event.key.toLowerCase() === 'f') toggleFavorite();
       if (event.key.toLowerCase() === 'n') openHub('notes');
       if (event.key.toLowerCase() === 'r') openHub('review');
+      if (event.key.toLowerCase() === 'm') openHub('learning');
       if (event.key.toLowerCase() === 'l') openHub('lab');
       if (event.key.toLowerCase() === 'g') openHub('glossary');
       if (event.key.toLowerCase() === 'c') toggleComplete();
@@ -1720,9 +2289,11 @@
   const deepLink = new URLSearchParams(location.search);
   const requestedHub = deepLink.get('hub');
   const requestedSearch = deepLink.get('search');
+  const requestedLearningView = deepLink.get('learning');
+  if (['overview', 'errors', 'diagnostic', 'projects'].includes(requestedLearningView)) learningHubView = requestedLearningView;
   if (requestedSearch) {
     search.value = requestedSearch;
     filterNavigation();
   }
-  if (['dashboard', 'notes', 'review', 'lab', 'glossary', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
+  if (['dashboard', 'notes', 'review', 'learning', 'lab', 'glossary', 'settings'].includes(requestedHub)) setTimeout(() => openHub(requestedHub), 0);
 })();
