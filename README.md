@@ -1,17 +1,40 @@
 # Stack Completa — Java e Spring
 
-Curso interativo de Java e Spring distribuído como uma aplicação autônoma em um único arquivo HTML.
+Curso interativo e offline-first de Java e Spring. O conteúdo integral está no `index.html`; a camada de estudos, instalação e cache é distribuída em pequenos arquivos locais, sem frameworks ou dependências externas.
+
+## Acesse o curso
+
+**[Abrir Stack Completa — Java e Spring](https://fesantsss.github.io/java-study-poo-claude/)**
+
+O curso é publicado no GitHub Pages e funciona diretamente pelo navegador. Não é necessário clonar o repositório, instalar dependências, executar comandos ou configurar um servidor local para estudar.
 
 ## Estado atual
 
 * 112 capítulos.
 * 20 fases organizadas por dependência pedagógica.
 * 10 mini-projetos práticos.
-* HTML, CSS e JavaScript reunidos em um único arquivo.
+* Conteúdo e estilos reunidos no `index.html`, com a lógica da aplicação isolada em `app.js`.
 * 93 capítulos do material original preservados e reposicionados.
 * Fundamentos adicionados antes de orientação a objetos.
 * Spring concluído antes de testes avançados, Docker, Kafka e arquitetura.
 * Nenhum capítulo aponta para um pré-requisito localizado adiante na trilha.
+
+## Nível e expectativas
+
+Esta é uma trilha ampla e aprofundada, construída para oferecer uma sequência coerente desde o primeiro programa em Java até aplicações Spring, dados, segurança, containers, mensageria, produção e arquitetura. Ela funciona muito bem como mapa de aprendizado, material de consulta, revisão e guia para projetos.
+
+Entretanto, nenhum material de leitura, isoladamente, produz domínio profundo de todas essas tecnologias. O curso entrega explicações, exemplos, exercícios, decisões técnicas e projetos; o domínio aparece quando o estudante também executa, erra, depura, testa, mede e entrega sistemas reais.
+
+Para considerar um assunto realmente aprendido, o estudante deve conseguir:
+
+* explicar o conceito sem consultar o capítulo;
+* implementar um exemplo partindo de um projeto vazio;
+* reconhecer casos em que a tecnologia não deve ser usada;
+* diagnosticar erros sem depender de copiar uma solução pronta;
+* escrever testes para o comportamento implementado;
+* justificar decisões e alternativas técnicas;
+* consultar e interpretar a documentação oficial;
+* aplicar o conhecimento em um projeto diferente do exemplo apresentado.
 
 ## Recursos
 
@@ -46,15 +69,17 @@ Curso interativo de Java e Spring distribuído como uma aplicação autônoma em
 
 ## Uso offline e instalação
 
-O conteúdo dos 112 capítulos está no próprio `index.html`, sem fontes, bibliotecas ou imagens externas. Abrir esse arquivo diretamente já permite estudar sem conexão.
+Abra o [curso no GitHub Pages](https://fesantsss.github.io/java-study-poo-claude/) pelo menos uma vez com internet. Nessa primeira visita, o Service Worker armazena o conteúdo integral no dispositivo. Depois disso, o mesmo endereço pode ser aberto sem conexão no mesmo navegador e perfil.
 
-Para ativar a experiência instalável, o Service Worker e as atualizações automáticas do cache, sirva a pasta por `localhost`:
+Para instalar como aplicativo:
 
-```bash
-python3 -m http.server 8000
-```
+1. Acesse o curso pelo GitHub Pages.
+2. Abra **Central → Preferências → Curso offline e instalável**.
+3. Clique em **Instalar app** quando a opção estiver disponível.
 
-Depois, acesse `http://localhost:8000`. Na Central de estudos, abra **Preferências → Curso offline e instalável**. O navegador pode exibir o botão de instalação assim que os critérios de PWA forem atendidos.
+Dependendo do navegador, a instalação também aparece na barra de endereço ou no menu como **Instalar aplicativo** ou **Adicionar à tela inicial**. A instalação não é obrigatória: o cache offline funciona no próprio navegador.
+
+Quando houver uma nova versão do curso, conecte-se à internet e recarregue a página. A opção **Atualizar cache**, nas preferências, também solicita a atualização dos arquivos offline.
 
 Os arquivos offline são:
 
@@ -64,7 +89,7 @@ Os arquivos offline são:
 * `manifest.webmanifest`: metadados do aplicativo instalável;
 * `icon.svg`: ícone vetorial do curso.
 
-O Service Worker usa uma estratégia de rede primeiro para navegação, mantendo a cópia em cache como fallback. Para os demais arquivos locais, usa cache primeiro e atualiza o armazenamento quando necessário.
+O Service Worker usa uma estratégia de rede primeiro para os arquivos locais, atualizando o cache quando existe conexão e usando a última cópia armazenada como fallback quando a rede não está disponível.
 
 ## Atalhos
 
@@ -196,13 +221,56 @@ Integração entre front-end e back-end, autenticação no cliente, WebSockets, 
 
 Os mini-projetos apresentam requisitos, restrições, casos-limite, entregáveis e critérios de conclusão. Eles não fornecem uma implementação completa pronta.
 
+## Como estudar para alcançar profundidade
+
+Cada capítulo deve ser tratado como um ciclo de aprendizagem, não como uma página a ser marcada rapidamente:
+
+1. Leia o conteúdo e execute os exemplos no ambiente real.
+2. Reescreva os exemplos sem copiar, alterando nomes, regras e casos de entrada.
+3. Resolva o exercício antes de revelar a solução.
+4. Explique em voz alta o que acontece em memória, no runtime ou na infraestrutura.
+5. Registre dúvidas e decisões nas anotações do capítulo.
+6. Marque o capítulo como concluído somente após conseguir reproduzir o conceito.
+7. Use a fila de repetição espaçada e seja honesto ao avaliar a lembrança.
+8. Aplique o assunto no mini-projeto correspondente.
+
+Para tecnologias de aplicação e infraestrutura, os exemplos do navegador devem ser levados para ferramentas reais:
+
+* Java deve ser compilado e executado com um JDK real;
+* dependências e builds devem passar por Maven ou Gradle;
+* APIs Spring devem ser iniciadas, testadas e observadas localmente;
+* PostgreSQL, MongoDB e Redis devem receber dados e consultas reais;
+* Docker e Compose devem criar ambientes reproduzíveis;
+* Kafka deve ser praticado com produtores, consumidores, falhas e reprocessamento;
+* testes devem ser executados automaticamente e fazer parte do fluxo de Git;
+* aplicações devem ser configuradas e implantadas em um ambiente separado do desenvolvimento.
+
+### Evidências de domínio
+
+Concluir a trilha significa produzir evidências verificáveis, não apenas atingir 100% na barra de progresso:
+
+* repositórios separados para os projetos principais;
+* histórico de commits compreensível;
+* README de cada projeto com arquitetura e instruções de execução;
+* testes unitários e de integração automatizados;
+* banco versionado por migrations;
+* decisões relevantes registradas em ADRs;
+* pipeline de integração contínua;
+* logs, métricas e procedimentos básicos de diagnóstico;
+* pelo menos um deploy reproduzível;
+* capacidade de apresentar o sistema e defender seus trade-offs.
+
+### Prática complementar necessária
+
+Para aprofundamento profissional, use este curso em conjunto com documentação oficial, projetos próprios, leitura de código, code review, debugging e manutenção contínua. Bibliotecas, frameworks, práticas de segurança e plataformas de deploy evoluem; portanto, exemplos devem ser confrontados com a documentação da versão realmente usada no projeto.
+
 ## Persistência local
 
 O navegador armazena localmente:
 
 * último capítulo aberto;
 * capítulos marcados como concluídos;
-* estado dos checklists.
+* estado dos checklists;
 * favoritos;
 * respostas e resultados dos quizzes;
 * anotações por capítulo;
@@ -215,16 +283,20 @@ Esses dados pertencem ao navegador e ao perfil em que o arquivo foi aberto. Limp
 
 A opção **Exportar JSON** da Central de estudos cria um backup legível com todos esses dados. **Importar backup** valida o arquivo e pede confirmação antes de substituir o estado atual.
 
+Não existe conta, banco de dados remoto ou sincronização automática entre dispositivos nesta versão. O progresso salvo no GitHub Pages pertence ao navegador e perfil utilizados. Outro navegador, perfil ou dispositivo terá uma área de armazenamento diferente. Use o backup JSON para transportar o progresso entre eles.
+
 ## Limites do Java Lab
 
 O Java Lab oferece um runner didático totalmente local para `System.out.print/println`, declarações de variáveis numéricas, `String`, operações aritméticas, concatenação e laços `for` simples. Ele foi pensado para experimentos rápidos de fundamentos sem conexão.
 
 Recursos completos da linguagem — classes colaborando entre si, Collections, Streams, threads, bibliotecas, Maven, Spring e acesso a banco — exigem uma JVM real. O botão **Baixar `.java`** permite levar o rascunho ao JDK sem perder o trabalho.
 
-Essa estrutura permite navegação dinâmica sem exigir framework ou processo de instalação.
+Essa estrutura permite navegação dinâmica sem exigir framework, build ou instalação obrigatória.
 
 ## Objetivo
 
 A trilha foi construída para levar o estudante do primeiro programa Java até uma aplicação Spring persistente e, somente depois, introduzir testes avançados, segurança, containers, produção, Kafka e decisões arquiteturais.
 
 O objetivo não é apenas terminar capítulos. É demonstrar domínio por meio de exercícios, projetos e capacidade de explicar as decisões tomadas.
+
+O curso deve ser entendido como a espinha dorsal da formação. A profundidade final depende da quantidade e da qualidade da prática realizada fora da leitura: projetos executáveis, testes, investigação de falhas, documentação, revisão de código e operação de ambientes reais.
