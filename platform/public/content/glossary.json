@@ -1,0 +1,925 @@
+[
+  {
+    "id": "term-0",
+    "term": "JDK",
+    "definition": "Kit de desenvolvimento que reúne compilador, ferramentas e runtime necessários para criar aplicações Java.",
+    "chapterId": "intro",
+    "aliases": [
+      "Java Development Kit"
+    ]
+  },
+  {
+    "id": "term-1",
+    "term": "JRE",
+    "definition": "Ambiente necessário para executar aplicações Java: JVM mais bibliotecas de runtime.",
+    "chapterId": "intro",
+    "aliases": [
+      "Java Runtime Environment"
+    ]
+  },
+  {
+    "id": "term-2",
+    "term": "JVM",
+    "definition": "Máquina virtual que carrega e executa bytecode Java, gerenciando memória, threads e otimizações em runtime.",
+    "chapterId": "intro",
+    "aliases": [
+      "Java Virtual Machine"
+    ]
+  },
+  {
+    "id": "term-3",
+    "term": "Bytecode",
+    "definition": "Representação intermediária gerada pelo compilador Java e executada pela JVM, normalmente armazenada em arquivos .class.",
+    "chapterId": "primeiro-programa",
+    "aliases": []
+  },
+  {
+    "id": "term-4",
+    "term": "Terminal",
+    "definition": "Interface textual que exibe a saída de um processo e encaminha a ele comandos e dados digitados.",
+    "chapterId": "entrada-console",
+    "aliases": []
+  },
+  {
+    "id": "term-5",
+    "term": "CLI",
+    "definition": "Interface de linha de comando: interação por texto, argumentos e comandos em vez de controles gráficos.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "Command-line interface",
+      "interface de linha de comando"
+    ]
+  },
+  {
+    "id": "term-6",
+    "term": "Entrada padrão",
+    "definition": "Canal de entrada do processo representado em Java por System.in; no terminal, normalmente recebe o que a pessoa digita.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "standard input",
+      "stdin",
+      "System.in"
+    ]
+  },
+  {
+    "id": "term-7",
+    "term": "Scanner",
+    "definition": "Classe da biblioteca Java que divide uma entrada em linhas ou tokens e converte representações textuais.",
+    "chapterId": "entrada-console",
+    "aliases": []
+  },
+  {
+    "id": "term-8",
+    "term": "Buffer",
+    "definition": "Área temporária que mantém dados recebidos ou preparados até que sejam consumidos ou enviados.",
+    "chapterId": "entrada-console",
+    "aliases": []
+  },
+  {
+    "id": "term-9",
+    "term": "Parsing",
+    "definition": "Conversão de uma representação textual segundo uma sintaxe para um valor estruturado ou tipado.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "parse"
+    ]
+  },
+  {
+    "id": "term-10",
+    "term": "EOF",
+    "definition": "Fim da entrada: sinal de que não existe outra linha ou byte disponível para leitura.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "end of file",
+      "fim de arquivo"
+    ]
+  },
+  {
+    "id": "term-11",
+    "term": "BigDecimal",
+    "definition": "Tipo Java para números decimais com precisão e escala controladas, indicado quando arredondamento exato importa.",
+    "chapterId": "entrada-console",
+    "aliases": []
+  },
+  {
+    "id": "term-12",
+    "term": "Locale",
+    "definition": "Conjunto de convenções regionais de idioma, números, moeda, datas e ordenação.",
+    "chapterId": "entrada-console",
+    "aliases": []
+  },
+  {
+    "id": "term-13",
+    "term": "Socket",
+    "definition": "Extremidade de comunicação entre processos que transporta bytes, normalmente através de uma rede.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "sockets"
+    ]
+  },
+  {
+    "id": "term-14",
+    "term": "Protocolo",
+    "definition": "Acordo que define formato, ordem, significado, erros e encerramento das mensagens trocadas.",
+    "chapterId": "entrada-console",
+    "aliases": [
+      "protocolos"
+    ]
+  },
+  {
+    "id": "term-15",
+    "term": "JIT",
+    "definition": "Compilador Just-In-Time que transforma trechos frequentes de bytecode em código de máquina durante a execução.",
+    "chapterId": "jvm-profundo",
+    "aliases": [
+      "Just-In-Time"
+    ]
+  },
+  {
+    "id": "term-16",
+    "term": "Garbage Collector",
+    "definition": "Componente da JVM que identifica objetos sem referências alcançáveis e recupera sua memória automaticamente.",
+    "chapterId": "jvm-profundo",
+    "aliases": [
+      "GC",
+      "coletor de lixo"
+    ]
+  },
+  {
+    "id": "term-17",
+    "term": "Stack",
+    "definition": "Região associada a cada thread que armazena frames de métodos, parâmetros e variáveis locais.",
+    "chapterId": "jvm-profundo",
+    "aliases": [
+      "pilha"
+    ]
+  },
+  {
+    "id": "term-18",
+    "term": "Heap",
+    "definition": "Região compartilhada da memória onde objetos e arrays são normalmente alocados.",
+    "chapterId": "jvm-profundo",
+    "aliases": []
+  },
+  {
+    "id": "term-19",
+    "term": "Classe",
+    "definition": "Definição de estrutura e comportamento usada para criar objetos.",
+    "chapterId": "classes",
+    "aliases": [
+      "class"
+    ]
+  },
+  {
+    "id": "term-20",
+    "term": "Objeto",
+    "definition": "Instância concreta de uma classe, com identidade, estado e comportamento próprios.",
+    "chapterId": "classes",
+    "aliases": []
+  },
+  {
+    "id": "term-21",
+    "term": "Encapsulamento",
+    "definition": "Proteção do estado interno de um objeto por meio de uma interface controlada de operações.",
+    "chapterId": "encapsulamento",
+    "aliases": []
+  },
+  {
+    "id": "term-22",
+    "term": "Herança",
+    "definition": "Mecanismo pelo qual uma classe especializa outra e reutiliza membros compatíveis.",
+    "chapterId": "heranca",
+    "aliases": []
+  },
+  {
+    "id": "term-23",
+    "term": "Polimorfismo",
+    "definition": "Capacidade de tratar implementações diferentes por um contrato comum, com o comportamento decidido em runtime.",
+    "chapterId": "polimorfismo",
+    "aliases": []
+  },
+  {
+    "id": "term-24",
+    "term": "Abstração",
+    "definition": "Modelagem que destaca características essenciais e esconde detalhes desnecessários para quem usa o componente.",
+    "chapterId": "abstracao",
+    "aliases": []
+  },
+  {
+    "id": "term-25",
+    "term": "Interface",
+    "definition": "Contrato de tipos que declara comportamentos sem exigir uma implementação concreta única.",
+    "chapterId": "interfaces",
+    "aliases": []
+  },
+  {
+    "id": "term-26",
+    "term": "Exceção",
+    "definition": "Objeto que representa uma condição anormal e altera o fluxo normal de execução.",
+    "chapterId": "excecoes",
+    "aliases": [
+      "exception"
+    ]
+  },
+  {
+    "id": "term-27",
+    "term": "Collection",
+    "definition": "Família de interfaces e implementações para armazenar e manipular grupos de objetos.",
+    "chapterId": "colecoes",
+    "aliases": [
+      "Collections",
+      "coleção"
+    ]
+  },
+  {
+    "id": "term-28",
+    "term": "Generics",
+    "definition": "Sistema de parametrização de tipos que aumenta reutilização e segurança em tempo de compilação.",
+    "chapterId": "generics",
+    "aliases": [
+      "genéricos"
+    ]
+  },
+  {
+    "id": "term-29",
+    "term": "Lambda",
+    "definition": "Expressão compacta que fornece a implementação de uma interface funcional.",
+    "chapterId": "streams",
+    "aliases": [
+      "lambdas"
+    ]
+  },
+  {
+    "id": "term-30",
+    "term": "Stream",
+    "definition": "Pipeline declarativo para processar sequências de elementos sem representar uma coleção de armazenamento.",
+    "chapterId": "streams",
+    "aliases": [
+      "streams"
+    ]
+  },
+  {
+    "id": "term-31",
+    "term": "Optional",
+    "definition": "Contêiner que expressa explicitamente a presença ou ausência de um valor de retorno.",
+    "chapterId": "javamoderno",
+    "aliases": []
+  },
+  {
+    "id": "term-32",
+    "term": "Record",
+    "definition": "Tipo Java compacto voltado a carregar um conjunto fixo de dados, com acessores, igualdade, hash e representação gerados.",
+    "chapterId": "java-21-profundo",
+    "aliases": [
+      "records"
+    ]
+  },
+  {
+    "id": "term-33",
+    "term": "Sealed type",
+    "definition": "Classe ou interface Java que restringe explicitamente quais tipos podem estendê-la ou implementá-la.",
+    "chapterId": "java-21-profundo",
+    "aliases": [
+      "sealed",
+      "tipo selado"
+    ]
+  },
+  {
+    "id": "term-34",
+    "term": "Virtual thread",
+    "definition": "Thread leve gerenciada pela JVM, adequada a grandes quantidades de tarefas que passam tempo bloqueadas em entrada e saída.",
+    "chapterId": "java-21-profundo",
+    "aliases": [
+      "virtual threads",
+      "thread virtual",
+      "threads virtuais"
+    ]
+  },
+  {
+    "id": "term-35",
+    "term": "Big O",
+    "definition": "Notação que descreve como o custo de um algoritmo cresce conforme aumenta o tamanho da entrada.",
+    "chapterId": "big-o",
+    "aliases": [
+      "complexidade assintótica"
+    ]
+  },
+  {
+    "id": "term-36",
+    "term": "Recursão",
+    "definition": "Técnica em que uma função resolve o problema chamando a si mesma sobre uma entrada menor, até alcançar um caso-base.",
+    "chapterId": "recursao",
+    "aliases": []
+  },
+  {
+    "id": "term-37",
+    "term": "Git",
+    "definition": "Sistema distribuído de controle de versão que registra a evolução do código e permite trabalho paralelo.",
+    "chapterId": "git",
+    "aliases": []
+  },
+  {
+    "id": "term-38",
+    "term": "Commit",
+    "definition": "Registro imutável de um conjunto coerente de alterações no histórico do Git.",
+    "chapterId": "git",
+    "aliases": []
+  },
+  {
+    "id": "term-39",
+    "term": "Maven",
+    "definition": "Ferramenta de build e gestão de dependências baseada em convenções e no arquivo pom.xml.",
+    "chapterId": "build",
+    "aliases": []
+  },
+  {
+    "id": "term-40",
+    "term": "Gradle",
+    "definition": "Ferramenta de automação de build que usa uma DSL para configurar tarefas e dependências.",
+    "chapterId": "build",
+    "aliases": []
+  },
+  {
+    "id": "term-41",
+    "term": "Reflection",
+    "definition": "API que permite inspecionar e manipular tipos, membros e anotações em tempo de execução.",
+    "chapterId": "anotacoes",
+    "aliases": [
+      "reflexão"
+    ]
+  },
+  {
+    "id": "term-42",
+    "term": "JSON",
+    "definition": "Formato textual de troca de dados baseado em objetos, arrays e valores simples.",
+    "chapterId": "json",
+    "aliases": []
+  },
+  {
+    "id": "term-43",
+    "term": "Logging",
+    "definition": "Registro estruturado de eventos da aplicação para diagnóstico, auditoria e observabilidade.",
+    "chapterId": "logging",
+    "aliases": [
+      "logs"
+    ]
+  },
+  {
+    "id": "term-44",
+    "term": "SOLID",
+    "definition": "Conjunto de cinco princípios de design orientado a objetos voltados a coesão, extensão e baixo acoplamento.",
+    "chapterId": "solid",
+    "aliases": []
+  },
+  {
+    "id": "term-45",
+    "term": "Injeção de dependência",
+    "definition": "Técnica em que um objeto recebe as colaborações de que precisa em vez de construí-las internamente.",
+    "chapterId": "di",
+    "aliases": [
+      "DI",
+      "dependency injection"
+    ]
+  },
+  {
+    "id": "term-46",
+    "term": "IoC",
+    "definition": "Inversão de Controle: o fluxo de criação e coordenação de componentes é transferido para um contêiner ou framework.",
+    "chapterId": "spring-core",
+    "aliases": [
+      "inversão de controle"
+    ]
+  },
+  {
+    "id": "term-47",
+    "term": "HTTP",
+    "definition": "Protocolo de requisição e resposta usado na comunicação entre clientes e servidores web.",
+    "chapterId": "http",
+    "aliases": []
+  },
+  {
+    "id": "term-48",
+    "term": "REST",
+    "definition": "Estilo arquitetural que modela recursos e usa as semânticas do HTTP para manipulá-los.",
+    "chapterId": "http",
+    "aliases": []
+  },
+  {
+    "id": "term-49",
+    "term": "Endpoint",
+    "definition": "Combinação de endereço e operação exposta por uma API para atender determinada interação.",
+    "chapterId": "http",
+    "aliases": []
+  },
+  {
+    "id": "term-50",
+    "term": "Status HTTP",
+    "definition": "Código numérico que comunica o resultado de uma requisição, como 200, 404 ou 409.",
+    "chapterId": "http",
+    "aliases": [
+      "status code"
+    ]
+  },
+  {
+    "id": "term-51",
+    "term": "SQL",
+    "definition": "Linguagem declarativa usada para definir, consultar e modificar dados relacionais.",
+    "chapterId": "sql",
+    "aliases": []
+  },
+  {
+    "id": "term-52",
+    "term": "Transação",
+    "definition": "Unidade lógica de trabalho que deve ser confirmada integralmente ou revertida.",
+    "chapterId": "sql",
+    "aliases": [
+      "transaction"
+    ]
+  },
+  {
+    "id": "term-53",
+    "term": "ACID",
+    "definition": "Propriedades de atomicidade, consistência, isolamento e durabilidade esperadas de transações confiáveis.",
+    "chapterId": "sql",
+    "aliases": []
+  },
+  {
+    "id": "term-54",
+    "term": "Índice",
+    "definition": "Estrutura auxiliar que acelera buscas no banco ao custo de espaço e manutenção nas escritas.",
+    "chapterId": "postgres",
+    "aliases": [
+      "index"
+    ]
+  },
+  {
+    "id": "term-55",
+    "term": "MVCC",
+    "definition": "Controle de concorrência por múltiplas versões: mantém versões de linhas para oferecer snapshots e reduzir bloqueio entre leituras e escritas.",
+    "chapterId": "postgres-concorrencia",
+    "aliases": [
+      "Multi-Version Concurrency Control"
+    ]
+  },
+  {
+    "id": "term-56",
+    "term": "Migration",
+    "definition": "Alteração versionada e reproduzível aplicada ao schema do banco de dados.",
+    "chapterId": "migrations",
+    "aliases": [
+      "migrations",
+      "migração"
+    ]
+  },
+  {
+    "id": "term-57",
+    "term": "JDBC",
+    "definition": "API padrão do Java para abrir conexões, enviar SQL e processar resultados de bancos relacionais.",
+    "chapterId": "jdbc",
+    "aliases": []
+  },
+  {
+    "id": "term-58",
+    "term": "Bean",
+    "definition": "Objeto cujo ciclo de vida e dependências são gerenciados pelo contêiner Spring.",
+    "chapterId": "spring-core",
+    "aliases": [
+      "beans"
+    ]
+  },
+  {
+    "id": "term-59",
+    "term": "Spring MVC",
+    "definition": "Módulo web do Spring que organiza requisições HTTP, controllers, conversão de dados e respostas.",
+    "chapterId": "spring-mvc",
+    "aliases": []
+  },
+  {
+    "id": "term-60",
+    "term": "JPA",
+    "definition": "Especificação Java de mapeamento objeto-relacional; implementações como Hibernate executam o trabalho concreto.",
+    "chapterId": "spring-jpa",
+    "aliases": [
+      "Java Persistence API"
+    ]
+  },
+  {
+    "id": "term-61",
+    "term": "Entity",
+    "definition": "Classe persistente mapeada para dados relacionais e identificada no contexto do JPA.",
+    "chapterId": "spring-jpa",
+    "aliases": [
+      "entidade"
+    ]
+  },
+  {
+    "id": "term-62",
+    "term": "DTO",
+    "definition": "Objeto criado para transportar dados através de uma fronteira sem expor diretamente o modelo interno.",
+    "chapterId": "dto-mapping",
+    "aliases": [
+      "Data Transfer Object"
+    ]
+  },
+  {
+    "id": "term-63",
+    "term": "Bean Validation",
+    "definition": "Modelo declarativo de validação baseado em constraints como @NotNull e @Size.",
+    "chapterId": "validacao-erros",
+    "aliases": [
+      "validação"
+    ]
+  },
+  {
+    "id": "term-64",
+    "term": "N+1",
+    "definition": "Problema em que uma consulta inicial dispara várias consultas adicionais, geralmente uma para cada item retornado.",
+    "chapterId": "n-mais-1",
+    "aliases": []
+  },
+  {
+    "id": "term-65",
+    "term": "CORS",
+    "definition": "Política do navegador que controla quais origens podem acessar recursos de outra origem.",
+    "chapterId": "cors-rate-limit",
+    "aliases": [
+      "Cross-Origin Resource Sharing"
+    ]
+  },
+  {
+    "id": "term-66",
+    "term": "JUnit",
+    "definition": "Framework usado para escrever e executar testes automatizados em Java.",
+    "chapterId": "testes",
+    "aliases": []
+  },
+  {
+    "id": "term-67",
+    "term": "Mock",
+    "definition": "Dublê configurável usado para controlar dependências e verificar interações durante um teste.",
+    "chapterId": "mockito",
+    "aliases": [
+      "mocks"
+    ]
+  },
+  {
+    "id": "term-68",
+    "term": "JWT",
+    "definition": "Token assinado composto por header, payload e assinatura; carrega claims, mas não é criptografado por padrão.",
+    "chapterId": "autenticacao-conceitos",
+    "aliases": [
+      "JSON Web Token"
+    ]
+  },
+  {
+    "id": "term-69",
+    "term": "OAuth2",
+    "definition": "Framework de autorização delegada que permite conceder acesso limitado sem compartilhar a senha do usuário.",
+    "chapterId": "autenticacao-conceitos",
+    "aliases": [
+      "OAuth 2.0"
+    ]
+  },
+  {
+    "id": "term-70",
+    "term": "OIDC",
+    "definition": "OpenID Connect: camada de identidade sobre OAuth 2.0 que padroniza autenticação e ID token.",
+    "chapterId": "security-oidc",
+    "aliases": [
+      "OpenID Connect"
+    ]
+  },
+  {
+    "id": "term-71",
+    "term": "PKCE",
+    "definition": "Proteção do fluxo Authorization Code que vincula cada código a um segredo temporário criado pelo cliente.",
+    "chapterId": "security-oidc",
+    "aliases": [
+      "Proof Key for Code Exchange"
+    ]
+  },
+  {
+    "id": "term-72",
+    "term": "RBAC",
+    "definition": "Modelo de autorização no qual permissões são atribuídas a papéis associados aos usuários.",
+    "chapterId": "mini-auth-rbac",
+    "aliases": [
+      "Role-Based Access Control"
+    ]
+  },
+  {
+    "id": "term-73",
+    "term": "TLS",
+    "definition": "Protocolo criptográfico que oferece confidencialidade, integridade e autenticação para conexões como HTTPS.",
+    "chapterId": "https",
+    "aliases": []
+  },
+  {
+    "id": "term-74",
+    "term": "Docker",
+    "definition": "Plataforma para empacotar e executar aplicações em containers reproduzíveis.",
+    "chapterId": "docker-conceitos",
+    "aliases": []
+  },
+  {
+    "id": "term-75",
+    "term": "Imagem Docker",
+    "definition": "Artefato imutável em camadas que contém aplicação, runtime e configuração necessários para criar containers.",
+    "chapterId": "dockerfile",
+    "aliases": [
+      "Docker image"
+    ]
+  },
+  {
+    "id": "term-76",
+    "term": "Container",
+    "definition": "Processo isolado iniciado a partir de uma imagem e compartilhando o kernel do host.",
+    "chapterId": "docker-conceitos",
+    "aliases": [
+      "containers"
+    ]
+  },
+  {
+    "id": "term-77",
+    "term": "Docker Compose",
+    "definition": "Ferramenta declarativa para definir e executar vários serviços relacionados.",
+    "chapterId": "compose",
+    "aliases": [
+      "Compose"
+    ]
+  },
+  {
+    "id": "term-78",
+    "term": "Testcontainers",
+    "definition": "Biblioteca que inicia containers descartáveis durante testes de integração.",
+    "chapterId": "testcontainers",
+    "aliases": []
+  },
+  {
+    "id": "term-79",
+    "term": "NoSQL",
+    "definition": "Família de bancos não relacionais com modelos como documentos, chave-valor, colunas ou grafos.",
+    "chapterId": "nosql",
+    "aliases": []
+  },
+  {
+    "id": "term-80",
+    "term": "MongoDB",
+    "definition": "Banco orientado a documentos que armazena estruturas semelhantes a JSON no formato BSON.",
+    "chapterId": "mongodb",
+    "aliases": []
+  },
+  {
+    "id": "term-81",
+    "term": "Redis",
+    "definition": "Armazenamento em memória baseado em estruturas de dados, frequentemente usado para cache e coordenação.",
+    "chapterId": "redis",
+    "aliases": []
+  },
+  {
+    "id": "term-82",
+    "term": "Cache",
+    "definition": "Cópia temporária de dados criada para reduzir latência e trabalho repetido.",
+    "chapterId": "spring-cache",
+    "aliases": []
+  },
+  {
+    "id": "term-83",
+    "term": "Circuit Breaker",
+    "definition": "Padrão que interrompe chamadas a uma dependência instável para evitar falhas em cascata.",
+    "chapterId": "resilience",
+    "aliases": []
+  },
+  {
+    "id": "term-84",
+    "term": "WebClient",
+    "definition": "Cliente HTTP reativo e não bloqueante fornecido pelo ecossistema Spring.",
+    "chapterId": "webclient",
+    "aliases": []
+  },
+  {
+    "id": "term-85",
+    "term": "AOP",
+    "definition": "Programação orientada a aspectos, usada para aplicar comportamentos transversais como logs e transações.",
+    "chapterId": "spring-aop",
+    "aliases": [
+      "Aspect-Oriented Programming"
+    ]
+  },
+  {
+    "id": "term-86",
+    "term": "Actuator",
+    "definition": "Conjunto de endpoints operacionais do Spring Boot para saúde, métricas e diagnóstico.",
+    "chapterId": "actuator",
+    "aliases": []
+  },
+  {
+    "id": "term-87",
+    "term": "CI/CD",
+    "definition": "Automação contínua de integração, testes e entrega ou implantação de software.",
+    "chapterId": "cicd",
+    "aliases": [
+      "pipeline"
+    ]
+  },
+  {
+    "id": "term-88",
+    "term": "Observabilidade",
+    "definition": "Capacidade de compreender o estado interno de um sistema por métricas, logs e traces.",
+    "chapterId": "mini-deploy-observavel",
+    "aliases": []
+  },
+  {
+    "id": "term-89",
+    "term": "SLO",
+    "definition": "Objetivo mensurável de confiabilidade de um serviço em uma janela, como 99,9% de sucesso em 30 dias.",
+    "chapterId": "observabilidade-pratica",
+    "aliases": [
+      "Service Level Objective"
+    ]
+  },
+  {
+    "id": "term-90",
+    "term": "SBOM",
+    "definition": "Inventário dos componentes e versões presentes em um artefato de software.",
+    "chapterId": "hardening-producao",
+    "aliases": [
+      "Software Bill of Materials"
+    ]
+  },
+  {
+    "id": "term-91",
+    "term": "Thread",
+    "definition": "Fluxo de execução dentro de um processo, com stack própria e memória compartilhada com outras threads.",
+    "chapterId": "threads",
+    "aliases": [
+      "threads"
+    ]
+  },
+  {
+    "id": "term-92",
+    "term": "Race condition",
+    "definition": "Falha dependente da ordem de execução concorrente quando acessos compartilhados não são coordenados.",
+    "chapterId": "concorrencia-profunda",
+    "aliases": [
+      "condição de corrida"
+    ]
+  },
+  {
+    "id": "term-93",
+    "term": "Deadlock",
+    "definition": "Situação em que fluxos concorrentes aguardam indefinidamente recursos mantidos uns pelos outros.",
+    "chapterId": "concorrencia-profunda",
+    "aliases": []
+  },
+  {
+    "id": "term-94",
+    "term": "Mensageria",
+    "definition": "Comunicação assíncrona baseada no envio de mensagens por meio de um broker ou canal.",
+    "chapterId": "mensageria",
+    "aliases": []
+  },
+  {
+    "id": "term-95",
+    "term": "Kafka",
+    "definition": "Plataforma distribuída de streaming de eventos baseada em logs particionados e persistentes.",
+    "chapterId": "kafka",
+    "aliases": [
+      "Apache Kafka"
+    ]
+  },
+  {
+    "id": "term-96",
+    "term": "Tópico Kafka",
+    "definition": "Fluxo nomeado de registros no Kafka, dividido em partições.",
+    "chapterId": "kafka",
+    "aliases": [
+      "topic"
+    ]
+  },
+  {
+    "id": "term-97",
+    "term": "Partição",
+    "definition": "Unidade ordenada e paralelizável de armazenamento de registros dentro de um tópico Kafka.",
+    "chapterId": "kafka",
+    "aliases": [
+      "partition"
+    ]
+  },
+  {
+    "id": "term-98",
+    "term": "Consumer group",
+    "definition": "Grupo de consumidores que divide entre si as partições de um tópico.",
+    "chapterId": "kafka",
+    "aliases": [
+      "grupo de consumidores"
+    ]
+  },
+  {
+    "id": "term-99",
+    "term": "DLT",
+    "definition": "Dead-letter topic: tópico que recebe mensagens não processadas após a política de tentativas definida.",
+    "chapterId": "kafka-confiavel",
+    "aliases": [
+      "dead-letter topic"
+    ]
+  },
+  {
+    "id": "term-100",
+    "term": "Outbox",
+    "definition": "Tabela gravada na mesma transação do domínio para que eventos pendentes sejam publicados de forma recuperável.",
+    "chapterId": "kafka-confiavel",
+    "aliases": [
+      "transactional outbox"
+    ]
+  },
+  {
+    "id": "term-101",
+    "term": "DDD",
+    "definition": "Abordagem de modelagem que aproxima o software do domínio e da linguagem usada pelos especialistas.",
+    "chapterId": "ddd",
+    "aliases": [
+      "Domain-Driven Design"
+    ]
+  },
+  {
+    "id": "term-102",
+    "term": "Agregado",
+    "definition": "Fronteira de consistência no DDD, controlada por uma raiz que protege suas invariantes.",
+    "chapterId": "ddd",
+    "aliases": [
+      "aggregate"
+    ]
+  },
+  {
+    "id": "term-103",
+    "term": "CAP",
+    "definition": "Princípio segundo o qual, diante de uma partição de rede, um sistema distribuído escolhe entre consistência e disponibilidade.",
+    "chapterId": "sistemas-distribuidos",
+    "aliases": [
+      "teorema CAP"
+    ]
+  },
+  {
+    "id": "term-104",
+    "term": "PACELC",
+    "definition": "Modelo que acrescenta ao CAP a troca entre latência e consistência quando não existe partição.",
+    "chapterId": "consistencia-distribuida",
+    "aliases": []
+  },
+  {
+    "id": "term-105",
+    "term": "Idempotência",
+    "definition": "Propriedade de uma operação que produz o mesmo efeito observável quando repetida com a mesma intenção.",
+    "chapterId": "sistemas-distribuidos",
+    "aliases": [
+      "idempotency"
+    ]
+  },
+  {
+    "id": "term-106",
+    "term": "Event-driven",
+    "definition": "Estilo arquitetural no qual componentes publicam e reagem a eventos, reduzindo o acoplamento temporal.",
+    "chapterId": "event-driven-profundo",
+    "aliases": [
+      "arquitetura orientada a eventos"
+    ]
+  },
+  {
+    "id": "term-107",
+    "term": "WebSocket",
+    "definition": "Protocolo de conexão persistente e bidirecional entre cliente e servidor.",
+    "chapterId": "websockets",
+    "aliases": [
+      "WebSockets"
+    ]
+  },
+  {
+    "id": "term-108",
+    "term": "BFF",
+    "definition": "Backend for Frontend: backend dedicado às necessidades de uma interface, capaz de intermediar APIs, sessão e tokens.",
+    "chapterId": "frontend-aplicacao",
+    "aliases": [
+      "Backend for Frontend"
+    ]
+  },
+  {
+    "id": "term-109",
+    "term": "ADR",
+    "definition": "Registro curto que documenta uma decisão arquitetural, seu contexto e suas consequências.",
+    "chapterId": "code-review-adr",
+    "aliases": [
+      "Architecture Decision Record"
+    ]
+  },
+  {
+    "id": "term-110",
+    "term": "WebHook",
+    "definition": "Chamada HTTP enviada automaticamente quando um evento ocorre em outro sistema.",
+    "chapterId": "conectando-front-back",
+    "aliases": [
+      "webhook",
+      "webhooks"
+    ]
+  }
+]

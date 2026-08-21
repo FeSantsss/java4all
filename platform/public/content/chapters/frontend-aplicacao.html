@@ -1,0 +1,40 @@
+<section class="section tk-front" id="frontend-aplicacao">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Front-end aplicado: estado, formulários, acessibilidade e testes</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-front">Front-end</span><div class="meta-item">Dificuldade: <b>Intermediário</b></div><div class="time-est">⏱ <b>~6h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#auth-front-ts">Autenticação no front</a>, <a class="prereq-tag" href="#api-design-avancado">Contratos HTTP</a></div></div>
+      
+      <p>Uma integração front-end robusta distingue estado remoto, estado de formulário, estado de navegação e estado puramente visual. Misturar tudo em variáveis globais cria telas inconsistentes e difíceis de testar.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Primeiro contato com a tela reativa</h3></div>
+    <p>O exemplo usa React com TypeScript, mas os princípios de estado, efeito e acessibilidade valem para outros frameworks.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Componente</dt><dd>Função ou unidade de interface que recebe dados e descreve o que deve aparecer.</dd></div><div class="concept-card"><dt>Estado</dt><dd>Dados que podem mudar e alterar a interface, como valor do campo ou resultado carregado.</dd></div><div class="concept-card"><dt>Renderização</dt><dd>Produção da interface correspondente ao estado atual.</dd></div><div class="concept-card"><dt>Hook</dt><dd>Função do React, como useState, que conecta o componente a recursos do framework.</dd></div><div class="concept-card"><dt>Efeito</dt><dd>Sincronização com algo externo à renderização, como rede, timer ou evento do navegador.</dd></div><div class="concept-card"><dt>Cleanup</dt><dd>Função de limpeza que cancela ou desfaz um efeito quando ele deixa de valer.</dd></div></dl>
+  </aside>
+      <h3>Camada 1 — um estado local simples</h3>
+      <pre class="code"><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> Contador() {
+  <span class="kw">const</span> [total, setTotal] = useState(0);
+  <span class="kw">return</span> &lt;button onClick={() =&gt; setTotal(total + 1)}&gt;
+    Cliques: {total}
+  &lt;/button&gt;;
+}</pre>
+      <p><code>useState(0)</code> guarda o valor atual e fornece uma função para atualizá-lo. Ao chamar <code>setTotal</code>, o React renderiza novamente o componente. A marcação dentro do JavaScript é <strong>JSX</strong>, uma sintaxe transformada em chamadas que descrevem elementos.</p>
+      <h3>Camada 2 — estados remotos explícitos</h3>
+      <pre class="code"><span class="kw">type</span> Estado&lt;T&gt; =
+  | { status: <span class="str">'carregando'</span> }
+  | { status: <span class="str">'erro'</span>; mensagem: string }
+  | { status: <span class="str">'vazio'</span> }
+  | { status: <span class="str">'pronto'</span>; dados: T };
+
+<span class="kw">function</span> Pedidos() {
+  <span class="kw">const</span> [estado, setEstado] = useState&lt;Estado&lt;Pedido[]&gt;&gt;({ status: <span class="str">'carregando'</span> });
+  <span class="com">// renderize cada estado deliberadamente; não deixe erro parecer lista vazia</span>
+}</pre>
+      <p><strong>Estado remoto</strong> é a cópia local de dados cuja autoridade está no servidor. Efeitos de busca precisam de cleanup e cancelamento: uma resposta antiga não deve sobrescrever a busca mais recente. Bibliotecas de <em>server state</em> ajudam com cache, deduplicação e invalidação — marcar dados antigos para nova busca — mas ainda exigem chaves e políticas corretas.</p>
+      <h3>Formulários e acessibilidade</h3>
+      <ul><li>Associe <code>label</code> ao controle; placeholder não substitui rótulo.</li><li>Mostre erro próximo ao campo, relacione com <code>aria-describedby</code> e mova foco para o resumo quando necessário.</li><li>Não desabilite zoom nem dependa somente de cor.</li><li>Use elementos semânticos e interação completa por teclado.</li><li>Validação do cliente melhora experiência, mas o servidor continua sendo autoridade.</li></ul>
+      <h3>Autenticação no navegador</h3>
+      <p>Retome o fluxo e as ameaças do capítulo <a href="#security-oidc">OAuth 2.0 e OpenID Connect</a>. <strong>Backend for Frontend (BFF)</strong> é um backend dedicado à interface que pode guardar tokens fora do JavaScript e expor ao navegador uma sessão por cookie. Prefira Authorization Code com PKCE ou BFF conforme o risco. Se usar cookie, implemente CSRF; se usar Bearer acessível ao JavaScript, minimize vida útil e superfície XSS. Nunca coloque client secret no bundle. Renove sessão de forma serializada para evitar uma tempestade de tentativas simultâneas.</p>
+      <h3>Testes</h3>
+      <p>Teste comportamento observável com <strong>Testing Library</strong>: o usuário preenche, envia, percebe carregamento e recebe sucesso ou erro. <strong>Mock Service Worker (MSW)</strong> intercepta requisições e simula a fronteira HTTP sem acoplar o teste à implementação do cliente. Mantenha poucos testes <strong>E2E</strong>, de ponta a ponta, para jornadas críticas.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — tela de pedidos completa</h4><span class="exercise-tag d">difícil</span></div><p>Implemente listagem por cursor, criação idempotente, estados de carregamento/erro/vazio, formulário acessível, sessão expirada e atualização por WebSocket com reconexão.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>Inclua testes de teclado, erro 422/409, duplicação de clique, resposta fora de ordem e reconexão. O bundle não pode conter segredo.</p></div></div>
+    </section>

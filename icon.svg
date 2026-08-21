@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Stack Completa Java">
-  <rect width="512" height="512" rx="112" fill="#050505"/>
-  <path fill="#dd8b32" d="M122 96h268v57H285v170c0 75-42 113-113 113-28 0-55-7-76-20l27-52c14 8 29 12 44 12 35 0 52-18 52-57V153h-97z"/>
-  <path fill="#8aa06d" d="M304 230h91v48h-91zm0 78h112v48H304z" opacity=".92"/>
-  <circle cx="384" cy="124" r="17" fill="#f3ecdd"/>
-</svg>

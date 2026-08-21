@@ -1,0 +1,97 @@
+<section class="section" id="logica-programacao">
+      <div class="section-head"><span class="section-num">76</span><h2 class="section-title">Lógica de Programação &amp; Pensamento Algorítmico</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Fundamentos</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + muita prática</div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#metodos-escopo">Métodos, parâmetros e escopo</a></div>
+      </div>
+
+      <p>Este capítulo é diferente dos outros: não ensina uma ferramenta ou biblioteca — treina a <strong>habilidade</strong> que sustenta tudo mais no curso. Quem programa bem não é quem decorou mais sintaxe, é quem consegue quebrar um problema grande em passos pequenos e certos.</p>
+
+      <h3>O hábito central: decompor antes de codificar</h3>
+      <div class="analogy">Pense em uma receita de bolo complexa. Ninguém memoriza "faça um bolo" como uma instrução única — a receita quebra em passos: separar ingredientes, misturar secos, misturar líquidos, combinar, assar. Programar bem é o mesmo hábito aplicado a problemas: antes de escrever a primeira linha de código, escreva os passos em português (ou pseudocódigo), depois traduza cada passo para Java.</div>
+
+      <pre class="code"><span class="com">// Problema: "dado um array, contar quantos números são positivos"
+//
+// Decomposição em português ANTES do código:
+// 1. começar um contador em zero
+// 2. percorrer cada número
+// 3. aumentar o contador quando o número for maior que zero
+// 4. devolver o contador
+//
+// SÓ AGORA traduzir para Java:</span>
+<span class="kw">int</span> <span class="fn">contarPositivos</span>(<span class="kw">int</span>[] numeros) {
+    <span class="kw">int</span> quantidade = 0;
+    <span class="kw">for</span> (<span class="kw">int</span> numero : numeros) {
+        <span class="kw">if</span> (numero &gt; 0) quantidade++;
+    }
+    <span class="kw">return</span> quantidade;
+}</pre>
+
+      <div class="study-tip">Sempre que travar num exercício (deste curso ou de qualquer outro lugar), pare de olhar para o teclado e escreva os passos em português, numa folha ou comentário, <strong>antes</strong> de tentar de novo em código. A trava quase nunca é "não sei a sintaxe" — é "não decompus o problema o suficiente ainda".</div>
+
+      <h3>Estruturas de controle como blocos de raciocínio</h3>
+      <p>Você já usa <code>if</code>, <code>for</code>, <code>while</code> desde os primeiros capítulos — mas pensar <em>em quais situações cada um é a ferramenta certa</em> é uma habilidade separada de saber a sintaxe.</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Estrutura</th><th>Pensamento por trás</th></tr>
+        <tr><td><code>if/else</code></td><td>"Dependendo de uma condição, o caminho muda" — uma decisão</td></tr>
+        <tr><td><code>for</code></td><td>"Sei exatamente quantas vezes preciso repetir" (ou tenho uma coleção para percorrer)</td></tr>
+        <tr><td><code>while</code></td><td>"Repito até uma condição parar de ser verdadeira, mas não sei de antemão quantas vezes"</td></tr>
+        <tr><td>Recursão (capítulo 81)</td><td>"O problema grande é feito de versões menores de si mesmo"</td></tr>
+      </tbody></table>
+
+      <h3>Rastreamento manual (dry run) — depurando sem executar</h3>
+      <p>Antes de rodar qualquer código, treine "ser a máquina" — percorrer o código linha por linha no papel, anotando o valor de cada variável a cada passo.</p>
+
+      <pre class="code"><span class="kw">int</span> <span class="fn">fatorial</span>(<span class="kw">int</span> n) {
+    <span class="kw">int</span> resultado = 1;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 1; i &lt;= n; i++) {
+        resultado = resultado * i;
+    }
+    <span class="kw">return</span> resultado;
+}
+<span class="com">// dry run manual de fatorial(4):
+// i=1: resultado = 1*1 = 1
+// i=2: resultado = 1*2 = 2
+// i=3: resultado = 2*3 = 6
+// i=4: resultado = 6*4 = 24
+// i=5: condição "i&lt;=4" falsa, sai do loop
+// retorna 24</span></pre>
+
+      <div class="secret">Esse exercício de "ser a máquina" no papel é o que separa quem entende um bug de quem só está tentando adivinhar a correção mexendo aleatoriamente no código até "funcionar". Um debugger (ferramenta da IDE que pausa a execução linha por linha) automatiza exatamente esse processo — mas a habilidade mental de rastrear estado passo a passo precisa existir <em>antes</em>, senão você olha os valores no debugger sem saber o que esperar deles.</div>
+
+      <div class="warn"><b>Off-by-one errors — o erro de lógica mais comum de todos:</b> confundir <code>i &lt; n</code> com <code>i &lt;= n</code>, ou começar um índice em 0 quando deveria começar em 1 (ou vice-versa). Não existe atalho mágico para evitar isso além de fazer o dry run mentalmente nos casos-limite (primeira iteração, última iteração, coleção vazia) toda vez que escrever um loop novo.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 79.1 — Decompondo antes de codificar</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Antes de escrever qualquer código, escreva em português os passos para resolver: "dado um array de inteiros, encontrar o segundo maior valor, sem ordenar o array inteiro". Só depois traduza para Java.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// Decomposição:
+// 1. guardar duas variáveis: "maior" e "segundoMaior"
+// 2. percorrer o array uma única vez
+// 3. se o valor atual for maior que "maior": o antigo "maior" vira "segundoMaior",
+//    e o valor atual vira o novo "maior"
+// 4. senão, se o valor atual for maior que "segundoMaior" (mas menor que "maior"):
+//    só atualiza "segundoMaior"</span>
+<span class="kw">int</span> <span class="fn">segundoMaior</span>(<span class="kw">int</span>[] numeros) {
+    <span class="kw">int</span> maior = Integer.MIN_VALUE, segundoMaior = Integer.MIN_VALUE;
+    <span class="kw">boolean</span> encontrouMaior = <span class="kw">false</span>, encontrouSegundo = <span class="kw">false</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> n : numeros) {
+        <span class="kw">if</span> (!encontrouMaior || n &gt; maior) {
+            <span class="kw">if</span> (encontrouMaior) { segundoMaior = maior; encontrouSegundo = <span class="kw">true</span>; }
+            maior = n;
+            encontrouMaior = <span class="kw">true</span>;
+        } <span class="kw">else if</span> (n != maior &amp;&amp; (!encontrouSegundo || n &gt; segundoMaior)) {
+            segundoMaior = n;
+            encontrouSegundo = <span class="kw">true</span>;
+        }
+    }
+    <span class="kw">if</span> (!encontrouSegundo) <span class="kw">throw new</span> IllegalArgumentException(<span class="str">"não há dois valores distintos"</span>);
+    <span class="kw">return</span> segundoMaior;
+}</pre>
+        </div>
+      </div>
+    </section>

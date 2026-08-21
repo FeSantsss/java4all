@@ -1,0 +1,39 @@
+<section class="section tk-security" id="security-oidc">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">OAuth 2.0, OpenID Connect e Resource Server seguros</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-security">Segurança</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~6h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-security">Spring Security</a>, <a class="prereq-tag" href="#http">HTTP</a></div></div>
+      
+      <p>OAuth 2.0 delega autorização; OpenID Connect acrescenta autenticação e identidade. Um access token autoriza uma API, um ID token descreve a autenticação ao cliente e um refresh token permite obter novos tokens. Trocar esses papéis abre vulnerabilidades.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Quem é quem no fluxo de identidade</h3></div>
+    <p>Não decore siglas antes de identificar os participantes e o propósito de cada artefato.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Pessoa/Resource Owner</dt><dd>Dona dos dados que autoriza determinado acesso.</dd></div><div class="concept-card"><dt>Client</dt><dd>Aplicação que solicita autorização; pode ser navegador, app móvel ou backend.</dd></div><div class="concept-card"><dt>Authorization Server</dt><dd>Sistema que autentica, obtém consentimento e emite tokens. Também é chamado de provedor de identidade em cenários OIDC.</dd></div><div class="concept-card"><dt>Resource Server</dt><dd>API que protege recursos e valida o access token antes de atender.</dd></div><div class="concept-card"><dt>OAuth 2.0</dt><dd>Framework de autorização delegada: permite conceder acesso limitado sem entregar a senha ao cliente.</dd></div><div class="concept-card"><dt>OpenID Connect (OIDC)</dt><dd>Camada de identidade sobre OAuth 2.0 que padroniza autenticação do usuário e ID token.</dd></div></dl>
+  </aside>
+      <h3>Authorization Code com PKCE</h3>
+      <ol><li>O cliente cria <code>code_verifier</code>, deriva o challenge e redireciona o usuário ao authorization server.</li><li>Após autenticação e consentimento, recebe um código curto.</li><li>Troca código e verifier por tokens diretamente no endpoint seguro.</li><li>A API valida assinatura, algoritmo permitido, issuer, audience, expiração e escopos.</li></ol>
+      <p><strong>PKCE</strong> (<em>Proof Key for Code Exchange</em>) faz o cliente criar um segredo temporário para cada tentativa de login. O servidor recebe primeiro um derivado e exige o valor original na troca; assim, um código de autorização interceptado não basta. O navegador não deve receber <em>client secret</em> permanente embutido.</p>
+      <h3>Proteções do navegador usadas no exemplo</h3>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Quatro mecanismos que não são equivalentes</h3></div>
+    <p>O código abaixo menciona CSRF e CORS; conheça seu papel antes de interpretar por que uma proteção pode ou não ser desativada.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Cookie HttpOnly</dt><dd>Cookie inacessível ao JavaScript da página, embora ainda seja enviado automaticamente pelo navegador.</dd></div><div class="concept-card"><dt>CSRF</dt><dd><em>Cross-Site Request Forgery</em>: outra página induz o navegador autenticado a enviar uma ação não desejada.</dd></div><div class="concept-card"><dt>CORS</dt><dd><em>Cross-Origin Resource Sharing</em>: política do navegador que controla quais origens podem ler respostas; não autentica o chamador.</dd></div><div class="concept-card"><dt>XSS</dt><dd><em>Cross-Site Scripting</em>: execução de JavaScript não confiável na origem da aplicação.</dd></div><div class="concept-card"><dt>CSP</dt><dd><em>Content Security Policy</em>: política que restringe de onde scripts e outros recursos podem ser carregados.</dd></div></dl>
+  </aside>
+      <pre class="code"><span class="annotation">@Bean</span>
+SecurityFilterChain api(HttpSecurity http) <span class="kw">throws</span> Exception {
+    <span class="kw">return</span> http
+        .csrf(csrf -&gt; csrf.disable()) <span class="com">// somente para API Bearer stateless; não copie para autenticação por cookie</span>
+        .cors(Customizer.withDefaults())
+        .authorizeHttpRequests(auth -&gt; auth
+            .requestMatchers(<span class="str">"/actuator/health"</span>).permitAll()
+            .requestMatchers(HttpMethod.POST, <span class="str">"/pedidos/**"</span>).hasAuthority(<span class="str">"SCOPE_pedidos:write"</span>)
+            .anyRequest().authenticated())
+        .oauth2ResourceServer(oauth -&gt; oauth.jwt(Customizer.withDefaults()))
+        .build();
+}</pre>
+      <p>O <strong>issuer</strong> identifica quem emitiu o token; a <strong>audience</strong> identifica para qual API ele foi criado. <strong>JWK Set</strong> é o conjunto publicado de chaves com que a API verifica assinaturas, inclusive durante rotação. Uma <strong>allowlist</strong> é a lista explícita de algoritmos aceitos. Rejeite token de outro emissor, destinado a outra API ou assinado por algoritmo não autorizado.</p>
+      <h3>Cookies e tokens mudam o risco</h3>
+      <p>Cookies <code>HttpOnly</code> reduzem roubo por JavaScript, mas são enviados automaticamente e portanto exigem proteção CSRF. Tokens no <code>localStorage</code> não são enviados automaticamente, porém ficam acessíveis a XSS. Não existe armazenamento mágico: reduza XSS com escaping, CSP e dependências auditadas; use cookies <code>Secure</code>, <code>SameSite</code> e CSRF conforme a arquitetura.</p>
+      <p>CORS não autentica ninguém. O wildcard de origem não pode ser combinado com credenciais pelo navegador. Como o preflight ocorre antes da autenticação, CORS deve ser processado antes da cadeia de segurança e configurado por origens explícitas.</p>
+      <h3>Ameaças que o capítulo básico não cobre sozinho</h3>
+      <ul><li><strong>SSRF — Server-Side Request Forgery:</strong> entrada controlada pelo atacante faz o servidor acessar destinos indevidos; restrinja endereços, protocolos, DNS e redirecionamentos.</li><li><strong>Mass assignment:</strong> vinculação automática aceita campos que o cliente não deveria controlar; use DTOs com allowlist.</li><li><strong>Broken access control:</strong> autorização ausente ou incompleta; confira propriedade e escopo do recurso, não apenas papel global.</li><li><strong>Session fixation:</strong> atacante tenta fazer a vítima usar uma sessão já conhecida; rotacione o identificador ao autenticar e defina logout/revogação.</li><li><strong>PII — informação pessoal identificável:</strong> dados capazes de identificar uma pessoa; não registre tokens, senhas nem requisições inteiras.</li><li><strong>Supply chain:</strong> risco herdado de dependências, plugins e processo de build; inventarie componentes e priorize vulnerabilidades realmente alcançáveis.</li></ul>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — matriz de autorização</h4><span class="exercise-tag d">difícil</span></div><p>Crie testes para endpoint público, token ausente, expirado, issuer errado, audience errada, escopo insuficiente, dono correto e usuário tentando acessar recurso alheio.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>Inclua testes em nível HTTP e em método. Habilite method security explicitamente quando usar <code>@PreAuthorize</code>. Cada negação deve retornar 401 ou 403 conforme o caso, sem revelar a existência de recurso sensível.</p></div></div>
+    </section>

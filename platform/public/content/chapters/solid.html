@@ -1,0 +1,106 @@
+<section class="section" id="solid">
+      <div class="section-head"><span class="section-num">16</span><h2 class="section-title">SOLID &amp; boas práticas</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#interfaces">08 · Interfaces</a>, <a class="prereq-tag" href="#abstracao">07 · Classes abstratas</a></div>
+      </div>
+
+      <p>SOLID é um acrônimo de cinco princípios de design orientado a objetos, formalizados por Robert C. Martin, que resumem boa parte da sabedoria acumulada dos capítulos anteriores.</p>
+
+      <h4 class="sub">S — Single Responsibility Principle</h4>
+      <p>Uma classe deve ter <strong>um único motivo para mudar</strong>. Se <code>Funcionario</code> calcula salário <em>e</em> salva no banco <em>e</em> gera um PDF de holerite, mudanças em qualquer uma dessas três responsabilidades forçam mexer na mesma classe.</p>
+      <pre class="code"><span class="com">// ❌ uma classe fazendo três coisas:</span>
+<span class="kw">class</span> <span class="cls">Funcionario</span> {
+    <span class="kw">double</span> <span class="fn">calcularSalario</span>() { ... }
+    <span class="kw">void</span> <span class="fn">salvarNoBanco</span>() { ... }
+    <span class="kw">void</span> <span class="fn">gerarHoleritePdf</span>() { ... }
+}
+
+<span class="com">// ✅ responsabilidades separadas:</span>
+<span class="kw">class</span> <span class="cls">Funcionario</span> { <span class="kw">double</span> <span class="fn">calcularSalario</span>() { ... } }
+<span class="kw">class</span> <span class="cls">FuncionarioRepositorio</span> { <span class="kw">void</span> <span class="fn">salvar</span>(<span class="cls">Funcionario</span> f) { ... } }
+<span class="kw">class</span> <span class="cls">HoleriteGenerator</span> { <span class="kw">void</span> <span class="fn">gerarPdf</span>(<span class="cls">Funcionario</span> f) { ... } }</pre>
+
+      <h4 class="sub">O — Open/Closed Principle</h4>
+      <p>Classes devem estar <strong>abertas para extensão, fechadas para modificação</strong>. Em vez de um <code>switch</code> gigante que cresce a cada novo caso, use polimorfismo (é literalmente o que fizemos no exercício 6.1 com <code>Forma</code>).</p>
+      <pre class="code"><span class="com">// ❌ toda vez que aparece uma forma nova, esse método precisa mudar:</span>
+<span class="kw">double</span> <span class="fn">calcularArea</span>(<span class="kw">Object</span> forma) {
+    <span class="kw">if</span> (forma <span class="kw">instanceof</span> <span class="cls">Circulo</span>) { ... }
+    <span class="kw">else if</span> (forma <span class="kw">instanceof</span> <span class="cls">Quadrado</span>) { ... }
+    <span class="com">// ... um "else if" novo para cada forma futura</span>
+}
+
+<span class="com">// ✅ Forma.area() já resolve isso -- adicionar uma forma nova não toca em código existente</span></pre>
+
+      <h4 class="sub">L — Liskov Substitution Principle</h4>
+      <p>Uma subclasse deve poder <strong>substituir</strong> sua superclasse sem quebrar o comportamento esperado por quem usa o código. O exemplo clássico do que <em>viola</em> esse princípio:</p>
+      <pre class="code"><span class="kw">class</span> <span class="cls">Retangulo</span> {
+    <span class="kw">protected double</span> largura, altura;
+    <span class="kw">void</span> <span class="fn">setLargura</span>(<span class="kw">double</span> l) { largura = l; }
+    <span class="kw">void</span> <span class="fn">setAltura</span>(<span class="kw">double</span> a) { altura = a; }
+    <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> largura * altura; }
+}
+
+<span class="com">// ❌ Quadrado "é um" retângulo geometricamente, mas quebra o CONTRATO:</span>
+<span class="kw">class</span> <span class="cls">Quadrado</span> <span class="kw">extends</span> <span class="cls">Retangulo</span> {
+    <span class="annotation">@Override</span> <span class="kw">void</span> <span class="fn">setLargura</span>(<span class="kw">double</span> l) { largura = altura = l; } <span class="com">// efeito colateral inesperado!</span>
+    <span class="annotation">@Override</span> <span class="kw">void</span> <span class="fn">setAltura</span>(<span class="kw">double</span> a) { largura = altura = a; }
+}
+<span class="com">// código que confia que setLargura só muda a largura QUEBRA silenciosamente com Quadrado</span></pre>
+      <div class="warn"><b>Lição:</b> "é um" na linguagem natural nem sempre é "é um" no sentido de contrato de comportamento. Se a subclasse precisa restringir ou alterar o comportamento esperado da superclasse, herança pode ser a ferramenta errada — considere composição.</div>
+
+      <h4 class="sub">I — Interface Segregation Principle</h4>
+      <p>Prefira <strong>várias interfaces específicas</strong> a uma única interface "gigante" que força classes a implementar métodos que não fazem sentido para elas.</p>
+      <pre class="code"><span class="com">// ❌ interface inchada:</span>
+<span class="kw">interface</span> <span class="cls">Trabalhador</span> { <span class="kw">void</span> <span class="fn">trabalhar</span>(); <span class="kw">void</span> <span class="fn">comer</span>(); }
+<span class="kw">class</span> <span class="cls">Robo</span> <span class="kw">implements</span> <span class="cls">Trabalhador</span> {
+    <span class="kw">public void</span> <span class="fn">trabalhar</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">comer</span>() { <span class="com">/* robô não come! método forçado e sem sentido */</span> }
+}
+
+<span class="com">// ✅ interfaces segregadas:</span>
+<span class="kw">interface</span> <span class="cls">Trabalhador</span> { <span class="kw">void</span> <span class="fn">trabalhar</span>(); }
+<span class="kw">interface</span> <span class="cls">SerVivo</span> { <span class="kw">void</span> <span class="fn">comer</span>(); }
+<span class="kw">class</span> <span class="cls">Robo</span> <span class="kw">implements</span> <span class="cls">Trabalhador</span> { <span class="kw">public void</span> <span class="fn">trabalhar</span>() { ... } }</pre>
+
+      <h4 class="sub">D — Dependency Inversion Principle</h4>
+      <p>Dependa de <strong>abstrações</strong> (interfaces), não de implementações concretas. Isso é o que permite trocar um <code>MySqlRepositorio</code> por um <code>MongoRepositorio</code> sem tocar na lógica de negócio.</p>
+      <pre class="code"><span class="com">// ❌ acoplado à implementação concreta:</span>
+<span class="kw">class</span> <span class="cls">PedidoService</span> {
+    <span class="kw">private</span> <span class="cls">MySqlRepositorio</span> repo = <span class="kw">new</span> <span class="cls">MySqlRepositorio</span>(); <span class="com">// travado nessa implementação</span>
+}
+
+<span class="com">// ✅ depende da abstração, implementação é injetada de fora:</span>
+<span class="kw">interface</span> <span class="cls">PedidoRepositorio</span> { <span class="kw">void</span> <span class="fn">salvar</span>(<span class="cls">Pedido</span> p); }
+
+<span class="kw">class</span> <span class="cls">PedidoService</span> {
+    <span class="kw">private final</span> <span class="cls">PedidoRepositorio</span> repo;
+    <span class="fn">PedidoService</span>(<span class="cls">PedidoRepositorio</span> repo) { <span class="kw">this</span>.repo = repo; } <span class="com">// injeção de dependência</span>
+}</pre>
+
+      <div class="secret">Note que <strong>D</strong> é exatamente o que torna testes com <strong>mocks</strong> (capítulo 15) possíveis: se <code>PedidoService</code> dependesse de <code>MySqlRepositorio</code> diretamente, você não conseguiria substituí-lo por um mock em teste. SOLID e testabilidade caminham juntos — código difícil de testar quase sempre é sintoma de algum princípio SOLID sendo violado.</div>
+
+      <h3>Composição sobre herança</h3>
+      <p>Uma máxima que resume boa parte do design orientado a objetos moderno: prefira <strong>"tem um"</strong> (composição) a <strong>"é um"</strong> (herança) sempre que a relação não for genuinamente uma especialização. Herança acopla fortemente subclasse e superclasse; composição é mais flexível e evita hierarquias frágeis como a de <code>Retangulo</code>/<code>Quadrado</code> vista acima.</p>
+      <pre class="code"><span class="com">// em vez de "Carro extends Motor" (Carro NÃO é um tipo de Motor):</span>
+<span class="kw">class</span> <span class="cls">Carro</span> {
+    <span class="kw">private final</span> <span class="cls">Motor</span> motor; <span class="com">// Carro TEM UM Motor -- composição</span>
+    <span class="fn">Carro</span>(<span class="cls">Motor</span> motor) { <span class="kw">this</span>.motor = motor; }
+    <span class="kw">void</span> <span class="fn">acelerar</span>() { motor.aumentarRotacao(); }
+}</pre>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 16.1 — Identificando violações</h4><span class="exercise-tag m">médio</span></div>
+        <p>Leia esta classe e aponte por escrito quais princípios SOLID ela viola e como corrigir:</p>
+        <pre class="code"><span class="kw">class</span> <span class="cls">RelatorioVendas</span> {
+    <span class="kw">void</span> <span class="fn">buscarVendasNoBanco</span>() { <span class="com">/* SQL direto aqui */</span> }
+    <span class="kw">void</span> <span class="fn">calcularTotal</span>() { ... }
+    <span class="kw">void</span> <span class="fn">formatarComoPdf</span>() { ... }
+    <span class="kw">void</span> <span class="fn">enviarPorEmail</span>() { <span class="com">/* SMTP direto aqui */</span> }
+}</pre>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>SRP violado:</strong> a classe busca dados, calcula, formata e envia e-mail — quatro motivos de mudança diferentes (mudar o banco, mudar a regra de cálculo, mudar o formato do relatório, trocar o provedor de e-mail cada um forçaria mexer na mesma classe). <strong>DIP violado:</strong> "SQL direto" e "SMTP direto" são acoplamento a implementações concretas, deveriam depender de interfaces como <code>VendaRepositorio</code> e <code>ServicoEmail</code>, injetadas de fora. Correção: separar em <code>VendaRepositorio</code> (busca), <code>CalculadoraVendas</code> (cálculo), <code>RelatorioPdfGenerator</code> (formatação) e <code>ServicoEmail</code> (envio), cada uma com uma única responsabilidade e dependendo de interfaces.</p>
+        </div>
+      </div>
+    </section>

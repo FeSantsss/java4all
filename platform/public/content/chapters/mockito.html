@@ -1,0 +1,115 @@
+<section class="section tk-spring" id="mockito">
+      <div class="section-head"><span class="section-num">87</span><h2 class="section-title">Mockito — Mocks &amp; Dublês de Teste</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Testes</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#testes">15 · Testes unitários</a>, <a class="prereq-tag" href="#di">22 · Injeção de dependência</a>, <a class="prereq-tag" href="#padroes">23 · Padrões de projeto</a></div>
+      </div>
+
+      <p>O capítulo 22 (exercício 22.1) já criou um "dublê" de teste manualmente — uma classe <code>NotificadorFalso</code> escrita à mão. <strong>Mockito</strong> automatiza completamente essa criação, gerando dublês dinamicamente (via proxy, capítulo 20) sem você precisar escrever uma única classe extra.</p>
+
+      <h3>O vocabulário completo de dublês de teste</h3>
+      <table class="cmp">
+        <tbody><tr><th>Tipo</th><th>O que faz</th><th>Exemplo</th></tr>
+        <tr><td><strong>Dummy</strong></td><td>Só preenche um parâmetro obrigatório, nunca é realmente usado</td><td>Um objeto passado só porque o construtor exige, mas o teste não interage com ele</td></tr>
+        <tr><td><strong>Stub</strong></td><td>Retorna respostas pré-programadas fixas, não verifica interação</td><td>"Sempre retorne este valor quando chamado"</td></tr>
+        <tr><td><strong>Mock</strong></td><td>Além de retornar respostas programadas, permite <strong>verificar</strong> se e como foi chamado</td><td>"Confirme que <code>enviar()</code> foi chamado exatamente uma vez"</td></tr>
+        <tr><td><strong>Fake</strong></td><td>Implementação funcional simplificada, com lógica real (mas mais simples que a de produção)</td><td>O <code>LivroRepositorioEmMemoria</code> do capítulo 23 é um Fake</td></tr>
+        <tr><td><strong>Spy</strong></td><td>Envolve um objeto <strong>real</strong>, registrando chamadas, mas deixando o comportamento real acontecer (a menos que você sobrescreva partes específicas)</td><td>Útil para verificar interações em código legado difícil de refatorar</td></tr>
+      </tbody></table>
+
+      <div class="secret">"Mock" virou o termo genérico popular para todo esse vocabulário (as pessoas dizem "mockar" para qualquer tipo de dublê), mas tecnicamente, no vocabulário original de Gerard Meszaros que cunhou esses termos, cada palavra descreve um comportamento distinto e específico. Entender a diferença ajuda a escolher a ferramenta certa: um <code>Stub</code> simples não precisa da sobrecarga de verificação de um <code>Mock</code> completo, e a biblioteca Mockito, apesar do nome, gera tanto Stubs quanto Mocks verdadeiros, dependendo de como você a usa.</div>
+
+      <h3>@Mock, @InjectMocks e a anotação que dispara tudo</h3>
+      <pre class="code"><span class="annotation">@ExtendWith</span>(MockitoExtension.<span class="kw">class</span>) <span class="com">// integra Mockito com o ciclo de vida JUnit 5 (capítulo 15)</span>
+<span class="kw">class</span> <span class="cls">BibliotecaTest</span> {
+
+    <span class="annotation">@Mock</span> <span class="com">// Mockito CRIA um dublê dinâmico da interface -- sem você escrever
+              // NENHUMA classe NotificadorFalso manual, como no capítulo 22</span>
+    <span class="kw">private</span> <span class="cls">NotificadorEmprestimo</span> notificadorMock;
+
+    <span class="annotation">@InjectMocks</span> <span class="com">// Mockito cria uma Biblioteca REAL, injetando os @Mock
+                    // declarados acima automaticamente no construtor</span>
+    <span class="kw">private</span> <span class="cls">Biblioteca</span> biblioteca;
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveNotificarAoEmprestar</span>() <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        biblioteca.adicionar(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Clean Code"</span>, <span class="str">"L001"</span>, <span class="str">"Robert Martin"</span>));
+
+        biblioteca.emprestar(<span class="str">"L001"</span>);
+
+        verify(notificadorMock).notificar(<span class="kw">any</span>()); <span class="com">// CONFIRMA que o método FOI chamado</span>
+    }
+}</pre>
+
+      <h3>when().thenReturn() — programando o comportamento do mock</h3>
+      <pre class="code"><span class="annotation">@Mock</span> <span class="kw">private</span> <span class="cls">LivroRepositorio</span> repositorioMock;
+<span class="annotation">@InjectMocks</span> <span class="kw">private</span> <span class="cls">LivroServico</span> servico;
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveRetornarLivroQuandoExiste</span>() {
+    <span class="cls">Livro</span> livroFalso = <span class="kw">new</span> <span class="cls">Livro</span>(1L, <span class="str">"1984"</span>, <span class="str">"Orwell"</span>);
+
+    <span class="com">// programando: "QUANDO buscarPorId(1L) for chamado, RETORNE isso"</span>
+    when(repositorioMock.buscarPorId(1L)).thenReturn(Optional.of(livroFalso));
+
+    <span class="cls">LivroDTO</span> resultado = servico.buscarPorId(1L);
+
+    assertEquals(<span class="str">"1984"</span>, resultado.titulo());
+    <span class="com">// o servico NUNCA tocou em um banco de dados real -- repositorioMock
+    // simplesmente devolveu o valor programado, instantaneamente</span>
+}
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveLancarExcecaoQuandoNaoEncontrado</span>() {
+    when(repositorioMock.buscarPorId(999L)).thenReturn(Optional.empty());
+
+    assertThrows(<span class="cls">LivroNaoEncontradoException</span>.<span class="kw">class</span>, () -&gt; servico.buscarPorId(999L));
+}</pre>
+
+      <h3>verify() — confirmando interações, não só valores de retorno</h3>
+      <pre class="code">verify(repositorioMock).salvar(<span class="kw">any</span>(<span class="cls">Livro</span>.<span class="kw">class</span>));        <span class="com">// foi chamado, exatamente 1 vez (padrão)</span>
+verify(repositorioMock, times(2)).buscarPorId(<span class="kw">any</span>()); <span class="com">// foi chamado exatamente 2 vezes</span>
+verify(repositorioMock, never()).deletar(<span class="kw">any</span>());       <span class="com">// NUNCA foi chamado</span>
+verify(notificadorMock, atLeastOnce()).notificar(<span class="kw">any</span>()); <span class="com">// pelo menos 1 vez</span>
+
+<span class="com">// capturando o ARGUMENTO exato passado, para inspecionar seu conteúdo:</span>
+ArgumentCaptor&lt;<span class="kw">String</span>&gt; captor = ArgumentCaptor.forClass(<span class="kw">String</span>.<span class="kw">class</span>);
+verify(notificadorMock).notificar(captor.capture());
+assertTrue(captor.getValue().contains(<span class="str">"Clean Code"</span>)); <span class="com">// confere o CONTEÚDO da mensagem</span></pre>
+
+      <div class="warn"><b>Mockito não substitui testes de integração (capítulo 54).</b> Um mock <strong>sempre</strong> retorna exatamente o que você programou — ele nunca prova que sua query SQL real funciona, que seu mapeamento JPA está correto, ou que a integração de verdade entre as camadas se comporta como esperado. A regra prática: use Mockito para isolar a <strong>lógica de negócio</strong> de suas dependências externas em testes unitários rápidos; use Testcontainers para validar que a integração real entre as camadas funciona de fato.</div>
+
+      <div class="analogy">Um mock é como um ator substituto (dublê) em uma cena de ação perigosa — ele reproduz exatamente os movimentos combinados no roteiro (o comportamento programado), sem realmente correr o risco genuíno que o ator principal correria (sem realmente bater no banco de dados, sem realmente enviar um e-mail). Isso é ótimo para testar a "coreografia" da cena (a lógica de negócio) repetidamente e rapidamente, sem o custo e risco reais — mas em algum momento você precisa filmar pelo menos algumas cenas com o ator de verdade (o teste de integração) para confirmar que tudo funciona no mundo real.</div>
+
+      <div class="study-tip">Use a regra F.I.R.S.T. do capítulo 15 como bússola para decidir entre mock e integração: se o teste precisa ser extremamente rápido e testar uma decisão de lógica isolada, mock. Se o teste precisa confirmar que uma integração real (SQL, serialização, configuração) funciona de fato, Testcontainers. Um projeto maduro tem os dois tipos coexistindo, em proporções diferentes — muitos testes unitários rápidos com mock, poucos testes de integração mais lentos mas mais realistas nos pontos críticos.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 90.1 — Testando com mocks completos</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Reescreva o teste do exercício 22.1 (que usava a classe <code>NotificadorFalso</code> escrita manualmente) usando Mockito: <code>@Mock</code> para <code>NotificadorEmprestimo</code>, <code>@InjectMocks</code> para <code>Biblioteca</code>, e <code>verify()</code> para confirmar que <code>notificar()</code> foi chamado exatamente uma vez com uma mensagem contendo o título do livro (usando <code>ArgumentCaptor</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@ExtendWith</span>(MockitoExtension.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cls">BibliotecaMockitoTest</span> {
+
+    <span class="annotation">@Mock</span>
+    <span class="kw">private</span> <span class="cls">NotificadorEmprestimo</span> notificadorMock;
+
+    <span class="annotation">@InjectMocks</span>
+    <span class="kw">private</span> <span class="cls">Biblioteca</span> biblioteca;
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveNotificarComTituloCorretoAoEmprestar</span>() <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        biblioteca.adicionar(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Clean Code"</span>, <span class="str">"L001"</span>, <span class="str">"Robert Martin"</span>));
+
+        biblioteca.emprestar(<span class="str">"L001"</span>);
+
+        ArgumentCaptor&lt;<span class="kw">String</span>&gt; captor = ArgumentCaptor.forClass(<span class="kw">String</span>.<span class="kw">class</span>);
+        verify(notificadorMock, times(1)).notificar(captor.capture());
+        assertTrue(captor.getValue().contains(<span class="str">"Clean Code"</span>));
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

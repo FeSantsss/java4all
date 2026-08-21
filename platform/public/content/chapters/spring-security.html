@@ -1,0 +1,127 @@
+<section class="section tk-security" id="spring-security">
+      <div class="section-head"><span class="section-num">52</span><h2 class="section-title">Spring Security na prática</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-security">Spring Security</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h30</b> de estudo + prática (o mais denso do curso — respire fundo)</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#autenticacao-conceitos">51 · Autenticação conceitos</a>, <a class="prereq-tag" href="#spring-mvc">44 · Spring Web/MVC</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a> (dynamic proxy)</div>
+      </div>
+
+      <p>Spring Security é notoriamente a parte do ecossistema Spring com curva de aprendizado mais íngreme — não porque seja mal desenhado, mas porque resolve um problema genuinamente complexo (autenticação + autorização) de forma extremamente configurável.</p>
+
+      <div class="analogy">Pense no Spring Security como um segurança de prédio em duas etapas: primeiro ele confere seu documento na entrada (<strong>autenticação</strong> — "quem é você?"), depois confere se seu crachá te dá acesso àquele andar específico (<strong>autorização</strong> — "você pode estar aqui?"). Toda a configuração deste capítulo é, no fundo, decidir as regras dessas duas perguntas.</div>
+
+      <h3>Filter Chain — onde a mágica acontece antes do seu controller</h3>
+      <p>Toda requisição HTTP passa por uma cadeia de <em>filtros</em> antes de chegar ao seu <code>@RestController</code>. O Spring Security se insere nessa cadeia, interceptando a requisição para validar autenticação <strong>antes</strong> mesmo do controller ser chamado.</p>
+
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="annotation">@EnableWebSecurity</span>
+<span class="kw">public class</span> <span class="cls">SecurityConfig</span> {
+
+    <span class="annotation">@Bean</span>
+    <span class="kw">public</span> SecurityFilterChain <span class="fn">filterChain</span>(HttpSecurity http) <span class="kw">throws</span> <span class="cls">Exception</span> {
+        <span class="kw">return</span> http
+            .csrf(csrf -&gt; csrf.disable()) <span class="com">// desabilitado para APIs stateless com JWT (explicado abaixo)</span>
+            .sessionManagement(s -&gt; s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) <span class="com">// sem sessão!</span>
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers(<span class="str">"/auth/login"</span>, <span class="str">"/auth/registrar"</span>).permitAll() <span class="com">// público</span>
+                .requestMatchers(HttpMethod.GET, <span class="str">"/livros/**"</span>).permitAll() <span class="com">// leitura pública</span>
+                .requestMatchers(<span class="str">"/admin/**"</span>).hasRole(<span class="str">"ADMIN"</span>)       <span class="com">// só admin</span>
+                .anyRequest().authenticated()                       <span class="com">// resto exige login</span>
+            )
+            .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.<span class="kw">class</span>) <span class="com">// seu filtro JWT customizado</span>
+            .build();
+    }
+}</pre>
+
+      <h3>Gerando e validando o JWT</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">JwtServico</span> {
+    <span class="kw">private final</span> <span class="kw">String</span> chaveSecreta = <span class="str">"..."</span>; <span class="com">// NUNCA hardcoded de verdade -- vem de variável de ambiente (capítulo 27!)</span>
+
+    <span class="kw">public</span> <span class="kw">String</span> <span class="fn">gerarToken</span>(<span class="cls">Usuario</span> usuario) {
+        <span class="kw">return</span> Jwts.builder()
+            .subject(usuario.getEmail())
+            .claim(<span class="str">"role"</span>, usuario.getRole())
+            .issuedAt(<span class="kw">new</span> Date())
+            .expiration(<span class="kw">new</span> Date(System.currentTimeMillis() + 3600_000)) <span class="com">// 1 hora</span>
+            .signWith(chaveComoBytes())
+            .compact();
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">validar</span>(<span class="kw">String</span> token) {
+        <span class="kw">try</span> {
+            Jwts.parser().verifyWith(chaveComoBytes()).build().parseSignedClaims(token);
+            <span class="kw">return true</span>;
+        } <span class="kw">catch</span> (JwtException e) { <span class="com">// expirado, assinatura inválida, malformado...</span>
+            <span class="kw">return false</span>;
+        }
+    }
+}</pre>
+
+      <h3>Autorização com @PreAuthorize</h3>
+      <pre class="code"><span class="annotation">@PreAuthorize</span>(<span class="str">"hasRole('ADMIN')"</span>) <span class="com">// checa ANTES do método executar -- outro dynamic proxy, capítulo 20!</span>
+<span class="annotation">@DeleteMapping</span>(<span class="str">"/livros/{id}"</span>)
+<span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">deletar</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id) { ... }
+
+<span class="annotation">@PreAuthorize</span>(<span class="str">"#id == authentication.principal.id"</span>) <span class="com">// só o PRÓPRIO usuário pode editar seu perfil</span>
+<span class="annotation">@PutMapping</span>(<span class="str">"/usuarios/{id}"</span>)
+<span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">atualizar</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id, ...) { ... }</pre>
+
+      <h3>Codificando senhas — nunca em texto puro</h3>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> PasswordEncoder <span class="fn">passwordEncoder</span>() {
+    <span class="kw">return new</span> BCryptPasswordEncoder(); <span class="com">// hash unidirecional com "salt" -- nunca reversível</span>
+}
+
+<span class="com">// ao registrar:</span>
+usuario.setSenha(passwordEncoder.encode(senhaDigitada));
+
+<span class="com">// ao logar:</span>
+<span class="kw">if</span> (passwordEncoder.matches(senhaDigitada, usuario.getSenha())) { <span class="com">// compara hash, nunca a senha crua</span>
+    <span class="com">// gera o JWT</span>
+}</pre>
+
+      <div class="secret">BCrypt é deliberadamente <strong>lento</strong> — e isso é uma característica de segurança, não um defeito de performance. Um hash rápido (como MD5 ou SHA-1 puro) permite que um atacante teste bilhões de senhas por segundo em um vazamento de banco; BCrypt limita isso a milhares por segundo, tornando ataques de força bruta impraticáveis mesmo com hardware potente. O "custo computacional" é o próprio mecanismo de defesa.</div>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Nunca guarde senha em texto puro, nem "só criptografada" (reversível) — sempre hash unidirecional com BCrypt ou equivalente.</li>
+          <li>A chave secreta do JWT nunca vai no código-fonte — sempre variável de ambiente (capítulo 27), diferente entre dev e produção.</li>
+          <li>Tokens JWT deveriam ter expiração curta (minutos/poucas horas) — combine com um <em>refresh token</em> de vida mais longa para renovar sem exigir login constante.</li>
+          <li><code>csrf().disable()</code> só é seguro em APIs verdadeiramente stateless (JWT, sem cookies de sessão) — nunca desabilite CSRF em uma aplicação que usa sessão tradicional.</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">Spring Security tem uma curva de aprendizado real — não se cobre entender tudo na primeira leitura. Comece implementando só o fluxo básico (registrar → gerar hash BCrypt → login → gerar JWT → validar JWT em requisições seguintes) funcionando ponta a ponta em um projeto de brinquedo, antes de se preocupar com <code>@PreAuthorize</code> refinado ou OAuth2. Segurança se aprende construindo camada por camada, exatamente como você fez com o resto deste curso.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 52.1 — Fluxo de autenticação completo</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Desenhe (em pseudo-código ou texto estruturado) o fluxo completo de registro e login para o sistema de biblioteca: endpoint de registro que faz hash da senha com BCrypt antes de salvar; endpoint de login que valida a senha e gera um JWT; e a configuração de <code>SecurityFilterChain</code> liberando <code>/auth/**</code> publicamente e exigindo autenticação para <code>/livros/**</code> em métodos que não sejam GET.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@PostMapping</span>(<span class="str">"/auth/registrar"</span>)
+<span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">registrar</span>(<span class="annotation">@RequestBody</span> <span class="cls">RegistroDTO</span> dto) {
+    <span class="cls">Usuario</span> usuario = <span class="kw">new</span> <span class="cls">Usuario</span>(dto.email(), passwordEncoder.encode(dto.senha()));
+    usuarioRepository.save(usuario);
+    <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).build();
+}
+
+<span class="annotation">@PostMapping</span>(<span class="str">"/auth/login"</span>)
+<span class="kw">public</span> ResponseEntity&lt;<span class="cls">TokenDTO</span>&gt; <span class="fn">login</span>(<span class="annotation">@RequestBody</span> <span class="cls">LoginDTO</span> dto) {
+    <span class="cls">Usuario</span> usuario = usuarioRepository.findByEmail(dto.email())
+        .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">CredenciaisInvalidasException</span>());
+    <span class="kw">if</span> (!passwordEncoder.matches(dto.senha(), usuario.getSenha())) {
+        <span class="kw">throw new</span> <span class="cls">CredenciaisInvalidasException</span>();
+    }
+    <span class="kw">return</span> ResponseEntity.ok(<span class="kw">new</span> <span class="cls">TokenDTO</span>(jwtServico.gerarToken(usuario)));
+}</pre>
+<pre class="code">.authorizeHttpRequests(auth -&gt; auth
+    .requestMatchers(<span class="str">"/auth/**"</span>).permitAll()
+    .requestMatchers(HttpMethod.GET, <span class="str">"/livros/**"</span>).permitAll()
+    .anyRequest().authenticated()
+)</pre>
+        </div>
+      </div>
+    </section>

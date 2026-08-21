@@ -1,0 +1,21 @@
+<section class="section tk-java" id="primeiro-programa">
+      <div class="section-head"><span class="section-num">01</span><h2 class="section-title">Primeiro programa: escrever, compilar e executar</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#intro">Ambiente Java</a></div></div>
+      <p>Antes de estudar abstrações, você precisa dominar o ciclo concreto: um arquivo <code>.java</code> contém código-fonte; o compilador <code>javac</code> verifica regras e produz bytecode; a JVM executa esse bytecode. IDEs escondem parte desse caminho, mas não o eliminam.</p>
+      <h3>O menor programa tradicional</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+        System.out.println(<span class="str">"Olá, Java!"</span>);
+    }
+}</pre>
+      <p>O nome do arquivo deve ser <code>Main.java</code> porque a classe pública se chama <code>Main</code>. <code>main</code> é o ponto de entrada. <code>String[] args</code> recebe argumentos da linha de comando. <code>System.out</code> é a saída padrão e <code>println</code> imprime uma linha.</p>
+      <h3>Terminal sem mágica</h3>
+      <pre class="code">javac Main.java   <span class="com"># compila e cria Main.class</span>
+java Main         <span class="com"># pede à JVM para executar Main</span>
+java Main.java    <span class="com"># execução direta de arquivo-fonte em Java moderno</span></pre>
+      <div class="warn"><b>Erro não é uma categoria única.</b> Erro de compilação impede gerar bytecode; exceção ocorre durante a execução; erro lógico permite rodar, mas produz resultado incorreto. Aprenda a classificá-los antes de tentar corrigi-los.</div>
+      <h3>Leitura de uma mensagem do compilador</h3>
+      <p>Leia de cima para baixo: arquivo, linha, símbolo indicado por <code>^</code> e descrição. Conserte o primeiro erro e compile outra vez. Um caractere ausente pode gerar vários erros em cascata.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Prática obrigatória</h4><span class="exercise-tag f">Fundamento</span></div><p>Crie o arquivo manualmente, compile pelo terminal e execute. Depois remova um ponto e vírgula, observe o diagnóstico e explique por que o problema pertence à compilação.</p></div>
+      <div class="rules-box"><h4>Critério de domínio</h4><ul><li>Você explica a diferença entre JDK, compilador, bytecode e JVM.</li><li>Consegue compilar sem depender do botão da IDE.</li><li>Distingue erro de compilação, exceção e erro lógico.</li></ul></div>
+    </section>

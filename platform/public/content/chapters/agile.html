@@ -1,0 +1,56 @@
+<section class="section" id="agile">
+      <div class="section-head"><span class="section-num">75</span><h2 class="section-title">Metodologias Ágeis: Scrum &amp; Kanban</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Engenharia</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#git">29 · Git</a></div>
+      </div>
+
+      <p>Todo o resto deste curso ensinou <em>como</em> escrever software. Metodologias ágeis organizam <em>como um time decide o que construir, em que ordem, e como acompanha o progresso</em> — o contexto de processo em que praticamente todo trabalho profissional acontece.</p>
+
+      <h3>Por que "ágil" existe: o problema do Waterfall</h3>
+      <div class="analogy">O modelo tradicional (Waterfall) é como construir uma casa inteira a partir de uma planta fixa, sem revisitar nada até a entrega final — se a planta estava errada, você só descobre depois de gastar todo o material. Ágil é construir e mostrar um cômodo de cada vez, permitindo ajustar a planta dos próximos cômodos com base no que já foi visto funcionando (ou não) na prática.</div>
+
+      <h3>Scrum — trabalho em ciclos fixos (sprints)</h3>
+      <table class="cmp">
+        <tbody><tr><th>Papel/Cerimônia</th><th>Função</th></tr>
+        <tr><td><strong>Product Owner</strong></td><td>Decide <em>o quê</em> e <em>em que ordem de prioridade</em> construir</td></tr>
+        <tr><td><strong>Scrum Master</strong></td><td>Remove obstáculos do time, garante que o processo funcione</td></tr>
+        <tr><td><strong>Sprint</strong></td><td>Ciclo fixo de trabalho (geralmente 1-2 semanas) com um objetivo definido</td></tr>
+        <tr><td><strong>Daily Standup</strong></td><td>Reunião curta e diária: o que fiz, o que farei, o que está bloqueando</td></tr>
+        <tr><td><strong>Sprint Review</strong></td><td>Demonstração do que foi entregue ao final do sprint</td></tr>
+        <tr><td><strong>Retrospectiva</strong></td><td>O que funcionou bem no processo, o que precisa melhorar no próximo ciclo</td></tr>
+      </tbody></table>
+
+      <h3>Kanban — fluxo contínuo, sem ciclos fixos</h3>
+      <pre class="code">A FAZER  →  EM PROGRESSO  →  EM REVISÃO  →  CONCLUÍDO
+[tarefa A]   [tarefa B]        [tarefa C]     [tarefa D]
+[tarefa E]                                    [tarefa F]</pre>
+      <p>Diferente do Scrum, Kanban não organiza trabalho em ciclos de tempo fixo — o foco é <strong>limitar o trabalho em progresso</strong> (WIP — Work In Progress) simultâneo, para reduzir contexto trocado e acelerar o fluxo de entrega item por item.</p>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Scrum</th><th>Kanban</th></tr>
+        <tr><td>Estrutura de tempo</td><td>Sprints fixos</td><td>Fluxo contínuo, sem ciclos</td></tr>
+        <tr><td>Papéis definidos</td><td>Sim (PO, Scrum Master)</td><td>Não formalmente exigidos</td></tr>
+        <tr><td>Bom para</td><td>Times com escopo previsível, produto em evolução planejada</td><td>Times de suporte/manutenção, fluxo de trabalho mais imprevisível</td></tr>
+      </tbody></table>
+
+      <div class="secret">Nenhuma dessas metodologias é "a certa" de forma universal — assim como arquitetura de software (capítulo 75), a escolha depende do contexto real do time e do produto. Times sêniores frequentemente adotam versões híbridas e adaptadas, em vez de seguir um framework de processo "por livro" de forma rígida — a métrica que realmente importa é se o time está entregando valor de forma sustentável, não se está seguindo a cerimônia à risca.</div>
+
+      <div class="study-tip">Independente da metodologia formal do seu time, o hábito individual mais valioso que você pode carregar de qualquer uma delas é: <strong>quebrar trabalho grande em pedaços pequenos e entregáveis</strong> — a mesma lição de commits atômicos (capítulo 29) e PRs pequenos (capítulo 77), agora aplicada no nível de planejamento de funcionalidades inteiras.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 78.1 — Quebrando uma funcionalidade em itens de sprint</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Para a funcionalidade "sistema de reserva de livros" (usuário reserva um livro emprestado, é notificado quando ele for devolvido), quebre em pelo menos 4 itens menores, entregáveis independentemente, que caberiam em um board Kanban ou backlog de sprint.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">1. Modelar e migrar a tabela "reservas" (capítulo 35)
+2. Endpoint para criar uma reserva (POST /livros/{id}/reserva)
+3. Lógica de negócio: impedir reserva duplicada do mesmo usuário
+4. Evento Kafka disparado na devolução, verificando fila de reservas (capítulo 41)
+5. Notificação ao usuário quando o livro reservado ficar disponível (capítulo 64, WebSocket)
+6. Endpoint para o usuário cancelar sua própria reserva</pre>
+        </div>
+      </div>
+    </section>

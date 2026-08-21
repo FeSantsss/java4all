@@ -1,0 +1,92 @@
+<section class="section" id="construtores">
+      <div class="section-head"><span class="section-num">03</span><h2 class="section-title">Construtores</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#atributos">02 · Atributos e métodos</a></div>
+      </div>
+
+      <p>Um <strong>construtor</strong> é um método especial, com o mesmo nome da classe e sem tipo de retorno, executado automaticamente no <code>new</code>. Ele existe para garantir que todo objeto nasça em um estado válido, em vez de depender que alguém lembre de preencher cada atributo depois.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Cafe</span> {
+    <span class="kw">String</span> tipo;
+    <span class="kw">boolean</span> comAcucar;
+
+    <span class="fn">Cafe</span>(<span class="kw">String</span> tipo, <span class="kw">boolean</span> comAcucar) {
+        <span class="kw">this</span>.tipo = tipo;
+        <span class="kw">this</span>.comAcucar = comAcucar;
+    }
+}
+<span class="cls">Cafe</span> expresso = <span class="kw">new</span> <span class="cls">Cafe</span>(<span class="str">"expresso"</span>, <span class="kw">false</span>);</pre>
+
+      <p><code>this</code> se refere ao próprio objeto sendo construído — aqui, diferencia o parâmetro <code>tipo</code> do atributo <code>tipo</code>.</p>
+
+      <h3>Sobrecarga de construtores e encadeamento com this(...)</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Cafe</span> {
+    <span class="kw">String</span> tipo;
+    <span class="kw">boolean</span> comAcucar;
+
+    <span class="fn">Cafe</span>(<span class="kw">String</span> tipo, <span class="kw">boolean</span> comAcucar) {
+        <span class="kw">this</span>.tipo = tipo;
+        <span class="kw">this</span>.comAcucar = comAcucar;
+    }
+
+    <span class="fn">Cafe</span>(<span class="kw">String</span> tipo) {
+        <span class="kw">this</span>(tipo, <span class="kw">false</span>); <span class="com">// delega para o construtor de cima -- deve ser a 1ª linha</span>
+    }
+}</pre>
+
+      <h3>Ordem exata de inicialização de um objeto</h3>
+      <p>Esse é o tipo de detalhe que raramente é ensinado, mas explica bugs sutis. Quando você chama <code>new Filho(...)</code>, a JVM executa, nesta ordem:</p>
+      <ol style="color:var(--ink-dim)">
+        <li>Blocos e atributos <code>static</code> da hierarquia inteira (só na <strong>primeira vez</strong> que a classe é carregada, uma única vez no programa).</li>
+        <li>O construtor da superclasse é chamado primeiro (<code>super(...)</code> implícito ou explícito, sempre a primeira linha).</li>
+        <li>Atributos de instância da superclasse são inicializados com seus valores declarados / blocos de inicialização de instância.</li>
+        <li>O corpo do construtor da superclasse roda.</li>
+        <li>Atributos de instância da subclasse são inicializados.</li>
+        <li>O corpo do construtor da subclasse roda.</li>
+      </ol>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">A</span> {
+    <span class="kw">static</span> { System.out.println(<span class="str">"1. static de A"</span>); }
+    { System.out.println(<span class="str">"3. bloco de instância de A"</span>); }
+    <span class="kw">public</span> <span class="fn">A</span>() { System.out.println(<span class="str">"4. construtor de A"</span>); }
+}
+
+<span class="kw">public class</span> <span class="cls">B</span> <span class="kw">extends</span> <span class="cls">A</span> {
+    <span class="kw">static</span> { System.out.println(<span class="str">"2. static de B"</span>); }
+    { System.out.println(<span class="str">"5. bloco de instância de B"</span>); }
+    <span class="kw">public</span> <span class="fn">B</span>() { System.out.println(<span class="str">"6. construtor de B"</span>); }
+}
+
+<span class="com">// new B(); imprime exatamente na ordem 1,2,3,4,5,6</span></pre>
+
+      <div class="secret">Blocos <code>static { ... }</code> rodam uma única vez, quando a classe é carregada pela JVM — não a cada <code>new</code>. Já blocos de instância <code>{ ... }</code> (sem <code>static</code>) rodam <strong>toda vez</strong> que um objeto é criado, logo antes do corpo do construtor. Poucos devs usam blocos de instância no dia a dia, mas eles aparecem em bibliotecas e em provas de concurso/certificação.</div>
+
+      <div class="warn"><b>Erro clássico:</b> chamar um método sobrescrevível (não <code>final</code>, não <code>private</code>) de dentro do construtor da superclasse. Como o construtor da subclasse ainda não rodou nesse ponto, os atributos da subclasse ainda estarão com valor padrão (<code>null</code>/<code>0</code>/<code>false</code>), o que costuma causar <code>NullPointerException</code> silenciosos. Regra prática: evite chamar métodos "overridable" dentro de construtores.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 3.1 — Construtor com validação</h4><span class="exercise-tag m">médio</span></div>
+        <p>Reescreva <code>ContaBancaria</code> com um construtor que recebe <code>titular</code> e <code>saldoInicial</code>. Se <code>saldoInicial</code> for negativo, defina o saldo como 0.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
+    <span class="kw">String</span> titular;
+    <span class="kw">double</span> saldo;
+
+    <span class="fn">ContaBancaria</span>(<span class="kw">String</span> titular, <span class="kw">double</span> saldoInicial) {
+        <span class="kw">this</span>.titular = titular;
+        <span class="kw">this</span>.saldo = (saldoInicial &lt; 0) ? 0 : saldoInicial;
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 3.2 — Ordem de inicialização</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie duas classes <code>Pai</code> e <code>Filho</code> (<code>Filho extends Pai</code>), cada uma com um bloco <code>static</code>, um bloco de instância e um construtor, cada um imprimindo uma mensagem própria. Antes de rodar, escreva no papel a ordem exata em que as mensagens vão aparecer ao criar <code>new Filho()</code> duas vezes seguidas. Depois confira sua previsão.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Na <strong>primeira</strong> criação: static de Pai → static de Filho → instância de Pai → construtor de Pai → instância de Filho → construtor de Filho. Na <strong>segunda</strong> criação de <code>new Filho()</code>, os blocos <code>static</code> <strong>não</strong> rodam de novo (a classe já foi carregada) — só a sequência de instância se repete: instância de Pai → construtor de Pai → instância de Filho → construtor de Filho.</p>
+        </div>
+      </div>
+    </section>

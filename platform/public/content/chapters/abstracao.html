@@ -1,0 +1,83 @@
+<section class="section" id="abstracao">
+      <div class="section-head"><span class="section-num">07</span><h2 class="section-title">Classes abstratas</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#polimorfismo">06 · Polimorfismo</a></div>
+      </div>
+
+      <p>No exercício anterior, <code>Forma.area()</code> retorna 0 só para existir — nunca faz sentido instanciar uma <code>Forma</code> "genérica" sozinha. Uma <strong>classe abstrata</strong> torna essa intenção explícita: não pode ser instanciada e pode ter <strong>métodos abstratos</strong>, sem corpo, que as subclasses são obrigadas a implementar.</p>
+
+      <pre class="code"><span class="kw">public abstract class</span> <span class="cls">Forma</span> {
+    <span class="kw">public abstract double</span> <span class="fn">area</span>(); <span class="com">// sem corpo</span>
+
+    <span class="kw">public void</span> <span class="fn">descrever</span>() { <span class="com">// métodos concretos também são permitidos</span>
+        System.out.println(<span class="str">"Área: "</span> + area());
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">Circulo</span> <span class="kw">extends</span> <span class="cls">Forma</span> {
+    <span class="kw">private double</span> raio;
+    <span class="kw">public</span> <span class="fn">Circulo</span>(<span class="kw">double</span> raio) { <span class="kw">this</span>.raio = raio; }
+    <span class="annotation">@Override</span> <span class="kw">public double</span> <span class="fn">area</span>() { <span class="kw">return</span> Math.PI * raio * raio; }
+}
+
+<span class="com">// Forma forma = new Forma();  // ❌ erro de compilação
+// Circulo c = new Circulo(2); // ✅ ok</span></pre>
+
+      <div class="callout"><b>Quando usar:</b> quando existe comportamento <em>compartilhado</em> (como <code>descrever()</code>) além de um contrato que cada subclasse implementa do seu jeito. Se não há nenhum comportamento compartilhado — só o contrato — uma <strong>interface</strong> (próximo capítulo) costuma ser melhor.</div>
+
+      <h3>Uma classe abstrata pode ter construtor</h3>
+      <p>Parece contraditório (já que ela não pode ser instanciada diretamente), mas faz sentido: o construtor roda quando uma <em>subclasse concreta</em> é instanciada, via <code>super(...)</code>.</p>
+
+      <pre class="code"><span class="kw">public abstract class</span> <span class="cls">Forma</span> {
+    <span class="kw">protected final String</span> nome;
+    <span class="kw">protected</span> <span class="fn">Forma</span>(<span class="kw">String</span> nome) { <span class="kw">this</span>.nome = nome; } <span class="com">// roda via super() nas subclasses</span>
+    <span class="kw">public abstract double</span> <span class="fn">area</span>();
+}</pre>
+
+      <div class="secret">Uma classe abstrata pode não ter <strong>nenhum</strong> método abstrato — a única exigência da palavra-chave <code>abstract</code> na classe é impedir instanciação direta. Isso é usado, por exemplo, quando você quer forçar que a classe só seja usada através de subclasses, mesmo que hoje todos os métodos já tenham implementação padrão.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 7.1 — Instrumentos musicais</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>Instrumento</code> abstrata com <code>tocar()</code> abstrato e <code>afinar()</code> concreto (imprime "Afinando..."). Implemente <code>Violao</code> e <code>Bateria</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public abstract class</span> <span class="cls">Instrumento</span> {
+    <span class="kw">public abstract void</span> <span class="fn">tocar</span>();
+    <span class="kw">public void</span> <span class="fn">afinar</span>() { System.out.println(<span class="str">"Afinando..."</span>); }
+}
+<span class="kw">public class</span> <span class="cls">Violao</span> <span class="kw">extends</span> <span class="cls">Instrumento</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">tocar</span>() { System.out.println(<span class="str">"Dedilhando as cordas"</span>); }
+}
+<span class="kw">public class</span> <span class="cls">Bateria</span> <span class="kw">extends</span> <span class="cls">Instrumento</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">tocar</span>() { System.out.println(<span class="str">"Batendo nos tambores"</span>); }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 7.2 — Template Method</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente o padrão <em>Template Method</em>: crie uma classe abstrata <code>ProcessadorPedido</code> com um método <strong>final</strong> <code>processar()</code> que chama, em ordem fixa, três métodos abstratos: <code>validar()</code>, <code>cobrar()</code> e <code>notificar()</code>. Crie uma subclasse <code>ProcessadorPedidoPix</code> implementando os três passos à sua maneira. A ideia: o "esqueleto" do algoritmo é fixo na superclasse, só os passos individuais variam.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public abstract class</span> <span class="cls">ProcessadorPedido</span> {
+    <span class="kw">public final void</span> <span class="fn">processar</span>() { <span class="com">// final: subclasses não podem mudar a ordem</span>
+        validar();
+        cobrar();
+        notificar();
+    }
+    <span class="kw">protected abstract void</span> <span class="fn">validar</span>();
+    <span class="kw">protected abstract void</span> <span class="fn">cobrar</span>();
+    <span class="kw">protected abstract void</span> <span class="fn">notificar</span>();
+}
+
+<span class="kw">public class</span> <span class="cls">ProcessadorPedidoPix</span> <span class="kw">extends</span> <span class="cls">ProcessadorPedido</span> {
+    <span class="annotation">@Override</span> <span class="kw">protected void</span> <span class="fn">validar</span>() { System.out.println(<span class="str">"Validando chave Pix"</span>); }
+    <span class="annotation">@Override</span> <span class="kw">protected void</span> <span class="fn">cobrar</span>() { System.out.println(<span class="str">"Gerando QR Code Pix"</span>); }
+    <span class="annotation">@Override</span> <span class="kw">protected void</span> <span class="fn">notificar</span>() { System.out.println(<span class="str">"Enviando confirmação por e-mail"</span>); }
+}
+
+<span class="com">// main: new ProcessadorPedidoPix().processar();</span></pre>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,80 @@
+<section class="section tk-spring" id="n-mais-1">
+      <div class="section-head"><span class="section-num">46</span><h2 class="section-title">O problema N+1</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">45 · Spring Data JPA</a>, <a class="prereq-tag" href="#postgres">34 · PostgreSQL</a> (EXPLAIN)</div>
+      </div>
+
+      <p>Este é <strong>o</strong> bug de performance mais comum em aplicações Spring Data JPA — silencioso, fácil de introduzir, e devastador em produção com volume real de dados.</p>
+
+      <div class="analogy">Imagine pedir a lista de 20 pedidos de um restaurante, e para descobrir o nome do cliente de <strong>cada</strong> pedido, o garçom volta à cozinha <strong>uma vez para cada pedido</strong>, em vez de perguntar tudo de uma vez. Uma consulta vira 21: uma para pegar os pedidos, mais uma <em>por pedido</em> para buscar o cliente. É exatamente isso que "N+1" significa: 1 consulta inicial + N consultas extras, uma para cada linha do resultado.</div>
+
+      <pre class="code"><span class="com">// o código parece completamente inocente:</span>
+List&lt;<span class="cls">Livro</span>&gt; livros = livroRepository.findAll(); <span class="com">// 1 query: SELECT * FROM livros</span>
+
+<span class="kw">for</span> (<span class="cls">Livro</span> livro : livros) {
+    System.out.println(livro.getAutor().getNome()); <span class="com">// se @ManyToOne for EAGER (padrão!), dispara
+                                                        // 1 query NOVA por livro para buscar o autor</span>
+}
+<span class="com">// resultado: 1 (livros) + N (um SELECT de autor por livro) = N+1 queries!</span></pre>
+
+      <p>Com 20 livros, isso são <strong>21 idas ao banco</strong> em vez de uma ou duas. Com 10.000 livros, o sistema trava.</p>
+
+      <div class="code-toggle-bar">
+        <button class="ct-btn bad active">❌ Causa o N+1</button>
+        <button class="ct-btn good">✅ Resolve o N+1</button>
+      </div>
+      <div class="ct-panel active">
+<pre class="code"><span class="annotation">@Entity</span>
+<span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="annotation">@ManyToOne</span>(fetch = FetchType.EAGER) <span class="com">// PADRÃO do @ManyToOne se você não especificar!</span>
+    <span class="kw">private</span> <span class="cls">Autor</span> autor;
+}
+<span class="com">// findAll() + acessar .getAutor() em cada um = N+1</span></pre>
+      </div>
+      <div class="ct-panel">
+<pre class="code"><span class="com">// opção 1: LAZY por padrão (não resolve sozinho, só adia o problema)</span>
+<span class="annotation">@ManyToOne</span>(fetch = FetchType.LAZY)
+<span class="kw">private</span> <span class="cls">Autor</span> autor;
+
+<span class="com">// opção 2: JOIN FETCH explícito -- resolve de verdade, tudo em UMA query</span>
+<span class="annotation">@Query</span>(<span class="str">"SELECT l FROM Livro l JOIN FETCH l.autor"</span>)
+List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarTodosComAutor</span>();
+
+<span class="com">// opção 3: EntityGraph -- declarativo, mesmo efeito do JOIN FETCH</span>
+<span class="annotation">@EntityGraph</span>(attributePaths = <span class="str">"autor"</span>)
+List&lt;<span class="cls">Livro</span>&gt; <span class="fn">findAll</span>();</pre>
+      </div>
+
+      <h3>Enxergando o problema com EXPLAIN e logs</h3>
+      <pre class="code"><span class="com"># application.properties -- mostra CADA query SQL executada:</span>
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true</pre>
+      <p>Com isso ligado, o N+1 fica visível imediatamente no console: você vê uma query <code>SELECT * FROM livros</code>, seguida de <strong>vinte</strong> queries repetidas <code>SELECT * FROM autores WHERE id = ?</code> — o padrão salta aos olhos assim que você sabe o que procurar.</p>
+
+      <div class="secret">A configuração <code>FetchType.LAZY</code> sozinha não <em>resolve</em> N+1 — ela só adia: em vez de buscar o autor no momento do <code>findAll()</code>, o Hibernate busca no momento exato em que você chama <code>.getAutor()</code>, ainda uma query por vez. A solução de verdade é sempre buscar <strong>o que você sabe que vai precisar</strong> em uma única consulta com <code>JOIN FETCH</code> ou <code>@EntityGraph</code> — antecipando a necessidade, em vez de deixar o ORM decidir sozinho, linha por linha.</div>
+
+      <div class="study-tip">Sempre que escrever um endpoint que lista objetos com relacionamento, pergunte antes de rodar: "esse endpoint vai acessar o objeto relacionado de cada item da lista?" Se sim, já escreva com <code>JOIN FETCH</code> desde o início — é muito mais fácil prevenir N+1 na hora de escrever do que caçá-lo depois com <code>show-sql</code> em um sistema que já está lento em produção.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 46.1 — Caçando e corrigindo um N+1</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Usando as entidades <code>Autor</code>/<code>Livro</code> do capítulo anterior com <code>spring.jpa.show-sql=true</code>, escreva um endpoint que lista todos os livros e imprime o nome do autor de cada um. Confirme no log a quantidade de queries geradas. Depois, reescreva o repository com um método usando <code>JOIN FETCH</code> e confirme que a quantidade de queries caiu para uma só.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// versão com N+1 (usando findAll() padrão + acesso ao relacionamento):</span>
+List&lt;<span class="cls">Livro</span>&gt; livros = livroRepository.findAll();
+livros.forEach(l -&gt; System.out.println(l.getAutor().getNome()));
+<span class="com">// log mostra: 1 SELECT de livros + N SELECTs de autor (um por livro)</span>
+
+<span class="com">// correção -- método dedicado no repository:</span>
+<span class="kw">public interface</span> <span class="cls">LivroRepository</span> <span class="kw">extends</span> JpaRepository&lt;<span class="cls">Livro</span>, <span class="kw">Long</span>&gt; {
+    <span class="annotation">@Query</span>(<span class="str">"SELECT l FROM Livro l JOIN FETCH l.autor"</span>)
+    List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarTodosComAutor</span>();
+}
+<span class="com">// agora: List<livro> livros = livroRepository.buscarTodosComAutor();
+// log mostra UMA ÚNICA query, com JOIN, trazendo livro + autor juntos</livro></span></pre>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,135 @@
+<section class="section tk-kafka" id="event-driven-profundo">
+      <div class="section-head"><span class="section-num">86</span><h2 class="section-title">Arquitetura Event-Driven &amp; Internals do Kafka — Aprofundamento</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-kafka">Kafka Interno</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Multi-Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#kafka">41 · Kafka na prática</a>, <a class="prereq-tag" href="#mensageria">40 · Mensageria conceitos</a>, <a class="prereq-tag" href="#arquitetura-software">75 · Arquitetura de Software</a></div>
+      </div>
+
+      <p>Os capítulos 40-42 ensinaram a <em>usar</em> Kafka. Este capítulo abre a "caixa preta" — como tópicos e partições realmente funcionam por dentro, e o que significa desenhar um sistema inteiro em torno de eventos, não só usar uma fila pontualmente.</p>
+
+      <h3>Event-Driven Architecture: uma mudança de mentalidade, não só de tecnologia</h3>
+      <p>Em uma arquitetura tradicional request-response (capítulo 44), um serviço <strong>pergunta ativamente</strong> a outro por informação, e espera a resposta. Em uma arquitetura orientada a eventos, um serviço <strong>anuncia que algo aconteceu</strong> ("PedidoCriado", "PagamentoAprovado"), sem saber (nem se importar) quem está ouvindo — quem precisar reagir, reage, de forma completamente desacoplada.</p>
+
+      <pre class="code">MODELO REQUEST-RESPONSE (acoplamento direto):
+┌───────────┐  "processe este pagamento"  ┌───────────────┐
+│  Serviço   │ ──────────────────────────► │  Serviço de     │
+│  Pedido    │ ◄────────────────────────── │  Pagamento      │
+└───────────┘        resposta direta       └───────────────┘
+    Serviço Pedido PRECISA SABER que o Serviço de Pagamento existe,
+    seu endereço, e espera SÍNCRONA e ATIVAMENTE pela resposta
+
+MODELO EVENT-DRIVEN (desacoplamento via eventos):
+┌───────────┐   publica "PedidoCriado"    ┌───────────────┐
+│  Serviço   │ ──────────────────────────► │     TÓPICO      │
+│  Pedido    │      (não sabe quem ouve)   │  "pedidos"      │
+└───────────┘                              └───────┬───────┘
+                                                     │
+                          ┌──────────────────────────┼──────────────────────┐
+                          ▼                          ▼                      ▼
+                 ┌───────────────┐        ┌───────────────┐      ┌───────────────┐
+                 │  Serviço de    │        │  Serviço de    │      │  Serviço de    │
+                 │  Pagamento     │        │  Estoque        │      │  Notificação    │
+                 └───────────────┘        └───────────────┘      └───────────────┘
+    Serviço Pedido NÃO SABE que esses três serviços existem --
+    cada um decide, de forma independente, se e como reagir ao evento</pre>
+
+      <div class="analogy">Request-response é como fazer uma ligação telefônica direta para pedir algo — você precisa saber exatamente o número de quem vai atender, e fica esperando na linha até a resposta. Event-driven é como postar um anúncio em um mural público de bairro ("alguém encontrou uma chave") — você não sabe (nem precisa saber) quem vai ler, quantas pessoas vão reagir, ou quando. Isso desacopla completamente quem publica de quem consome, permitindo adicionar novos "leitores do mural" (novos serviços reagindo ao mesmo evento) sem NUNCA precisar tocar no código de quem publica.</div>
+
+      <h3>Anatomia interna de um tópico Kafka</h3>
+      <p>O capítulo 41 já introduziu tópicos e partições superficialmente. Vamos abrir isso completamente.</p>
+
+      <pre class="code">TÓPICO: "pedidos-finalizados"  (3 partições)
+
+┌─────────────────────────────────────────────────────────────┐
+│ PARTIÇÃO 0                                                     │
+│ offset:  0     1     2     3     4     5                       │
+│        ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐                    │
+│        │msg│ │msg│ │msg│ │msg│ │msg│ │msg│  ← APPEND-ONLY --   │
+│        └───┘ └───┘ └───┘ └───┘ └───┘ └───┘    NUNCA editada,   │
+│                                    ▲            só cresce       │
+│                          próximo offset a escrever              │
+├─────────────────────────────────────────────────────────────┤
+│ PARTIÇÃO 1                                                     │
+│ offset:  0     1     2     3                                   │
+│        ┌───┐ ┌───┐ ┌───┐ ┌───┐                                 │
+│        │msg│ │msg│ │msg│ │msg│                                 │
+│        └───┘ └───┘ └───┘ └───┘                                 │
+├─────────────────────────────────────────────────────────────┤
+│ PARTIÇÃO 2                                                     │
+│ offset:  0     1     2     3     4                              │
+│        ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐                            │
+│        │msg│ │msg│ │msg│ │msg│ │msg│                            │
+│        └───┘ └───┘ └───┘ └───┘ └───┘                            │
+└─────────────────────────────────────────────────────────────┘</pre>
+
+      <p>Cada partição é, estruturalmente, um <strong>log append-only</strong> — uma estrutura de dados extremamente simples (e por isso extremamente rápida): novas mensagens só são adicionadas ao final, nunca inseridas no meio, nunca editadas. Cada mensagem recebe um <strong>offset</strong> sequencial, único dentro daquela partição — como o número de uma página em um livro que só cresce, nunca é reordenado.</p>
+
+      <h3>Como a chave da mensagem decide a partição</h3>
+      <pre class="code">producer.send(<span class="kw">new</span> ProducerRecord&lt;&gt;(<span class="str">"pedidos-finalizados"</span>, <span class="str">"cliente-42"</span>, dadosPedido));
+                                                    <span class="com">↑ chave</span>
+
+Por baixo dos panos: partição = hash(chave) % numeroDePartições
+
+"cliente-42" sempre produz o MESMO hash, então TODAS as mensagens
+com essa chave SEMPRE vão para a MESMA partição -- garantindo que,
+para aquele cliente específico, a ORDEM de processamento é preservada
+(mensagens dentro de uma mesma partição são sempre processadas em
+ordem de offset). Mensagens de clientes DIFERENTES podem ir para
+partições diferentes, processadas EM PARALELO por consumidores
+diferentes -- é assim que Kafka escala: paralelismo entre partições,
+ordem garantida dentro de cada uma.</pre>
+
+      <div class="secret">Essa é a razão técnica exata pela qual "ordem garantida" no Kafka é uma <strong>garantia por partição, não global no tópico</strong> — um detalhe que confunde bastante gente. Se você precisa que todos os eventos de um mesmo cliente sejam processados estritamente em ordem (ex: "PedidoCriado" antes de "PedidoCancelado" para o mesmo pedido), a chave da mensagem <strong>precisa</strong> ser algo que identifique esse cliente/pedido de forma consistente — se você usar uma chave aleatória ou nula, mensagens relacionadas podem cair em partições diferentes e serem processadas fora de ordem por consumidores diferentes, rodando em paralelo.</div>
+
+      <h3>Replicação — como Kafka sobrevive à queda de um servidor</h3>
+      <pre class="code">PARTIÇÃO 0, com replication-factor=3 (replicada em 3 brokers):
+
+  Broker 1 (LÍDER)         Broker 2 (réplica)      Broker 3 (réplica)
+  ┌─────────────┐          ┌─────────────┐         ┌─────────────┐
+  │ [0][1][2][3] │ ──copia──► [0][1][2][3] │ ──copia─► [0][1][2][3] │
+  └─────────────┘          └─────────────┘         └─────────────┘
+   TODA escrita e            réplica PASSIVA         réplica PASSIVA
+   leitura passa por          (só copia do líder)     (só copia do líder)
+   este broker
+
+  Se o Broker 1 (líder) CAIR:
+  Kafka elege AUTOMATICAMENTE um novo líder entre as réplicas
+  restantes (ex: Broker 2 vira o novo líder) -- a aplicação cliente
+  nem percebe, além de uma pequena pausa durante a reeleição</pre>
+
+      <div class="analogy">Pense em replicação como três funcionários de um cartório, cada um com uma cópia idêntica de um livro de registros. Um deles (o "líder") é quem realmente atende o público e escreve novos registros; os outros dois copiam cada novo registro dele em tempo real, como espectadores atentos. Se o funcionário líder sair de férias inesperadamente (o broker cai), um dos outros dois — que já tinha uma cópia atualizada — assume o balcão imediatamente, sem que o público perceba interrupção significativa no atendimento.</div>
+
+      <h3>Consumer Offset — como Kafka lembra "até onde você já leu"</h3>
+      <pre class="code">Consumer Group "servico-notificacao" lendo a PARTIÇÃO 0:
+
+  offset:  0     1     2     3     4     5
+         ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐
+         │ ✓ │ │ ✓ │ │ ✓ │ │ ✓ │ │ →  │ │   │
+         └───┘ └───┘ └───┘ └───┘ └───┘ └───┘
+                              ▲
+                    "committed offset" = 3
+                    (o consumer já confirmou ter processado
+                     até a mensagem de offset 3 -- se ele cair
+                     e voltar, retoma exatamente do offset 4,
+                     NUNCA reprocessa o que já foi confirmado
+                     ... exceto se o commit em si falhar, daí
+                     entramos de novo em "at-least-once",
+                     capítulo 40!)</pre>
+
+      <p>O <strong>offset commitado</strong> é armazenado pelo próprio Kafka (em um tópico interno especial). Isso é o que permite a um consumer group retomar exatamente de onde parou depois de uma queda — e é também a raiz técnica exata da garantia "at-least-once" discutida no capítulo 40: se o consumer processar a mensagem mas cair <em>antes</em> de confirmar o commit do offset, ao voltar ele vai reprocessar aquela mesma mensagem — daí a necessidade de idempotência no lado do consumidor.</p>
+
+      <div class="warn"><b>Ordem de operações importa:</b> processar a mensagem <strong>antes</strong> de commitar o offset (o padrão mais comum, chamado "at-least-once") significa que uma falha entre as duas etapas causa reprocessamento — mas nunca perda de mensagem. Commitar o offset <strong>antes</strong> de processar ("at-most-once") é mais raro e mais arriscado: uma falha entre as duas etapas significa que a mensagem é considerada "processada" pelo Kafka, mesmo que na prática nunca tenha sido — resultando em perda silenciosa. A escolha padrão do Spring Kafka (capítulo 42) tende para at-least-once, exatamente por essa razão de segurança.</div>
+
+      <div class="study-tip">Ao desenhar um sistema orientado a eventos do zero, comece sempre respondendo três perguntas antes de escrever qualquer código: "qual é a chave certa para garantir ordem onde ela importa?", "meu consumidor é genuinamente idempotente (capítulo 40)?" e "o que acontece se este evento for processado duas vezes, ou nunca?" Essas três perguntas cobrem a esmagadora maioria dos bugs sutis que sistemas orientados a eventos costumam introduzir em produção.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 89.1 — Desenhando particionamento correto</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Para um tópico Kafka <code>"eventos-conta-bancaria"</code>, publicando eventos de depósito e saque, explique qual deveria ser a chave de particionamento correta e por quê, considerando que a ordem de processamento entre depósitos e saques de uma <strong>mesma conta</strong> é crítica (processar um saque antes de um depósito anterior daria saldo incorreto), mas a ordem entre contas <strong>diferentes</strong> é irrelevante.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>A chave deveria ser o <strong>ID da conta bancária</strong> (ex: <code>numeroConta</code>), nunca um ID de transação individual ou uma chave nula/aleatória. Como Kafka garante ordem <strong>dentro</strong> de uma partição, usar o ID da conta como chave garante que <strong>todos</strong> os eventos daquela conta específica sempre caiam na mesma partição e sejam processados estritamente na ordem em que foram publicados — resolvendo exatamente o requisito de negócio. Ao mesmo tempo, contas diferentes (chaves diferentes) podem ser distribuídas entre partições diferentes e processadas em paralelo por múltiplos consumidores do mesmo consumer group, aproveitando o paralelismo sem sacrificar a correção onde ela realmente importa.</p>
+        </div>
+      </div>
+    </section>

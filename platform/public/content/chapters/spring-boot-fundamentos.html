@@ -1,0 +1,34 @@
+<section class="section tk-spring" id="spring-boot-fundamentos">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Spring Boot por dentro: bootstrap, auto-configuração e configuração tipada</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Intermediário</b></div><div class="time-est">⏱ <b>~3h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">Spring Core</a>, <a class="prereq-tag" href="#build">Maven e Gradle</a></div></div>
+      
+      <p>Spring Framework fornece o contêiner e os módulos; Spring Boot fornece convenções, auto-configuração, starters, servidor embutido, configuração externa e ferramentas operacionais para iniciar uma aplicação coerente rapidamente.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>O que acontece quando a aplicação inicia</h3></div>
+    <p>Antes das anotações, conecte cada termo a uma etapa simples do início da aplicação.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Bootstrap</dt><dd>Sequência que cria e prepara a aplicação: lê configuração, monta o contexto e inicia o servidor.</dd></div><div class="concept-card"><dt>Bean</dt><dd>Objeto criado e administrado pelo contêiner Spring.</dd></div><div class="concept-card"><dt>Component scanning</dt><dd>Busca classes marcadas como componentes nos pacotes configurados para registrá-las como beans.</dd></div><div class="concept-card"><dt>Starter</dt><dd>Dependência agregadora que traz um conjunto coerente de bibliotecas para uma capacidade, como web ou validação.</dd></div><div class="concept-card"><dt>Auto-configuração</dt><dd>Configuração padrão ativada somente quando condições de classes, propriedades e beans são satisfeitas.</dd></div><div class="concept-card"><dt>Servidor embutido</dt><dd>Servidor HTTP empacotado com a aplicação, iniciado pelo próprio processo em vez de receber um WAR externo.</dd></div></dl>
+  </aside>
+      <pre class="code"><span class="annotation">@SpringBootApplication</span>
+<span class="annotation">@ConfigurationPropertiesScan</span>
+<span class="kw">public class</span> Aplicacao {
+    <span class="kw">public static void</span> main(String[] args) {
+        SpringApplication.run(Aplicacao.class, args);
+    }
+}</pre>
+      <p><code>@SpringBootApplication</code> combina configuração, component scanning e habilitação da auto-configuração. As auto-configurações são condicionais: observam classes presentes, propriedades e beans já definidos. Declarar seu próprio bean costuma fazer a configuração padrão recuar, mas isso precisa ser verificado com o relatório de condições e testes.</p>
+      <h3>Configuração tipada</h3>
+      <pre class="code"><span class="annotation">@ConfigurationProperties</span>(<span class="str">"pagamentos"</span>)
+<span class="kw">public record</span> PagamentoProperties(
+    <span class="annotation">@NotBlank</span> String baseUrl,
+    <span class="annotation">@DurationMin</span>(millis = 100) Duration timeout,
+    <span class="annotation">@Min</span>(1) <span class="kw">int</span> tentativas) {}</pre>
+      <pre class="code">pagamentos:
+  base-url: ${PAGAMENTOS_BASE_URL}
+  timeout: 2s
+  tentativas: 3</pre>
+      <p><strong>Configuração externa</strong> mantém valores que variam por ambiente fora do código. O <code>@ConfigurationProperties</code> agrupa esses valores em um tipo Java; as anotações de validação impedem a aplicação de iniciar com configuração inválida. Prefira isso a espalhar <code>@Value</code>. Nunca forneça segredo real como padrão. <strong>Profiles</strong> ativam conjuntos nomeados de configuração e devem representar diferenças legítimas de ambiente, não combinações incontáveis de comportamento.</p>
+      <h3>Starters e versões</h3>
+      <p>Use o BOM/dependency management da versão de Spring Boot adotada e evite fixar versões individuais de bibliotecas gerenciadas sem motivo. O curso assume <strong>Java 21</strong>; a versão exata do Spring Boot deve estar registrada no projeto e no README, porque compatibilidade de springdoc, Testcontainers e plugins depende dela.</p>
+      <div class="warn"><b>JSON e ObjectMapper:</b> Jackson é a biblioteca que o Boot normalmente usa para converter objetos Java e JSON; <code>ObjectMapper</code> é seu objeto central de configuração e conversão. Declarar um <code>new ObjectMapper()</code> isolado pode perder módulos e customizações do Boot. Prefira customizadores, módulos Jackson como beans ou injete o mapper auto-configurado.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — explique o bootstrap</h4><span class="exercise-tag m">médio</span></div><p>Crie uma API pelo Initializr com Web, Validation e Actuator. Rode com <code>--debug</code>, encontre a auto-configuração do servidor, sobrescreva uma propriedade tipada e escreva um teste que falha quando a configuração é inválida.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>O relatório deve distinguir condições positivas e negativas; a aplicação não deve acessar variável de ambiente diretamente dentro da regra de negócio.</p></div></div>
+    </section>

@@ -1,0 +1,132 @@
+<section class="section" id="jdbc">
+      <div class="section-head"><span class="section-num">24</span><h2 class="section-title">JDBC &amp; banco de dados</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#sql">SQL</a>, <a class="prereq-tag" href="#padroes">Padrões de projeto</a>, <a class="prereq-tag" href="#excecoes">Exceções</a></div>
+      </div>
+
+      <p><strong>JDBC</strong> (Java Database Connectivity) é a API padrão do Java para conversar com bancos relacionais. O Spring Data JPA (que você vai usar no módulo Spring) é construído <em>em cima</em> de JDBC — entender esta camada evita que o JPA pareça mágica.</p>
+
+      <h3>Conexão, Statement e ResultSet</h3>
+      <pre class="code"><span class="kw">String</span> url = <span class="str">"jdbc:postgresql://localhost:5432/biblioteca"</span>;
+
+<span class="kw">try</span> (Connection conexao = DriverManager.getConnection(url, <span class="str">"usuario"</span>, <span class="str">"senha"</span>);
+     PreparedStatement stmt = conexao.prepareStatement(
+         <span class="str">"SELECT titulo, autor FROM livros WHERE paginas &gt; ?"</span>)) {
+
+    stmt.setInt(1, 300); <span class="com">// preenche o "?" -- posição 1</span>
+
+    <span class="kw">try</span> (ResultSet rs = stmt.executeQuery()) {
+        <span class="kw">while</span> (rs.next()) {
+            System.out.println(rs.getString(<span class="str">"titulo"</span>) + <span class="str">" - "</span> + rs.getString(<span class="str">"autor"</span>));
+        }
+    }
+} <span class="kw">catch</span> (SQLException e) {
+    <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Erro ao consultar livros"</span>, e); <span class="com">// exception chaining (capítulo 10)</span>
+}</pre>
+
+      <p>Repare o uso de <strong>try-with-resources</strong> (capítulo 10) duplo — <code>Connection</code>, <code>PreparedStatement</code> e <code>ResultSet</code> implementam <code>AutoCloseable</code> e precisam ser fechados sempre, mesmo em caso de erro.</p>
+
+      <div class="warn"><b>NUNCA concatene SQL com dados do usuário:</b></div>
+      <pre class="code"><span class="com">// ❌ SQL Injection -- um usuário malicioso pode injetar "'; DROP TABLE livros; --"</span>
+<span class="kw">String</span> sql = <span class="str">"SELECT * FROM livros WHERE titulo = '"</span> + tituloDigitadoPeloUsuario + <span class="str">"'"</span>;
+
+<span class="com">// ✅ PreparedStatement separa o valor da estrutura SQL</span>
+PreparedStatement stmt = conexao.prepareStatement(<span class="str">"SELECT * FROM livros WHERE titulo = ?"</span>);
+stmt.setString(1, tituloDigitadoPeloUsuario);</pre>
+
+      <div class="warn"><b>Limite da proteção:</b> parâmetros protegem valores. Nomes de tabela, coluna, direção de ordenação e fragmentos SQL não podem ser recebidos do usuário e passados como parâmetro; selecione-os a partir de uma allowlist controlada pela aplicação.</div>
+
+      <h3>INSERT, UPDATE, DELETE</h3>
+      <pre class="code"><span class="kw">try</span> (PreparedStatement stmt = conexao.prepareStatement(
+        <span class="str">"INSERT INTO livros (titulo, autor, paginas) VALUES (?, ?, ?)"</span>)) {
+    stmt.setString(1, <span class="str">"Dom Casmurro"</span>);
+    stmt.setString(2, <span class="str">"Machado de Assis"</span>);
+    stmt.setInt(3, 256);
+    <span class="kw">int</span> linhasAfetadas = stmt.executeUpdate(); <span class="com">// INSERT/UPDATE/DELETE usam executeUpdate(), não executeQuery()</span>
+}</pre>
+
+      <h3>Connection Pool — por que ninguém abre conexão "crua" em produção</h3>
+      <p>Abrir uma <code>Connection</code> nova a cada operação é caro (handshake de rede, autenticação). Um <strong>pool de conexões</strong> (ex: HikariCP, que é o padrão usado pelo Spring Boot) mantém um conjunto de conexões já abertas e as reutiliza entre requisições.</p>
+
+      <div class="secret">Quando você configurar um <code>DataSource</code> no Spring Boot (geralmente só com algumas linhas em <code>application.properties</code>), o framework vai montar automaticamente um <code>Connection</code> pool HikariCP por trás — e o <code>JdbcTemplate</code>/Spring Data JPA vão usar exatamente os mesmos conceitos de <code>PreparedStatement</code> e mapeamento de <code>ResultSet</code> que você acabou de ver, só que com boilerplate reduzido drasticamente. Entender o JDBC puro é entender <em>o que</em> essas camadas de conveniência estão economizando do seu código.</div>
+
+      <h3>Mapeando ResultSet para objetos — o embrião do ORM</h3>
+      <pre class="code"><span class="kw">public</span> List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarTodos</span>(Connection conexao) <span class="kw">throws</span> SQLException {
+    List&lt;<span class="cls">Livro</span>&gt; livros = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">try</span> (Statement stmt = conexao.createStatement();
+         ResultSet rs = stmt.executeQuery(<span class="str">"SELECT * FROM livros"</span>)) {
+        <span class="kw">while</span> (rs.next()) {
+            <span class="cls">Livro</span> livro = <span class="kw">new</span> <span class="cls">Livro</span>(
+                rs.getLong(<span class="str">"id"</span>),
+                rs.getString(<span class="str">"titulo"</span>),
+                rs.getString(<span class="str">"autor"</span>),
+                rs.getInt(<span class="str">"paginas"</span>)
+            );
+            livros.add(livro);
+        }
+    }
+    <span class="kw">return</span> livros;
+}</pre>
+      <div class="callout"><b>Isso é literalmente o que um ORM (Object-Relational Mapper) automatiza.</b> Hibernate/JPA — usados pelo Spring Data JPA — fazem exatamente esse "linha de tabela vira objeto Java" automaticamente, usando anotações (<code>@Entity</code>, <code>@Column</code>) e reflection (capítulo 20) para descobrir os mapeamentos, no lugar de você escrever esse <code>while (rs.next())</code> manualmente para cada tabela.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 24.1 — Repository JDBC</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente <code>LivroRepositorioJdbc</code> recebendo um <code>DataSource</code>. Cada operação adquire e devolve uma conexão pelo try-with-resources. Implemente <code>salvar</code>, <code>buscarPorId</code> e <code>listarTodos</code>; depois explique como uma camada de serviço forneceria a mesma conexão para várias operações dentro de uma transação.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">LivroRepositorioJdbc</span> <span class="kw">implements</span> <span class="cls">LivroRepositorio</span> {
+    <span class="kw">private final</span> DataSource dataSource;
+    <span class="kw">public</span> <span class="fn">LivroRepositorioJdbc</span>(DataSource dataSource) { <span class="kw">this</span>.dataSource = dataSource; }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public void</span> <span class="fn">salvar</span>(<span class="cls">Livro</span> livro) {
+        <span class="kw">try</span> (Connection conexao = dataSource.getConnection();
+             PreparedStatement stmt = conexao.prepareStatement(
+                <span class="str">"INSERT INTO livros (titulo, autor, paginas) VALUES (?, ?, ?)"</span>)) {
+            stmt.setString(1, livro.getTitulo());
+            stmt.setString(2, livro.getAutor());
+            stmt.setInt(3, livro.getPaginas());
+            stmt.executeUpdate();
+        } <span class="kw">catch</span> (SQLException e) {
+            <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Erro ao salvar livro"</span>, e);
+        }
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public</span> Optional&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarPorId</span>(<span class="kw">long</span> id) {
+        <span class="kw">try</span> (Connection conexao = dataSource.getConnection();
+             PreparedStatement stmt = conexao.prepareStatement(
+                <span class="str">"SELECT * FROM livros WHERE id = ?"</span>)) {
+            stmt.setLong(1, id);
+            <span class="kw">try</span> (ResultSet rs = stmt.executeQuery()) {
+                <span class="kw">if</span> (rs.next()) {
+                    <span class="kw">return</span> Optional.of(<span class="kw">new</span> <span class="cls">Livro</span>(rs.getLong(<span class="str">"id"</span>), rs.getString(<span class="str">"titulo"</span>),
+                        rs.getString(<span class="str">"autor"</span>), rs.getInt(<span class="str">"paginas"</span>)));
+                }
+                <span class="kw">return</span> Optional.empty();
+            }
+        } <span class="kw">catch</span> (SQLException e) {
+            <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Erro ao buscar livro"</span>, e);
+        }
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public</span> List&lt;<span class="cls">Livro</span>&gt; <span class="fn">listarTodos</span>() {
+        List&lt;<span class="cls">Livro</span>&gt; livros = <span class="kw">new</span> ArrayList&lt;&gt;();
+        <span class="kw">try</span> (Connection conexao = dataSource.getConnection();
+             Statement stmt = conexao.createStatement();
+             ResultSet rs = stmt.executeQuery(<span class="str">"SELECT * FROM livros"</span>)) {
+            <span class="kw">while</span> (rs.next()) {
+                livros.add(<span class="kw">new</span> <span class="cls">Livro</span>(rs.getLong(<span class="str">"id"</span>), rs.getString(<span class="str">"titulo"</span>),
+                    rs.getString(<span class="str">"autor"</span>), rs.getInt(<span class="str">"paginas"</span>)));
+            }
+        } <span class="kw">catch</span> (SQLException e) {
+            <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Erro ao listar livros"</span>, e);
+        }
+        <span class="kw">return</span> livros;
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

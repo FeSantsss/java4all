@@ -1,0 +1,75 @@
+<section class="section tk-kafka" id="mensageria">
+      <div class="section-head"><span class="section-num">40</span><h2 class="section-title">Mensageria — conceitos</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-kafka">Mensageria</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#threads">14 · Threads &amp; concorrência</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a></div>
+      </div>
+
+      <p>Até aqui, toda comunicação do curso foi <strong>síncrona</strong>: o cliente chama a API e espera a resposta ali mesmo (capítulo 26). <strong>Mensageria</strong> resolve o problema de comunicação <strong>assíncrona</strong> — um serviço manda uma mensagem e segue em frente, sem esperar quem vai processá-la, nem quando.</p>
+
+      <div class="analogy">Comunicação síncrona é uma ligação telefônica: você fala e espera a resposta na hora, os dois lados precisam estar disponíveis ao mesmo tempo. Mensageria é uma caixa de correio: você deixa a carta lá e segue sua vida; o destinatário lê quando puder, mesmo que esteja offline no momento em que você escreveu.</div>
+
+      <h3>Por que não simplesmente chamar a outra API direto?</h3>
+      <p>Se o serviço de e-mail estiver fora do ar no momento em que um pedido é finalizado, uma chamada HTTP síncrona falharia e travaria (ou quebraria) o fluxo de finalização do pedido — mesmo que enviar e-mail seja secundário ao pedido em si. Com mensageria, o pedido publica uma mensagem "pedido finalizado" e segue seu fluxo; o serviço de e-mail processa essa mensagem quando estiver disponível, sem acoplar o sucesso do pedido ao sucesso do envio de e-mail.</p>
+
+      <h3>Fila (queue) vs Publish/Subscribe (pub/sub)</h3>
+      <table class="cmp">
+        <tbody><tr><th>Padrão</th><th>Como funciona</th><th>Exemplo</th></tr>
+        <tr><td><strong>Fila (Queue)</strong></td><td>Cada mensagem é consumida por <strong>um único</strong> consumidor</td><td>Processar pagamentos — cada pagamento processado uma vez, por um worker</td></tr>
+        <tr><td><strong>Pub/Sub</strong></td><td>Cada mensagem é entregue a <strong>todos</strong> os assinantes interessados</td><td>"Pedido criado" — o serviço de e-mail, o de estoque e o de analytics reagem, cada um à sua maneira, ao mesmo evento</td></tr>
+      </tbody></table>
+
+      <h3>Garantias de entrega — o que pode dar errado</h3>
+      <table class="cmp">
+        <tbody><tr><th>Garantia</th><th>Significado</th><th>Risco</th></tr>
+        <tr><td><strong>At-most-once</strong></td><td>Mensagem entregue no máximo uma vez</td><td>Pode <strong>perder</strong> mensagens se algo falhar</td></tr>
+        <tr><td><strong>At-least-once</strong></td><td>Mensagem entregue uma ou mais vezes</td><td>Pode <strong>duplicar</strong> processamento — exige idempotência</td></tr>
+        <tr><td><strong>Exactly-once</strong></td><td>Mensagem processada exatamente uma vez</td><td>Mais caro/complexo de garantir de ponta a ponta; raramente 100% absoluto na prática</td></tr>
+      </tbody></table>
+
+      <h3>Idempotência — a habilidade que salva sistemas de mensageria</h3>
+      <p>Na prática, a maioria dos sistemas de mensageria (incluindo Kafka, próximo capítulo) opera em <strong>at-least-once</strong>: é mais barato garantir "entrega pelo menos uma vez, às vezes duas" do que "exatamente uma vez, sempre". Isso significa que seu <strong>consumidor</strong> precisa ser <strong>idempotente</strong> — processar a mesma mensagem duas vezes não pode causar efeito duplicado.</p>
+
+      <pre class="code"><span class="com">// ❌ NÃO idempotente -- processar a mesma mensagem 2x credita 2x:</span>
+<span class="kw">void</span> <span class="fn">processarPagamento</span>(<span class="cls">MensagemPagamento</span> msg) {
+    conta.creditar(msg.getValor());
+}
+
+<span class="com">// ✅ idempotente -- usa um ID único da mensagem para NUNCA processar duas vezes:</span>
+<span class="kw">void</span> <span class="fn">processarPagamento</span>(<span class="cls">MensagemPagamento</span> msg) {
+    <span class="kw">if</span> (processadosRepositorio.jaProcessado(msg.getId())) {
+        <span class="kw">return</span>; <span class="com">// já vimos essa mensagem antes -- ignora silenciosamente</span>
+    }
+    conta.creditar(msg.getValor());
+    processadosRepositorio.marcarComoProcessado(msg.getId());
+}</pre>
+
+      <div class="secret">Esse é literalmente o mesmo problema de race condition do capítulo 14, só que distribuído entre processos diferentes em vez de threads na mesma JVM. A solução também rima: assim como <code>synchronized</code>/<code>AtomicInteger</code> garantiam uma operação atômica dentro de uma aplicação, um registro de "IDs já processados" (geralmente com uma restrição <code>UNIQUE</code> no banco, capítulo 33) garante atomicidade de processamento entre múltiplas instâncias consumindo a mesma fila.</div>
+
+      <div class="study-tip">Antes de aprender a sintaxe de qualquer ferramenta de mensageria específica, treine a pergunta: <em>"o que acontece se essa mensagem chegar duas vezes?"</em> Se a resposta te assusta, o design ainda não está pronto para produção — independente de qual tecnologia (Kafka, RabbitMQ, SQS) você usar por baixo.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 40.1 — Tornando um consumidor idempotente</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva uma classe <code>ProcessadorEmprestimo</code> com um método <code>processar(String mensagemId, String codigoLivro)</code> que empresta um livro (reaproveitando a lógica da <code>Biblioteca</code> dos capítulos anteriores). Use um <code>Set&lt;String&gt;</code> em memória para rastrear IDs de mensagem já processados, garantindo que processar a mesma <code>mensagemId</code> duas vezes não empreste o livro duas vezes.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">ProcessadorEmprestimo</span> {
+    <span class="kw">private final</span> <span class="cls">Biblioteca</span> biblioteca;
+    <span class="kw">private final</span> Set&lt;<span class="kw">String</span>&gt; mensagensProcessadas = <span class="kw">new</span> HashSet&lt;&gt;();
+
+    <span class="kw">public</span> <span class="fn">ProcessadorEmprestimo</span>(<span class="cls">Biblioteca</span> biblioteca) { <span class="kw">this</span>.biblioteca = biblioteca; }
+
+    <span class="kw">public synchronized void</span> <span class="fn">processar</span>(<span class="kw">String</span> mensagemId, <span class="kw">String</span> codigoLivro) <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        <span class="kw">if</span> (mensagensProcessadas.contains(mensagemId)) {
+            System.out.println(<span class="str">"Mensagem "</span> + mensagemId + <span class="str">" já processada -- ignorando"</span>);
+            <span class="kw">return</span>;
+        }
+        biblioteca.emprestar(codigoLivro);
+        mensagensProcessadas.add(mensagemId);
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

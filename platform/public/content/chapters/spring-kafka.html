@@ -1,0 +1,65 @@
+<section class="section tk-spring" id="spring-kafka">
+      <div class="section-head"><span class="section-num">42</span><h2 class="section-title">Spring Kafka — integração</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#kafka">41 · Kafka na prática</a>, <a class="prereq-tag" href="#di">22 · Injeção de dependência</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
+      </div>
+
+      <p>O que você acabou de escrever manualmente no capítulo 41 (configurar <code>Properties</code>, criar producer/consumer, fazer o loop de <code>poll</code>) é exatamente o boilerplate que o <strong>Spring Kafka</strong> elimina — mesma relação de "entenda antes de automatizar" que já vimos com JDBC → Spring Data JPA.</p>
+
+      <pre class="code"><span class="com">// producer: uma linha, o Spring já gerencia a configuração via application.properties</span>
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">PedidoEventPublisher</span> {
+    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate;
+
+    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate) { <span class="com">// injeção, capítulo 22!</span>
+        <span class="kw">this</span>.kafkaTemplate = kafkaTemplate;
+    }
+
+    <span class="kw">public void</span> <span class="fn">publicarPedidoFinalizado</span>(<span class="kw">String</span> pedidoId) {
+        kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, pedidoId, <span class="str">"{\"id\":\""</span> + pedidoId + <span class="str">"\"}"</span>);
+    }
+}
+
+<span class="com">// consumer: uma anotação substitui o loop de poll() inteiro</span>
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">NotificacaoListener</span> {
+    <span class="annotation">@KafkaListener</span>(topics = <span class="str">"pedidos-finalizados"</span>, groupId = <span class="str">"servico-notificacao"</span>)
+    <span class="kw">public void</span> <span class="fn">ouvir</span>(<span class="kw">String</span> mensagem) {
+        System.out.println(<span class="str">"Notificando sobre: "</span> + mensagem);
+    }
+}</pre>
+
+      <pre class="code"><span class="com"># application.properties</span>
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=servico-notificacao
+spring.kafka.consumer.auto-offset-reset=earliest</pre>
+
+      <div class="secret">Por trás de <code>@KafkaListener</code>, o Spring cria uma thread dedicada (relembra o capítulo 14) que fica rodando o equivalente ao <code>while(true) { poll(...) }</code> manual que você escreveu no capítulo anterior — só que gerenciado, com retry configurável e integração automática com o restante do container de beans. É exatamente o mesmo padrão de "reflection + anotação automatizando boilerplate" que apareceu em todo o capítulo 20.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 42.1 — Migrando para Spring Kafka</h4><span class="exercise-tag m">médio</span></div>
+        <p>Reescreva o <code>PedidoProducer</code> e <code>NotificacaoConsumer</code> do exercício 41.1 usando <code>KafkaTemplate</code> e <code>@KafkaListener</code>. Configure o <code>application.properties</code> com o <code>bootstrap-servers</code> e <code>group-id</code> corretos.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">PedidoEventPublisher</span> {
+    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate;
+    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate) { <span class="kw">this</span>.kafkaTemplate = kafkaTemplate; }
+    <span class="kw">public void</span> <span class="fn">publicar</span>(<span class="kw">String</span> pedidoId) {
+        kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, pedidoId, <span class="str">"{\"id\":\""</span> + pedidoId + <span class="str">"\"}"</span>);
+    }
+}
+
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">NotificacaoListener</span> {
+    <span class="annotation">@KafkaListener</span>(topics = <span class="str">"pedidos-finalizados"</span>, groupId = <span class="str">"servico-notificacao"</span>)
+    <span class="kw">public void</span> <span class="fn">ouvir</span>(<span class="kw">String</span> mensagem) {
+        System.out.println(<span class="str">"Notificando: "</span> + mensagem);
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

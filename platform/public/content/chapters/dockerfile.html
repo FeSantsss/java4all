@@ -1,0 +1,83 @@
+<section class="section tk-docker" id="dockerfile">
+      <div class="section-head"><span class="section-num">31</span><h2 class="section-title">Dockerfile &amp; multi-stage build</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-docker">Docker</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#docker-conceitos">30 · Docker conceitos</a>, <a class="prereq-tag" href="#build">19 · Maven &amp; Gradle</a></div>
+      </div>
+
+      <p>Um <strong>Dockerfile</strong> é a receita que descreve como construir sua própria imagem — no nosso caso, a imagem da aplicação Java que você escreveu ao longo do curso.</p>
+
+      <pre class="code"><span class="com"># Dockerfile ingênuo -- funciona, mas é PROBLEMÁTICO:</span>
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+COPY . .
+RUN ./mvnw package -DskipTests
+CMD ["java", "-jar", "target/biblioteca-1.0.0.jar"]</pre>
+
+      <div class="warn"><b>O problema:</b> essa imagem final carrega o JDK inteiro (compilador incluso) + todo o código-fonte + o Maven + o cache de dependências de build — tudo isso é peso morto em produção, onde você só precisa do <code>.jar</code> já compilado rodando. Imagens assim facilmente passam de 500MB-1GB.</div>
+
+      <h3>Multi-stage build — a solução real</h3>
+      <pre class="code"><span class="com"># --- ESTÁGIO 1: build (usa o JDK completo, mas é DESCARTADO no final) ---</span>
+FROM eclipse-temurin:21-jdk AS build
+WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+RUN ./mvnw -B -DskipTests dependency:go-offline
+COPY src ./src
+RUN ./mvnw -B package -DskipTests
+
+<span class="com"># --- ESTÁGIO 2: runtime (imagem final, enxuta, só com o necessário) ---</span>
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/biblioteca-1.0.0.jar app.jar
+EXPOSE 8080
+RUN useradd --system --uid 10001 app
+USER 10001
+ENTRYPOINT ["java", "-jar", "app.jar"]</pre>
+
+      <p>O estágio final usa apenas o runtime Java e copia <strong>somente o <code>.jar</code> pronto</strong>. A aplicação roda como usuário sem privilégios. O tamanho exato depende da imagem e das camadas; meça em vez de assumir. Imagens Alpine usam musl e podem ter diferenças de compatibilidade, portanto não devem ser escolhidas apenas pelo tamanho.</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Comando</th><th>Para que serve</th></tr>
+        <tr><td><code>FROM</code></td><td>Imagem base a partir da qual construir</td></tr>
+        <tr><td><code>WORKDIR</code></td><td>Diretório de trabalho dentro do container</td></tr>
+        <tr><td><code>COPY</code></td><td>Copia arquivos do host para dentro da imagem</td></tr>
+        <tr><td><code>RUN</code></td><td>Executa um comando durante o <em>build</em> da imagem</td></tr>
+        <tr><td><code>EXPOSE</code></td><td>Documenta qual porta a aplicação usa (não abre a porta sozinho — isso é o <code>-p</code> do <code>docker run</code>)</td></tr>
+        <tr><td><code>ENTRYPOINT</code>/<code>CMD</code></td><td>Comando executado quando o container inicia</td></tr>
+      </tbody></table>
+
+      <pre class="code">docker build -t biblioteca-api:1.0 .   <span class="com"># constrói a imagem a partir do Dockerfile na pasta atual</span>
+docker run -d -p 8080:8080 biblioteca-api:1.0
+docker images                          <span class="com"># lista imagens locais, compare o tamanho antes/depois do multi-stage</span></pre>
+
+      <div class="secret">A ordem das instruções aproveita o cache: wrapper e <code>pom.xml</code> são copiados, então <code>dependency:go-offline</code> cria uma camada antes de copiar <code>src</code>. Se apenas o código mudar, a camada de dependências pode ser reaproveitada. Copiar <code>src</code> antes de baixar as dependências invalidaria essa vantagem.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 31.1 — Multi-stage do zero</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva um Dockerfile multi-stage para o projeto da biblioteca: estágio 1 com JDK compilando pelo Maven Wrapper, estágio 2 com JRE copiando só o <code>.jar</code> e executando sem privilégios. Construa, rode, inspecione usuário e tamanho e compare com uma versão single-stage.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">FROM eclipse-temurin:21-jdk AS build
+WORKDIR /app
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+RUN ./mvnw -B -DskipTests dependency:go-offline
+COPY src ./src
+RUN ./mvnw -B package -DskipTests
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+RUN useradd --system --uid 10001 app
+USER 10001
+ENTRYPOINT ["java", "-jar", "app.jar"]</pre>
+<pre class="code">docker build -t biblioteca-api .
+docker run -d -p 8080:8080 --name biblioteca biblioteca-api
+docker images | grep biblioteca</pre>
+        </div>
+      </div>
+    </section>

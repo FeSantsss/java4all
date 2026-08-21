@@ -1,0 +1,98 @@
+<section class="section" id="streams">
+      <div class="section-head"><span class="section-num">13</span><h2 class="section-title">Lambdas &amp; Streams</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#generics">12 · Generics</a></div>
+      </div>
+
+      <h3>Interfaces funcionais e lambdas</h3>
+      <p>Uma <strong>interface funcional</strong> tem exatamente <strong>um</strong> método abstrato (pode ter vários <code>default</code>/<code>static</code>). É esse formato que permite escrever <strong>lambdas</strong> — funções anônimas curtas.</p>
+
+      <pre class="code"><span class="annotation">@FunctionalInterface</span>
+<span class="kw">public interface</span> <span class="cls">Operacao</span> {
+    <span class="kw">int</span> <span class="fn">aplicar</span>(<span class="kw">int</span> a, <span class="kw">int</span> b);
+}
+
+<span class="com">// forma "clássica" com classe anônima:</span>
+<span class="cls">Operacao</span> soma1 = <span class="kw">new</span> <span class="cls">Operacao</span>() {
+    <span class="annotation">@Override</span>
+    <span class="kw">public int</span> <span class="fn">aplicar</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a + b; }
+};
+
+<span class="com">// mesma coisa com lambda -- muito mais direto:</span>
+<span class="cls">Operacao</span> soma2 = (a, b) -&gt; a + b;
+
+System.out.println(soma2.aplicar(2, 3)); <span class="com">// 5</span></pre>
+
+      <h3>As interfaces funcionais prontas do java.util.function</h3>
+      <table class="cmp">
+        <tbody><tr><th>Interface</th><th>Assinatura</th><th>Uso típico</th></tr>
+        <tr><td><code>Predicate&lt;T&gt;</code></td><td><code>boolean test(T t)</code></td><td>Filtros (<code>stream.filter(...)</code>)</td></tr>
+        <tr><td><code>Function&lt;T,R&gt;</code></td><td><code>R apply(T t)</code></td><td>Transformação (<code>stream.map(...)</code>)</td></tr>
+        <tr><td><code>Consumer&lt;T&gt;</code></td><td><code>void accept(T t)</code></td><td>Efeito colateral (<code>stream.forEach(...)</code>)</td></tr>
+        <tr><td><code>Supplier&lt;T&gt;</code></td><td><code>T get()</code></td><td>Fornecer valor sob demanda (lazy)</td></tr>
+        <tr><td><code>BiFunction&lt;T,U,R&gt;</code></td><td><code>R apply(T t, U u)</code></td><td>Combinar dois valores</td></tr>
+      </tbody></table>
+
+      <h3>Method references — lambdas ainda mais curtas</h3>
+      <pre class="code">livros.forEach(System.out::println);          <span class="com">// referência a método de instância</span>
+livros.stream().map(<span class="cls">Livro</span>::getTitulo);       <span class="com">// referência a método de instância "não vinculado"</span>
+List&lt;<span class="kw">String</span>&gt; nomes = List.of(<span class="str">"a"</span>,<span class="str">"b"</span>).stream().map(<span class="kw">String</span>::toUpperCase).toList();</pre>
+
+      <h3>Streams — pipeline de processamento de dados</h3>
+      <p>Um <code>Stream</code> não é uma estrutura de dados — é um <strong>pipeline</strong> de operações sobre uma fonte de dados (geralmente uma coleção), avaliado de forma preguiçosa (<em>lazy</em>) e, em geral, sem alterar a coleção original.</p>
+
+      <pre class="code">List&lt;<span class="cls">Livro</span>&gt; livros = ...;
+
+List&lt;<span class="kw">String</span>&gt; titulosGrandes = livros.stream()
+    .filter(l -&gt; l.getPaginas() &gt; 300)      <span class="com">// operação intermediária: mantém só alguns</span>
+    .sorted(Comparator.comparing(<span class="cls">Livro</span>::getTitulo))
+    .map(<span class="cls">Livro</span>::getTitulo)              <span class="com">// operação intermediária: transforma o tipo</span>
+    .collect(Collectors.toList());          <span class="com">// operação TERMINAL: dispara o processamento</span>
+
+<span class="kw">double</span> mediaPaginas = livros.stream()
+    .mapToInt(<span class="cls">Livro</span>::getPaginas)
+    .average()
+    .orElse(0);
+
+Map&lt;<span class="kw">String</span>, List&lt;<span class="cls">Livro</span>&gt;&gt; porAutor = livros.stream()
+    .collect(Collectors.groupingBy(<span class="cls">Livro</span>::getAutor));</pre>
+
+      <div class="secret">Streams são <strong>preguiçosos</strong>: nenhuma operação intermediária (<code>filter</code>, <code>map</code>, <code>sorted</code>...) realmente executa até que uma operação <strong>terminal</strong> (<code>collect</code>, <code>forEach</code>, <code>count</code>, <code>reduce</code>...) seja chamada. Isso permite otimizações — por exemplo, <code>filter().findFirst()</code> pode parar no primeiro item que bate, sem processar a coleção inteira. Também significa que um <code>Stream</code> só pode ser <strong>consumido uma vez</strong>: chamar uma segunda operação terminal no mesmo stream lança <code>IllegalStateException</code>.</div>
+
+      <div class="warn"><b>Streams não substituem loops sempre:</b> para lógica simples e sequencial, um <code>for</code> tradicional costuma ser mais legível e até mais rápido (sem overhead de boxing/lambdas). Streams brilham quando há uma cadeia real de transformações (filtrar → mapear → agrupar → coletar) que ficaria confusa em loops aninhados.</div>
+
+      <h3>reduce — a operação mais genérica</h3>
+      <pre class="code"><span class="kw">int</span> total = List.of(1,2,3,4).stream()
+    .reduce(0, (acumulado, atual) -&gt; acumulado + atual); <span class="com">// 10</span>
+
+<span class="com">// map/filter/collect nada mais são que casos especiais de reduce por baixo dos panos</span></pre>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 13.1 — Pipeline básico</h4><span class="exercise-tag m">médio</span></div>
+        <p>Dada uma <code>List&lt;Livro&gt;</code>, use streams para obter uma <code>List&lt;String&gt;</code> apenas com os títulos dos livros com mais de 200 páginas, em ordem alfabética.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">List&lt;<span class="kw">String</span>&gt; resultado = livros.stream()
+    .filter(l -&gt; l.getPaginas() &gt; 200)
+    .map(<span class="cls">Livro</span>::getTitulo)
+    .sorted()
+    .collect(Collectors.toList());</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 13.2 — Agrupando e contando</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Dada uma <code>List&lt;Livro&gt;</code>, produza um <code>Map&lt;String, Long&gt;</code> com a contagem de livros por autor, usando <code>Collectors.groupingBy</code> combinado com <code>Collectors.counting()</code>. Depois, encontre o autor com mais livros usando <code>reduce</code> ou <code>Stream.max</code> sobre as entradas do map.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">Map&lt;<span class="kw">String</span>, <span class="kw">Long</span>&gt; contagemPorAutor = livros.stream()
+    .collect(Collectors.groupingBy(<span class="cls">Livro</span>::getAutor, Collectors.counting()));
+
+<span class="cls">String</span> autorComMais = contagemPorAutor.entrySet().stream()
+    .max(Map.Entry.comparingByValue())
+    .map(Map.Entry::getKey)
+    .orElse(<span class="str">"nenhum"</span>);</pre>
+        </div>
+      </div>
+    </section>

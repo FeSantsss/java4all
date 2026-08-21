@@ -1,0 +1,16 @@
+{
+  "name": "java4br - Java e backend",
+  "short_name": "java4br",
+  "description": "Java, backend e inglês técnico em uma trilha progressiva e offline-first.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "categories": ["education", "developer tools", "productivity"],
+  "orientation": "any",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

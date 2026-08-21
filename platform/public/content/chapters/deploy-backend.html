@@ -1,0 +1,67 @@
+<section class="section tk-devops" id="deploy-backend">
+      <div class="section-head"><span class="section-num">60</span><h2 class="section-title">Deploy do back-end em produção</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Deploy</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#dockerfile">31 · Dockerfile</a>, <a class="prereq-tag" href="#secrets">57 · Secrets</a>, <a class="prereq-tag" href="#hospedagem-db">39 · Onde hospedar o banco</a>, <a class="prereq-tag" href="#cicd">58 · CI/CD</a></div>
+      </div>
+
+      <p>É a hora de tirar a API do <code>localhost</code> e colocá-la em um servidor real, acessível pela internet. Existem três níveis de controle/complexidade, e a escolha certa depende do estágio do projeto.</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Opção</th><th>Nível de controle</th><th>Esforço de setup</th><th>Bom para</th></tr>
+        <tr><td><strong>Railway / Render</strong></td><td>Baixo (PaaS)</td><td>Mínimo — conecta o repositório e pronto</td><td>Projetos pessoais, MVPs, aprendizado</td></tr>
+        <tr><td><strong>VPS com Docker</strong> (DigitalOcean, Hetzner)</td><td>Médio</td><td>Você configura o servidor, mas usa Docker Compose</td><td>Mais controle, custo previsível</td></tr>
+        <tr><td><strong>AWS EC2 / ECS</strong></td><td>Alto</td><td>Maior curva de aprendizado, mais flexibilidade</td><td>Aplicações corporativas, escala grande</td></tr>
+      </tbody></table>
+
+      <div class="analogy">Pense nessas três opções como alugar um apartamento mobiliado (Railway/Render — chega e usa), alugar um apartamento vazio que você mobilia do seu jeito (VPS com Docker — mais trabalho, mais liberdade), ou construir a casa do zero em um terreno (AWS — controle total, mas você é responsável por tudo, da fundação ao telhado).</div>
+
+      <h3>Deploy via Railway (PaaS) — o caminho mais direto</h3>
+      <pre class="code"><span class="com"># 1. conecta o repositório GitHub ao Railway (via interface web)
+# 2. Railway detecta o Dockerfile (capítulo 31) automaticamente
+# 3. configura as variáveis de ambiente no painel (capítulo 57):</span>
+DB_URL=jdbc:postgresql://...
+JWT_SECRET=...
+
+<span class="com"># 4. a cada push na branch configurada, Railway builda e faz deploy sozinho --
+# o CI/CD do capítulo 58 combinado com isso fecha o ciclo completo</span></pre>
+
+      <h3>Deploy via VPS com Docker Compose</h3>
+      <pre class="code"><span class="com"># na sua máquina local ou via CI/CD:</span>
+docker context create producao --docker "host=ssh://usuario@meu-servidor.com"
+docker context use producao
+docker compose up -d --build   <span class="com"># builda e sobe DIRETO no servidor remoto</span></pre>
+
+      <div class="secret">Repare que o comando final (<code>docker compose up -d --build</code>) é <strong>exatamente</strong> o mesmo que você já usa localmente desde o capítulo 32 — a única diferença é o <code>docker context</code> apontando para uma máquina remota via SSH em vez da sua própria. Isso é a prova prática de "environment parity" (capítulo 59): se funciona no seu Compose local, a chance de funcionar igual em produção é muito maior, porque literalmente é a mesma configuração rodando em outro lugar.</div>
+
+      <h3>Configurando o domínio e HTTPS</h3>
+      <p>Provedores PaaS (Railway, Render) entregam um subdomínio próprio com HTTPS automático (capítulo 53) imediatamente. Para domínio próprio (<code>api.seusite.com</code>), você aponta um registro DNS <code>CNAME</code> para o endereço fornecido pelo provedor — a renovação do certificado continua automática.</p>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Nunca faça o primeiro deploy de produção sem antes ter testado o mesmo Dockerfile localmente com <code>docker compose up</code>.</li>
+          <li>Configure o healthcheck do Actuator (capítulo 56) desde o primeiro deploy — sem ele, você só descobre que a aplicação caiu quando um usuário reclamar.</li>
+          <li>Sempre tenha logs acessíveis do ambiente de produção (a maioria dos PaaS já oferece isso no painel) — sem log, um erro em produção é um mistério sem pistas.</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">Para o primeiro deploy da sua vida, escolha Railway ou Render — a barreira de entrada baixa importa mais nesse momento do que o controle refinado de uma VPS ou AWS. Depois que você já entender o ciclo completo (build → deploy → monitorar → corrigir), migrar para mais controle fica muito mais natural, porque você já sabe o que está automatizando.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 60.1 — Checklist de deploy</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva um checklist de pré-deploy para o projeto da biblioteca antes de publicar em produção pela primeira vez, cobrindo pelo menos: variáveis de ambiente configuradas, migrations aplicadas, HTTPS ativo, CORS configurado para o domínio real do front-end, e healthcheck respondendo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">☐ Variáveis de ambiente (DB_URL, JWT_SECRET) configuradas no painel do provedor, não no código
+☐ Flyway configurado com spring.flyway.enabled=true, ddl-auto=validate
+☐ HTTPS confirmado (certificado ativo, sem aviso de "conexão não segura")
+☐ CORS liberando apenas o domínio real do front-end de produção, não localhost
+☐ /actuator/health respondendo "UP" publicamente, resto do Actuator protegido
+☐ Backup automático do banco confirmado como ativo no provedor
+☐ Logs acessíveis via painel do provedor para depuração pós-deploy</pre>
+        </div>
+      </div>
+    </section>

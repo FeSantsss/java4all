@@ -1,0 +1,128 @@
+<section class="section tk-db" id="sql">
+      <div class="section-head"><span class="section-num">33</span><h2 class="section-title">SQL — fundamentos de banco relacional</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-db">SQL</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~4h</b> de estudo + prática (é um capítulo denso — não tenha pressa)</div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#colecoes">Coleções</a></div>
+      </div>
+
+      <p>Até aqui, todo "banco de dados" do curso foi um <code>List</code> ou <code>Map</code> em memória — os dados somem quando o programa fecha. SQL é a linguagem para conversar com um banco de dados <strong>relacional</strong>, que guarda dados permanentemente, organizados em tabelas.</p>
+
+      <div class="analogy">Pense em cada <strong>tabela</strong> como uma classe Java, e cada <strong>linha</strong> como um objeto daquela classe. A tabela <code>livros</code> é como a classe <code>Livro</code> — cada linha é um <code>new Livro(...)</code> com valores específicos. As <strong>colunas</strong> são os atributos, e o tipo de cada coluna (INTEGER, VARCHAR, BOOLEAN) é como o tipo de cada atributo Java. A diferença é que, ao contrário de um <code>ArrayList</code>, os dados de uma tabela sobrevivem ao fechar o programa — porque vivem no disco, gerenciados pelo banco.</div>
+
+      <h3>Criando tabelas: DDL (Data Definition Language)</h3>
+      <pre class="code">CREATE TABLE autores (
+    id SERIAL PRIMARY KEY,             <span class="com">-- SERIAL: número que se auto-incrementa</span>
+    nome VARCHAR(150) NOT NULL,
+    nascimento DATE
+);
+
+CREATE TABLE livros (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    paginas INTEGER CHECK (paginas &gt; 0),   <span class="com">-- restrição de valor</span>
+    autor_id INTEGER REFERENCES autores(id), <span class="com">-- CHAVE ESTRANGEIRA -- liga as duas tabelas</span>
+    disponivel BOOLEAN DEFAULT true
+);</pre>
+
+      <p>A <code>autor_id REFERENCES autores(id)</code> é uma <strong>chave estrangeira</strong> (foreign key) — ela garante, no próprio banco, que todo livro aponte para um autor que realmente existe. Essa é a diferença central entre "vários <code>ArrayList</code> soltos" e um banco relacional de verdade: as relações são <em>impostas</em>, não apenas uma convenção que seu código Java promete respeitar.</p>
+
+      <h3>CRUD em SQL: INSERT, SELECT, UPDATE, DELETE</h3>
+      <pre class="code">INSERT INTO autores (nome, nascimento) VALUES ('Machado de Assis', '1839-06-21');
+
+INSERT INTO livros (titulo, paginas, autor_id) VALUES ('Dom Casmurro', 256, 1);
+
+SELECT * FROM livros;                              <span class="com">-- todas as colunas, todas as linhas</span>
+SELECT titulo, paginas FROM livros WHERE paginas &gt; 200;
+SELECT * FROM livros ORDER BY paginas DESC LIMIT 5;
+
+UPDATE livros SET disponivel = false WHERE id = 1;
+
+DELETE FROM livros WHERE id = 1;</pre>
+
+      <div class="study-tip">Se você já entendeu bem <code>Stream</code> (capítulo 13), SQL vai parecer familiar: <code>WHERE</code> é igual a <code>.filter(...)</code>, <code>ORDER BY</code> é igual a <code>.sorted(...)</code>, e <code>SELECT titulo, paginas</code> é igual a um <code>.map(...)</code> que projeta só os campos que você quer. A mentalidade de "pipeline de transformação de dados" que você já treinou nos streams se transfere quase 1:1 para SQL.</div>
+
+      <h3>JOIN — combinando tabelas relacionadas</h3>
+      <p>Sem <code>JOIN</code>, uma consulta em <code>livros</code> te dá só o <code>autor_id</code> (um número) — não o nome do autor. <code>JOIN</code> combina linhas de duas tabelas com base em uma condição de igualdade.</p>
+
+      <pre class="code">SELECT livros.titulo, autores.nome
+FROM livros
+INNER JOIN autores ON livros.autor_id = autores.id;
+<span class="com">-- só retorna livros que TÊM autor correspondente</span>
+
+SELECT livros.titulo, autores.nome
+FROM livros
+LEFT JOIN autores ON livros.autor_id = autores.id;
+<span class="com">-- retorna TODOS os livros, mesmo os sem autor (nome viria NULL)</span></pre>
+
+      <div class="analogy">Pense em <code>INNER JOIN</code> como o resultado de um <code>Set.retainAll(...)</code> — só o que existe nos dois lados sobrevive. <code>LEFT JOIN</code> é como manter <strong>tudo</strong> do lado esquerdo, e preencher com <code>null</code> o que não tiver correspondência do lado direito — parecido com o <code>getOrDefault(chave, null)</code> de um <code>Map</code> (capítulo 11), aplicado linha a linha.</div>
+
+      <table class="cmp">
+        <tbody><tr><th>Tipo de JOIN</th><th>O que retorna</th></tr>
+        <tr><td><code>INNER JOIN</code></td><td>Só as linhas que têm correspondência nos dois lados</td></tr>
+        <tr><td><code>LEFT JOIN</code></td><td>Todas as linhas da esquerda + correspondências (ou NULL) da direita</td></tr>
+        <tr><td><code>RIGHT JOIN</code></td><td>O espelho do LEFT JOIN — todas da direita</td></tr>
+        <tr><td><code>FULL JOIN</code></td><td>Tudo dos dois lados, casando onde possível</td></tr>
+      </tbody></table>
+
+      <h3>Agregações: GROUP BY, COUNT, SUM, AVG</h3>
+      <pre class="code">SELECT autores.nome, COUNT(livros.id) AS total_livros
+FROM autores
+LEFT JOIN livros ON livros.autor_id = autores.id
+GROUP BY autores.nome
+ORDER BY total_livros DESC;
+<span class="com">-- equivalente ao Collectors.groupingBy(...) + counting() do capítulo 13!</span></pre>
+
+      <h3>Transações — tudo ou nada</h3>
+      <pre class="code">BEGIN;
+UPDATE contas SET saldo = saldo - 100 WHERE id = 1; <span class="com">-- débito</span>
+UPDATE contas SET saldo = saldo + 100 WHERE id = 2; <span class="com">-- crédito</span>
+COMMIT; <span class="com">-- só agora as duas mudanças ficam permanentes, JUNTAS</span>
+
+<span class="com">-- se algo desse errado no meio, "ROLLBACK;" desfaz TUDO desde o BEGIN</span></pre>
+
+      <div class="secret">Uma transferência bancária que debita de uma conta e credita em outra <strong>precisa</strong> ser atômica — se o servidor cair exatamente entre os dois <code>UPDATE</code>, sem transação o dinheiro simplesmente desaparece. Esse é o conceito por trás de <code>@Transactional</code> no Spring (que você vai ver adiante): ele abre um <code>BEGIN</code>, executa seu método, e decide <code>COMMIT</code> ou <code>ROLLBACK</code> automaticamente dependendo se uma exceção foi lançada — exatamente o dynamic proxy que você já estudou no capítulo 20.</div>
+
+      <h3>Índices — por que consultas ficam rápidas (ou lentas)</h3>
+      <p>Sem índice, o banco varre a tabela inteira linha por linha para achar o que você pediu (<em>full table scan</em>) — ok para 100 linhas, catastrófico para 10 milhões. Um <strong>índice</strong> é uma estrutura extra (geralmente uma árvore B) que permite pular direto para os dados relevantes.</p>
+      <pre class="code">CREATE INDEX idx_livros_autor_id ON livros(autor_id);
+<span class="com">-- toda coluna usada com frequência em WHERE ou JOIN é candidata a índice</span></pre>
+
+      <div class="analogy">Um índice é o índice remissivo no final de um livro técnico. Sem ele, achar todas as páginas que mencionam "polimorfismo" significa ler o livro inteiro. Com o índice, você vai direto às páginas certas — só que, como o índice ocupa espaço e precisa ser atualizado a cada novo capítulo adicionado, ele tem um custo (mais lento em <code>INSERT</code>/<code>UPDATE</code>, mais rápido em leitura). É exatamente esse trade-off que existe em índices de banco.</div>
+
+      <div class="warn"><b>Índice em excesso também é problema:</b> toda escrita (<code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code>) precisa atualizar <strong>todos</strong> os índices da tabela afetada. Criar índice em toda coluna "por garantia" deixa escritas lentas sem necessidade — crie índices baseados em consultas reais e lentas, não por precaução.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 33.1 — Modelando e consultando</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie as tabelas <code>autores</code> e <code>livros</code> como no exemplo acima. Insira 3 autores e 5 livros (alguns autores com mais de um livro). Escreva uma consulta que lista o título de cada livro junto com o nome do autor, ordenado por título. Depois, escreva uma consulta que mostra quantos livros cada autor tem, incluindo autores com zero livros.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">SELECT livros.titulo, autores.nome
+FROM livros
+INNER JOIN autores ON livros.autor_id = autores.id
+ORDER BY livros.titulo;
+
+SELECT autores.nome, COUNT(livros.id) AS total
+FROM autores
+LEFT JOIN livros ON livros.autor_id = autores.id
+GROUP BY autores.nome
+ORDER BY total DESC;
+<span class="com">-- LEFT JOIN é essencial aqui: com INNER JOIN, autores sem livro nenhum
+-- simplesmente desapareceriam do resultado</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 33.2 — Transação simulando empréstimo</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma tabela <code>emprestimos (id SERIAL, livro_id INTEGER, data_emprestimo DATE)</code>. Escreva uma transação que: (1) marca <code>disponivel = false</code> no livro, (2) insere um registro em <code>emprestimos</code>. Envolva as duas operações em <code>BEGIN</code>/<code>COMMIT</code>, e explique em texto por que rodar essas duas operações <strong>sem</strong> transação poderia deixar o sistema em um estado inconsistente se o processo falhasse entre as duas.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">BEGIN;
+UPDATE livros SET disponivel = false WHERE id = 3;
+INSERT INTO emprestimos (livro_id, data_emprestimo) VALUES (3, CURRENT_DATE);
+COMMIT;</pre>
+          <p style="margin-top:12px">Sem transação, se o processo caísse depois do <code>UPDATE</code> mas antes do <code>INSERT</code>, o livro ficaria marcado como indisponível <strong>para sempre</strong>, sem nenhum registro de empréstimo explicando por quê — um estado inconsistente impossível de auditar. Com transação, ou as duas operações acontecem juntas, ou nenhuma acontece.</p>
+        </div>
+      </div>
+    </section>

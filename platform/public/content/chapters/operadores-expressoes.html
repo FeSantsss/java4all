@@ -1,0 +1,18 @@
+<section class="section tk-java" id="operadores-expressoes">
+      <div class="section-head"><span class="section-num">03</span><h2 class="section-title">Operadores, expressões e precedência</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#variaveis-tipos">Variáveis e tipos</a></div></div>
+      <p>Expressão é uma combinação que produz um valor. Operadores determinam como os operandos são combinados. Decorar uma tabela de precedência é menos importante que escrever expressões claras com parênteses.</p>
+      <table class="cmp"><tbody><tr><th>Categoria</th><th>Operadores principais</th><th>Resultado</th></tr><tr><td>Aritméticos</td><td><code>+ - * / %</code></td><td>Número</td></tr><tr><td>Comparação</td><td><code>== != &gt; &gt;= &lt; &lt;=</code></td><td><code>boolean</code></td></tr><tr><td>Lógicos</td><td><code>&amp;&amp; || !</code></td><td><code>boolean</code></td></tr><tr><td>Atribuição</td><td><code>= += -= *= /=</code></td><td>Atualiza uma variável</td></tr></tbody></table>
+      <h3>Curto-circuito</h3>
+      <pre class="code"><span class="kw">if</span> (usuario != <span class="kw">null</span> &amp;&amp; usuario.estaAtivo()) {
+    liberarAcesso();
+}</pre>
+      <p>Com <code>&amp;&amp;</code>, a segunda condição só é avaliada se a primeira for verdadeira. Com <code>||</code>, ela só é avaliada se a primeira for falsa. Isso afeta segurança contra <code>null</code> e também efeitos colaterais.</p>
+      <h3><code>==</code> não é igualdade de conteúdo para objetos</h3>
+      <p>Em primitivos, <code>==</code> compara valores. Em referências, compara se ambos os lados apontam para o mesmo objeto. Para conteúdo de <code>String</code> e outros value objects, use <code>equals</code> conforme o contrato do tipo.</p>
+      <pre class="code">String a = <span class="kw">new</span> String(<span class="str">"Java"</span>);
+String b = <span class="kw">new</span> String(<span class="str">"Java"</span>);
+System.out.println(a == b);      <span class="com">// false: referências distintas</span>
+System.out.println(a.equals(b)); <span class="com">// true: mesmo conteúdo</span></pre>
+      <div class="exercise"><div class="exercise-head"><h4>Validador de intervalo</h4><span class="exercise-tag f">Fundamento</span></div><p>Escreva uma expressão que aceite idade entre 18 e 65, inclusive. Depois negue a condição inteira sem repetir a lógica.</p></div>
+    </section>

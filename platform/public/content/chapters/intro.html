@@ -1,0 +1,61 @@
+<section class="section" id="intro">
+      <div class="section-head"><span class="section-num">00</span><h2 class="section-title">Introdução &amp; ambiente</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="meta-item">Pré-requisito: <span class="prereq-none">nenhum</span></div>
+      </div><div class="rules-box"><h4>Baseline verificável do curso</h4><ul>
+    <li><strong>Java:</strong> JDK 21 LTS; recursos preview ficam explicitamente identificados e não são exigidos.</li>
+    <li><strong>Spring:</strong> exemplos tradicionais são compatíveis com a linha Spring Boot 3.5 / Framework 6.2; notas indicam diferenças relevantes do Framework 7, como a preferência por <code>RestClient</code>.</li>
+    <li><strong>Dados e infraestrutura:</strong> PostgreSQL 16 nos exemplos, Redis 7 e imagens fixadas no projeto executável. Para Kafka, Springdoc e Testcontainers, use a versão administrada pelo BOM adotado e registre a imagem por tag e digest.</li>
+    <li><strong>Última revisão técnica integral:</strong> agosto de 2026. Antes de copiar dependências, confira a matriz oficial de compatibilidade da versão do projeto.</li>
+    </ul></div>
+
+      <p>Programação Orientada a Objetos (POO) é um paradigma que organiza o código em torno de <strong>objetos</strong> — entidades que juntam <strong>estado</strong> (atributos) e <strong>comportamento</strong> (métodos) em um único bloco. Em vez de escrever uma sequência de funções soltas operando sobre dados globais, você modela o problema como um conjunto de "coisas" que conversam entre si trocando mensagens (chamadas de método).</p>
+      <p>Java é uma linguagem <strong>fortemente orientada a objetos, mas multiparadigma</strong>: todo método é declarado dentro de uma classe ou interface, enquanto tipos primitivos, membros <code>static</code>, lambdas e programação funcional mostram que nem todo valor ou estilo de programação é um objeto. Entender POO continua essencial porque o modelo de tipos e a maior parte das APIs Java são organizados em torno de classes, interfaces e objetos.</p>
+
+      <h3>JDK, JRE e JVM — o que cada um faz</h3>
+      <table class="cmp">
+        <tbody><tr><th>Sigla</th><th>O que é</th><th>Quando você usa</th></tr>
+        <tr><td><b style="color:var(--ink)">JVM</b></td><td>Java Virtual Machine — a máquina virtual que executa bytecode Java, independente de sistema operacional</td><td>Sempre, é ela quem roda o <code>.class</code></td></tr>
+        <tr><td><b style="color:var(--ink)">JRE</b></td><td>Java Runtime Environment — JVM + bibliotecas padrão, só para <em>executar</em> programas</td><td>Ambientes que só rodam Java, sem compilar</td></tr>
+        <tr><td><b style="color:var(--ink)">JDK</b></td><td>Java Development Kit — JRE + compilador (<code>javac</code>), depurador e ferramentas</td><td>Para desenvolver — é o que você instala para programar</td></tr>
+      </tbody></table>
+
+      <h3>Do código-fonte ao programa rodando</h3>
+      <pre class="code"><span class="com">// 1. Você escreve Main.java (código-fonte, texto legível)
+// 2. javac compila para bytecode:</span>
+javac Main.java   <span class="com">// gera Main.class</span>
+
+<span class="com">// 3. a JVM interpreta/compila-JIT o bytecode e executa:</span>
+java Main</pre>
+
+      <div class="callout"><b>Por que isso importa:</b> o bytecode gerado pelo <code>javac</code> não é código de máquina x86 nem ARM — é um formato intermediário que qualquer JVM (Windows, Linux, macOS) sabe interpretar. É esse desenho que dá origem ao lema <em>"write once, run anywhere"</em>.</div>
+
+      <h3>Os quatro pilares (mapa do curso)</h3>
+      <ul style="color:var(--ink-dim)">
+        <li><strong>Encapsulamento</strong> — esconder detalhes internos e expor apenas o necessário (capítulo 04).</li>
+        <li><strong>Herança</strong> — reaproveitar e especializar comportamento entre classes (capítulo 05).</li>
+        <li><strong>Polimorfismo</strong> — um mesmo método se comportar de formas diferentes dependendo do objeto real (capítulo 06).</li>
+        <li><strong>Abstração</strong> — modelar o essencial de um conceito, ignorando detalhes irrelevantes ao contexto (capítulos 07 e 08).</li>
+      </ul>
+
+      <div class="secret">Muita gente aprende os quatro pilares "de cor" para passar em prova e nunca entende <em>por que</em> eles existem. Cada um resolve um problema específico de manutenção de código — duplicação, fragilidade a mudanças, acoplamento excessivo. Ao longo deste curso, cada pilar é apresentado depois de um exemplo do problema que ele resolve, não antes.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 0.1 — Hello World consciente</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Escreva a classe <code>Main</code> com um método <code>main</code> que imprime <em>"Olá, POO!"</em>. Depois, explique com suas palavras (num comentário acima do método) por que <code>main</code> precisa ser <code>public static void</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// public: a JVM (fora da classe) precisa conseguir chamar este método.
+// static: a JVM chama main SEM criar um objeto Main antes — precisa
+//         existir independente de qualquer instância.
+// void: main não devolve valor para quem o chamou (o processo termina
+//       com um código de saída, não com um "return" de objeto).</span>
+<span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="kw">String</span>[] args) {
+        System.out.println(<span class="str">"Olá, POO!"</span>);
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

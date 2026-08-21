@@ -1,0 +1,90 @@
+<section class="section" id="recursao">
+      <div class="section-head"><span class="section-num">78</span><h2 class="section-title">Recursão</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Algoritmos</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática (costuma exigir mais de uma leitura)</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#big-o">80 · Complexidade (Big O)</a>, <a class="prereq-tag" href="#classes">01 · Classes e objetos</a> (stack)</div>
+      </div>
+
+      <p>Um método que chama <strong>a si mesmo</strong>. Parece paradoxal na primeira vez que se vê, mas é a ferramenta natural para problemas que são, por definição, feitos de versões menores de si mesmos.</p>
+
+      <div class="analogy">Pense em bonecas russas (matryoshka): para saber quantas bonecas existem no total, você não precisa de uma fórmula especial — só precisa saber "abrir uma boneca e repetir o mesmo processo na boneca de dentro, até chegar na menor que não abre mais". Recursão é exatamente esse raciocínio: resolver o problema pequeno o suficiente diretamente (o <strong>caso base</strong>), e para todo o resto, resolver "uma camada" e delegar o restante para uma chamada menor de si mesmo.</div>
+
+      <h3>Os dois ingredientes obrigatórios de toda recursão</h3>
+      <pre class="code"><span class="kw">int</span> <span class="fn">fatorial</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= 1) <span class="kw">return</span> 1;              <span class="com">// CASO BASE -- sem isso, recursão infinita</span>
+    <span class="kw">return</span> n * fatorial(n - 1);         <span class="com">// CASO RECURSIVO -- problema menor + chamada a si mesmo</span>
+}
+<span class="com">// fatorial(4) = 4 * fatorial(3)
+//             = 4 * (3 * fatorial(2))
+//             = 4 * (3 * (2 * fatorial(1)))
+//             = 4 * (3 * (2 * 1))
+//             = 24</span></pre>
+
+      <div class="warn"><b>Todo caso recursivo precisa se aproximar do caso base.</b> Esquecer o caso base (ou escrever uma condição que nunca se torna verdadeira) causa recursão infinita — que na prática vira um <code>StackOverflowError</code>, porque cada chamada recursiva empilha um novo frame na stack (capítulo 01) até estourar a memória reservada para ela.</div>
+
+      <h3>Visualizando a pilha de chamadas</h3>
+      <div class="analogy">Cada chamada recursiva empilha um novo "andar" na stack de execução (capítulo 01) — como empilhar pratos, um em cima do outro. <code>fatorial(4)</code> não retorna nada até que <code>fatorial(3)</code> retorne, que não retorna até <code>fatorial(2)</code> retornar, e assim por diante — só quando o caso base é alcançado é que a pilha começa a ser "desempilhada", de baixo para cima, cada chamada multiplicando seu resultado antes de devolver para quem a chamou.</div>
+
+      <h3>Recursão vs iteração — quando cada uma vence</h3>
+      <pre class="code"><span class="com">// versão iterativa do mesmo fatorial (capítulo 79, raciocínio de loop):</span>
+<span class="kw">int</span> <span class="fn">fatorialIterativo</span>(<span class="kw">int</span> n) {
+    <span class="kw">int</span> resultado = 1;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 2; i &lt;= n; i++) resultado *= i;
+    <span class="kw">return</span> resultado;
+}
+<span class="com">// mesmo resultado, SEM o custo de empilhar N frames na stack</span></pre>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Recursão</th><th>Iteração</th></tr>
+        <tr><td>Legibilidade</td><td>Frequentemente mais clara para problemas naturalmente recursivos (árvores, capítulo 82)</td><td>Mais direta para contagens simples</td></tr>
+        <tr><td>Custo de memória</td><td>Uma stack frame por chamada — pode estourar em entradas grandes</td><td>Não empilha nada extra</td></tr>
+        <tr><td>Bom para</td><td>Estruturas recursivas por natureza: árvores, backtracking, "dividir para conquistar"</td><td>Contagens e transformações lineares simples</td></tr>
+      </tbody></table>
+
+      <div class="secret">A "recursão ingênua" de Fibonacci é o exemplo clássico usado para ensinar por que Big O (capítulo 80) importa na prática: <code>fibonacci(n) = fibonacci(n-1) + fibonacci(n-2)</code> parece elegante, mas recalcula os mesmos subproblemas repetidamente, chegando a <code>O(2ⁿ)</code> — para <code>n=40</code>, isso já são bilhões de chamadas. A correção (guardar resultados já calculados, técnica chamada <em>memoization</em>) transforma isso em <code>O(n)</code>, e é o primeiro contato prático que muita gente tem com programação dinâmica.</div>
+
+      <pre class="code"><span class="com">// ❌ ingênua -- O(2ⁿ), recalcula os mesmos valores repetidamente:</span>
+<span class="kw">int</span> <span class="fn">fibonacci</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= 1) <span class="kw">return</span> n;
+    <span class="kw">return</span> fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+<span class="com">// ✅ com memoization -- O(n), guarda resultados já calculados:</span>
+Map&lt;<span class="kw">Integer</span>, <span class="kw">Long</span>&gt; cache = <span class="kw">new</span> HashMap&lt;&gt;();
+<span class="kw">long</span> <span class="fn">fibonacciMemo</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= 1) <span class="kw">return</span> n;
+    <span class="kw">if</span> (cache.containsKey(n)) <span class="kw">return</span> cache.get(n); <span class="com">// já calculado, não refaz</span>
+    <span class="kw">long</span> resultado = fibonacciMemo(n - 1) + fibonacciMemo(n - 2);
+    cache.put(n, resultado);
+    <span class="kw">return</span> resultado;
+}</pre>
+
+      <div class="study-tip">Ao escrever qualquer recursão, escreva o caso base <strong>primeiro</strong>, antes até de pensar no caso recursivo — é a parte mais fácil de esquecer sob pressão, e sem ela nada mais funciona. Depois, confie no "salto de fé": assuma que a chamada recursiva para o problema menor <em>já funciona corretamente</em> (não tente rastrear todas as chamadas mentalmente de uma vez), e escreva só como combinar esse resultado menor no resultado do problema atual.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 81.1 — Soma recursiva de dígitos</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva um método recursivo <code>somaDigitos(int n)</code> que soma todos os dígitos de um número (ex: <code>somaDigitos(1234)</code> retorna <code>1+2+3+4=10</code>). Identifique claramente o caso base e o caso recursivo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">int</span> <span class="fn">somaDigitos</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt; 10) <span class="kw">return</span> n;                       <span class="com">// caso base: número de um único dígito</span>
+    <span class="kw">return</span> (n % 10) + somaDigitos(n / 10);    <span class="com">// último dígito + soma do resto</span>
+}
+<span class="com">// somaDigitos(1234) = 4 + somaDigitos(123)
+//                    = 4 + (3 + somaDigitos(12))
+//                    = 4 + (3 + (2 + somaDigitos(1)))
+//                    = 4 + 3 + 2 + 1 = 10</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 81.2 — De recursivo para iterativo com memoization</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente <code>fibonacci</code> das duas formas mostradas acima. Conte chamadas para diferentes valores de <code>n</code> e observe a curva de crescimento. Se medir tempo, use <code>System.nanoTime()</code> somente como experimento inicial e depois reproduza com JMH, pois aquecimento do JIT e otimizações distorcem medições isoladas.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>A versão ingênua cresce exponencialmente em número de chamadas, enquanto memoization calcula cada subproblema uma vez. O tempo absoluto de <code>n=35</code> varia com hardware, JVM e aquecimento; a evidência correta é a curva e a contagem, não prometer uma duração específica.</p>
+        </div>
+      </div>
+    </section>

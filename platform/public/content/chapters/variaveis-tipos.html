@@ -1,0 +1,22 @@
+<section class="section tk-java" id="variaveis-tipos">
+      <div class="section-head"><span class="section-num">02</span><h2 class="section-title">Variáveis, tipos, memória e conversões</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#primeiro-programa">Primeiro programa</a></div></div>
+      <p>Uma variável associa um nome a um valor cujo tipo é conhecido pelo compilador. O tipo limita operações válidas, representação e faixa. Java é estaticamente tipada: incompatibilidades são detectadas antes da execução sempre que possível.</p>
+      <h3>Primitivos</h3>
+      <table class="cmp"><tbody><tr><th>Grupo</th><th>Tipos</th><th>Uso</th></tr><tr><td>Inteiros</td><td><code>byte</code>, <code>short</code>, <code>int</code>, <code>long</code></td><td><code>int</code> é a escolha normal; <code>long</code> para faixas maiores</td></tr><tr><td>Decimais</td><td><code>float</code>, <code>double</code></td><td><code>double</code> é o padrão; nenhum deles representa dinheiro com exatidão decimal</td></tr><tr><td>Caractere</td><td><code>char</code></td><td>Uma unidade UTF-16, não necessariamente um caractere humano completo</td></tr><tr><td>Lógico</td><td><code>boolean</code></td><td><code>true</code> ou <code>false</code></td></tr></tbody></table>
+      <pre class="code"><span class="kw">int</span> idade = <span class="num">17</span>;
+<span class="kw">long</span> habitantes = <span class="num">8_100_000_000L</span>;
+<span class="kw">double</span> altura = <span class="num">1.78</span>;
+<span class="kw">boolean</span> ativo = <span class="kw">true</span>;
+String nome = <span class="str">"Felipy"</span>;</pre>
+      <h3>Valor primitivo versus referência</h3>
+      <p>Uma variável primitiva contém o próprio valor. Uma variável de referência aponta para um objeto ou contém <code>null</code>. Copiar um primitivo copia o valor; copiar uma referência faz duas variáveis apontarem inicialmente para o mesmo objeto.</p>
+      <div class="warn"><b><code>null</code> não significa vazio nem zero.</b> Significa ausência de referência. Tentar acessar um membro por uma referência nula causa <code>NullPointerException</code>.</div>
+      <h3>Conversão e perda</h3>
+      <pre class="code"><span class="kw">int</span> pequeno = <span class="num">10</span>;
+<span class="kw">long</span> ampliado = pequeno;       <span class="com">// widening: seguro</span>
+<span class="kw">double</span> media = <span class="num">7.9</span>;
+<span class="kw">int</span> truncado = (<span class="kw">int</span>) media; <span class="com">// narrowing: vira 7, não arredonda</span></pre>
+      <p>Variáveis locais precisam ser inicializadas antes do uso. Campos de objetos recebem valores padrão, mas depender disso sem intenção explícita reduz clareza.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Preveja antes de executar</h4><span class="exercise-tag f">Fundamento</span></div><p>Explique o valor e o tipo de cada expressão: <code>5 / 2</code>, <code>5 / 2.0</code>, <code>(double) 5 / 2</code> e <code>(int) 5.9</code>.</p></div>
+    </section>

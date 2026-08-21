@@ -1,0 +1,59 @@
+<section class="section tk-spring" id="resilience">
+      <div class="section-head"><span class="section-num">55</span><h2 class="section-title">Circuit Breaker com Resilience4j</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a> (dynamic proxy)</div>
+      </div>
+
+      <p>Quando seu back-end depende de outro serviço (outra API, um serviço de pagamento externo), o que acontece quando esse serviço fica lento ou fora do ar? Sem proteção, sua aplicação também trava — um efeito cascata que pode derrubar um sistema inteiro por causa de uma única dependência externa instável.</p>
+
+      <div class="analogy">Um <strong>circuit breaker</strong> (disjuntor) funciona exatamente como o disjuntor elétrico da sua casa: se algo começa a "puxar corrente demais" (o serviço externo está falhando repetidamente), o disjuntor <strong>desarma</strong> — para de tentar, evitando queimar o resto do sistema. Depois de um tempo, ele testa cautelosamente se a energia normalizou antes de religar de vez.</div>
+
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">PagamentoExternoServico</span> {
+
+    <span class="annotation">@CircuitBreaker</span>(name = <span class="str">"servico-pagamento"</span>, fallbackMethod = <span class="str">"pagamentoIndisponivel"</span>)
+    <span class="kw">public</span> <span class="cls">RespostaPagamento</span> <span class="fn">processar</span>(<span class="cls">Pagamento</span> pagamento) {
+        <span class="kw">return</span> clienteHttp.chamarServicoExterno(pagamento); <span class="com">// pode falhar, pode demorar</span>
+    }
+
+    <span class="com">// chamado automaticamente quando o circuito está "aberto" (desarmado)</span>
+    <span class="kw">public</span> <span class="cls">RespostaPagamento</span> <span class="fn">pagamentoIndisponivel</span>(<span class="cls">Pagamento</span> pagamento, <span class="cls">Throwable</span> t) {
+        <span class="kw">return new</span> <span class="cls">RespostaPagamento</span>(<span class="str">"INDISPONIVEL"</span>, <span class="str">"Tente novamente em instantes"</span>);
+    }
+}</pre>
+
+      <h3>Os três estados do circuito</h3>
+      <table class="cmp">
+        <tbody><tr><th>Estado</th><th>Comportamento</th></tr>
+        <tr><td><strong>Fechado</strong> (normal)</td><td>Chamadas passam normalmente; falhas são contadas</td></tr>
+        <tr><td><strong>Aberto</strong></td><td>Depois de muitas falhas seguidas, para de tentar chamar o serviço real — chama o <code>fallbackMethod</code> direto, instantaneamente</td></tr>
+        <tr><td><strong>Meio-aberto</strong></td><td>Depois de um tempo, deixa passar algumas chamadas de teste para ver se o serviço voltou a funcionar</td></tr>
+      </tbody></table>
+
+      <div class="secret">Assim como <code>@Transactional</code> (capítulo 33) e <code>@PreAuthorize</code> (capítulo 52), <code>@CircuitBreaker</code> funciona via dynamic proxy (capítulo 20) — o método real só é chamado através de um wrapper que monitora falhas e decide se deve ou não deixar a chamada passar. É o mesmo mecanismo de interceptação reaparecendo pela quarta vez no curso, cada vez resolvendo um problema transversal diferente (transação, autorização, resiliência) sem espalhar código repetido em cada método de negócio.</div>
+
+      <div class="study-tip">Não confunda circuit breaker com retry simples. Retry tenta de novo assumindo que a falha é passageira; circuit breaker existe justamente para <strong>parar</strong> de tentar quando fica claro que o problema é persistente — tentar repetidamente contra um serviço já sobrecarregado só piora a situação dele. As duas técnicas costumam ser combinadas: algumas tentativas de retry, e se continuar falhando, o circuito abre.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 55.1 — Protegendo uma chamada externa</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva uma classe <code>ServicoFrete</code> com um método <code>calcularFrete(String cep)</code> anotado com <code>@CircuitBreaker</code>, simulando uma chamada a uma API externa de frete. Escreva o método de fallback correspondente, retornando um valor de frete padrão fixo quando o serviço externo estiver indisponível.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">ServicoFrete</span> {
+
+    <span class="annotation">@CircuitBreaker</span>(name = <span class="str">"servico-frete"</span>, fallbackMethod = <span class="str">"freteFallback"</span>)
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">calcularFrete</span>(<span class="kw">String</span> cep) {
+        <span class="kw">return</span> clienteHttp.consultarFreteExterno(cep); <span class="com">// pode lançar exceção ou demorar demais</span>
+    }
+
+    <span class="kw">public double</span> <span class="fn">freteFallback</span>(<span class="kw">String</span> cep, <span class="cls">Throwable</span> t) {
+        <span class="kw">return</span> 25.00; <span class="com">// valor padrão -- melhor que travar o checkout inteiro</span>
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

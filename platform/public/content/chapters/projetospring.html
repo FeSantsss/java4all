@@ -1,0 +1,103 @@
+<section class="section" id="projetospring">
+      <div class="section-head"><span class="section-num">28</span><h2 class="section-title">Projeto final — mini-framework pré-Spring</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: todos os capítulos 18-27</div>
+      </div>
+
+      <p>O projeto que fecha a trilha pré-Spring: um <strong>container de injeção de dependência baseado em anotações</strong>, construído do zero. Depois deste projeto, quando você abrir seu primeiro projeto Spring Boot, <code>@Component</code> e <code>@Autowired</code> vão parecer familiares — porque você já construiu uma versão simplificada deles com as próprias mãos.</p>
+
+      <ul class="checklist" id="checklist2">
+        <li><input type="checkbox"><span>Crie sua própria anotação <code>@Componente</code> (<code>@Retention(RUNTIME)</code>, <code>@Target(TYPE)</code>), marcando classes que o container deve gerenciar.</span></li>
+        <li><input type="checkbox"><span>Crie sua própria anotação <code>@Injetar</code> (<code>@Target(FIELD)</code>), marcando campos que o container deve preencher automaticamente.</span></li>
+        <li><input type="checkbox"><span>Implemente uma classe <code>MiniContainer</code> com um método <code>registrar(Class&lt;?&gt; tipo)</code> que guarda os tipos anotados com <code>@Componente</code> em um <code>Map&lt;Class&lt;?&gt;, Object&gt;</code> (as instâncias criadas — reaproveitando a ideia de Singleton do capítulo 23).</span></li>
+        <li><input type="checkbox"><span>Implemente <code>iniciar()</code>: para cada tipo registrado, cria a instância via reflection (construtor sem argumentos) e guarda no map.</span></li>
+        <li><input type="checkbox"><span>Implemente a injeção: depois de todas as instâncias criadas, percorra os campos de cada uma via <code>getDeclaredFields()</code>; para cada campo com <code>@Injetar</code>, busque a instância do tipo certo no map e injete com <code>Field.set(...)</code> (<code>setAccessible(true)</code> antes).</span></li>
+        <li><input type="checkbox"><span>Implemente <code>&lt;T&gt; T resolver(Class&lt;T&gt; tipo)</code>, devolvendo a instância já criada e com as dependências injetadas.</span></li>
+        <li><input type="checkbox"><span>Aplique o container nas classes <code>Biblioteca</code> e <code>NotificadorEmprestimo</code>/<code>EmailServico</code> dos capítulos anteriores: anote-as com <code>@Componente</code>, o campo de dependência com <code>@Injetar</code>, registre ambas no container, chame <code>iniciar()</code> e resolva <code>Biblioteca</code> pronta para uso, sem <strong>nenhum</strong> <code>new</code> manual no código cliente.</span></li>
+      </ul>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Gabarito completo do mini-container</h4><span class="exercise-tag d">projeto</span></div>
+        <p>Uma possível solução, reunindo anotações, reflection, generics, coleções e o padrão de injeção de dependência vistos na trilha inteira:</p>
+        <button class="reveal-btn">Ver solução completa</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="annotation">@Target</span>(ElementType.TYPE)
+<span class="kw">public @interface</span> <span class="cls">Componente</span> {}
+
+<span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="annotation">@Target</span>(ElementType.FIELD)
+<span class="kw">public @interface</span> <span class="cls">Injetar</span> {}
+
+<span class="kw">public class</span> <span class="cls">MiniContainer</span> {
+    <span class="kw">private final</span> List&lt;Class&lt;?&gt;&gt; tiposRegistrados = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">private final</span> Map&lt;Class&lt;?&gt;, <span class="kw">Object</span>&gt; instancias = <span class="kw">new</span> HashMap&lt;&gt;();
+
+    <span class="kw">public void</span> <span class="fn">registrar</span>(Class&lt;?&gt; tipo) {
+        <span class="kw">if</span> (!tipo.isAnnotationPresent(Componente.<span class="kw">class</span>)) {
+            <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(tipo.getName() + <span class="str">" não é @Componente"</span>);
+        }
+        tiposRegistrados.add(tipo);
+    }
+
+    <span class="kw">public void</span> <span class="fn">iniciar</span>() <span class="kw">throws</span> <span class="cls">ReflectiveOperationException</span> {
+        <span class="com">// 1ª passada: cria todas as instâncias (construtor sem argumentos)</span>
+        <span class="kw">for</span> (Class&lt;?&gt; tipo : tiposRegistrados) {
+            <span class="kw">Object</span> instancia = tipo.getDeclaredConstructor().newInstance();
+            instancias.put(tipo, instancia);
+        }
+
+        <span class="com">// 2ª passada: injeta dependências em cada campo @Injetar</span>
+        <span class="kw">for</span> (<span class="kw">Object</span> instancia : instancias.values()) {
+            <span class="kw">for</span> (Field campo : instancia.getClass().getDeclaredFields()) {
+                <span class="kw">if</span> (campo.isAnnotationPresent(Injetar.<span class="kw">class</span>)) {
+                    <span class="kw">Object</span> dependencia = resolverPorTipoCompativel(campo.getType());
+                    campo.setAccessible(<span class="kw">true</span>);
+                    campo.set(instancia, dependencia);
+                }
+            }
+        }
+    }
+
+    <span class="kw">private</span> <span class="kw">Object</span> <span class="fn">resolverPorTipoCompativel</span>(Class&lt;?&gt; tipoAlvo) {
+        <span class="kw">return</span> instancias.values().stream()
+            .filter(i -&gt; tipoAlvo.isAssignableFrom(i.getClass())) <span class="com">// aceita interface OU implementação exata</span>
+            .findFirst()
+            .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">IllegalStateException</span>(<span class="str">"Nenhum componente compatível com "</span> + tipoAlvo.getName()));
+    }
+
+    <span class="annotation">@SuppressWarnings</span>(<span class="str">"unchecked"</span>)
+    <span class="kw">public</span> &lt;T&gt; T <span class="fn">resolver</span>(Class&lt;T&gt; tipo) {
+        <span class="kw">return</span> (T) instancias.get(tipo);
+    }
+}
+
+<span class="com">// --- usando o mini-container ---</span>
+<span class="annotation">@Componente</span>
+<span class="kw">public class</span> <span class="cls">EmailServico</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="kw">String</span> msg) { System.out.println(<span class="str">"[email] "</span> + msg); }
+}
+
+<span class="annotation">@Componente</span>
+<span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="annotation">@Injetar</span>
+    <span class="kw">private</span> <span class="cls">NotificadorEmprestimo</span> notificador; <span class="com">// preenchido automaticamente pelo container!</span>
+
+    <span class="kw">private final</span> List&lt;<span class="cls">ItemAcervo</span>&gt; acervo = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">public void</span> <span class="fn">adicionar</span>(<span class="cls">ItemAcervo</span> i) { acervo.add(i); }
+    <span class="kw">public void</span> <span class="fn">emprestar</span>(<span class="kw">String</span> codigo) { <span class="com">/* ... usa notificador normalmente ... */</span> }
+}
+
+<span class="com">// main:</span>
+<span class="cls">MiniContainer</span> container = <span class="kw">new</span> <span class="cls">MiniContainer</span>();
+container.registrar(<span class="cls">EmailServico</span>.<span class="kw">class</span>);
+container.registrar(<span class="cls">Biblioteca</span>.<span class="kw">class</span>);
+container.iniciar();
+
+<span class="cls">Biblioteca</span> biblioteca = container.resolver(<span class="cls">Biblioteca</span>.<span class="kw">class</span>);
+<span class="com">// biblioteca já está pronta, com "notificador" injetado -- ZERO "new" manual!</span></pre>
+          <p style="margin-top:12px">Compare este <code>MiniContainer</code> com <code>@SpringBootApplication</code>: a ideia central — descobrir definições, instanciar, resolver por tipo e coordenar ciclo de vida — é semelhante. O Spring acrescenta escopos, qualificadores, callbacks, proxies, post-processors e scan de pacotes. Dependências circulares não são um recurso a ser “resolvido”: ciclos por construtor falham e normalmente revelam responsabilidades mal separadas.</p>
+        </div>
+      </div>
+    </section>

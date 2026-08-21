@@ -1,0 +1,90 @@
+<section class="section" id="static">
+      <div class="section-head"><span class="section-num">09</span><h2 class="section-title">static, final e this</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#encapsulamento">Encapsulamento</a></div>
+      </div>
+
+      <h3>static — pertence à classe, não ao objeto</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Contador</span> {
+    <span class="kw">private static int</span> totalCriados = 0; <span class="com">// compartilhado entre TODOS os objetos</span>
+    <span class="kw">private final int</span> id;
+
+    <span class="kw">public</span> <span class="fn">Contador</span>() {
+        totalCriados++;
+        <span class="kw">this</span>.id = totalCriados;
+    }
+
+    <span class="kw">public static int</span> <span class="fn">getTotalCriados</span>() { <span class="kw">return</span> totalCriados; } <span class="com">// static não usa "this"</span>
+}
+<span class="com">// uso: Contador.getTotalCriados() -- chamado na CLASSE, sem "new"</span></pre>
+      <p>Um campo <code>static</code> existe uma única vez, compartilhado por todas as instâncias. Um método <code>static</code> pertence à classe e não acessa atributos de instância diretamente — é por isso que <code>public static void main(...)</code> roda sem que nenhum objeto tenha sido criado ainda.</p>
+
+      <h3>final — não pode mudar depois de definido</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Circulo</span> {
+    <span class="kw">public static final double</span> PI_APROX = 3.14159; <span class="com">// constante de classe</span>
+    <span class="kw">private final double</span> raio; <span class="com">// só pode ser atribuído uma vez</span>
+
+    <span class="kw">public</span> <span class="fn">Circulo</span>(<span class="kw">double</span> raio) { <span class="kw">this</span>.raio = raio; }
+}</pre>
+      <p><code>final</code> em uma classe (<code>public final class Foo</code>) impede que ela seja estendida. <code>String</code> é <code>final</code> por esse motivo, entre outros ligados a segurança e imutabilidade.</p>
+
+      <div class="warn"><b>final em objeto ≠ imutável:</b> <code>final List&lt;String&gt; lista = new ArrayList&lt;&gt;();</code> impede reatribuir a variável <code>lista</code> a outro objeto — mas você ainda pode chamar <code>lista.add("x")</code> normalmente. <code>final</code> trava a <em>referência</em>, não o conteúdo do objeto apontado.</div>
+
+      <h3>this — referência ao próprio objeto</h3>
+      <p>Já vimos <code>this</code> para diferenciar parâmetro de atributo e para encadear construtores. Ele também habilita <strong>method chaining</strong>, retornando o próprio objeto:</p>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">PedidoBuilder</span> {
+    <span class="kw">private String</span> item = <span class="str">""</span>;
+    <span class="kw">private int</span> quantidade = 1;
+
+    <span class="kw">public</span> <span class="cls">PedidoBuilder</span> <span class="fn">item</span>(<span class="kw">String</span> item) { <span class="kw">this</span>.item = item; <span class="kw">return this</span>; }
+    <span class="kw">public</span> <span class="cls">PedidoBuilder</span> <span class="fn">quantidade</span>(<span class="kw">int</span> q) { <span class="kw">this</span>.quantidade = q; <span class="kw">return this</span>; }
+}
+<span class="com">// uso: new PedidoBuilder().item("Café").quantidade(2);</span></pre>
+
+      <div class="secret">Esse padrão de retornar <code>this</code> é a base do <strong>Builder Pattern</strong>, muito usado para construir objetos complexos com muitos parâmetros opcionais sem criar dez construtores sobrecarregados. Bibliotecas populares como <code>StringBuilder</code> (<code>.append(a).append(b)</code>) e frameworks de teste usam exatamente essa técnica.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 9.1 — Fábrica com contador estático</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie <code>Pedido</code> com <code>static int proximoId = 1</code> e <code>final int id</code>. No construtor, atribua <code>id</code> a partir de <code>proximoId</code> e incremente. Crie três pedidos e confirme ids sequenciais.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Pedido</span> {
+    <span class="kw">private static int</span> proximoId = 1;
+    <span class="kw">private final int</span> id;
+    <span class="kw">public</span> <span class="fn">Pedido</span>() { <span class="kw">this</span>.id = proximoId++; }
+    <span class="kw">public int</span> <span class="fn">getId</span>() { <span class="kw">return</span> id; }
+}
+<span class="cls">Pedido</span> p1 = <span class="kw">new</span> <span class="cls">Pedido</span>(), p2 = <span class="kw">new</span> <span class="cls">Pedido</span>(), p3 = <span class="kw">new</span> <span class="cls">Pedido</span>();
+System.out.println(p1.getId() + <span class="str">" "</span> + p2.getId() + <span class="str">" "</span> + p3.getId()); <span class="com">// 1 2 3</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 9.2 — Builder encadeável</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie uma classe <code>Pizza</code> com atributos <code>tamanho</code>, <code>borda</code> e uma <code>List&lt;String&gt; ingredientes</code>. Crie um <code>PizzaBuilder</code> com métodos encadeáveis <code>tamanho(String)</code>, <code>borda(String)</code> e <code>adicionar(String ingrediente)</code>, todos retornando <code>this</code>, e um método final <code>construir()</code> que retorna a <code>Pizza</code> pronta.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Pizza</span> {
+    <span class="kw">private final String</span> tamanho, borda;
+    <span class="kw">private final</span> java.util.List&lt;<span class="kw">String</span>&gt; ingredientes;
+    <span class="kw">public</span> <span class="fn">Pizza</span>(<span class="kw">String</span> tamanho, <span class="kw">String</span> borda, java.util.List&lt;<span class="kw">String</span>&gt; ingredientes) {
+        <span class="kw">this</span>.tamanho = tamanho; <span class="kw">this</span>.borda = borda; <span class="kw">this</span>.ingredientes = ingredientes;
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">PizzaBuilder</span> {
+    <span class="kw">private String</span> tamanho = <span class="str">"média"</span>, borda = <span class="str">"tradicional"</span>;
+    <span class="kw">private</span> java.util.List&lt;<span class="kw">String</span>&gt; ingredientes = <span class="kw">new</span> java.util.ArrayList&lt;&gt;();
+
+    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">tamanho</span>(<span class="kw">String</span> t) { <span class="kw">this</span>.tamanho = t; <span class="kw">return this</span>; }
+    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">borda</span>(<span class="kw">String</span> b) { <span class="kw">this</span>.borda = b; <span class="kw">return this</span>; }
+    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">adicionar</span>(<span class="kw">String</span> ing) { ingredientes.add(ing); <span class="kw">return this</span>; }
+    <span class="kw">public</span> <span class="cls">Pizza</span> <span class="fn">construir</span>() { <span class="kw">return new</span> <span class="cls">Pizza</span>(tamanho, borda, ingredientes); }
+}
+
+<span class="com">// uso:
+// Pizza p = new PizzaBuilder().tamanho("grande").adicionar("mussarela").adicionar("manjericão").construir();</span></pre>
+        </div>
+      </div>
+    </section>

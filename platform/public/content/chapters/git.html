@@ -1,0 +1,93 @@
+<section class="section tk-devops" id="git">
+      <div class="section-head"><span class="section-num">29</span><h2 class="section-title">Git &amp; fluxo de trabalho</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Git</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <span class="prereq-none">nenhum (pode ser aprendido em paralelo ao resto do curso)</span></div>
+      </div>
+
+      <p>A partir daqui o curso entra em ferramentas que cercam o código Java, não a linguagem em si. <strong>Git</strong> é pré-requisito de tudo que vem depois — CI/CD, deploy, trabalho em equipe — porque é o sistema de controle de versão que registra o histórico do seu projeto.</p>
+
+      <div class="install-box">
+        <h4>Instalação</h4>
+        <div class="install-tabs">
+          <span class="install-tab active">Windows</span>
+          <span class="install-tab">macOS</span>
+          <span class="install-tab">Linux</span>
+        </div>
+        <div class="install-panel active"><pre class="code"><span class="com"># baixe o instalador em git-scm.com e siga o wizard, ou via winget:</span>
+winget install --id Git.Git -e --source winget</pre></div>
+        <div class="install-panel"><pre class="code"><span class="com"># via Homebrew:</span>
+brew install git</pre></div>
+        <div class="install-panel"><pre class="code"><span class="com"># Debian/Ubuntu:</span>
+sudo apt update &amp;&amp; sudo apt install git
+
+<span class="com"># Fedora:</span>
+sudo dnf install git</pre></div>
+        <pre class="code"><span class="com"># confirme a instalação e configure identidade (uma vez só, por máquina):</span>
+git --version
+git config --global user.name "Felipy Santos"
+git config --global user.email "seu-email@exemplo.com"</pre>
+      </div>
+
+      <h3>O ciclo básico: working directory → staging → commit</h3>
+      <pre class="code">git init                      <span class="com"># cria um repositório novo na pasta atual</span>
+git status                    <span class="com"># o que mudou desde o último commit</span>
+git add arquivo.java          <span class="com"># move para a "staging area" (o que vai entrar no próximo commit)</span>
+git add .                     <span class="com"># adiciona TUDO que mudou</span>
+git commit -m "Adiciona classe Livro"  <span class="com"># registra um snapshot permanente</span>
+git log --oneline             <span class="com"># histórico resumido</span></pre>
+
+      <h3>Branches — trabalhando em paralelo sem quebrar o principal</h3>
+      <pre class="code">git branch feature/emprestimo     <span class="com"># cria uma branch nova</span>
+git checkout feature/emprestimo   <span class="com"># muda para ela</span>
+git checkout -b feature/emprestimo <span class="com"># cria E muda, em um comando só</span>
+
+<span class="com"># depois de terminar e commitar na branch:</span>
+git checkout main
+git merge feature/emprestimo      <span class="com"># traz as mudanças de volta para main</span></pre>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Commits pequenos e atômicos — uma mudança lógica por commit, não "correções do dia inteiro" em um commit só.</li>
+          <li>Mensagens de commit no imperativo: "Adiciona validação de saldo", não "adicionado" ou "adicionando".</li>
+          <li><code>.gitignore</code> sempre configurado <strong>antes</strong> do primeiro commit — <code>target/</code>, <code>.env</code>, <code>*.class</code>, credenciais nunca vão para o repositório.</li>
+          <li>Nunca dê <code>git push --force</code> em uma branch compartilhada (<code>main</code>/<code>develop</code>) — isso reescreve o histórico que outras pessoas já têm localmente.</li>
+        </ul>
+      </div>
+
+      <h3>Pull Request — a unidade social do trabalho em equipe</h3>
+      <p>Um <strong>Pull Request</strong> (PR) é um pedido para mesclar sua branch na branch principal, geralmente com revisão de código de outra pessoa antes de aceitar. É a prática padrão em qualquer time — mesmo sozinho, vale simular esse fluxo para manter <code>main</code> sempre funcional.</p>
+
+      <h3>merge vs rebase</h3>
+      <pre class="code">git merge feature/x    <span class="com"># cria um commit de merge, preserva o histórico exato de cada branch</span>
+git rebase main         <span class="com"># reescreve os commits da sua branch como se tivessem partido do main atual -- histórico linear, mas reescreve commits</span></pre>
+      <div class="warn"><b>Nunca dê rebase em uma branch que outras pessoas já baixaram</b> — como ele reescreve o histórico (novos hashes de commit), qualquer um que já tinha a versão antiga vai ter conflitos sérios ao sincronizar.</div>
+
+      <div class="secret">O arquivo <code>.gitignore</code> é o motivo real de nunca vazar uma senha de banco de produção sem querer: sem ele, é fácil dar <code>git add .</code> distraidamente e commitar um <code>application-prod.properties</code> com credenciais reais. Isso conecta direto com o capítulo 27 (configuração externa) e com o capítulo de Secrets mais adiante — a defesa em profundidade começa aqui, no controle de versão.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 29.1 — Fluxo completo com branch</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Inicialize um repositório Git para o projeto da biblioteca (capítulos 17/18). Crie um <code>.gitignore</code> ignorando <code>target/</code>, <code>*.class</code> e <code>.env</code>. Faça o commit inicial. Crie uma branch <code>feature/notificacao-sms</code>, adicione (mesmo que só como esqueleto) uma classe <code>SmsServico</code>, commit, volte para <code>main</code> e faça o merge.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">git init
+<span class="kw">echo</span> "target/
+*.class
+.env" &gt; .gitignore
+
+git add .
+git commit -m "Commit inicial: estrutura do projeto biblioteca"
+
+git checkout -b feature/notificacao-sms
+<span class="com"># cria SmsServico.java...</span>
+git add .
+git commit -m "Adiciona esqueleto de SmsServico"
+
+git checkout main
+git merge feature/notificacao-sms</pre>
+        </div>
+      </div>
+    </section>

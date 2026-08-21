@@ -1,0 +1,32 @@
+<section class="section tk-java" id="algoritmos-praticos">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Estruturas e algoritmos essenciais na prática</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-java">Java</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~5h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#ordenacao-busca">Ordenação e busca</a>, <a class="prereq-tag" href="#colecoes">Coleções</a></div></div>
+      
+      <p>Escolher uma estrutura é escolher quais operações serão baratas e quais custos serão aceitos. Analise tempo, memória, pior caso, custo amortizado, localidade de cache e características reais da entrada.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Como ler custos e estruturas</h3></div>
+    <p>Comece pela operação que o problema repete. A estrutura ideal para buscar pode ser ruim para inserir, ordenar ou percorrer.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>O(1), O(log n), O(n)</dt><dd>Descrevem como o trabalho cresce com a entrada: constante, logarítmico ou linear. Não são tempos em segundos.</dd></div><div class="concept-card"><dt>Custo amortizado</dt><dd>Média garantida ao distribuir uma operação ocasionalmente cara por uma sequência de operações, como o crescimento interno de um ArrayList.</dd></div><div class="concept-card"><dt>Localidade de cache</dt><dd>Dados próximos na memória tendem a ser lidos de forma mais eficiente pelo processador. Duas estruturas com a mesma ordem assintótica podem ter desempenho real diferente.</dd></div><div class="concept-card"><dt>Grafo</dt><dd>Conjunto de vértices ligados por arestas. Cidades podem ser vértices; estradas, arestas.</dd></div><div class="concept-card"><dt>Peso</dt><dd>Custo associado a uma aresta, como distância ou tempo. Grafo não ponderado trata cada travessia com o mesmo custo.</dd></div><div class="concept-card"><dt>Benchmark</dt><dd>Experimento controlado para medir desempenho, com cenário, parâmetros, aquecimento e repetição documentados.</dd></div></dl>
+  </aside>
+      <table class="cmp"><tbody><tr><th>Estrutura</th><th>Operações principais</th><th>Uso típico</th></tr><tr><td><code>ArrayList</code></td><td>índice O(1), inserir no meio O(n)</td><td>sequência e leitura</td></tr><tr><td><code>HashMap</code></td><td>busca/inserção O(1) em média</td><td>índice por chave</td></tr><tr><td><code>TreeMap</code></td><td>O(log n)</td><td>chaves ordenadas e consultas por faixa</td></tr><tr><td><code>ArrayDeque</code></td><td>extremos O(1) amortizado</td><td>fila e pilha</td></tr><tr><td><code>PriorityQueue</code></td><td>consultar mínimo O(1), inserir/remover O(log n)</td><td>agendamento e top-k</td></tr></tbody></table>
+      <h3>Busca em grafos</h3>
+      <pre class="code"><span class="kw">static</span> Set&lt;String&gt; bfs(Map&lt;String, List&lt;String&gt;&gt; grafo, String origem) {
+    Set&lt;String&gt; visitados = <span class="kw">new</span> LinkedHashSet&lt;&gt;();
+    Deque&lt;String&gt; fila = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    fila.add(origem);
+    <span class="kw">while</span> (!fila.isEmpty()) {
+        String atual = fila.removeFirst();
+        <span class="kw">if</span> (!visitados.add(atual)) <span class="kw">continue</span>;
+        grafo.getOrDefault(atual, List.of()).stream()
+            .filter(vizinho -&gt; !visitados.contains(vizinho))
+            .forEach(fila::addLast);
+    }
+    <span class="kw">return</span> visitados;
+}</pre>
+      <p><strong>BFS</strong> (<em>breadth-first search</em>, busca em largura) explora por camadas e encontra o menor número de arestas em grafos não ponderados. <strong>DFS</strong> (<em>depth-first search</em>, busca em profundidade) segue um caminho antes de voltar e é útil para componentes, ciclos e ordenação topológica. <strong>Dijkstra</strong> escolhe repetidamente o menor custo conhecido e resolve menores caminhos com pesos não negativos usando uma fila de prioridade. Para pesos negativos, essa escolha deixa de ser segura e outro algoritmo é necessário.</p>
+      <h3>Padrões de resolução</h3>
+      <ul><li><strong>Dois ponteiros:</strong> percorre uma sequência ordenada sem testar todos os pares.</li><li><strong>Janela deslizante:</strong> mantém estatísticas de um intervalo contíguo.</li><li><strong>Backtracking:</strong> explora escolhas e desfaz estado; poda caminhos impossíveis.</li><li><strong>Programação dinâmica:</strong> identifica subproblemas sobrepostos e reutiliza seus resultados.</li><li><strong>Union-find:</strong> mantém componentes disjuntos com compressão de caminho e união por rank.</li><li><strong>Top-k:</strong> usa heap de tamanho k em vez de ordenar toda a entrada.</li></ul>
+      <h3>Benchmark sem autoengano</h3>
+      <p><code>System.currentTimeMillis()</code> não é uma metodologia de microbenchmark. O <strong>JIT</strong> compila e otimiza código durante a execução; o <strong>GC</strong> recupera memória; ambos mudam uma medição curta. <strong>JMH</strong> é o Java Microbenchmark Harness, ferramenta que organiza aquecimento, repetição e consumo do resultado. Um <strong>fork</strong> executa o benchmark em um novo processo JVM para reduzir interferência de execuções anteriores. Registre distribuição, parâmetros e ambiente.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — rota de entregas</h4><span class="exercise-tag d">difícil</span></div><p>Modele cidades e estradas ponderadas. Implemente BFS, DFS, detecção de ciclo, ordenação topológica para dependências e Dijkstra para menor custo. Crie testes para grafo vazio, desconectado, ciclo e múltiplos caminhos com mesmo custo.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>Separe representação do algoritmo; rejeite pesos negativos em Dijkstra; retorne caminho e custo; documente complexidade em função de vértices e arestas.</p></div></div>
+    </section>

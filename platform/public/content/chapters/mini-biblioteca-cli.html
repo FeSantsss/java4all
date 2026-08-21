@@ -1,0 +1,23 @@
+<section class="section tk-java" id="mini-biblioteca-cli">
+      <div class="section-head"><span class="section-num">P2</span><h2 class="section-title">Mini-projeto: biblioteca orientada a objetos</h2></div>
+      <div class="topic-meta"><div class="meta-item">Objetivo: <b>modelagem e POO</b></div><div class="time-est">Tempo: <b>7–12 horas</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#interfaces">Interfaces</a></div></div>
+      <p>Modele livros, usuários e empréstimos. A regra central é impedir empréstimo simultâneo do mesmo exemplar e registrar devolução.</p>
+      <h3>Entregáveis</h3><ul class="checklist"><li><input type="checkbox"><span>Diagrama simples com entidades, responsabilidades e relações.</span></li><li><input type="checkbox"><span>Estado privado e mudanças feitas por comportamentos, não setters indiscriminados.</span></li><li><input type="checkbox"><span>Interface para itens emprestáveis e ao menos dois tipos de item.</span></li><li><input type="checkbox"><span>Exceções específicas para regras violadas.</span></li><li><input type="checkbox"><span>Aplicação CLI demonstrando cadastro, empréstimo, devolução e busca.</span></li></ul>
+      <div class="secret"><b>Pergunta de revisão:</b> quem deve decidir se um item está disponível: o menu, o serviço ou o próprio objeto? Defenda sua escolha com invariantes.</div>
+      <div class="rules-box"><h4>Critérios</h4><ul><li>Objetos não entram em estado impossível.</li><li>Herança só existe onde há relação “é um”.</li><li>A regra funciona sem depender do terminal.</li></ul></div>
+    <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Onde deve ficar a regra que impede emprestar exemplar indisponível?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">No modelo/caso de uso que protege a invariante, não apenas no menu.</div><div class="quiz-opt" data-correct="false">Somente na mensagem impressa pelo menu.</div><div class="quiz-opt" data-correct="false">Em um getter que altera o estado.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
+      <h3>Execução guiada e evidências</h3>
+      <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>
+      <h4 class="sub">Marcos obrigatórios</h4>
+      <ol>
+        <li><strong>Contrato:</strong> escreva regras, entradas, saídas, invariantes e casos-limite antes da implementação.</li>
+        <li><strong>Caminho mínimo:</strong> entregue uma fatia vertical executável com um teste de aceitação.</li>
+        <li><strong>Falhas:</strong> implemente validação, mensagens úteis, cleanup e comportamento após interrupção.</li>
+        <li><strong>Qualidade:</strong> automatize testes, formatação e build; remova segredos e dados pessoais dos logs.</li>
+        <li><strong>Operação:</strong> documente como executar, diagnosticar, atualizar e recuperar o projeto.</li>
+      </ol>
+      <h4 class="sub">Matriz mínima de testes</h4>
+      <table class="cmp"><tbody><tr><th>Categoria</th><th>Evidência</th></tr><tr><td>caminho feliz</td><td>resultado e estado final esperados</td></tr><tr><td>limites</td><td>vazio, mínimo, máximo, duplicado e formato inválido</td></tr><tr><td>falha</td><td>dependência indisponível, timeout ou exceção sem corrupção de estado</td></tr><tr><td>repetição</td><td>retry ou execução duplicada não produz efeito indevido</td></tr><tr><td>regressão</td><td>bug corrigido ganha teste que falhava antes</td></tr></tbody></table>
+      <ul class="checklist"><li><input type="checkbox"><span>README contém requisitos, arquitetura, decisões e comandos reproduzíveis.</span></li><li><input type="checkbox"><span>Build e testes executam do zero sem passos secretos.</span></li><li><input type="checkbox"><span>Casos-limite e falhas foram demonstrados, não apenas descritos.</span></li><li><input type="checkbox"><span>Existe uma retrospectiva com dívida técnica e próximo incremento.</span></li></ul>
+      <div class="warn"><b>Regra de conclusão:</b> captura de tela não prova comportamento. Entregue código, testes, dados de exemplo, comandos e resultados verificáveis. Se uma tecnologia externa for necessária, fixe versões e forneça um ambiente reproduzível.</div>
+      </div></section>

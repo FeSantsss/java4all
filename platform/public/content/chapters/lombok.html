@@ -1,0 +1,84 @@
+<section class="section tk-spring" id="lombok">
+      <div class="section-head"><span class="section-num">65</span><h2 class="section-title">Lombok — eliminando boilerplate</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Ferramenta</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#encapsulamento">04 · Encapsulamento</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
+      </div>
+
+      <p>Lembra de escrever getters, setters, construtores e <code>equals</code>/<code>hashCode</code>/<code>toString</code> na mão nos capítulos 04 e 05? Isso é exatamente o que <strong>Lombok</strong> gera automaticamente — sem reflection em runtime, direto no bytecode durante a compilação.</p>
+
+      <div class="code-toggle-bar">
+        <button class="ct-btn bad active">❌ Sem Lombok</button>
+        <button class="ct-btn good">✅ Com Lombok</button>
+      </div>
+      <div class="ct-panel active">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">private</span> <span class="kw">Long</span> id;
+    <span class="kw">private String</span> titulo;
+    <span class="kw">private int</span> paginas;
+
+    <span class="kw">public</span> <span class="fn">Livro</span>(<span class="kw">Long</span> id, <span class="kw">String</span> titulo, <span class="kw">int</span> paginas) {
+        <span class="kw">this</span>.id = id; <span class="kw">this</span>.titulo = titulo; <span class="kw">this</span>.paginas = paginas;
+    }
+    <span class="kw">public Long</span> <span class="fn">getId</span>() { <span class="kw">return</span> id; }
+    <span class="kw">public String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+    <span class="kw">public void</span> <span class="fn">setTitulo</span>(<span class="kw">String</span> titulo) { <span class="kw">this</span>.titulo = titulo; }
+    <span class="kw">public int</span> <span class="fn">getPaginas</span>() { <span class="kw">return</span> paginas; }
+    <span class="kw">public void</span> <span class="fn">setPaginas</span>(<span class="kw">int</span> paginas) { <span class="kw">this</span>.paginas = paginas; }
+    <span class="annotation">@Override</span> <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="kw">Object</span> o) { <span class="com">/* ~10 linhas */</span> }
+    <span class="annotation">@Override</span> <span class="kw">public int</span> <span class="fn">hashCode</span>() { <span class="com">/* ~3 linhas */</span> }
+    <span class="annotation">@Override</span> <span class="kw">public String</span> <span class="fn">toString</span>() { <span class="com">/* ~3 linhas */</span> }
+}
+<span class="com">// ~35 linhas para uma classe de 3 campos</span></pre>
+      </div>
+      <div class="ct-panel">
+<pre class="code"><span class="annotation">@Getter</span> <span class="annotation">@Setter</span>
+<span class="annotation">@NoArgsConstructor</span> <span class="annotation">@AllArgsConstructor</span>
+<span class="annotation">@EqualsAndHashCode</span> <span class="annotation">@ToString</span>
+<span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">private</span> <span class="kw">Long</span> id;
+    <span class="kw">private String</span> titulo;
+    <span class="kw">private int</span> paginas;
+}
+<span class="com">// 8 linhas, mesmo resultado -- o código "chato" nunca existiu de verdade
+// no .java, mas existe no .class compilado final</span></pre>
+      </div>
+
+      <h3>Anotações mais usadas</h3>
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Gera</th></tr>
+        <tr><td><code>@Getter</code>/<code>@Setter</code></td><td>Getters/setters de todos os campos (ou de um específico, aplicado no campo)</td></tr>
+        <tr><td><code>@NoArgsConstructor</code></td><td>Construtor vazio</td></tr>
+        <tr><td><code>@AllArgsConstructor</code></td><td>Construtor com todos os campos</td></tr>
+        <tr><td><code>@Data</code></td><td>Combo: Getter + Setter + EqualsAndHashCode + ToString + construtor com campos <code>final</code></td></tr>
+        <tr><td><code>@Builder</code></td><td>Gera o Builder Pattern inteiro (capítulo 09) automaticamente</td></tr>
+        <tr><td><code>@Slf4j</code></td><td>Injeta um <code>Logger</code> pronto (capítulo 27), sem precisar declarar manualmente</td></tr>
+      </tbody></table>
+
+      <div class="secret">Diferente do Jackson (reflection em runtime) e do Spring (reflection + proxies em runtime), o Lombok atua em <strong>tempo de compilação</strong>, via uma API do compilador Java chamada Annotation Processing — ele literalmente reescreve o <code>.class</code> gerado, adicionando os métodos como se você os tivesse digitado. É por isso que, ao decompilar uma classe com <code>@Getter</code>, você vê os métodos <code>getX()</code> normalmente, mesmo nunca tendo escrito essa palavra no <code>.java</code>.</div>
+
+      <div class="warn"><b>@Data em entidades JPA é uma armadilha comum:</b> o <code>equals</code>/<code>hashCode</code> gerado usa <strong>todos</strong> os campos por padrão, incluindo relacionamentos — o que pode disparar carregamento LAZY inesperado (capítulo 46) ou comparações incorretas antes do <code>id</code> ser gerado pelo banco. Para entidades JPA, prefira anotações específicas (<code>@Getter</code>, <code>@Setter</code>) e escreva <code>equals</code>/<code>hashCode</code> manualmente baseado só no <code>id</code>, como você já fez no exercício 5.2.</div>
+
+      <div class="study-tip">Você já sabe escrever tudo isso na mão (capítulos 04, 05, 09) — não é acaso. Ferramentas de geração de código só deveriam ser adotadas depois que você entende exatamente o que está sendo automatizado, senão vira "magia" que você não sabe depurar quando algo foge do padrão comum.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 68.1 — Refatorando com Lombok</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Pegue a classe <code>Livro</code> encapsulada do exercício 4.1 (getters, setters, construtor) e reescreva usando as anotações Lombok adequadas, mantendo o mesmo comportamento público.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Getter</span>
+<span class="annotation">@AllArgsConstructor</span>
+<span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">private String</span> titulo;
+    <span class="kw">private String</span> autor;
+    <span class="kw">private int</span> paginas;
+
+    <span class="kw">public void</span> <span class="fn">setPaginas</span>(<span class="kw">int</span> paginas) { <span class="com">// setter customizado -- Lombok não gera validação, então mantém manual</span>
+        <span class="kw">if</span> (paginas &gt; 0) <span class="kw">this</span>.paginas = paginas;
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

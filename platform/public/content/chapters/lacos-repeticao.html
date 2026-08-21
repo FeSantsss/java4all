@@ -1,0 +1,14 @@
+<section class="section tk-java" id="lacos-repeticao">
+      <div class="section-head"><span class="section-num">05</span><h2 class="section-title">Repetição: while, for e controle de laços</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#controle-fluxo">Decisões</a></div></div>
+      <p>Um laço repete enquanto uma condição permite. Todo laço precisa de estado inicial, condição de continuidade e progresso em direção ao término. Se um desses elementos estiver errado, surge um laço infinito ou uma iteração incompleta.</p>
+      <table class="cmp"><tbody><tr><th>Estrutura</th><th>Use quando</th></tr><tr><td><code>while</code></td><td>A quantidade de repetições depende de uma condição externa</td></tr><tr><td><code>do-while</code></td><td>O corpo precisa executar pelo menos uma vez</td></tr><tr><td><code>for</code></td><td>Inicialização, condição e incremento formam uma contagem clara</td></tr><tr><td><code>for-each</code></td><td>Você percorre todos os elementos e não precisa do índice</td></tr></tbody></table>
+      <pre class="code"><span class="kw">int</span> soma = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">100</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> != <span class="num">0</span>) <span class="kw">continue</span>;
+    soma += i;
+}</pre>
+      <h3>Erros de fronteira</h3>
+      <p>Os bugs mais comuns são começar uma posição tarde, terminar uma posição cedo ou usar <code>&lt;=</code> quando o limite é exclusivo. Simule à mão a primeira e a última iteração. Para coleções indexadas de tamanho <code>n</code>, índices válidos normalmente vão de <code>0</code> a <code>n - 1</code>.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Sentinela e validação</h4><span class="exercise-tag f">Fundamento</span></div><p>Leia números até receber zero. Ignore negativos, some positivos e conte quantos foram aceitos. Teste: zero como primeiro valor, apenas negativos e uma sequência mista.</p></div>
+    </section>

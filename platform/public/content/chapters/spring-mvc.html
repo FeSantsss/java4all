@@ -1,0 +1,68 @@
+<section class="section tk-spring" id="spring-mvc">
+      <div class="section-head"><span class="section-num">44</span><h2 class="section-title">Spring Web / MVC — controllers REST</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">43 · Spring Core</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; APIs REST</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
+      </div>
+
+      <p>Aqui o pseudo-REST desenhado no capítulo 26 vira código de verdade. Um <strong>controller</strong> Spring é uma classe cujos métodos são mapeados para combinações de verbo HTTP + caminho de URL — exatamente como você previu naquele capítulo.</p>
+
+      <pre class="code"><span class="annotation">@RestController</span> <span class="com">// @Controller + @ResponseBody: retorno vira JSON automaticamente (via Jackson, capítulo 25)</span>
+<span class="annotation">@RequestMapping</span>(<span class="str">"/livros"</span>)
+<span class="kw">public class</span> <span class="cls">LivroController</span> {
+
+    <span class="kw">private final</span> <span class="cls">LivroServico</span> servico;
+
+    <span class="kw">public</span> <span class="fn">LivroController</span>(<span class="cls">LivroServico</span> servico) { <span class="kw">this</span>.servico = servico; } <span class="com">// injeção, capítulo 22</span>
+
+    <span class="annotation">@GetMapping</span>
+    <span class="kw">public</span> List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">listarTodos</span>() {
+        <span class="kw">return</span> servico.listarTodos();
+    }
+
+    <span class="annotation">@GetMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">buscarPorId</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id) {
+        <span class="kw">return</span> servico.buscarPorId(id)
+            .map(ResponseEntity::ok)                    <span class="com">// 200 OK com o corpo</span>
+            .orElseGet(() -&gt; ResponseEntity.notFound().build()); <span class="com">// 404, capítulo 26</span>
+    }
+
+    <span class="annotation">@PostMapping</span>
+    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">criar</span>(<span class="annotation">@RequestBody</span> <span class="cls">LivroDTO</span> dto) {
+        <span class="cls">LivroDTO</span> criado = servico.salvar(dto);
+        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CREATED).body(criado); <span class="com">// 201</span>
+    }
+
+    <span class="annotation">@DeleteMapping</span>(<span class="str">"/{id}"</span>)
+    <span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">deletar</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id) {
+        servico.deletar(id);
+        <span class="kw">return</span> ResponseEntity.noContent().build(); <span class="com">// 204</span>
+    }
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Equivale a</th></tr>
+        <tr><td><code>@GetMapping</code></td><td><code>GET</code> (capítulo 26)</td></tr>
+        <tr><td><code>@PostMapping</code></td><td><code>POST</code></td></tr>
+        <tr><td><code>@PutMapping</code></td><td><code>PUT</code></td></tr>
+        <tr><td><code>@DeleteMapping</code></td><td><code>DELETE</code></td></tr>
+        <tr><td><code>@PathVariable</code></td><td>Captura um segmento da URL (<code>/livros/{id}</code>)</td></tr>
+        <tr><td><code>@RequestParam</code></td><td>Captura query string (<code>?titulo=Duna</code>)</td></tr>
+        <tr><td><code>@RequestBody</code></td><td>Desserializa o corpo JSON da requisição em objeto Java</td></tr>
+      </tbody></table>
+
+      <div class="analogy">Um controller é o "recepcionista" da sua aplicação — ele não sabe cozinhar (regra de negócio) nem sabe onde os ingredientes estão guardados (banco de dados). Ele só recebe o pedido do cliente HTTP, entende o que foi pedido (via <code>@PathVariable</code>/<code>@RequestBody</code>), repassa para quem sabe fazer (o <code>@Service</code>) e devolve a resposta formatada certinha. Se seu controller tem lógica de negócio complexa dentro, ele deixou de ser recepcionista e virou o cozinheiro — sinal de que essa lógica deveria estar no Service (mesma lição de SRP do capítulo 16).</div>
+
+      <div class="secret">Repare que <code>@RestController</code> nunca "sabe" que existe JSON explicitamente no código — você retorna objetos Java normais (<code>LivroDTO</code>, <code>List&lt;LivroDTO&gt;</code>) e o Spring, por trás dos panos, usa o Jackson (capítulo 25) automaticamente para serializar, baseado no <code>Content-Type</code> negociado com o cliente. É por isso que entender getters/records + Jackson <em>antes</em> deste capítulo evita achar essa conversão mágica.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 44.1 — Controller completo de Livro</h4><span class="exercise-tag m">médio</span></div>
+        <p>Sem copiar o exemplo, implemente um <code>AutorController</code> com listar, buscar, criar e deletar. A criação deve retornar 201 com <code>Location</code>; busca ausente retorna 404; deleção inexistente também possui contrato explícito. Escreva testes MockMvc para cada status.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Critérios: controller não contém regra de negócio; usa DTO; constrói <code>Location</code> a partir da requisição; converte ausência em 404; valida o corpo; e os testes verificam status, header e JSON. Compare uma solução com <code>ResponseEntity.of(optional)</code> e outra com exceção de domínio traduzida globalmente.</p>
+        </div>
+      </div>
+    </section>

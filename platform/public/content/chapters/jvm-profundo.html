@@ -1,0 +1,183 @@
+<section class="section tk-java" id="jvm-profundo">
+      <div class="section-head"><span class="section-num">82</span><h2 class="section-title">JVM, Bytecode e Gerenciamento de Memória — Aprofundamento</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Java Interno</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo — releia com calma, é a fundação de tudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#intro">00 · Introdução</a>, <a class="prereq-tag" href="#classes">01 · Classes e objetos</a>, <a class="prereq-tag" href="#threads">14 · Threads &amp; concorrência</a></div>
+      </div>
+
+      <p>O capítulo 00 explicou JDK/JRE/JVM em nível de superfície, e o capítulo 01 introduziu stack e heap de passagem. Este capítulo volta a esses dois tópicos e vai fundo de verdade — porque toda decisão de performance séria que você vai tomar como desenvolvedor sênior depende de entender exatamente o que acontece entre o momento em que você escreve <code>Livro l = new Livro();</code> e o momento em que esse objeto deixa de existir.</p>
+
+      <h3>Do .java ao processo rodando: o caminho completo, passo a passo</h3>
+      <p>Nada disso é mágico — é uma sequência de transformações mecânicas e determinísticas. Vamos percorrer cada uma delas sem pular nenhuma etapa.</p>
+
+      <pre class="code">PASSO 1 — Código-fonte (Livro.java)
+┌─────────────────────────────────────┐
+│ public class Livro {                 │
+│     private String titulo;           │
+│     public String getTitulo() {      │
+│         return titulo;               │
+│     }                                │
+│ }                                    │
+└─────────────────────────────────────┘
+              │
+              │  javac Livro.java
+              ▼
+PASSO 2 — Bytecode (Livro.class) -- NÃO é código de máquina x86/ARM,
+          é um formato intermediário, independente de sistema operacional
+┌─────────────────────────────────────┐
+│ CAFEBABE 0000 0041 001D...           │  ← cabeçalho mágico + versão
+│ Constant Pool: #1 = Class  #2        │  ← tabela de símbolos (nomes, tipos)
+│ Methods:                             │
+│   getTitulo:                         │
+│     aload_0        // empilha "this" │
+│     getfield #3     // busca "titulo"│
+│     areturn         // retorna       │
+└─────────────────────────────────────┘
+              │
+              │  java Livro   (a JVM CARREGA o .class)
+              ▼
+PASSO 3 — Class Loading: a JVM lê o .class, verifica que o bytecode é
+          válido (Bytecode Verifier -- proteção de segurança), e registra
+          a classe Livro na memória da aplicação
+              │
+              ▼
+PASSO 4 — Execução: a JVM interpreta o bytecode instrução por instrução
+          (lento) OU, para métodos executados MUITAS vezes, o JIT
+          (Just-In-Time compiler) o compila para código de máquina NATIVO
+          real, otimizado para o processador específico da máquina</pre>
+
+      <div class="analogy">Pense no bytecode como uma partitura musical universal — qualquer orquestra do mundo (qualquer JVM, em qualquer sistema operacional) consegue lê-la e tocá-la, mesmo que os instrumentos físicos (o hardware) sejam diferentes entre uma sala de concerto e outra. O <code>javac</code> é o compositor traduzindo uma ideia musical (seu código Java) para essa notação universal; a JVM é o maestro que interpreta a partitura e faz a orquestra (o processador da sua máquina) realmente tocar o som.</div>
+
+      <h3>Interpretação vs JIT — por que Java "esquenta" com o tempo</h3>
+      <p>Quando sua aplicação Spring Boot inicia, os primeiros métodos chamados rodam <strong>interpretados</strong> — a JVM lê cada instrução de bytecode e a executa uma a uma, sem otimização. A JVM mantém contadores de quantas vezes cada método é chamado (<em>hot methods</em>); quando um método ultrapassa um limiar, o compilador JIT (<strong>C1</strong> para compilação rápida inicial, <strong>C2</strong> para otimização agressiva depois) o traduz para código de máquina nativo, e as chamadas seguintes usam essa versão compilada, muito mais rápida.</p>
+
+      <div class="secret">Isso explica um fenômeno real que você provavelmente já observou sem saber o nome: uma aplicação Spring Boot recém-iniciada responde requisições mais lentamente nos primeiros segundos/minutos do que depois de "aquecida" (<em>warmed up</em>). É por isso que testes de performance/carga sérios sempre incluem um período de aquecimento antes de medir — medir a aplicação "fria" (só interpretada) dá números artificialmente piores do que ela realmente entrega em regime permanente de produção.</div>
+
+      <h3>A memória da JVM: um mapa completo, não só Stack e Heap</h3>
+      <pre class="code">┌─────────────────────────────────────────────────────────────┐
+│                     MEMÓRIA DA JVM                            │
+│                                                                 │
+│  ┌───────────────┐  ┌───────────────┐  ┌────────────────────┐│
+│  │  STACK         │  │  STACK         │  │  METASPACE          ││
+│  │  (Thread A)    │  │  (Thread B)    │  │  (fora do heap)     ││
+│  │                │  │                │  │  guarda METADADOS   ││
+│  │ frame: main()  │  │ frame: run()   │  │  das CLASSES:        ││
+│  │  int x = 5     │  │  Livro l       │  │  - bytecode dos      ││
+│  │ frame: foo()   │  │                │  │    métodos            ││
+│  │  String s      │  │                │  │  - Constant Pool      ││
+│  └───────────────┘  └───────────────┘  └────────────────────┘│
+│         │ referências apontam para                             │
+│         ▼                                                       │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                        HEAP                              │ │
+│  │  ┌──────────────────┐  ┌───────────────────────────────┐│ │
+│  │  │  Young Generation │  │      Old Generation            ││ │
+│  │  │  ┌─────┐┌───┐┌───┐│  │  (objetos que sobreviveram     ││ │
+│  │  │  │Eden ││S0 ││S1 ││  │   várias coletas de lixo na    ││ │
+│  │  │  └─────┘└───┘└───┘│  │   Young Generation)             ││ │
+│  │  │ objetos NOVOS,     │  │  ex: cache de longa duração,    ││ │
+│  │  │ nascem aqui        │  │  singleton beans do Spring      ││ │
+│  │  └──────────────────┘  └───────────────────────────────┘│ │
+│  └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘</pre>
+
+      <p>Cada <strong>Thread</strong> tem sua própria Stack — é por isso que variáveis locais nunca precisam de sincronização (capítulo 14): cada thread tem uma cópia física separada de sua própria pilha de execução. O <strong>Heap</strong> é compartilhado por todas as threads da aplicação — é onde vive todo objeto criado com <code>new</code>, e é exatamente por isso que objetos compartilhados entre threads precisam de <code>synchronized</code> ou classes <code>Atomic*</code> (capítulo 14): múltiplas threads podem acessar a mesma região de memória simultaneamente.</p>
+
+      <h3>Por que o Heap é dividido em gerações</h3>
+      <p>A observação empírica que fundamenta esse design, confirmada repetidamente em décadas de análise de aplicações reais, é chamada de <strong>hipótese geracional</strong>: a maioria dos objetos morre jovem. Uma variável local de método, um DTO temporário criado para uma única requisição HTTP (capítulo 44) — a esmagadora maioria dos objetos vive apenas milissegundos e é descartada logo depois.</p>
+
+      <div class="analogy">Pense em uma sala de espera de hospital (Young Generation, especificamente a região <strong>Eden</strong>) onde a maioria das pessoas fica pouquíssimo tempo — atendidas e liberadas rapidamente. Só uma pequena fração precisa ficar internada por mais tempo (sobrevive a várias "rodadas de triagem" — coletas de lixo — e é promovida para as áreas <strong>Survivor</strong>, S0/S1). Depois de sobreviver a internações suficientes, um paciente é transferido para uma ala de tratamento de longo prazo (<strong>Old Generation</strong>). Focar o esforço de "limpeza" (coleta de lixo) na sala de espera, que tem alta rotatividade, é muito mais eficiente do que vasculhar a ala de longo prazo toda vez.</div>
+
+      <h3>O Garbage Collector: como a JVM decide o que é "lixo"</h3>
+      <p>Diferente de C/C++, você nunca chama <code>free()</code> em Java. O GC identifica objetos <strong>inalcançáveis</strong> — nenhuma referência viva (a partir de nenhuma Stack, de nenhum campo <code>static</code>) aponta mais para eles — e libera essa memória automaticamente.</p>
+
+      <pre class="code"><span class="cls">Livro</span> l1 = <span class="kw">new</span> <span class="cls">Livro</span>(); <span class="com">// objeto A criado no heap, "l1" (na stack) aponta para ele</span>
+l1 = <span class="kw">new</span> <span class="cls">Livro</span>();       <span class="com">// objeto B criado, "l1" agora aponta para B
+                          // objeto A ficou SEM NENHUMA referência --
+                          // agora é candidato a coleta de lixo</span>
+
+<span class="kw">void</span> <span class="fn">metodo</span>() {
+    <span class="cls">Livro</span> local = <span class="kw">new</span> <span class="cls">Livro</span>(); <span class="com">// objeto C, referenciado só pela variável local</span>
+} <span class="com">// método termina -- o frame da stack é destruído --
+  // "local" deixa de existir -- objeto C também vira lixo</span></pre>
+
+      <div class="warn"><b>Referências "esquecidas" causam vazamento de memória mesmo em Java.</b> O GC só coleta objetos <strong>inalcançáveis</strong> — se você guarda uma referência desnecessária em um <code>static</code> <code>Map</code> ou <code>List</code> que só cresce e nunca remove itens (um cache mal desenhado, por exemplo), esses objetos permanecem "alcançáveis" para sempre, mesmo que ninguém mais os use de verdade. Isso é a causa mais comum de <code>OutOfMemoryError</code> em aplicações Java de longa duração, como um Spring Boot rodando em produção por semanas.</div>
+
+      <h3>Algoritmos de coleta: Mark-and-Sweep, generational, G1</h3>
+      <p>O algoritmo fundamental por trás da maioria dos coletores modernos tem duas fases:</p>
+
+      <pre class="code">FASE 1 — MARK (marcar)
+A JVM parte das "raízes" (variáveis em cada Stack de cada Thread,
+campos static) e percorre TODAS as referências alcançáveis a partir
+delas, marcando cada objeto encontrado como "vivo".
+
+     [Stack Thread A] ──┐
+                         ├──► Objeto X (marcado: VIVO)
+     [campo static]   ───┘         │
+                                    └──► Objeto Y (marcado: VIVO,
+                                          referenciado por X)
+
+     Objeto Z (não alcançado por ninguém) → permanece NÃO marcado
+
+FASE 2 — SWEEP (varrer)
+A JVM percorre o heap inteiro; todo objeto NÃO marcado é considerado
+lixo e sua memória é liberada/reciclada.</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Coletor</th><th>Estratégia</th><th>Quando usar</th></tr>
+        <tr><td><strong>Serial GC</strong></td><td>Uma única thread faz toda a coleta, pausando a aplicação inteira</td><td>Aplicações pequenas, single-core</td></tr>
+        <tr><td><strong>Parallel GC</strong></td><td>Várias threads coletam em paralelo, ainda pausando a aplicação</td><td>Maximizar throughput, pausas aceitáveis</td></tr>
+        <tr><td><strong>G1 (Garbage-First)</strong></td><td>Divide o heap em regiões pequenas, coleta incrementalmente as regiões com mais lixo primeiro</td><td><strong>Padrão desde Java 9</strong> — bom equilíbrio entre pausas curtas e throughput, a escolha certa para a maioria das aplicações Spring Boot</td></tr>
+        <tr><td><strong>ZGC / Shenandoah</strong></td><td>Coleta quase inteiramente concorrente, pausas sub-milissegundo mesmo em heaps enormes (terabytes)</td><td>Aplicações que não toleram NENHUMA pausa perceptível — sistemas de latência ultra-baixa</td></tr>
+      </tbody></table>
+
+      <div class="secret">"Pausa do GC" (<em>stop-the-world</em>) significa que, durante parte do processo de coleta, <strong>todas</strong> as threads da sua aplicação (inclusive as processando requisições HTTP, capítulo 44) são congeladas. É por isso que dimensionar corretamente o heap (<code>-Xmx</code>, <code>-Xms</code> na JVM) é uma decisão de produção real: um heap grande demais para o volume de tráfego pode causar pausas de GC mais longas e perceptíveis; um heap pequeno demais causa coletas frequentes demais, também prejudicando throughput. Ferramentas de observabilidade (o Actuator do capítulo 56, ou ferramentas dedicadas como o VisualVM) expõem métricas de GC exatamente para você acompanhar isso em produção.</div>
+
+      <h3>Escape Analysis — quando um objeto nem chega a ir para o Heap</h3>
+      <p>Uma otimização avançada do JIT: se o compilador consegue provar que um objeto <strong>nunca "escapa" do método</strong> (nenhuma referência a ele sai do escopo local), ele pode alocar esse objeto diretamente na <strong>Stack</strong> em vez do Heap — ou até eliminar a alocação completamente, mantendo os campos como variáveis locais soltas. Isso evita completamente o custo de GC para esses objetos.</p>
+
+      <div class="study-tip">Você não precisa (nem deveria, na maioria dos casos) escrever código "pensando no Escape Analysis" — é uma otimização que o JIT decide automaticamente. O valor prático de saber que ela existe é entender por que, às vezes, um código aparentemente "cria muitos objetos temporários" tem performance melhor do que a intuição sugeriria: o JIT frequentemente já eliminou boa parte desse custo nos bastidores, sem você precisar fazer nada.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 85.1 — Rastreando o ciclo de vida de um objeto</h4><span class="exercise-tag m">médio</span></div>
+        <p>Para o código abaixo, escreva um passo a passo detalhado de: (1) onde cada objeto é alocado (Stack ou Heap), (2) em que momento cada objeto se torna elegível para coleta de lixo, explicando o motivo exato em cada caso.</p>
+        <pre class="code"><span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">static</span> <span class="cls">Livro</span> livroFavorito;
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="kw">String</span>[] args) {
+        <span class="cls">Livro</span> l1 = <span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"1984"</span>);
+        livroFavorito = l1;
+        <span class="cls">Livro</span> l2 = <span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Duna"</span>);
+        l1 = <span class="kw">null</span>;
+        processarLivro();
+    }
+
+    <span class="kw">static void</span> <span class="fn">processarLivro</span>() {
+        <span class="cls">Livro</span> temp = <span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Temporário"</span>);
+    }
+}</pre>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>Modelo conceitual:</strong> as variáveis locais <code>l1</code>, <code>l2</code> e <code>temp</code> pertencem aos frames de seus métodos; os objetos <code>Livro</code> criados com <code>new</code> são normalmente alocados no heap, embora otimizações possam eliminar alocações. <code>livroFavorito</code> é um campo estático associado à classe e funciona como raiz de alcançabilidade enquanto a classe estiver carregada. Não afirme que o valor do campo fica no Metaspace: detalhes físicos dependem da implementação da JVM.</p>
+          <p><strong>Passo a passo:</strong> (1) <code>l1</code> aponta para o objeto "1984" no Heap. (2) <code>livroFavorito = l1</code> — agora <strong>duas</strong> referências apontam para o mesmo objeto "1984": a variável local <code>l1</code> e o campo estático <code>livroFavorito</code>. (3) <code>l2</code> aponta para "Duna" no Heap. (4) <code>l1 = null</code> — a referência local deixa de apontar para "1984", mas o objeto <strong>ainda é alcançável</strong> através de <code>livroFavorito</code> (que é <code>static</code>, então "raiz" viva para sempre enquanto a classe existir) — <strong>não</strong> é coletado. (5) Dentro de <code>processarLivro()</code>, <code>temp</code> aponta para "Temporário". (6) Quando <code>processarLivro()</code> termina, o frame daquele método é destruído da Stack, <code>temp</code> deixa de existir, e o objeto "Temporário" fica sem nenhuma referência — torna-se elegível para coleta de lixo. (7) Quando <code>main()</code> termina, <code>l2</code> também deixa de existir e "Duna" se torna elegível — mas "1984" continua vivo, porque <code>livroFavorito</code> (static) continua referenciando-o mesmo depois que <code>main()</code> encerra.</p>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 85.2 — Identificando um vazamento de memória</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Analise a classe abaixo e explique por que ela causa um vazamento de memória em uma aplicação de longa duração, mesmo em uma linguagem com Garbage Collector automático. Proponha uma correção.</p>
+        <pre class="code"><span class="kw">public class</span> <span class="cls">CacheDeUsuarios</span> {
+    <span class="kw">private static final</span> Map&lt;<span class="kw">Long</span>, <span class="cls">Usuario</span>&gt; cache = <span class="kw">new</span> HashMap&lt;&gt;();
+
+    <span class="kw">public static void</span> <span class="fn">adicionar</span>(<span class="kw">Long</span> id, <span class="cls">Usuario</span> usuario) {
+        cache.put(id, usuario); <span class="com">// nunca remove nada!</span>
+    }
+}</pre>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Como <code>cache</code> é <code>static</code>, ele é uma "raiz" que vive durante toda a execução da aplicação — todo <code>Usuario</code> adicionado permanece <strong>alcançável para sempre</strong> através dele, mesmo que nenhuma outra parte do sistema jamais volte a usar aquele usuário específico. O GC nunca coleta esses objetos, porque tecnicamente eles nunca ficam inalcançáveis — o programa simplesmente acumula memória indefinidamente até esgotar o heap e lançar <code>OutOfMemoryError</code>. A correção clássica é usar uma estrutura com <strong>política de expiração ou tamanho máximo</strong>: um <code>LinkedHashMap</code> configurado como LRU (remove o item menos recentemente usado ao ultrapassar um limite), ou — a solução real de produção — delegar esse cache para o Redis (capítulo 38) com TTL configurado, tirando essa responsabilidade da memória da própria aplicação Java.</p>
+        </div>
+      </div>
+    </section>

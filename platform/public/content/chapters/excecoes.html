@@ -1,0 +1,130 @@
+<section class="section" id="excecoes">
+      <div class="section-head"><span class="section-num">10</span><h2 class="section-title">Exceções</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#static">09 · static, final &amp; this</a></div>
+      </div>
+
+      <p>Exceções em Java também são <strong>objetos</strong> — instâncias de classes que herdam de <code>Throwable</code>. Você pode criar suas próprias exceções especializando <code>Exception</code>, exatamente como especializaria qualquer outra classe.</p>
+
+      <h3>A hierarquia completa</h3>
+      <pre class="code">Throwable
+├── Error                    <span class="com">// problemas graves da JVM (OutOfMemoryError...) -- não trate</span>
+└── Exception
+    ├── RuntimeException      <span class="com">// UNCHECKED -- erro de programação (NullPointerException...)</span>
+    │   ├── NullPointerException
+    │   ├── ArrayIndexOutOfBoundsException
+    │   ├── ArithmeticException
+    │   ├── ClassCastException
+    │   └── IllegalArgumentException
+    └── (demais)              <span class="com">// CHECKED -- condição esperada (IOException, SQLException...)</span></pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Tipo</th><th>Compilador obriga tratar?</th><th>Quando usar</th></tr>
+        <tr><td><strong>Checked</strong> (estende <code>Exception</code> direto)</td><td>Sim — <code>try/catch</code> ou <code>throws</code></td><td>Condições externas previsíveis: arquivo não encontrado, rede indisponível</td></tr>
+        <tr><td><strong>Unchecked</strong> (estende <code>RuntimeException</code>)</td><td>Não</td><td>Erros de programação que idealmente não deveriam acontecer: argumento inválido, índice fora do array</td></tr>
+      </tbody></table>
+
+      <h3>try / catch / finally / try-with-resources</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">SaldoInsuficienteException</span> <span class="kw">extends</span> <span class="cls">Exception</span> {
+    <span class="kw">public</span> <span class="fn">SaldoInsuficienteException</span>(<span class="kw">String</span> mensagem) { <span class="kw">super</span>(mensagem); }
+}
+
+<span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
+    <span class="kw">private double</span> saldo;
+
+    <span class="kw">public void</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) <span class="kw">throws</span> <span class="cls">SaldoInsuficienteException</span> {
+        <span class="kw">if</span> (valor &gt; saldo) {
+            <span class="kw">throw new</span> <span class="cls">SaldoInsuficienteException</span>(<span class="str">"Saldo insuficiente para sacar R$"</span> + valor);
+        }
+        saldo -= valor;
+    }
+}
+
+<span class="kw">try</span> {
+    conta.sacar(500);
+} <span class="kw">catch</span> (<span class="cls">SaldoInsuficienteException</span> e) {
+    System.out.println(<span class="str">"Erro: "</span> + e.getMessage());
+} <span class="kw">finally</span> {
+    System.out.println(<span class="str">"Operação finalizada"</span>); <span class="com">// SEMPRE roda, com ou sem exceção</span>
+}</pre>
+
+      <p>Desde o Java 7, recursos que precisam ser fechados (arquivos, conexões) usam <strong>try-with-resources</strong>, que chama <code>close()</code> automaticamente, mesmo se uma exceção ocorrer:</p>
+      <pre class="code"><span class="kw">try</span> (<span class="cls">BufferedReader</span> br = <span class="kw">new</span> <span class="cls">BufferedReader</span>(<span class="kw">new</span> <span class="cls">FileReader</span>(<span class="str">"dados.txt"</span>))) {
+    System.out.println(br.readLine());
+} <span class="kw">catch</span> (<span class="cls">IOException</span> e) {
+    System.out.println(<span class="str">"Falha ao ler arquivo: "</span> + e.getMessage());
+} <span class="com">// br.close() é chamado automaticamente aqui, sem precisar de finally</span></pre>
+
+      <h3>Encadeamento de exceções (exception chaining)</h3>
+      <p>Ao relançar uma exceção como outro tipo, preserve a causa original — perder a stack trace original é um dos erros mais frustrantes de depurar em produção.</p>
+      <pre class="code"><span class="kw">try</span> {
+    conectarBanco();
+} <span class="kw">catch</span> (<span class="cls">SQLException</span> e) {
+    <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Falha ao processar pedido"</span>, e); <span class="com">// "e" vira a "cause"</span>
+}
+<span class="com">// e.getCause() no catch externo recupera a SQLException original</span></pre>
+
+      <div class="secret">Nunca faça <code>catch (Exception e) {}</code> vazio — isso é conhecido como "engolir exceção" e é uma das piores práticas em Java: o erro simplesmente desaparece, sem log, sem rastro, e o sistema segue rodando em um estado inconsistente até quebrar em outro lugar completamente diferente, tornando a causa raiz quase impossível de achar depois.</div>
+
+      <div class="warn"><b>Nunca capture <code>Exception</code> ou <code>Throwable</code> genericamente</b> a menos que seja em uma borda muito específica do sistema (ex: um handler global de erros de uma API). Capturar o tipo mais específico possível deixa claro qual falha você realmente está tratando, e evita mascarar bugs inesperados como se fossem esperados.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 10.1 — Idade inválida</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>IdadeInvalidaException</code> (unchecked). No construtor de <code>Pessoa</code>, lance-a se a idade for negativa ou &gt; 130. Teste em um <code>try/catch</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">IdadeInvalidaException</span> <span class="kw">extends</span> <span class="cls">RuntimeException</span> {
+    <span class="kw">public</span> <span class="fn">IdadeInvalidaException</span>(<span class="kw">String</span> msg) { <span class="kw">super</span>(msg); }
+}
+<span class="kw">public class</span> <span class="cls">Pessoa</span> {
+    <span class="kw">private String</span> nome;
+    <span class="kw">private int</span> idade;
+    <span class="kw">public</span> <span class="fn">Pessoa</span>(<span class="kw">String</span> nome, <span class="kw">int</span> idade) {
+        <span class="kw">if</span> (idade &lt; 0 || idade &gt; 130) <span class="kw">throw new</span> <span class="cls">IdadeInvalidaException</span>(<span class="str">"Idade inválida: "</span> + idade);
+        <span class="kw">this</span>.nome = nome; <span class="kw">this</span>.idade = idade;
+    }
+}
+<span class="kw">try</span> {
+    <span class="kw">new</span> <span class="cls">Pessoa</span>(<span class="str">"Felipy"</span>, 200);
+} <span class="kw">catch</span> (<span class="cls">IdadeInvalidaException</span> e) {
+    System.out.println(<span class="str">"Erro: "</span> + e.getMessage());
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 10.2 — Hierarquia de exceções de domínio</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma exceção base checked <code>PedidoException</code> e duas subclasses, <code>EstoqueInsuficienteException</code> e <code>PagamentoRecusadoException</code>. Escreva um método <code>finalizarPedido(int qtd, boolean pagamentoOk)</code> que lança a exceção adequada, e um <code>main</code> com um único bloco <code>try</code> e <strong>dois</strong> blocos <code>catch</code> específicos (um para cada subtipo), mais um <code>catch (PedidoException e)</code> genérico por último como rede de segurança.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">PedidoException</span> <span class="kw">extends</span> <span class="cls">Exception</span> {
+    <span class="kw">public</span> <span class="fn">PedidoException</span>(<span class="kw">String</span> msg) { <span class="kw">super</span>(msg); }
+}
+<span class="kw">public class</span> <span class="cls">EstoqueInsuficienteException</span> <span class="kw">extends</span> <span class="cls">PedidoException</span> {
+    <span class="kw">public</span> <span class="fn">EstoqueInsuficienteException</span>(<span class="kw">String</span> msg) { <span class="kw">super</span>(msg); }
+}
+<span class="kw">public class</span> <span class="cls">PagamentoRecusadoException</span> <span class="kw">extends</span> <span class="cls">PedidoException</span> {
+    <span class="kw">public</span> <span class="fn">PagamentoRecusadoException</span>(<span class="kw">String</span> msg) { <span class="kw">super</span>(msg); }
+}
+
+<span class="kw">static void</span> <span class="fn">finalizarPedido</span>(<span class="kw">int</span> qtd, <span class="kw">boolean</span> pagamentoOk) <span class="kw">throws</span> <span class="cls">PedidoException</span> {
+    <span class="kw">if</span> (qtd &gt; 10) <span class="kw">throw new</span> <span class="cls">EstoqueInsuficienteException</span>(<span class="str">"Estoque insuficiente"</span>);
+    <span class="kw">if</span> (!pagamentoOk) <span class="kw">throw new</span> <span class="cls">PagamentoRecusadoException</span>(<span class="str">"Pagamento recusado"</span>);
+    System.out.println(<span class="str">"Pedido finalizado!"</span>);
+}
+
+<span class="com">// main:</span>
+<span class="kw">try</span> {
+    finalizarPedido(20, <span class="kw">true</span>);
+} <span class="kw">catch</span> (<span class="cls">EstoqueInsuficienteException</span> e) {
+    System.out.println(<span class="str">"Sem estoque: "</span> + e.getMessage());
+} <span class="kw">catch</span> (<span class="cls">PagamentoRecusadoException</span> e) {
+    System.out.println(<span class="str">"Pagamento falhou: "</span> + e.getMessage());
+} <span class="kw">catch</span> (<span class="cls">PedidoException</span> e) {
+    System.out.println(<span class="str">"Erro genérico de pedido: "</span> + e.getMessage());
+}</pre>
+          <p style="margin-top:12px">Repare que os <code>catch</code> mais específicos precisam vir <strong>antes</strong> do genérico — Java não compila se um <code>catch</code> de superclasse aparecer antes de um de subclasse, porque o primeiro nunca deixaria o segundo ser alcançado.</p>
+        </div>
+      </div>
+    </section>

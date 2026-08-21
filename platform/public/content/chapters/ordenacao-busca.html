@@ -1,0 +1,70 @@
+<section class="section" id="ordenacao-busca">
+      <div class="section-head"><span class="section-num">80</span><h2 class="section-title">Algoritmos de Ordenação &amp; Busca</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Algoritmos</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#big-o">80 · Complexidade (Big O)</a>, <a class="prereq-tag" href="#recursao">81 · Recursão</a></div>
+      </div>
+
+      <p><code>Collections.sort(...)</code> e <code>list.sort(comparator)</code> (capítulo 11) já resolvem ordenação na prática — mas entender <em>como</em> por trás dos panos ajuda a reconhecer trade-offs de performance em situações que a biblioteca padrão não cobre perfeitamente.</p>
+
+      <h3>Busca binária — a aplicação direta da árvore do capítulo anterior</h3>
+      <pre class="code"><span class="kw">int</span> <span class="fn">buscaBinaria</span>(<span class="kw">int</span>[] ordenado, <span class="kw">int</span> alvo) {
+    <span class="kw">int</span> inicio = 0, fim = ordenado.length - 1;
+    <span class="kw">while</span> (inicio &lt;= fim) {
+        <span class="kw">int</span> meio = inicio + (fim - inicio) / 2; <span class="com">// evita overflow de (inicio+fim)/2 em arrays gigantes</span>
+        <span class="kw">if</span> (ordenado[meio] == alvo) <span class="kw">return</span> meio;
+        <span class="kw">else if</span> (ordenado[meio] &lt; alvo) inicio = meio + 1; <span class="com">// descarta metade esquerda</span>
+        <span class="kw">else</span> fim = meio - 1;                            <span class="com">// descarta metade direita</span>
+    }
+    <span class="kw">return</span> -1; <span class="com">// não encontrado</span>
+}
+<span class="com">// O(log n) -- SÓ funciona se o array já estiver ORDENADO</span></pre>
+
+      <h3>Merge Sort — dividir para conquistar, O(n log n)</h3>
+      <div class="analogy">Merge Sort resolve o problema dividindo pela metade repetidamente (como a busca binária) até sobrar pedaços de um único elemento (trivialmente "ordenados"), e depois combina esses pedaços já ordenados dois a dois, de volta, mantendo a ordem — como juntar duas filas já organizadas por altura em uma única fila maior, também organizada, sem precisar reordenar do zero.</div>
+      <pre class="code"><span class="kw">int</span>[] <span class="fn">mergeSort</span>(<span class="kw">int</span>[] array) {
+    <span class="kw">if</span> (array.length &lt;= 1) <span class="kw">return</span> array; <span class="com">// caso base -- 0 ou 1 elemento já está "ordenado"</span>
+
+    <span class="kw">int</span> meio = array.length / 2;
+    <span class="kw">int</span>[] esquerda = mergeSort(Arrays.copyOfRange(array, 0, meio));
+    <span class="kw">int</span>[] direita = mergeSort(Arrays.copyOfRange(array, meio, array.length));
+
+    <span class="kw">return</span> mesclar(esquerda, direita); <span class="com">// combina os dois já ordenados</span>
+}
+
+<span class="kw">int</span>[] <span class="fn">mesclar</span>(<span class="kw">int</span>[] esq, <span class="kw">int</span>[] dir) {
+    <span class="kw">int</span>[] resultado = <span class="kw">new</span> <span class="kw">int</span>[esq.length + dir.length];
+    <span class="kw">int</span> i = 0, j = 0, k = 0;
+    <span class="kw">while</span> (i &lt; esq.length &amp;&amp; j &lt; dir.length) {
+        resultado[k++] = (esq[i] &lt;= dir[j]) ? esq[i++] : dir[j++];
+    }
+    <span class="kw">while</span> (i &lt; esq.length) resultado[k++] = esq[i++];
+    <span class="kw">while</span> (j &lt; dir.length) resultado[k++] = dir[j++];
+    <span class="kw">return</span> resultado;
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Algoritmo</th><th>Complexidade média</th><th>Observação</th></tr>
+        <tr><td>Bubble Sort</td><td><code>O(n²)</code></td><td>Simples de entender, péssimo em dados grandes — raramente usado na prática</td></tr>
+        <tr><td>Merge Sort</td><td><code>O(n log n)</code></td><td>Estável, previsível, usa memória extra</td></tr>
+        <tr><td>Quick Sort</td><td><code>O(n log n)</code> médio, <code>O(n²)</code> pior caso</td><td>Rápido na prática, in-place (sem memória extra significativa)</td></tr>
+        <tr><td><code>Collections.sort()</code> do Java</td><td><code>O(n log n)</code></td><td>Timsort (híbrido merge+insertion), a escolha certa para 99% dos casos reais</td></tr>
+      </tbody></table>
+
+      <div class="secret">Na prática profissional, você quase nunca implementa um algoritmo de ordenação do zero — <code>Collections.sort()</code> e <code>Arrays.sort()</code> já usam Timsort, uma implementação extremamente otimizada e testada por décadas. O valor de <strong>entender</strong> Merge Sort não é reimplementá-lo em produção, é desenvolver a intuição de "dividir para conquistar" — a mesma técnica reaparece resolvendo problemas completamente diferentes (busca binária, algoritmos de processamento distribuído como MapReduce).</div>
+
+      <div class="warn"><b>Nunca implemente sua própria ordenação em código de produção</b> "porque é mais rápido" sem medir — <code>Collections.sort()</code> foi otimizado, testado e endurecido contra casos-limite por milhares de desenvolvedores ao longo de anos. Reimplementar isso quase sempre resulta em algo mais lento e com mais bugs do que a biblioteca padrão.</div>
+
+      <div class="study-tip">Implemente Merge Sort uma única vez, manualmente, só para consolidar a intuição de recursão + divisão do problema (capítulo 81). Depois disso, use exclusivamente <code>Collections.sort()</code>/<code>list.sort(comparator)</code> (capítulo 11) no resto da sua carreira — o objetivo do exercício é entendimento, não reuso.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 83.1 — Implementando e comparando</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente <code>mergeSort</code>, valide-o contra <code>Arrays.sort()</code> em arrays vazios, ordenados, reversos e com duplicatas. Depois crie um benchmark JMH com dados copiados a cada invocação e explique por que algoritmos de mesma classe assintótica podem ter desempenho diferente.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><code>Arrays.sort()</code> é altamente otimizado, mas o algoritmo depende do tipo: arrays de objetos usam uma ordenação estável baseada em TimSort, enquanto arrays primitivos usam algoritmos especializados, como dual-pivot quicksort em vários casos. Big O descreve crescimento assintótico, não constantes, alocações, localidade de cache ou adaptação à entrada.</p>
+        </div>
+      </div>
+    </section>

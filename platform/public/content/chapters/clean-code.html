@@ -1,0 +1,113 @@
+<section class="section" id="clean-code">
+      <div class="section-head"><span class="section-num">71</span><h2 class="section-title">Clean Code &amp; Refatoração</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Engenharia</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#solid">16 · SOLID</a>, <a class="prereq-tag" href="#padroes">23 · Padrões de projeto</a></div>
+      </div>
+
+      <p>SOLID (capítulo 16) organiza classes; Clean Code organiza <strong>código dentro</strong> de cada método e classe — nomes, tamanho de função, comentários, estrutura. É a diferença entre um sistema bem arquitetado que ainda assim é doloroso de ler linha a linha.</p>
+
+      <h3>Nomes que contam a história sozinhos</h3>
+      <div class="code-toggle-bar">
+        <button class="ct-btn bad active">❌ Nomes ruins</button>
+        <button class="ct-btn good">✅ Nomes que explicam</button>
+      </div>
+      <div class="ct-panel active">
+<pre class="code"><span class="kw">int</span> d; <span class="com">// dias desde a última atualização? </span>
+List&lt;<span class="kw">int</span>[]&gt; l = <span class="fn">getList</span>();
+<span class="kw">if</span> (x.getStatus() == 1) { <span class="com">// o que é "1"?</span>
+    processar(x);
+}</pre>
+      </div>
+      <div class="ct-panel">
+<pre class="code"><span class="kw">int</span> diasDesdeUltimaAtualizacao;
+List&lt;<span class="cls">Celula</span>&gt; celulasVivas = tabuleiro.<span class="fn">getCelulasVivas</span>();
+<span class="kw">if</span> (pedido.getStatus() == <span class="cls">StatusPedido</span>.APROVADO) { <span class="com">// enum, não número mágico</span>
+    processarPedidoAprovado(pedido);
+}</pre>
+      </div>
+
+      <h3>Funções pequenas, fazendo uma coisa só</h3>
+      <p>Isso é o SRP do capítulo 16 aplicado no nível de <em>método</em>, não de classe. Um método que precisa de comentários para separar "seções" internas geralmente deveria ser quebrado em métodos menores, cada um nomeado pela intenção daquela seção.</p>
+
+      <pre class="code"><span class="com">// ❌ um método fazendo três coisas, precisando de comentários pra separar:</span>
+<span class="kw">public void</span> <span class="fn">processarPedido</span>(<span class="cls">Pedido</span> p) {
+    <span class="com">// validar</span>
+    <span class="kw">if</span> (p.getItens().isEmpty()) <span class="kw">throw new</span> <span class="cls">PedidoInvalidoException</span>();
+    <span class="com">// calcular total</span>
+    <span class="kw">double</span> total = 0;
+    <span class="kw">for</span> (<span class="kw">var</span> item : p.getItens()) total += item.getPreco() * item.getQtd();
+    <span class="com">// notificar</span>
+    notificador.enviar(<span class="str">"Pedido de R$"</span> + total);
+}
+
+<span class="com">// ✅ cada intenção é um método nomeado -- os comentários viram desnecessários:</span>
+<span class="kw">public void</span> <span class="fn">processarPedido</span>(<span class="cls">Pedido</span> p) {
+    validar(p);
+    <span class="kw">double</span> total = calcularTotal(p);
+    notificarCliente(total);
+}</pre>
+
+      <div class="analogy">Comentários que descrevem <em>o que</em> o código faz costumam ser um sintoma, não uma virtude — se você precisa explicar "isso calcula o total", o próprio nome do método deveria dizer isso (<code>calcularTotal</code>), sem exigir tradução extra. Comentários bons explicam o <strong>porquê</strong> de uma decisão não óbvia (por que esse algoritmo específico, por que essa exceção é ignorada de propósito), nunca o <em>o que</em> — isso o código já diz por si.</div>
+
+      <h3>Refatoração: mudando a estrutura sem mudar o comportamento</h3>
+      <p>Refatorar só é seguro com uma rede de segurança — é por isso que o capítulo 15 (testes) e o TDD vieram antes deste capítulo, não depois. Sem testes, "refatorar" é só "reescrever e torcer".</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Refatoração</th><th>Quando aplicar</th></tr>
+        <tr><td><strong>Extract Method</strong></td><td>Um bloco de código dentro de um método merece seu próprio nome</td></tr>
+        <tr><td><strong>Rename Variable/Method</strong></td><td>O nome atual não comunica a intenção real</td></tr>
+        <tr><td><strong>Replace Conditional with Polymorphism</strong></td><td>Um <code>if/else</code> ou <code>switch</code> gigante decidindo comportamento por tipo — vira o padrão do exercício 6.1 (capítulo 06)</td></tr>
+        <tr><td><strong>Introduce Parameter Object</strong></td><td>Um método com 5+ parâmetros — agrupe em um objeto com nome próprio</td></tr>
+      </tbody></table>
+
+      <div class="secret">"Código limpo" não é sobre estética ou preferência pessoal — é sobre o <strong>custo real de manutenção</strong>. Estudos e experiência de mercado convergem na mesma observação: código é lido muito mais vezes do que é escrito. Um método que economiza 30 segundos para escrever hoje, mas exige 10 minutos para entender daqui a 6 meses (por você mesmo ou por outra pessoa), foi um mau negócio, mesmo que tenha "funcionado" no primeiro momento.</div>
+
+      <div class="warn"><b>Cuidado com o perfeccionismo paralisante:</b> Clean Code é uma bússola, não uma lei absoluta. Código "bom o suficiente" que resolve o problema e vai para produção vale mais que código "perfeito" que nunca sai do rascunho. A regra prática do Boy Scout — "deixe o código um pouco melhor do que você encontrou" — é mais sustentável do que tentar reescrever tudo perfeitamente de uma vez.</div>
+
+      <div class="study-tip">Pratique refatoração em código que <strong>você mesmo já escreveu</strong> antes de tentar em código de terceiros ou de produção real. Pegue qualquer exercício resolvido nos capítulos anteriores deste curso e pergunte: "se eu tivesse que explicar este método para alguém só pelo nome, sem ler o corpo, ele contaria a história certa?"</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 74.1 — Refatorando um método confuso</h4><span class="exercise-tag m">médio</span></div>
+        <p>Refatore o método abaixo aplicando Extract Method e nomes melhores, sem mudar o comportamento:</p>
+        <pre class="code"><span class="kw">public double</span> <span class="fn">calc</span>(List&lt;<span class="cls">Item</span>&gt; l) {
+    <span class="kw">double</span> t = 0;
+    <span class="kw">for</span> (<span class="cls">Item</span> i : l) {
+        <span class="kw">double</span> p = i.getPreco();
+        <span class="kw">if</span> (i.getQtd() &gt; 10) p = p * 0.9; <span class="com">// desconto</span>
+        t += p * i.getQtd();
+    }
+    <span class="kw">if</span> (t &gt; 500) t = t * 0.95; <span class="com">// desconto adicional</span>
+    <span class="kw">return</span> t;
+}</pre>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public double</span> <span class="fn">calcularTotalComDescontos</span>(List&lt;<span class="cls">Item</span>&gt; itens) {
+    <span class="kw">double</span> subtotal = calcularSubtotal(itens);
+    <span class="kw">return</span> aplicarDescontoPorVolumeTotal(subtotal);
+}
+
+<span class="kw">private double</span> <span class="fn">calcularSubtotal</span>(List&lt;<span class="cls">Item</span>&gt; itens) {
+    <span class="kw">double</span> subtotal = 0;
+    <span class="kw">for</span> (<span class="cls">Item</span> item : itens) {
+        subtotal += precoComDescontoPorQuantidade(item);
+    }
+    <span class="kw">return</span> subtotal;
+}
+
+<span class="kw">private double</span> <span class="fn">precoComDescontoPorQuantidade</span>(<span class="cls">Item</span> item) {
+    <span class="kw">double</span> preco = item.getPreco();
+    <span class="kw">boolean</span> qualificaDescontoVolume = item.getQtd() &gt; 10;
+    <span class="kw">if</span> (qualificaDescontoVolume) preco *= 0.9;
+    <span class="kw">return</span> preco * item.getQtd();
+}
+
+<span class="kw">private double</span> <span class="fn">aplicarDescontoPorVolumeTotal</span>(<span class="kw">double</span> subtotal) {
+    <span class="kw">boolean</span> qualificaDescontoTotal = subtotal &gt; 500;
+    <span class="kw">return</span> qualificaDescontoTotal ? subtotal * 0.95 : subtotal;
+}</pre>
+        </div>
+      </div>
+    </section>

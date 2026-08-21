@@ -1,0 +1,64 @@
+<section class="section tk-front" id="deploy-frontend">
+      <div class="section-head"><span class="section-num">61</span><h2 class="section-title">Deploy do front-end &amp; monorepo vs poli-repo</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-front">Front-end</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#deploy-backend">60 · Deploy do back-end</a>, <a class="prereq-tag" href="#git">29 · Git</a></div>
+      </div>
+
+      <p>O front-end (React, Vue, ou qualquer SPA) tem um perfil de deploy bem diferente do back-end: no final, é só HTML/CSS/JS estático — não precisa de um servidor Java rodando o tempo todo.</p>
+
+      <div class="analogy">Enquanto o back-end é como um restaurante que precisa estar sempre com a cozinha funcionando para atender pedidos, o front-end depois de "buildado" é como um cardápio impresso — um arquivo estático que qualquer servidor de arquivos simples (ou uma CDN) pode entregar instantaneamente, sem processamento nenhum a cada visita.</div>
+
+      <h3>Vercel / Netlify — feitos sob medida para isso</h3>
+      <pre class="code"><span class="com"># conecta o repositório, e a cada push:
+# 1. detecta o framework (Next.js, Vite, etc)
+# 2. roda o build (npm run build)
+# 3. publica os arquivos estáticos em uma CDN global automaticamente</span></pre>
+
+      <pre class="code"><span class="com"># .env.production do front-end -- aponta para a API real, não localhost:</span>
+VITE_API_URL=https://api.biblioteca.com</pre>
+
+      <div class="secret">A "compilação" do front-end (<code>npm run build</code>) faz algo parecido com o multi-stage build do capítulo 31: pega código-fonte (JSX, TypeScript, CSS) e produz um punhado de arquivos estáticos otimizados (minificados, com hash no nome para cache eficiente do navegador) — o "estágio final enxuto" equivalente ao <code>jre-alpine</code> do back-end, só que para o mundo do front-end.</div>
+
+      <h3>Monorepo vs poli-repo — onde colocar tudo</h3>
+      <table class="cmp">
+        <tbody><tr><th></th><th>Monorepo</th><th>Poli-repo</th></tr>
+        <tr><td>Estrutura</td><td>Front e back no mesmo repositório Git, em pastas separadas</td><td>Dois repositórios completamente independentes</td></tr>
+        <tr><td>Vantagem</td><td>Mudanças relacionadas (API muda + front se adapta) num único commit/PR</td><td>Pipelines de deploy independentes, times podem trabalhar sem interferir um no outro</td></tr>
+        <tr><td>Desvantagem</td><td>CI/CD precisa ser configurado para rodar só o que mudou</td><td>Sincronizar mudanças relacionadas exige coordenar dois PRs em dois lugares</td></tr>
+        <tr><td>Bom para</td><td>Time pequeno, projeto pessoal, forte acoplamento entre front e back</td><td>Times maiores, ciclos de release independentes, ownership claro</td></tr>
+      </tbody></table>
+
+      <pre class="code"><span class="com"># estrutura típica de monorepo:</span>
+projeto-biblioteca/
+├── backend/          <span class="com"># projeto Spring Boot (capítulos 43-59)</span>
+│   ├── pom.xml
+│   └── src/
+├── frontend/          <span class="com"># projeto React/Vite</span>
+│   ├── package.json
+│   └── src/
+└── docker-compose.yml  <span class="com"># sobe os dois juntos, capítulo 32</span></pre>
+
+      <div class="study-tip">Para projetos de aprendizado e portfólio (o cenário mais comum neste ponto do curso), monorepo é quase sempre a escolha mais simples de gerenciar — um único <code>git clone</code>, um único <code>docker compose up</code> sobe tudo. Só considere poli-repo quando times diferentes realmente precisarem de ciclos de deploy totalmente independentes.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 61.1 — Estruturando o monorepo</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Desenhe a estrutura de pastas de um monorepo para o projeto da biblioteca, com back-end Spring Boot e um front-end React, incluindo onde ficaria o <code>docker-compose.yml</code> que sobe os dois juntos com o banco Postgres (capítulo 32).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">biblioteca/
+├── backend/
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── src/
+├── frontend/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── src/
+├── docker-compose.yml   <span class="com"># define os 3 serviços: api, front, db</span>
+└── .env                  <span class="com"># local, no .gitignore</span></pre>
+        </div>
+      </div>
+    </section>

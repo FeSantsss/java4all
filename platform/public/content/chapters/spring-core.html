@@ -1,0 +1,93 @@
+<section class="section tk-spring" id="spring-core">
+      <div class="section-head"><span class="section-num">43</span><h2 class="section-title">Spring Core — IoC/DI oficial</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#projetospring">28 · Mini-container pré-Spring</a>, <a class="prereq-tag" href="#build">19 · Maven &amp; Gradle</a></div>
+      </div>
+
+      <p>Este capítulo deveria parecer <strong>fácil</strong> — você já construiu, com as próprias mãos, uma versão simplificada de tudo que vem aqui, no capítulo 28. Agora é só trocar seu <code>MiniContainer</code> pelo <code>ApplicationContext</code> real do Spring.</p>
+
+      <div class="analogy">Se o mini-container foi uma bicicleta montada para entender as engrenagens, Spring Core é um sistema industrial com definições de bean, escopos, ciclo de vida, eventos e extensões. Ele diagnostica ciclos impossíveis; não use dependência circular como mecanismo de design.</div>
+
+      <h3>De @Componente/@Injetar para as anotações reais do Spring</h3>
+      <pre class="code"><span class="com">// seu capítulo 28:              →  Spring real:
+// @Componente                   →  @Component (ou especializações abaixo)
+// @Injetar                      →  @Autowired
+// MiniContainer.registrar()     →  @ComponentScan (automático, via reflection)
+// MiniContainer.resolver()      →  context.getBean(Tipo.class)</span>
+
+<span class="annotation">@Component</span> <span class="com">// genérico -- "isso é um bean gerenciado pelo Spring"</span>
+<span class="kw">public class</span> <span class="cls">EmailServico</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> { ... }
+
+<span class="annotation">@Service</span>  <span class="com">// especialização -- comunica INTENÇÃO: "isso é lógica de negócio"</span>
+<span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="kw">private final</span> <span class="cls">NotificadorEmprestimo</span> notificador;
+
+    <span class="annotation">@Autowired</span> <span class="com">// injeção via construtor -- a MELHOR forma (capítulo 22)</span>
+    <span class="kw">public</span> <span class="fn">Biblioteca</span>(<span class="cls">NotificadorEmprestimo</span> notificador) {
+        <span class="kw">this</span>.notificador = notificador;
+    }
+}</pre>
+
+      <p>Desde o Spring 4.3, <code>@Autowired</code> é <strong>opcional</strong> quando a classe tem um único construtor — o Spring injeta automaticamente. Isso não é mágica nova: é o mesmo princípio de reflection do capítulo 20, aplicado por convenção.</p>
+
+      <h3>As especializações de @Component e por que existem</h3>
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Camada</th><th>Por quê usar em vez de @Component puro</th></tr>
+        <tr><td><code>@Component</code></td><td>Genérico</td><td>Qualquer bean que não se encaixa nas categorias abaixo</td></tr>
+        <tr><td><code>@Service</code></td><td>Lógica de negócio</td><td>Comunica intenção — e algumas ferramentas de análise de código usam isso para identificar a camada de serviço</td></tr>
+        <tr><td><code>@Repository</code></td><td>Acesso a dados</td><td>Além de marcar, o Spring converte exceções de banco específicas em exceções unificadas do Spring (<code>DataAccessException</code>)</td></tr>
+        <tr><td><code>@Controller</code>/<code>@RestController</code></td><td>Camada web</td><td>Ativa o mapeamento de requisições HTTP (próximo capítulo)</td></tr>
+      </tbody></table>
+
+      <div class="secret"><code>@Service</code>, <code>@Repository</code> e <code>@Controller</code> são especializações de <code>@Component</code> e comunicam papéis. A diferença não é sempre puramente semântica: <code>@Repository</code> participa da tradução de exceções de persistência e <code>@Controller</code>/<code>@RestController</code> são interpretados pela infraestrutura web.</div>
+
+      <h3>Escopos de bean</h3>
+      <pre class="code"><span class="annotation">@Component</span>
+<span class="annotation">@Scope</span>(<span class="str">"singleton"</span>) <span class="com">// PADRÃO -- uma única instância para toda a aplicação (capítulo 23!)</span>
+<span class="kw">public class</span> <span class="cls">ConfiguracaoApp</span> { ... }
+
+<span class="annotation">@Component</span>
+<span class="annotation">@Scope</span>(<span class="str">"prototype"</span>) <span class="com">// uma instância NOVA a cada vez que é injetada/solicitada</span>
+<span class="kw">public class</span> <span class="cls">RelatorioTemporario</span> { ... }</pre>
+
+      <div class="warn"><b>Cuidado com estado mutável em beans Singleton:</b> como existe uma única instância compartilhada por toda a aplicação (inclusive entre requisições HTTP concorrentes), um campo mutável não sincronizado em um <code>@Service</code> é a mesma race condition do capítulo 14, só que ainda mais fácil de introduzir sem perceber. Beans deveriam, na maioria dos casos, ser <strong>stateless</strong> (sem estado próprio entre chamadas) — toda a "memória" do sistema deveria estar no banco, não em campos de instância do bean.</div>
+
+      <h3>@Configuration e @Bean — quando você não controla a classe</h3>
+      <p>Nem toda dependência é sua — bibliotecas externas não têm como carregar <code>@Component</code>. Para essas, você declara manualmente como criar o bean:</p>
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="kw">public class</span> <span class="cls">AppConfig</span> {
+    <span class="annotation">@Bean</span>
+    <span class="kw">public</span> ObjectMapper <span class="fn">objectMapper</span>() { <span class="com">// capítulo 25 -- Jackson não é sua classe, não pode ter @Component</span>
+        <span class="kw">return new</span> ObjectMapper();
+    }
+}</pre>
+
+      <div class="study-tip">Quando estiver com dúvida sobre <em>onde</em> uma dependência veio, lembre da ordem que você mesmo implementou no <code>MiniContainer</code> (capítulo 28): primeiro o Spring escaneia e cria <strong>todos</strong> os beans, depois injeta as dependências entre eles. Se um bean não é encontrado, quase sempre é porque ele está fora do pacote escaneado pelo <code>@ComponentScan</code> (implícito em <code>@SpringBootApplication</code>) — o mesmo problema de "esquecer de chamar <code>registrar(...)</code>" no seu container manual.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 43.1 — Convertendo o mini-container real</h4><span class="exercise-tag m">médio</span></div>
+        <p>Pegue as classes <code>EmailServico</code> e <code>Biblioteca</code> do capítulo 28 (com <code>@Componente</code>/<code>@Injetar</code>) e reescreva usando as anotações reais do Spring: <code>@Service</code> em ambas, injeção via construtor. Escreva também uma classe <code>@Configuration</code> com um <code>@Bean</code> para um <code>ObjectMapper</code>, simulando uma dependência externa que você não controla.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">EmailServico</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="kw">String</span> msg) { System.out.println(<span class="str">"[email] "</span> + msg); }
+}
+
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="kw">private final</span> <span class="cls">NotificadorEmprestimo</span> notificador;
+    <span class="kw">public</span> <span class="fn">Biblioteca</span>(<span class="cls">NotificadorEmprestimo</span> notificador) { <span class="kw">this</span>.notificador = notificador; } <span class="com">// @Autowired implícito</span>
+}
+
+<span class="annotation">@Configuration</span>
+<span class="kw">public class</span> <span class="cls">AppConfig</span> {
+    <span class="annotation">@Bean</span>
+    <span class="kw">public</span> ObjectMapper <span class="fn">objectMapper</span>() { <span class="kw">return new</span> ObjectMapper(); }
+}</pre>
+        </div>
+      </div>
+    </section>

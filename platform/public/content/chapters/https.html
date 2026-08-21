@@ -1,0 +1,36 @@
+<section class="section tk-security" id="https">
+      <div class="section-head"><span class="section-num">53</span><h2 class="section-title">HTTPS &amp; certificados</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-security">Segurança</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#autenticacao-conceitos">51 · Autenticação conceitos</a></div>
+      </div>
+
+      <p>Todo JWT, toda senha, todo dado sensível que você protegeu nos últimos dois capítulos viaja pela rede como texto simples se a conexão não for <strong>HTTPS</strong> — qualquer um na mesma rede Wi-Fi poderia interceptar e ler tudo. HTTPS é o que torna todo o resto deste curso realmente seguro na prática.</p>
+
+      <div class="analogy">HTTP sem HTTPS é enviar um cartão postal — qualquer pessoa que manuseie a carta no caminho consegue ler o conteúdo. HTTPS é colocar essa mesma mensagem dentro de um envelope lacrado, cifrado, que só o destinatário certo consegue abrir — mesmo que alguém intercepte fisicamente o envelope no caminho, o conteúdo continua ilegível.</div>
+
+      <h3>Como funciona, em conceito</h3>
+      <p>HTTPS usa <strong>TLS</strong> (Transport Layer Security) para criptografar a comunicação entre cliente e servidor. Um <strong>certificado digital</strong> — emitido por uma Autoridade Certificadora (CA) confiável — prova que o servidor é realmente quem diz ser, evitando que alguém finja ser sua API (ataque conhecido como <em>man-in-the-middle</em>).</p>
+
+      <div class="secret">A boa notícia: você quase nunca precisa configurar certificados manualmente hoje em dia. Provedores modernos de deploy (Railway, Render, Vercel — que você vai usar em capítulos futuros) já entregam HTTPS automaticamente, renovando certificados sozinhos via Let's Encrypt, de graça. A configuração manual de certificado só volta a ser sua responsabilidade em cenários de infraestrutura própria (VPS, servidor dedicado).</div>
+
+      <h3>Onde HTTPS se conecta com o resto do que você já aprendeu</h3>
+      <ul style="color:var(--ink-dim)">
+        <li>Sem HTTPS, o <code>Authorization: Bearer eyJ...</code> do capítulo 52 viaja em texto puro — qualquer um na rede pode roubar o token e se passar pelo usuário.</li>
+        <li>O CORS do capítulo 50 e o cookie <code>Secure</code> (que só é enviado sobre HTTPS) andam juntos em produção séria.</li>
+        <li>Certificados expirados são uma causa clássica de incidente em produção — parte do capítulo de observabilidade (mais adiante) cobre monitorar isso.</li>
+      </ul>
+
+      <div class="study-tip">Não é necessário estudar criptografia assimétrica a fundo para usar HTTPS corretamente no dia a dia — o importante é internalizar a regra prática: <strong>toda</strong> API que lida com autenticação ou dado sensível deveria estar atrás de HTTPS, sem exceção, mesmo em ambientes internos. "É só a rede interna, não precisa" é uma das frases mais caras já ditas em incidentes de segurança reais.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 53.1 — Identificando o problema</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Explique, em texto, por que enviar um JWT (capítulo 52) sobre uma conexão HTTP simples (não HTTPS) anula boa parte da segurança que o BCrypt e a assinatura do token oferecem, mesmo que a senha nunca tenha sido enviada em texto puro no login.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Mesmo com senha protegida por BCrypt no banco e o JWT assinado corretamente, se a <strong>conexão</strong> não for HTTPS, o token em si viaja em texto puro em toda requisição subsequente — qualquer pessoa capturando o tráfego de rede (ex: em um Wi-Fi público) pode copiar esse token e reutilizá-lo para se passar pelo usuário até o token expirar, sem nunca precisar saber a senha. HTTPS protege o <em>transporte</em>; BCrypt e assinatura JWT protegem o <em>conteúdo</em> — os dois são necessários, um não substitui o outro.</p>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,21 @@
+<section class="section tk-java" id="controle-fluxo">
+      <div class="section-head"><span class="section-num">04</span><h2 class="section-title">Decisões: if, else e switch</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#operadores-expressoes">Operadores</a></div></div>
+      <p>Controle de fluxo decide qual caminho será executado. A qualidade não está em usar o maior número de recursos, mas em tornar as regras mutuamente compreensíveis e testáveis.</p>
+      <pre class="code"><span class="kw">if</span> (nota &gt;= <span class="num">7</span>) {
+    situacao = <span class="str">"Aprovado"</span>;
+} <span class="kw">else if</span> (nota &gt;= <span class="num">5</span>) {
+    situacao = <span class="str">"Recuperação"</span>;
+} <span class="kw">else</span> {
+    situacao = <span class="str">"Reprovado"</span>;
+}</pre>
+      <p>A ordem importa. Em uma cadeia, coloque condições mais específicas antes das mais amplas. Evite pirâmides de <code>if</code>; retornos antecipados costumam separar casos inválidos do caminho principal.</p>
+      <h3>Switch como expressão</h3>
+      <pre class="code">String tipo = <span class="kw">switch</span> (codigo) {
+    <span class="kw">case</span> <span class="num">200</span>, <span class="num">201</span> -&gt; <span class="str">"sucesso"</span>;
+    <span class="kw">case</span> <span class="num">400</span>, <span class="num">404</span> -&gt; <span class="str">"erro do cliente"</span>;
+    <span class="kw">default</span> -&gt; <span class="str">"outro"</span>;
+};</pre>
+      <div class="secret"><b>Modele regras, não acidentes.</b> Se uma decisão cresce continuamente, talvez o problema peça enum, polimorfismo, tabela de decisão ou objeto de regra — não mais um <code>else if</code>.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Frete por regra</h4><span class="exercise-tag m">Prática</span></div><p>Calcule frete considerando região, peso e gratuidade acima de um valor. Liste primeiro casos-limite e só então escreva o código.</p></div>
+    </section>

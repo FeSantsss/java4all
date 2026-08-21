@@ -1,0 +1,39 @@
+<section class="section tk-db" id="postgres-concorrencia">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">PostgreSQL avançado: planos, MVCC, isolamento e locks</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-db">Banco de dados</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~5h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#postgres">PostgreSQL</a>, <a class="prereq-tag" href="#sql">SQL</a></div></div>
+      
+      <p>Um banco relacional não é apenas armazenamento: ele coordena concorrência, aplica invariantes e escolhe planos físicos para consultas declarativas. Dominar PostgreSQL exige observar o que ocorre quando muitas transações disputam as mesmas linhas.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Vocabulário antes da disputa</h3></div>
+    <p>A consulta SQL declara o resultado; o banco decide como obtê-lo e como isolar operações concorrentes.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Invariante</dt><dd>Regra que precisa permanecer verdadeira, como saldo nunca negativo. Uma constraint permite ao próprio banco protegê-la.</dd></div><div class="concept-card"><dt>Plano de execução</dt><dd>Estratégia física escolhida pelo banco: quais índices ler, em que ordem unir tabelas e onde ordenar.</dd></div><div class="concept-card"><dt>MVCC</dt><dd><em>Multi-Version Concurrency Control</em>: mantém versões de linhas para criar visões consistentes e reduzir bloqueio entre leitura e escrita.</dd></div><div class="concept-card"><dt>Snapshot</dt><dd>Visão das versões de dados que uma operação pode enxergar em determinado momento lógico.</dd></div><div class="concept-card"><dt>Lock</dt><dd>Reserva que restringe operações concorrentes sobre um recurso.</dd></div><div class="concept-card"><dt>Deadlock</dt><dd>Ciclo de espera: cada transação segura algo de que a outra precisa; o banco aborta uma para romper o ciclo.</dd></div></dl>
+  </aside>
+      <h3>Modelagem e constraints primeiro</h3>
+      <pre class="code"><span class="kw">CREATE TABLE</span> conta (
+    id <span class="kw">bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    saldo <span class="kw">numeric</span>(19,2) <span class="kw">NOT NULL CHECK</span> (saldo &gt;= 0),
+    versao <span class="kw">bigint NOT NULL DEFAULT</span> 0
+);
+
+<span class="kw">CREATE UNIQUE INDEX</span> uq_usuario_email_normalizado
+    <span class="kw">ON</span> usuario (lower(email));</pre>
+      <p>Constraints protegem o dado contra qualquer cliente, não somente contra a aplicação atual. Normalize para evitar dependências e anomalias; desnormalize quando uma medição justificar e documente como a duplicação ficará consistente.</p>
+      <h3>MVCC e níveis de isolamento</h3>
+      <p>O PostgreSQL mantém versões de linhas para que leitores e escritores interfiram menos. <code>READ COMMITTED</code> cria um novo snapshot por comando; <code>REPEATABLE READ</code> mantém uma visão estável na transação; <code>SERIALIZABLE</code> detecta execuções que não podem equivaler a alguma ordem serial e pode abortar uma delas. Uma aplicação correta precisa saber repetir a transação inteira quando recebe uma falha de serialização.</p>
+      <pre class="code"><span class="kw">BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE</span>;
+<span class="kw">SELECT</span> saldo <span class="kw">FROM</span> conta <span class="kw">WHERE</span> id = 10 <span class="kw">FOR UPDATE</span>;
+<span class="kw">UPDATE</span> conta <span class="kw">SET</span> saldo = saldo - 50 <span class="kw">WHERE</span> id = 10;
+<span class="kw">UPDATE</span> conta <span class="kw">SET</span> saldo = saldo + 50 <span class="kw">WHERE</span> id = 20;
+<span class="kw">COMMIT</span>;</pre>
+      <p>Adquira locks de múltiplas contas sempre na mesma ordem para reduzir deadlocks. Um deadlock ainda pode ocorrer; trate a exceção e repita com limite. <strong>Jitter</strong> é uma pequena variação aleatória no tempo de espera, usada para evitar que todos repitam juntos. Não mantenha uma transação aberta durante chamadas HTTP ou interação humana.</p>
+      <h3>Planos de execução</h3>
+      <pre class="code"><span class="kw">EXPLAIN (ANALYZE, BUFFERS, VERBOSE)</span>
+<span class="kw">SELECT</span> p.id, <span class="kw">sum</span>(i.quantidade * i.preco)
+<span class="kw">FROM</span> pedido p <span class="kw">JOIN</span> item_pedido i <span class="kw">ON</span> i.pedido_id = p.id
+<span class="kw">WHERE</span> p.criado_em &gt;= current_date - interval <span class="str">'30 days'</span>
+<span class="kw">GROUP BY</span> p.id;</pre>
+      <p><code>ANALYZE</code> executa a consulta: não o use despreocupadamente em comandos mutáveis. Compare linhas estimadas e reais, buffers lidos, tipo de join e ordenações em disco. Um índice tem custo de escrita e só ajuda quando combina com filtros, ordem, seletividade e estatísticas.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — reserva sem venda dupla</h4><span class="exercise-tag d">difícil</span></div><p>Implemente reserva concorrente de estoque por atualização condicional: decremente somente se a quantidade for suficiente e valide o número de linhas alteradas. Compare com <code>SELECT FOR UPDATE</code> e optimistic locking.</p><button class="reveal-btn">Ver solução-base</button><div class="solution"><pre class="code"><span class="kw">UPDATE</span> produto
+<span class="kw">SET</span> estoque = estoque - :qtd, versao = versao + 1
+<span class="kw">WHERE</span> id = :id <span class="kw">AND</span> estoque &gt;= :qtd;</pre><p>Zero linhas alteradas significa estoque insuficiente ou disputa perdida. Não faça primeiro um <code>SELECT</code> desprotegido e depois um <code>UPDATE</code>.</p></div></div>
+    </section>

@@ -1,0 +1,103 @@
+<section class="section" id="build">
+      <div class="section-head"><span class="section-num">19</span><h2 class="section-title">Maven &amp; Gradle</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#pacotes">18 · Pacotes &amp; projeto</a></div>
+      </div>
+
+      <p>Até agora, todo exemplo assumiu que você compila com <code>javac</code> na mão. Projetos reais dependem de <strong>bibliotecas externas</strong> (JUnit, Mockito, e mais tarde o próprio Spring) — baixar e gerenciar isso manualmente não escala. Uma <strong>build tool</strong> resolve três problemas: gerenciar dependências, compilar/testar/empacotar o projeto com um único comando, e garantir que o build seja reproduzível em qualquer máquina.</p>
+
+      <h3>Maven — configuração declarativa em XML</h3>
+      <pre class="code"><span class="com">&lt;!-- pom.xml --&gt;</span>
+&lt;project&gt;
+    &lt;groupId&gt;com.felipy&lt;/groupId&gt;
+    &lt;artifactId&gt;biblioteca&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;21&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;21&lt;/maven.compiler.target&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+            &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+            &lt;version&gt;5.10.0&lt;/version&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/project&gt;</pre>
+
+      <pre class="code">mvn compile     <span class="com"># compila o código em src/main/java</span>
+mvn test        <span class="com"># roda os testes de src/test/java</span>
+mvn package     <span class="com"># gera um .jar (ou .war) em target/</span>
+mvn clean       <span class="com"># apaga o diretório target/</span></pre>
+
+      <h3>Gradle — configuração em código (Groovy/Kotlin DSL)</h3>
+      <pre class="code"><span class="com">// build.gradle.kts (Kotlin DSL, padrão em projetos novos)</span>
+plugins {
+    java
+}
+
+group = <span class="str">"com.felipy"</span>
+version = <span class="str">"1.0.0"</span>
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(<span class="str">"org.junit.jupiter:junit-jupiter:5.10.0"</span>)
+}</pre>
+
+      <pre class="code">./gradlew build   <span class="com"># compila, testa e empacota</span>
+./gradlew test    <span class="com"># só roda os testes</span>
+./gradlew run     <span class="com"># executa a aplicação (com o plugin "application")</span></pre>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Maven</th><th>Gradle</th></tr>
+        <tr><td>Formato</td><td>XML declarativo (<code>pom.xml</code>)</td><td>Script (Groovy ou Kotlin DSL)</td></tr>
+        <tr><td>Verbosidade</td><td>Mais verboso</td><td>Mais enxuto</td></tr>
+        <tr><td>Velocidade de build</td><td>Boa</td><td>Geralmente mais rápido (cache incremental)</td></tr>
+        <tr><td>Onde aparece mais</td><td>Projetos corporativos legados, Spring Initializr (opção padrão)</td><td>Projetos Android, projetos novos que priorizam flexibilidade</td></tr>
+      </tbody></table>
+
+      <div class="secret">O <strong>Spring Initializr</strong> (start.spring.io) — a ferramenta oficial para criar um projeto Spring Boot do zero — pergunta logo na primeira tela "Maven ou Gradle?". Tudo que você configurar ali vira exatamente um <code>pom.xml</code> ou <code>build.gradle</code> como os de cima, com as dependências do Spring já declaradas. Entender a estrutura desses arquivos <em>antes</em> de ver o Spring Initializr transforma aquela tela de "mágica" em "ah, é só isso".</div>
+
+      <h3>Escopos de dependência (Maven) e por que importam</h3>
+      <pre class="code">&lt;scope&gt;compile&lt;/scope&gt;  <span class="com">&lt;!-- padrão: disponível em compilação, teste e runtime --&gt;</span>
+&lt;scope&gt;test&lt;/scope&gt;     <span class="com">&lt;!-- só disponível ao rodar testes (ex: JUnit, Mockito) --&gt;</span>
+&lt;scope&gt;provided&lt;/scope&gt; <span class="com">&lt;!-- disponível em compilação, mas fornecida pelo ambiente em runtime --&gt;</span></pre>
+
+      <div class="warn"><b>Erro comum de iniciante:</b> declarar JUnit ou Mockito sem <code>&lt;scope&gt;test&lt;/scope&gt;</code>. Isso funciona, mas empacota bibliotecas de teste dentro do <code>.jar</code> de produção, aumentando o tamanho do artefato final sem necessidade.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 19.1 — Seu primeiro pom.xml</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Escreva um <code>pom.xml</code> mínimo e válido para o projeto da biblioteca (capítulo 17/18), com <code>groupId</code>, <code>artifactId</code>, <code>version</code>, compilando para Java 21, e com JUnit 5 como dependência de escopo <code>test</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">&lt;project&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;com.felipy&lt;/groupId&gt;
+    &lt;artifactId&gt;biblioteca&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;packaging&gt;jar&lt;/packaging&gt;
+
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;21&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;21&lt;/maven.compiler.target&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+            &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+            &lt;version&gt;5.10.0&lt;/version&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/project&gt;</pre>
+        </div>
+      </div>
+    </section>

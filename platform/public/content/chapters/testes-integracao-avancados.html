@@ -1,0 +1,136 @@
+<section class="section tk-spring" id="testes-integracao-avancados">
+      <div class="section-head"><span class="section-num">88</span><h2 class="section-title">Testes de Integração Avançados: @SpringBootTest, @DataJpaTest &amp; Testcontainers com Kafka</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Testes</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Multi-Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#testcontainers">54 · Testcontainers</a>, <a class="prereq-tag" href="#mockito">90 · Mockito</a>, <a class="prereq-tag" href="#spring-kafka">42 · Spring Kafka</a></div>
+      </div>
+
+      <p>O capítulo 54 já mostrou Testcontainers com Postgres. Este capítulo completa o quadro: as diferentes "fatias" de teste que o Spring Boot oferece, cada uma carregando só a parte do contexto necessária — e testes de integração reais com <strong>Kafka</strong> rodando em container, não simulado.</p>
+
+      <h3>A pirâmide de testes do Spring Boot — do mais rápido ao mais completo</h3>
+      <pre class="code">┌─────────────────────────────────────────────────────────┐
+│  @SpringBootTest                                            │
+│  Carrega o CONTEXTO INTEIRO da aplicação (todos os beans)   │
+│  -- mais lento, mas testa a integração completa              │
+├─────────────────────────────────────────────────────────┤
+│  @WebMvcTest(LivroController.class)                          │
+│  Carrega SÓ a camada web -- controllers, sem banco real       │
+│  (services/repositories geralmente mockados com @MockBean)   │
+├─────────────────────────────────────────────────────────┤
+│  @DataJpaTest                                                │
+│  Carrega SÓ a camada de persistência -- repositories,         │
+│  configura um banco em memória (H2) por padrão, OU pode ser   │
+│  combinado com Testcontainers para um banco REAL              │
+├─────────────────────────────────────────────────────────┤
+│  Teste unitário puro (@ExtendWith(MockitoExtension.class))   │
+│  NENHUM contexto Spring carregado -- o MAIS rápido de todos    │
+│  (capítulo 90) -- ideal para testar lógica de negócio isolada │
+└─────────────────────────────────────────────────────────┘
+    ↑ mais lento, mais completo          mais rápido, mais isolado ↓</pre>
+
+      <h3>@DataJpaTest com Testcontainers — testando o repository de verdade</h3>
+      <pre class="code"><span class="annotation">@DataJpaTest</span>
+<span class="annotation">@Testcontainers</span>
+<span class="annotation">@AutoConfigureTestDatabase</span>(replace = AutoConfigureTestDatabase.Replace.NONE) <span class="com">// NÃO usa H2 --
+                                                                                     usa o Testcontainers real</span>
+<span class="kw">class</span> <span class="cls">LivroRepositoryDataJpaTest</span> {
+
+    <span class="annotation">@Container</span>
+    <span class="kw">static</span> PostgreSQLContainer&lt;?&gt; postgres = <span class="kw">new</span> PostgreSQLContainer&lt;&gt;(<span class="str">"postgres:16"</span>);
+
+    <span class="annotation">@DynamicPropertySource</span>
+    <span class="kw">static void</span> <span class="fn">props</span>(DynamicPropertyRegistry registry) {
+        registry.add(<span class="str">"spring.datasource.url"</span>, postgres::getJdbcUrl);
+        registry.add(<span class="str">"spring.datasource.username"</span>, postgres::getUsername);
+        registry.add(<span class="str">"spring.datasource.password"</span>, postgres::getPassword);
+    }
+
+    <span class="annotation">@Autowired</span>
+    <span class="kw">private</span> <span class="cls">LivroRepository</span> livroRepository;
+
+    <span class="annotation">@Autowired</span>
+    <span class="kw">private</span> TestEntityManager entityManager; <span class="com">// ferramenta específica de @DataJpaTest,
+                                                    // para preparar dados de teste diretamente</span>
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveEncontrarLivrosPorAutor</span>() {
+        <span class="cls">Autor</span> autor = entityManager.persist(<span class="kw">new</span> <span class="cls">Autor</span>(<span class="str">"Orwell"</span>));
+        entityManager.persist(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"1984"</span>, autor));
+        entityManager.flush(); <span class="com">// força a escrita real no banco ANTES do teste continuar</span>
+
+        List&lt;<span class="cls">Livro</span>&gt; resultado = livroRepository.findByAutorNome(<span class="str">"Orwell"</span>);
+
+        assertEquals(1, resultado.size());
+    }
+}</pre>
+
+      <div class="secret">Repare a diferença de <code>@DataJpaTest</code> em relação a <code>@SpringBootTest</code> completo do capítulo 54: aqui, <strong>só</strong> os beans relacionados à camada JPA são carregados (repositories, <code>EntityManager</code>) — nenhum <code>@Controller</code>, nenhum <code>@Service</code>. Isso torna a suíte de testes significativamente mais rápida quando você só precisa validar comportamento de persistência, sem pagar o custo de subir a aplicação inteira para cada teste.</div>
+
+      <h3>Testando Kafka de verdade com Testcontainers</h3>
+      <pre class="code"><span class="annotation">@SpringBootTest</span>
+<span class="annotation">@Testcontainers</span>
+<span class="kw">class</span> <span class="cls">PedidoEventPublisherTest</span> {
+
+    <span class="annotation">@Container</span>
+    <span class="kw">static</span> KafkaContainer kafka = <span class="kw">new</span> KafkaContainer(DockerImageName.parse(<span class="str">"apache/kafka:3.7.0"</span>));
+
+    <span class="annotation">@DynamicPropertySource</span>
+    <span class="kw">static void</span> <span class="fn">props</span>(DynamicPropertyRegistry registry) {
+        registry.add(<span class="str">"spring.kafka.bootstrap-servers"</span>, kafka::getBootstrapServers);
+    }
+
+    <span class="annotation">@Autowired</span>
+    <span class="kw">private</span> <span class="cls">PedidoEventPublisher</span> publisher; <span class="com">// capítulo 42</span>
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">devePublicarEventoQueUmConsumerConsegueLer</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        <span class="cls">CountDownLatch</span> latch = <span class="kw">new</span> <span class="cls">CountDownLatch</span>(1); <span class="com">// sincroniza a espera pela mensagem assíncrona</span>
+        List&lt;<span class="kw">String</span>&gt; mensagensRecebidas = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+        <span class="com">// cria um CONSUMER REAL, conectado ao mesmo Kafka em container:</span>
+        Properties consumerProps = <span class="kw">new</span> Properties();
+        consumerProps.put(<span class="str">"bootstrap.servers"</span>, kafka.getBootstrapServers());
+        consumerProps.put(<span class="str">"group.id"</span>, <span class="str">"teste"</span>);
+        consumerProps.put(<span class="str">"key.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+        consumerProps.put(<span class="str">"value.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+        consumerProps.put(<span class="str">"auto.offset.reset"</span>, <span class="str">"earliest"</span>);
+
+        <span class="kw">try</span> (KafkaConsumer&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; consumer = <span class="kw">new</span> KafkaConsumer&lt;&gt;(consumerProps)) {
+            consumer.subscribe(List.of(<span class="str">"pedidos-finalizados"</span>));
+
+            publisher.publicar(<span class="str">"pedido-99"</span>); <span class="com">// AÇÃO: publica de verdade</span>
+
+            <span class="kw">var</span> registros = consumer.poll(Duration.ofSeconds(5)); <span class="com">// espera de verdade pela mensagem</span>
+            assertEquals(1, registros.count());
+            assertTrue(registros.iterator().next().value().contains(<span class="str">"pedido-99"</span>));
+        }
+    }
+}</pre>
+
+      <div class="warn"><b>Testes de integração com Kafka são inerentemente mais lentos e complexos</b> — envolvem timing assíncrono real (não simulado), exigindo esperas com timeout em vez de asserções instantâneas. Reserve esse tipo de teste para os fluxos mais críticos de mensageria, e confie em testes unitários com Mockito (capítulo 90) para a maior parte da lógica de negócio ao redor da publicação/consumo de eventos.</div>
+
+      <div class="study-tip">Ao decidir qual "fatia" de teste do Spring usar, pergunte: "o que exatamente eu preciso validar?" Se é lógica de negócio pura, teste unitário com Mockito. Se é uma query JPA específica, <code>@DataJpaTest</code>. Se é o comportamento HTTP de um controller (status codes, serialização), <code>@WebMvcTest</code>. Só recorra a <code>@SpringBootTest</code> completo (o mais lento) quando genuinamente precisar validar a integração de múltiplas camadas juntas.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 91.1 — @DataJpaTest com Testcontainers</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva um teste <code>@DataJpaTest</code> com Testcontainers Postgres para o <code>LivroRepository</code>, usando <code>TestEntityManager</code> para persistir um autor e dois livros, e confirmando que <code>findByAutorNome</code> retorna exatamente os dois livros esperados, não mais nem menos.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveEncontrarTodosOsLivrosDoAutor</span>() {
+    <span class="cls">Autor</span> orwell = entityManager.persist(<span class="kw">new</span> <span class="cls">Autor</span>(<span class="str">"Orwell"</span>));
+    entityManager.persist(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"1984"</span>, orwell));
+    entityManager.persist(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"A Revolução dos Bichos"</span>, orwell));
+    <span class="cls">Autor</span> outroAutor = entityManager.persist(<span class="kw">new</span> <span class="cls">Autor</span>(<span class="str">"Machado de Assis"</span>));
+    entityManager.persist(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Dom Casmurro"</span>, outroAutor));
+    entityManager.flush();
+
+    List&lt;<span class="cls">Livro</span>&gt; resultado = livroRepository.findByAutorNome(<span class="str">"Orwell"</span>);
+
+    assertEquals(2, resultado.size());
+}</pre>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,2073 @@
+{
+  "version": 1,
+  "sourceFiles": {
+    "indexHtmlSha256": "b43bd2fdf5dc26337efc72ac9f11145569591d44b7101307f8478be6547f40f5",
+    "curriculumSha256": "8860fcf1c9184b6a5858f9bd12ad7c244628eb30a28729886aa97343cd662aaf",
+    "legacyAppSha256": "9f4276c8f4fa3675efa8a105787900d5229f67563c2f810c0f42440d370e4eae"
+  },
+  "counts": {
+    "chapters": 128,
+    "glossaryTerms": 111,
+    "htmlBytes": 923898,
+    "headings": 707,
+    "paragraphs": 595,
+    "codeBlocks": 407,
+    "tables": 79,
+    "exercises": 135,
+    "quizzes": 31,
+    "checklists": 25,
+    "links": 231
+  },
+  "aggregateHtmlSha256": "e9f788436c2b94ad3c8816b95169beca83bba6ab299f17331ac6a0bca3d9ea3e",
+  "aggregateTextSha256": "a09a1c76865b6437eab9833f632a4e328a792ce1d8a584c6050555a472d456ea",
+  "chapters": [
+    {
+      "id": "intro",
+      "bytes": 5987,
+      "htmlSha256": "2c7282aa13471c7ed7684145356810e3e289c6b7e814e382f8ea753376bc2886",
+      "textSha256": "fe4bc4f716363004edd80cc862684947bbf0767d8133c7a4fc34749b821c77e9",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 0
+      }
+    },
+    {
+      "id": "primeiro-programa",
+      "bytes": 2826,
+      "htmlSha256": "c96395aeb8cee91fcd8fcc2719d207bdea4599bd72474119ad737e16e5fa1ebb",
+      "textSha256": "6c81f1569902bf33b7661246a6677ed61e63434fec83f7b4a96ebafb2d40eed7",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "variaveis-tipos",
+      "bytes": 3273,
+      "htmlSha256": "d5906c73ffcf04500a660b385c012b8eb0bb6b2b4c612bf0db0da59fc9f34ca0",
+      "textSha256": "ab480fd2159922b932c3f285261f5f402ca5c7e8d42212c205035dbd446ea8e0",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "operadores-expressoes",
+      "bytes": 2607,
+      "htmlSha256": "896da6209b5e585260878cf86f1f937ab87d3ba866a7414da29fd0c03a666bf7",
+      "textSha256": "2e64a15f95f6fa42ee0357e42abb7cd139da49c7158d2030afbb16fa903b8ce3",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "controle-fluxo",
+      "bytes": 2235,
+      "htmlSha256": "1df02ce6976b7055c9215c053e131cfe6861526e420701b03eee2cdee8974024",
+      "textSha256": "4fb21ebb287fc8b227888710e76faa0a1c4b0f0c84b7a52e3f8d07db54adbd11",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "lacos-repeticao",
+      "bytes": 2303,
+      "htmlSha256": "1adade5b572d51951b1b3c2039192df434c140548efda9319851bfbc144d0064",
+      "textSha256": "d8234f9a794d7aa4ca2bc82618bed26fbc07da4943f21f8b3a1202e63bfdc640",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 3,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "arrays-matrizes",
+      "bytes": 2623,
+      "htmlSha256": "ecaaf29e6b5149eae1e6051f959ea6e8627bea53226a4a1dbc907686e5bef0e7",
+      "textSha256": "45a46c55d0e963fadf8f130e395138c3dcd45027cfc695ce0475f27adc682f11",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "strings-wrapper",
+      "bytes": 2248,
+      "htmlSha256": "3cec5836941e800fbf554244539d00b9e20a4acfeba628ae317d319f7feca2f0",
+      "textSha256": "47efcd1e54047852e66bcbf8b0e9f33b4bcf4eec766e50954597844ad8438759",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "metodos-escopo",
+      "bytes": 2877,
+      "htmlSha256": "e95f22d168c0e16bdffb15d46f24da7fabb86bc4db888d7da8e4981b1c1e8a4d",
+      "textSha256": "1ca21d2a7d975126eda0067c16c0cc6179ce7775503e6c783f213c5a0926820d",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 5,
+        "codeBlocks": 1,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "entrada-console",
+      "bytes": 13478,
+      "htmlSha256": "fac4641d3a55b3781f6e09f9d715f6d9c31f57fcf0cc2f484d79c8319789d2ab",
+      "textSha256": "958639171026ec5ce4aa678cf908fd78f916f2a81bb5535fadac3719c64c5797",
+      "elements": {
+        "headings": 10,
+        "paragraphs": 20,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "logica-programacao",
+      "bytes": 7278,
+      "htmlSha256": "227e08ad0febb9e15939b4832d7b4b2ac30f807e245a48eb1b31a941feba5de4",
+      "textSha256": "8ea5a0434a3aedeeffd6fc4bea6333d677b3a870815181e9425b51f071eae5ef",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mini-caixa-eletronico",
+      "bytes": 4702,
+      "htmlSha256": "0bb05b6d33b93377a895d4339064c6fa3fe1788946d1841dc2b03a95c043bbc5",
+      "textSha256": "dbe72680afeb59ab18d0bfa0d7c6a1e085d07b023231565b0368255fee8a340e",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 4,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "classes",
+      "bytes": 6696,
+      "htmlSha256": "da5b39c15122a680f55402e9976cd745df77d27df4c5ec0acebf29fefbe4c87e",
+      "textSha256": "d11074fb8d30156c7c0c7a14b3d1a22f3d38aa96e9862e2d1d9f20820db8a0e0",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 5,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "atributos",
+      "bytes": 8392,
+      "htmlSha256": "460ae360beb7de2b3de7f7752a19dba412c01b8db22f4606ce7a4bc99e76ed98",
+      "textSha256": "275e4e2ca06238d276243ddc42b5a1855541333e174ae5fa8505724bc92278a7",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 5,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "construtores",
+      "bytes": 7218,
+      "htmlSha256": "a646e717208c14761f2a2d1e0eb541d65796cbe2ce1bc843d21c6de2f8d669d9",
+      "textSha256": "8b21830f443d48d7932ad3c1c316c544456c7ce99d74fe14f9d87bbae9bdba3a",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 6,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "encapsulamento",
+      "bytes": 9831,
+      "htmlSha256": "d3c35006a5e30acf647e7a9801237ef2b2390631cc817e9ee42e2fe6f92f2bb6",
+      "textSha256": "ae9bd38ef934c65a34f3658b8ae8d06915afd1b2d86fc22e2627e57183fc426f",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 6,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 1,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "static",
+      "bytes": 8252,
+      "htmlSha256": "d34d2f3945b04d2f6cc8bd424d3d41e6bfc3d7e50f716116a7d34b0c253be4b7",
+      "textSha256": "5ac2e1572ee83dc61d686acce4df7e344730b006ade560252564d20228c27898",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 5,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "heranca",
+      "bytes": 10909,
+      "htmlSha256": "5f93f30678f22bf82b14b2b9d776727b9e33c73766d9dae43dd8f6d5ec3274ac",
+      "textSha256": "74e07bb864c260a6b820a1173f9189a9c2a925e933d4ad3ce1741e429bd8b62d",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 5,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "polimorfismo",
+      "bytes": 8728,
+      "htmlSha256": "5569116f46f5972ff5613c724b61048f23a0eea32385e32cfae19952f54ba993",
+      "textSha256": "7dcef23e96fd141d65715e71b304fe52f1547e3ba43287519de8aa24d8f0fe2f",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 6,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "abstracao",
+      "bytes": 7083,
+      "htmlSha256": "105b413d4384846aab9c9a372d8e1d6348c3a8e024a4359cafa02f6d80d1f0b2",
+      "textSha256": "9d58d4d4422d7d7025befa485efb20f85f345ced88e3ac5586a287f7d94447d9",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "interfaces",
+      "bytes": 7925,
+      "htmlSha256": "e9973e65255e5e63873a3ac73708137e01103b131aa4f8c3e0ffa3a839218b30",
+      "textSha256": "7183fbaa72b3e943cb34a2c49b0a2589f6bb3934caf1d78289ba7c312d525d04",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mini-biblioteca-cli",
+      "bytes": 4480,
+      "htmlSha256": "ad2c49c706086b56f38a5d7e63db79554caaac8a38026b44388a12cd5a69766f",
+      "textSha256": "3f5ba5182bf89a81069be449b50375bbfef8f22a2a295073f0fd7afcc0795f24",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "pacotes",
+      "bytes": 6415,
+      "htmlSha256": "0c8bc991e308e04bad470a4f22df54b0ffd61e4f5f94c4bf04dbc26322d4486c",
+      "textSha256": "1cd9e16ccc5e5346c387f9817491fbb4537199a4fe02c03a508cf380e8bcd0e4",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 5,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "excecoes",
+      "bytes": 10831,
+      "htmlSha256": "0e47192e6b039f4c0fc4fc5ff974a5a2a38674809741cc7e721e4011e4e31faf",
+      "textSha256": "d6225f2c6d8e8032c2f738527e8ffeb62b269a51836081c07c455256e4d3a7b4",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 6,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "colecoes",
+      "bytes": 10361,
+      "htmlSha256": "106e1c77ec0c0d6c1303bfd77e5ccf079be343aee5049211eb9929809732ed9d",
+      "textSha256": "b2867b1045a434f807d509f84f123690b10e5417e5ed2896115eb2f538ed1e8d",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 6,
+        "codeBlocks": 7,
+        "tables": 1,
+        "exercises": 3,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "generics",
+      "bytes": 8706,
+      "htmlSha256": "27659fc6fec3cbed1d6c6972c60a893f12a4840cae6141a67bbcbfb735fcc07b",
+      "textSha256": "72a85b83201c2bcca15ec8f80dd52849bf00d312e6fefacf41e3fcc6b33e8249",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 3,
+        "codeBlocks": 7,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "javamoderno",
+      "bytes": 6454,
+      "htmlSha256": "e6cbfd3d42206dc5c05f1389a65f720ce2ca8e20e1cf266c1196cac4591ee05a",
+      "textSha256": "94e17b1257c9537b727ae7f9d2d021804b09b62170fdae1505acb6dd9bad7426",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "java-21-profundo",
+      "bytes": 7699,
+      "htmlSha256": "240a678ba19b865db5bf1c176530de4a5f276905f470a84b5b047557e293dd85",
+      "textSha256": "21a1a0e4d108f1e35c5e17679408f2a72ed1b4e12efbf120f2c8daf45a1bd4f2",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 8,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "streams",
+      "bytes": 7629,
+      "htmlSha256": "c37b90d9b0845f1089ed349e19dcf7b153fe76887c49b2c771f049eb68d0d54b",
+      "textSha256": "0c170625e0adce3fc4c07d5c6558d8b28a7ba8ca8d9a04f1932d29ed5084db22",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 4,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "java-io",
+      "bytes": 2717,
+      "htmlSha256": "d1ca01e76c0a2293f6557992f52076c10ad24cb34675b1ffc4c4f97d645556f4",
+      "textSha256": "dcbcc709267af28a0d1d6fd880e16376200b4b9f25c1948e127bc3b5bd19f869",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 1,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "mini-analisador-vendas",
+      "bytes": 4207,
+      "htmlSha256": "d87ae88b152e5665aa783932aa9497bf920ea0426cccbc0a63440902275a2ec6",
+      "textSha256": "7323ed3464ec0176e608455d030df079100cf1f4ecfc4b4d61686998f13a6109",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "big-o",
+      "bytes": 6180,
+      "htmlSha256": "7c19a744cf01b7e945d674caae9ef04f717b70e105c6cd4a32f6bbefc78d40b2",
+      "textSha256": "bf54f57adfcb2c461eead0de02d53534d594d9a73d07694d0158bf0e6a9ff544",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "recursao",
+      "bytes": 8653,
+      "htmlSha256": "ce1c43b66dd812d765f944ab2fa3a4af17e45d17bf2ee364c4e1e05e51087b27",
+      "textSha256": "0367d754d2d75de620ec4dd29f697f20c4cc482722969067df6bfe6d18f198c0",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "ordenacao-busca",
+      "bytes": 7029,
+      "htmlSha256": "3be991cdbd5137b2f3456bd8cec8da4c8a5d085e06f14a5a26c4f623fb606f9c",
+      "textSha256": "9be80c445c9000e3404084bb0d2e77a8aae1389cb2622b091e239c69f6ff1926",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "algoritmos-praticos",
+      "bytes": 6227,
+      "htmlSha256": "6eaac0cefd73275e334c02209da8a5e5cff0aaaa445df74c017f2d80aea8e218",
+      "textSha256": "e93b6419ed08a773627ab3316a6ba421085239ee1b9244057683eddd07a79908",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 6,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "git",
+      "bytes": 6510,
+      "htmlSha256": "ed28d2759f510ca48f4bb566fb03462130f543574acc35bc3c8aa3c8e06e0355",
+      "textSha256": "eb0f681affb2f0255bc93bff81cd5e77dc20f471a867fb45cefacab1aa1a8f5f",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 3,
+        "codeBlocks": 8,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 0
+      }
+    },
+    {
+      "id": "build",
+      "bytes": 6160,
+      "htmlSha256": "bad5d86c096c5b137d966d0d8c5bb7aa1bb456a5bc7aaf14e5104adfbb7a0072",
+      "textSha256": "5f0bd1cf8e9bdcceafc332d16dd0421536b9ac8f4eec8191e00f439e64ed6d7c",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 2,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "anotacoes",
+      "bytes": 16219,
+      "htmlSha256": "df6c199e44187a635d33e1e235d617af6c30a4a4e46fa3ecdd5f4da93cb960e7",
+      "textSha256": "fa1f5a3bb72363b6e933a6ea59ce3364cf703299432ba01d7f8d9a778b8efc57",
+      "elements": {
+        "headings": 10,
+        "paragraphs": 7,
+        "codeBlocks": 8,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "json",
+      "bytes": 6417,
+      "htmlSha256": "dc340f36a3b94a0258a50f4496fe6072595d366c9753ec3e99e479e1fd2ee8a9",
+      "textSha256": "f1ead04cfc1b8c7361d2d8a3af4c52ecea22ea3aded80dd75b35b7d63b207a1d",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "logging",
+      "bytes": 6938,
+      "htmlSha256": "e1b80d7ca57cf3956c67c39ececf123c6e2bd5072ea715aa3b81b84b56abbb08",
+      "textSha256": "366c32a90b1151b36a80fdd3aeef19f0290545a4f8fbde5d5347a260f55b66d6",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mini-importador-pedidos",
+      "bytes": 4279,
+      "htmlSha256": "e5834212016c67bb391fd55efb3d5bcc31f3500c09d555101938c38097082f24",
+      "textSha256": "4ae739ae4d88bb49a4d67c6745b244525adf3c794e06f2f059bc8c3260aa8f39",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 2
+      }
+    },
+    {
+      "id": "solid",
+      "bytes": 10807,
+      "htmlSha256": "caffb845c8b8edcb33660f5a1f424f0fad3c6b90fa10731872581be2f4bcdcca",
+      "textSha256": "09065043eead6f8f10a87913cf5ba4d79fc00ef9e89e466bcc293ccfd0fd4175",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 9,
+        "codeBlocks": 7,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "di",
+      "bytes": 11193,
+      "htmlSha256": "ed39effebbce9180f6ee1fbd4fd09236206809a4243156c9e7e8c7b5a1d25016",
+      "textSha256": "dfd54db8199706c66aa2178dac7d24a9bc37eb2f32f7704bab7273dfbf5866f0",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 5,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "padroes",
+      "bytes": 9173,
+      "htmlSha256": "b331e7665feccfc2291f1ce9f350ea5b8712851f944c8ddd1beb6163cca6e3d0",
+      "textSha256": "87c38a918df141aaebc78650630dabe48337ddf3189dc954ed72946006b27571",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 7,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "clean-code",
+      "bytes": 8710,
+      "htmlSha256": "877394e895c2975800885c586c017b237969f6d4b552334cc8d4a7142936ceba",
+      "textSha256": "e37f10514b20a198940af0e653b854e976a2a7f10e5194c67ac6454a0d035298",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "projetospring",
+      "bytes": 9004,
+      "htmlSha256": "27931d3a796bd9f10d21ba0663b0e055928cb3e38f281756d725aee763122fd3",
+      "textSha256": "cfd7a357b562841d90dfdb4be4ee3b327890ab30a0147713f0c061f490491be0",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 3,
+        "codeBlocks": 1,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 1,
+        "links": 0
+      }
+    },
+    {
+      "id": "http",
+      "bytes": 6900,
+      "htmlSha256": "1389e3a5bf6368cf579c9735703925562a1f19008cf1885066f5928c1902497a",
+      "textSha256": "376801d7c33e0152c764fef7fc6763722137d3a634887c31ca372286380d2728",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 6,
+        "codeBlocks": 4,
+        "tables": 2,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "sql",
+      "bytes": 10667,
+      "htmlSha256": "0b1629c5e75bccb30ca37cccc1b7cc6102b130d7c0918d67d544681ecc688e00",
+      "textSha256": "ef8bcd08bf95c0ada78c1ad5d09f5cd2e08bfb039e19bc738bdba029cc2c69d4",
+      "elements": {
+        "headings": 9,
+        "paragraphs": 7,
+        "codeBlocks": 8,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "postgres",
+      "bytes": 7933,
+      "htmlSha256": "fe35b363a054519b0bb439c59e6073ad1b852b68cce7d8506627600aade78955",
+      "textSha256": "04f6191886b99668c8082ab0ac7c711b20cf4f33129a1cf7d5f0492032547c47",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 8,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "postgres-concorrencia",
+      "bytes": 6023,
+      "htmlSha256": "ff2bc9b3998a09adf3c15c8275519f34d7c344e9cbf64ea7c6e49a8e61846f5f",
+      "textSha256": "1c808fd8d775f2969d7a6bde8f819983cd868a518f8723fccde41cdbab66a5ae",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 8,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "migrations",
+      "bytes": 5519,
+      "htmlSha256": "1e2c2c43143f834bf9cdc2ba723784a57357c341c8fad69627a467d6c64d44c3",
+      "textSha256": "db44e7b8c9021004d9b3613c31c95a09df8319bd73371eaac620663c559ae206",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "jdbc",
+      "bytes": 10553,
+      "htmlSha256": "762bf608d25c7159d266db748e74b1cf725e4a5d37ea5678c1b527eefe018415",
+      "textSha256": "2b80d688bae5ae66195e1352a35d51366bebf4b41108573396e796969d1a1d0d",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "mini-financas-jdbc",
+      "bytes": 4306,
+      "htmlSha256": "e279b141a55188de92fe3a0aedb13b1df5eb5a720e14282bf70f40ba30a3d81d",
+      "textSha256": "3a4f2bd9f135f6e4a91daf6cb26f4d48cdceef9a6c943a7d2ec4737df67b82de",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 2
+      }
+    },
+    {
+      "id": "spring-core",
+      "bytes": 8801,
+      "htmlSha256": "546cabe4ef40b4e4c1bd8bddedef683fd482858ca056fc1a2099d068504a19f7",
+      "textSha256": "6444327e65d9efaa39f55746644e765b9cc9c1c56c8b35a7bd0480e3f91c46a3",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "spring-boot-fundamentos",
+      "bytes": 5450,
+      "htmlSha256": "fb207afe5c851eb8a25dac13fea49068971cae08096b44b52897d6370ba3a8f3",
+      "textSha256": "a8b91f37f8dfdf8c3d82581d92798c7ac384830ae89f6f433da9591287318449",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 7,
+        "codeBlocks": 3,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "devtools",
+      "bytes": 3897,
+      "htmlSha256": "55cc0e0db0bc7cccac9b7d7f270a2aabb1e979577b22414c0845ba91617ee6d3",
+      "textSha256": "5259a040e39dd185a9414bf1099c0d005e488a463bdf03ad04d9a901d10d2a74",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 3,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "lombok",
+      "bytes": 7337,
+      "htmlSha256": "173036cefbcc6d48b65d63c888d3164b2726fc49055cc55363300095f946c55a",
+      "textSha256": "6ccb7511dce8d71bb4c99c33b6eaea536b18de6492fcad1bb3102e7a6df1fcfb",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 2,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "spring-mvc",
+      "bytes": 6290,
+      "htmlSha256": "2eeb8bb6bc70871b96c753c9ed3c3188d64f80109f7aa10277992284746c0d20",
+      "textSha256": "056628fa385afc12020e4b3c2c8266a90f50a9d34571ad9859092e1decd60892",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 3,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "spring-jpa",
+      "bytes": 7629,
+      "htmlSha256": "839a90b7785b5f362bb60db0099c30919c217b495e7073afd73c149821564e9d",
+      "textSha256": "7a18497a486fc5a63db44b25f78e5d8f6e5f93196b33064d109da6efe3c58e06",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "jpa-transacoes",
+      "bytes": 6351,
+      "htmlSha256": "c93e90953c1f480b07eb3b28b03190a5d2f1205e6782195c4c763a0b0fc89d7c",
+      "textSha256": "4bb9a398157537a16c75caaa8c0503346ff61e37dc6c804239cee0da52907db7",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 8,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "dto-mapping",
+      "bytes": 6398,
+      "htmlSha256": "04e25a9f1af8ccbad00b9ba1f346fcc6b0ebb5a4560e1a77fcf6e72f79de2941",
+      "textSha256": "308efb7b0c85082309748f603baabbee56a6f987f5194ed14e81870852fb42e3",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "validacao-erros",
+      "bytes": 7960,
+      "htmlSha256": "375caee432d19ac7f865cb2c0d4147363084b10d76857c7254d591ce15f39e97",
+      "textSha256": "9bf66cd434eeaea0d517a848194ec5d639c948d296a566cb0c6831b151b8ab16",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 5,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "paginacao-swagger",
+      "bytes": 5374,
+      "htmlSha256": "29d56ae9237c686eafc273bdfe84d7db1cec3e145d369517e2c0162cc6c9686a",
+      "textSha256": "9e2b47ede55934b86779166de5ab792b19a493af38d826d58cb22e3e74bebe3e",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 3,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "api-design-avancado",
+      "bytes": 5492,
+      "htmlSha256": "2658f56b45b9f581c3165248346a7c4b986cbc8896cb6e9c227db9219d7cd108",
+      "textSha256": "f66de76188bd8818c5d66cbc79b2eebd4e95da4ff0c4bda9dfa578780d36873c",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 7,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "n-mais-1",
+      "bytes": 6931,
+      "htmlSha256": "77f1f10a9ad39ee37eb6c372a702c733be5e71ce22d58445286f53a6f9ebc2bb",
+      "textSha256": "9e52c96298def8856bb7fe9ab29531d2a96c001491f7f6f5dea0876aadc9c35e",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 4,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "cors-rate-limit",
+      "bytes": 6768,
+      "htmlSha256": "b4bfbafb2c9b248352eb773af2e0228b496e6308b2ea732591e8ba517f1738ec",
+      "textSha256": "fbd15651565e7e61d342143c0daf09ef560e2b5a56f4c9b91c4c152d75576f78",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 5,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "mini-helpdesk-api",
+      "bytes": 4604,
+      "htmlSha256": "8c1d14daedca15618c8b0a3d96e4119d24485a038530aeb1ec00a88b031c9a3c",
+      "textSha256": "3462b40dcc56f454c1ad72042625a68fd69001cdbbe9d83c975f3eb05637d414",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 4,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 2
+      }
+    },
+    {
+      "id": "testes",
+      "bytes": 11750,
+      "htmlSha256": "9adf0fbe377c3b0909a132831352b0e48530431b2126ab6427cdfa7accc11e41",
+      "textSha256": "2e63477e1827f8252dae9c7ea529d7e6d5a3ce149d82dde14912252d2fecf6d3",
+      "elements": {
+        "headings": 9,
+        "paragraphs": 6,
+        "codeBlocks": 7,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mockito",
+      "bytes": 11054,
+      "htmlSha256": "c39a22ad37356d8919cf4710bd72ccbac4d6237dc99f2443e7936ff6cde31197",
+      "textSha256": "f9dc5f3f6046683adb82e961e4a383eb11f951f237b554d819ee75c373594aa5",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "mini-reservas-testadas",
+      "bytes": 4319,
+      "htmlSha256": "f725b36782f72f61ce9faf3082b2460e48697aecc2e53082177fa17bd4283052",
+      "textSha256": "7f89525f243b7342fca4f975964b0a299e96d78afbe2585e65c08c3d1d743d25",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "projeto",
+      "bytes": 12387,
+      "htmlSha256": "13c98937903634782d26e058147c631e4c406679185096d22da7115c193b0e58",
+      "textSha256": "a4144afd50fb91591d87c95ea9347b26c2ac7147c0442733fdb65dee55b75e3b",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 3,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 2,
+        "links": 0
+      }
+    },
+    {
+      "id": "autenticacao-conceitos",
+      "bytes": 7183,
+      "htmlSha256": "fa4700c51f67e7239abae386dd90089a35a3723a16da02699494aa8985de6657",
+      "textSha256": "d8b9765becfb9add17f527fff18660e67d81c67853110fdd250c050e47f12604",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 7,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "spring-security",
+      "bytes": 10973,
+      "htmlSha256": "2cd55c8f81bfb0ea321892dc570cbe137b0764eac561655253c62083a2630f2c",
+      "textSha256": "e5beed2a4c72d9febe2b1ef79ecf9d2e932be669ee9e113327755afc6e21d0d9",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 6,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "security-oidc",
+      "bytes": 7911,
+      "htmlSha256": "1fa872b7a9fa6e2248e01bfe187bc82425bc2c270b13c88e83da3f559c7251b4",
+      "textSha256": "653d410848506036eb42db82d06f475f541545b597c645a0c3db50fd6236f7f0",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 9,
+        "codeBlocks": 1,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "https",
+      "bytes": 4405,
+      "htmlSha256": "0f6ccf7ada2a917e1158cae4eaf61bed64f1397b636c4fc7c48b5bbbcb8677b4",
+      "textSha256": "bafe480161a2c2b4fd8c37bab7b84d705501436772a36913149b0090ed59d614",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 0,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mini-auth-rbac",
+      "bytes": 4361,
+      "htmlSha256": "3b7716276f7c2f28c048b7e7f9aafd34e7b56e97efbb2720f15c6534340cfdff",
+      "textSha256": "4b0f5fd7f3ba08ab9a5eb98c06c1129fd3cb472c5b32202c8c723a262ab39ed7",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "docker-conceitos",
+      "bytes": 6240,
+      "htmlSha256": "bf5301bec6109027f02f4d17fb8320fe7e44c61d9ba047b639fdc55427b5a1e8",
+      "textSha256": "c5c46750f338de382dc075a444014254b3c81ea8d6cea17029a09ad17d84c9f2",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 7,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "dockerfile",
+      "bytes": 5170,
+      "htmlSha256": "8f44c31053d92db98179f0dbf0f0bbc430fbcc71d665d9044a27a93958105858",
+      "textSha256": "c9b27575fe29547de2916ce311c0f18af45b694fde5e6269d21725e4ddf9fdee",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 3,
+        "codeBlocks": 5,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "compose",
+      "bytes": 3940,
+      "htmlSha256": "39b120f73f690458de80c4df22abec78e70d235fb0b6a013e685efa5b3c3ce71",
+      "textSha256": "554321cfa8e92c2edeee4b494053b5b4566411f6812fbf55e1b2cfecdbd954dc",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 2,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "testcontainers",
+      "bytes": 6412,
+      "htmlSha256": "b4c910c5a207e3788030084bfc4b08edef789b535583809510bf2e67ba531c01",
+      "textSha256": "5db5a1b7a4d7037fe6c77fee2c91627b62d15b409f97706cbdb9cb165073aa10",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "estrategia-testes",
+      "bytes": 4925,
+      "htmlSha256": "7c004f211668e44b1c00fbdfd2fd9ff459a87884ae6d55375d5294d9a8dc6c4a",
+      "textSha256": "dc3070bace93218e6690b5ffdcce9a8514f7f511ac7453a1eea229060a8d5aaf",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 6,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "nosql",
+      "bytes": 6196,
+      "htmlSha256": "3e40290db2218c0a012c164d977793e0eff4b3a85fce25a3e8807c51fbac4035",
+      "textSha256": "1bb298231c17ea15eeeba9877e2703c38e7a7f410f5786af0bc3f9b61b51dd28",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 5,
+        "codeBlocks": 0,
+        "tables": 2,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "mongodb",
+      "bytes": 6207,
+      "htmlSha256": "4238ff9d24562ce10e3aae961d94d46126b25607e531e7e82a7f84ffcc92383a",
+      "textSha256": "24aff368156717b7e43d0417762eb119b757fe9a58a56a41dfe1f19017cc2ad4",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 8,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "redis",
+      "bytes": 7736,
+      "htmlSha256": "84d7d497e9a413fe2881d57254d98f8a9687c4e2f72b6dae21e55f3a57b2491d",
+      "textSha256": "238acddeb9b2e03f5b43915a825c86ca50fce7c91d05f4094b249454b9237973",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 2,
+        "codeBlocks": 6,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "nosql-operacional",
+      "bytes": 6187,
+      "htmlSha256": "2d38095e974fdb250530478e7568802605e0343366bca3e11cd253d2732c136a",
+      "textSha256": "3542dc5b935e9fc7b7faed1606f4c2a40e8fb58201c4410c15b14dc73751125e",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 9,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "hospedagem-db",
+      "bytes": 6241,
+      "htmlSha256": "f2bb4686f3574e4fa42f31e1fd8732d83101d10a22daf5b1baa1e14160e55d1e",
+      "textSha256": "f8577eb6f2437a557eb028aeabf4ae019421089cbdb2a32fc431014aeea42c28",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 4,
+        "codeBlocks": 0,
+        "tables": 2,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "resilience",
+      "bytes": 5815,
+      "htmlSha256": "5e415e104793929c41f98a07802d0d7cfbcd7fd115f533ca2b4d1f1106045d84",
+      "textSha256": "f50e6aedd879c484f269a107582de0719e488494d0d07679abe78f99dc8d231a",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 2,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "webclient",
+      "bytes": 5426,
+      "htmlSha256": "f431d4e188c7b7ef6d42de7dd7b0247feb6ab773168a646b3ef867f32a210f2a",
+      "textSha256": "bdc3e5e29c9128772087398ec16bbcdcf861fa71faee816efb0c81f4f2120c1d",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "spring-aop",
+      "bytes": 8674,
+      "htmlSha256": "3ee8f072ad2e8ada628256c6dc7a1e9e2a6fab186679e6664baa8b697bfe6b1e",
+      "textSha256": "a9f647a17e8007cffa15a50aaab9aa0d54a45ff30353669194f559002623f8d4",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 2,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "spring-cache",
+      "bytes": 4724,
+      "htmlSha256": "6bccdfa3e9ec09d5fb497934eac2a64497f4226aafba43acfdcec70f1db7987e",
+      "textSha256": "af411814f3b34bece8b217237e232049b102b3272c2fed41e9e9808b9bcfa385",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "actuator",
+      "bytes": 4794,
+      "htmlSha256": "763eb2ba1d17b47752feb77604359ee44dfbb254517a239916dbb93a475a8c01",
+      "textSha256": "52e50dc46e687adaa561c8f47267ed22f81be93070cb3dbd0d0580e8715847a4",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 2,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "observabilidade-pratica",
+      "bytes": 5070,
+      "htmlSha256": "60b6d95462e5029a72b36ab6017007fb401870110fa84f6dcd965a4eac52af0e",
+      "textSha256": "f1fb42616d7ac803849e9232e0880a0a69decf0aa1eff8dd9bf852b526b91568",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 8,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "secrets",
+      "bytes": 5713,
+      "htmlSha256": "cbc7ba6c568cfe28972045fb6bbcaec83580d7ab1f23415da208ce6516480360",
+      "textSha256": "5cd1fe85e35f8b7391e50450abcd41604ad221dc5469d9c2b68e20f78015fa1d",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "cicd",
+      "bytes": 6085,
+      "htmlSha256": "5e0dd33ddbf5399d63902e5d75f854205829d732e76bddb7dfc91bed1aeb2307",
+      "textSha256": "31a7475f902fbd7fe90552f5783445b972ba93c7374e32d4dbff7d3078a98dca",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 3,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "praticas-producao",
+      "bytes": 6986,
+      "htmlSha256": "9953fad7dede4f5295e5c9abed13f50db1a35052a1ecb77bd871d9aff8453a22",
+      "textSha256": "3bc7a0fb95b299ae779385825a0df1b9b8224d4bb96474e27e6983beb086698a",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 6,
+        "codeBlocks": 3,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "hardening-producao",
+      "bytes": 5354,
+      "htmlSha256": "00f0a7895115761684bceb24d02aabe40680f5769d15dcad1bc26921171d8bc6",
+      "textSha256": "9a5f92f382aa45ac5033aca0d9dce5b9f7da5fa9de3301fb937acc37dd6e1d9c",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 6,
+        "codeBlocks": 1,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "deploy-backend",
+      "bytes": 6118,
+      "htmlSha256": "e1fe6c4173fec10041ad503750f8b41e8b8033a263ca3b3fe73bee891ba13845",
+      "textSha256": "6d18e2fd4a13b3b0e5655b2d510fa1cc4e3a1b082a6908dcba5d537529af0078",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "spring-profiles",
+      "bytes": 5013,
+      "htmlSha256": "287d258b1c622ad66e5d93f95d573eccebd56cd23cfd7cf26f238018fadf2899",
+      "textSha256": "37136cf956790b5b72778491d4828bb0ea75c7fc8d177320d2ac75b9701f9bcd",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "mini-deploy-observavel",
+      "bytes": 4683,
+      "htmlSha256": "a8af96415e5297d46f2f9868614a4cb6d4e421a8c352db56b935d6a5a8bd2b0b",
+      "textSha256": "a300108497dc00d99be89f49aa02a6269e46e31f736a0742e824539c663485c1",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 4,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 1
+      }
+    },
+    {
+      "id": "threads",
+      "bytes": 8755,
+      "htmlSha256": "b1b1c2d05a31d8861e0d67a1dccd842e70cdad77e4fe03310d3a83fa61608630",
+      "textSha256": "60bdd98946f7a7b961b516b39ff0d7964c50071cf40a58f783a1245005fa2356",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 6,
+        "tables": 0,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "mensageria",
+      "bytes": 7482,
+      "htmlSha256": "2dc447668dfd2c8964f48e7f5f694fdcc115b674ea870a3488962b2d9dc9b7e4",
+      "textSha256": "eb1194b98b3f888dc4f6729646be9c9dd8a94f8295d85377d3bc3625a498c8de",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 2,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "kafka",
+      "bytes": 10845,
+      "htmlSha256": "3c817ba2d3c871fe6a4122ba5ff83c5658d9a50954b1b933dd4a25dc842ef40b",
+      "textSha256": "a990c8212d98aea30abec6d67ddbbd381b64c28f53b6251be65727d9566b406b",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 3,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "spring-kafka",
+      "bytes": 5355,
+      "htmlSha256": "8b7ea921165882ff58bea81d270d7734128e6f35e45ee51aad6dfb0793d13b6e",
+      "textSha256": "5195219306822a8976dbca90f73041ee4285638d36e17f81d3c7b3efab654acc",
+      "elements": {
+        "headings": 2,
+        "paragraphs": 2,
+        "codeBlocks": 3,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "kafka-confiavel",
+      "bytes": 5362,
+      "htmlSha256": "ec3d6c2984e5a92f2d7f32c5817881342df3c77e441cae91f63631654aeee1b9",
+      "textSha256": "5239a062b0a332f467b192b16b3f42a2638e9fadd7d86fbebe6e43213f9bc678",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 9,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "pilares-profundo",
+      "bytes": 14655,
+      "htmlSha256": "f82d55a4b4ad9887e0f974fbd45abfe7759cc621747effc9d4977c0357ee9dc2",
+      "textSha256": "181950ac76dfd712b52cab949cd875a9e48c3fc5f036ba2ad95360cb1914d13e",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 8,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "di-ioc-profundo",
+      "bytes": 15425,
+      "htmlSha256": "1720c334d58dab9a9159a0d68010785da50af72b60a954b6dc269c0f298e286f",
+      "textSha256": "1d1e487ba95839573a396aef227671f7383158c38c463a8f41c985b557b6565e",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 7,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "jvm-profundo",
+      "bytes": 21134,
+      "htmlSha256": "3613407224eb6d7b6c7abcaa6c58c6a270fcedbcac55ed0fc2e9e71f148ab99e",
+      "textSha256": "48f750016b3d4ae9e9df1d708168b342c7b128b74ee5b3f91e5ca7c223d25d19",
+      "elements": {
+        "headings": 10,
+        "paragraphs": 13,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 2,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "debugging",
+      "bytes": 11297,
+      "htmlSha256": "f028165ed9ef7023769e652b2201e9d168115ac6dbfe674daaf01a98e1424845",
+      "textSha256": "4be45a430e0ab81eef7583eca46399c237b5ef8bfc3fd7ec5d4ada595342685c",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 8,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "concorrencia-profunda",
+      "bytes": 13391,
+      "htmlSha256": "83f8be067fc7d6f1af895d83c1fda99abae0b918bacd72693a410761b555371a",
+      "textSha256": "cf908f383385319d3d964b080a735007491faa04689998294b65cf71eebe3aa6",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 5,
+        "codeBlocks": 6,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "arquitetura-software",
+      "bytes": 7194,
+      "htmlSha256": "01f7a0cda8cc80c829cbe6064370d4dc8d5205e729171e71aaf4d7618d265f4e",
+      "textSha256": "dada1b7a49aba433aa21cc6d855ce342c8a4879aac4b868c00439aab0aea7081",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 4,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "ddd",
+      "bytes": 7493,
+      "htmlSha256": "349955c50652bb585f01da3967a0e288ed49d2c1776105a3a0c14d4634ae4962",
+      "textSha256": "930da420b5ad7917605cabc3a08d5e9187f1917f9fdabd3404b307136089aef5",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 5,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "ddd-estrategico",
+      "bytes": 4484,
+      "htmlSha256": "a39a58eb5601868c2f205935e6b51a4377f18be19801e01c63a4d231ab275c6e",
+      "textSha256": "545d4ca527f56477ec458fd29614d0445591f9a06e2a326c3c8517cf9e3bab28",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 6,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "sistemas-distribuidos",
+      "bytes": 7390,
+      "htmlSha256": "b5a23ee5fd9789efdd1589589012f342691803fcc1ad751b828e0158bb6c94e6",
+      "textSha256": "973cf98505753473c5acbd97fc338265c344888da733d020105efcfe043d3762",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 6,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 4
+      }
+    },
+    {
+      "id": "consistencia-distribuida",
+      "bytes": 5496,
+      "htmlSha256": "931c19554234316cac8736ee79b621063762e1cb8aa3b8dd9cb68ae778c899b6",
+      "textSha256": "a9f7510fe090302fe4763e18cc45de9a23f3189b94ba903895131057236a3315",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 8,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "event-driven-profundo",
+      "bytes": 14962,
+      "htmlSha256": "ff829732b5321695738c49af701a2c73f6aedcefdd24d65f69fbfa7732e4fdfb",
+      "textSha256": "d4c2cbc1e3c77d0768b25b5aa55cbe1c8871ffee7d8306f9e5fc4364abed3aca",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 7,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "testes-integracao-avancados",
+      "bytes": 11826,
+      "htmlSha256": "cbd955cb61479189dbb7d352f28c24e4e6a99269591cbf485fa2115a015ae52c",
+      "textSha256": "50bcd9aff39e066ba6e2537e22080f255cc9dbfc5042722b6f31b79990c6022b",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 2,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "mini-pedidos-eventos",
+      "bytes": 4366,
+      "htmlSha256": "8b00847849445b6e8d2c25de7109788f0798d67af2cec50cb0b4a41b03857882",
+      "textSha256": "f8d0d6fff963eaa8dd9ac756a92733458b66b3e98358a13a4cd7f7f8a939aef8",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 3,
+        "codeBlocks": 0,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 1,
+        "checklists": 2,
+        "links": 2
+      }
+    },
+    {
+      "id": "estruturas-avancadas",
+      "bytes": 8586,
+      "htmlSha256": "097349f4a070c4b8fb26bab8843e7acc3c6f32bcb65ae47b5bb4e61fa17ca08a",
+      "textSha256": "df577457de93a7bb2e2be03a69d6c9b7c9ea6f21c88b84d720f3401188ddc436",
+      "elements": {
+        "headings": 6,
+        "paragraphs": 2,
+        "codeBlocks": 5,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "code-review-adr",
+      "bytes": 6112,
+      "htmlSha256": "35e8d3b978e2722b3d11fe5193fd3bf0fc2ea9d01fdbefef5d04468fc994c257",
+      "textSha256": "b3f6bcd4d8c2e42447f55bfa4eb01ee097caa2706dc039774786ff1d07250fda",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "agile",
+      "bytes": 5299,
+      "htmlSha256": "dc984ba20412f5cd19368c1beca7b3391e0e7f95f97f354984e6d4a0c499d37a",
+      "textSha256": "ee677250158bcc56bfeb33269dbd18b13989b4a075b406f919f6589385bfbb61",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 3,
+        "codeBlocks": 2,
+        "tables": 2,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 1
+      }
+    },
+    {
+      "id": "conectando-front-back",
+      "bytes": 6998,
+      "htmlSha256": "26ed9e5b531b5908ac52e23c6fe8940271773fa61b93a6feb494e070d012fd20",
+      "textSha256": "4d6843c1c1449b54c5971240cb0169ca01cd30bfb52682d8f74fef29b1913f7f",
+      "elements": {
+        "headings": 5,
+        "paragraphs": 3,
+        "codeBlocks": 4,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "auth-front-ts",
+      "bytes": 6783,
+      "htmlSha256": "f481f140ddc874e3394149a44e0e2fa759cbafc6685a6a1aa863abb72f6a15e7",
+      "textSha256": "ed34891efcc6ccb75a72daecd33ab892408a199e63f5fdd894ca3c235abbff03",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 3,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "frontend-aplicacao",
+      "bytes": 5971,
+      "htmlSha256": "c207ae499b5ca008e5ad424eee97fc265585715250d7fb64c54295c8c5c58ddc",
+      "textSha256": "be734ba96ac3da7a5e0d66e6209286b768ad4ff8bd73ec1010c5a3419c4f26ab",
+      "elements": {
+        "headings": 8,
+        "paragraphs": 8,
+        "codeBlocks": 2,
+        "tables": 0,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 3
+      }
+    },
+    {
+      "id": "websockets",
+      "bytes": 7241,
+      "htmlSha256": "fcabf28945dfcfd46b9437dd8c07f1300f35fdf3af4fa39915203a1b64d08e87",
+      "textSha256": "96ce331fdb06f37932e92b52302edf4cbfb06c9a3b1f7853ff1ecd7ec5f1efb7",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 2,
+        "codeBlocks": 3,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "deploy-frontend",
+      "bytes": 4907,
+      "htmlSha256": "48abaf6acc952957e3e4f07b51f8698deef5ae5ba5c55dd7c050140e5213829a",
+      "textSha256": "85d929820c7500a4f9d4a777113a5109b4676bbe02bf09bbaecbda758c9d7d9e",
+      "elements": {
+        "headings": 4,
+        "paragraphs": 2,
+        "codeBlocks": 4,
+        "tables": 1,
+        "exercises": 1,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 2
+      }
+    },
+    {
+      "id": "mapa-sistema",
+      "bytes": 4583,
+      "htmlSha256": "4d89f2064d6a028b2c420dcc78ea7372b555716597ec47679613a8073d9ba89b",
+      "textSha256": "d36734ccbcfd9ee9927cf066684a33e5e884d62929b3cbfc21d9dae2ead77e01",
+      "elements": {
+        "headings": 3,
+        "paragraphs": 2,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 0,
+        "checklists": 0,
+        "links": 0
+      }
+    },
+    {
+      "id": "projeto-integrador",
+      "bytes": 8254,
+      "htmlSha256": "db8fb2b27c4b5c2dc2a82aed0d88bdba52016fe64217711b884a0a4c8f11dc43",
+      "textSha256": "a1585c4708cffd3a76da7a694ab6502f8463580f932162324d3a3d29cdd7117e",
+      "elements": {
+        "headings": 7,
+        "paragraphs": 2,
+        "codeBlocks": 1,
+        "tables": 1,
+        "exercises": 0,
+        "quizzes": 0,
+        "checklists": 2,
+        "links": 0
+      }
+    },
+    {
+      "id": "quiz",
+      "bytes": 12548,
+      "htmlSha256": "ff1a74b1a2205b3805f567c8fa2b3f5a88fce8034fd2aae710c69e88d967eccf",
+      "textSha256": "204374d59b6ddb01ea7f9c6dec9cc0ed1a8714e05fc7aab1c3ca5d96f5c98b88",
+      "elements": {
+        "headings": 1,
+        "paragraphs": 21,
+        "codeBlocks": 0,
+        "tables": 0,
+        "exercises": 0,
+        "quizzes": 20,
+        "checklists": 0,
+        "links": 0
+      }
+    }
+  ]
+}

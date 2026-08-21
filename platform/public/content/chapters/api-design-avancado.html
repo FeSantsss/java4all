@@ -1,0 +1,31 @@
+<section class="section tk-spring" id="api-design-avancado">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Contratos HTTP: idempotência, concorrência e evolução de APIs</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~4h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-mvc">Spring MVC</a>, <a class="prereq-tag" href="#validacao-erros">Validação e erros</a></div></div>
+      
+      <p>Uma API é um contrato público: método, URI, headers, status, corpo e semântica de repetição formam uma unidade. Uma resposta válida não é apenas JSON que o cliente conseguiu desserializar.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>A requisição como contrato completo</h3></div>
+    <p>Comece identificando as peças visíveis pelo cliente; depois acrescente garantias de repetição e concorrência.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Método e URI</dt><dd>O método expressa a intenção HTTP; a URI identifica o recurso sobre o qual ela atua.</dd></div><div class="concept-card"><dt>Header</dt><dd>Metadado da mensagem, como tipo do conteúdo, autenticação ou condição de versão.</dd></div><div class="concept-card"><dt>Status</dt><dd>Código que resume o resultado HTTP; clientes não deveriam deduzi-lo lendo uma frase.</dd></div><div class="concept-card"><dt>Idempotência</dt><dd>Propriedade em que repetir a mesma intenção não produz efeitos adicionais indevidos.</dd></div><div class="concept-card"><dt>ETag</dt><dd>Identificador da versão de uma representação; com If-Match permite rejeitar atualização baseada em versão antiga.</dd></div><div class="concept-card"><dt>Correlation ID</dt><dd>Identificador seguro para localizar a mesma operação em logs e serviços, sem expor detalhes internos.</dd></div></dl>
+  </aside>
+      <table class="cmp"><tbody><tr><th>Operação</th><th>Resposta típica</th><th>Detalhe</th></tr><tr><td>criar</td><td>201</td><td>inclua <code>Location</code> do novo recurso</td></tr><tr><td>substituir</td><td>200/204</td><td><code>PUT</code> deve ser idempotente</td></tr><tr><td>alterar parcialmente</td><td>200/204</td><td>defina semântica de PATCH e campos ausentes</td></tr><tr><td>conflito</td><td>409</td><td>invariante, versão ou idempotency key conflitante</td></tr><tr><td>pré-condição</td><td>412</td><td><code>If-Match</code>/<code>ETag</code> não corresponde</td></tr><tr><td>assíncrono</td><td>202</td><td>ofereça recurso para consultar estado</td></tr></tbody></table>
+      <h3>Problem Details</h3>
+      <pre class="code"><span class="annotation">@ExceptionHandler</span>(SaldoInsuficienteException.class)
+ProblemDetail saldoInsuficiente(SaldoInsuficienteException e) {
+    ProblemDetail problema = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+    problema.setTitle(<span class="str">"Saldo insuficiente"</span>);
+    problema.setDetail(e.getMessage());
+    problema.setProperty(<span class="str">"codigo"</span>, <span class="str">"conta.saldo-insuficiente"</span>);
+    <span class="kw">return</span> problema;
+}</pre>
+      <p>Nunca devolva stack trace, nome de tabela ou segredo. Forneça um código estável legível por máquina, detalhes seguros e um correlation ID. Erros de validação precisam indicar campo e regra sem ecoar dados sensíveis.</p>
+      <h3>Idempotência e concorrência otimista HTTP</h3>
+      <p>Para criação ou pagamento sujeito a <strong>retry</strong> — nova tentativa após falha ou resposta perdida — aceite <code>Idempotency-Key</code>. Persista chave, escopo, <strong>hash</strong> da requisição (resumo determinístico usado para comparar o conteúdo) e resposta na mesma transação da operação. Repetir a mesma intenção devolve o resultado original; reutilizar a chave com outro corpo é conflito.</p>
+      <pre class="code">ETag: "pedido-42-v7"
+If-Match: "pedido-42-v7"
+
+<span class="com">// se a versão atual for 8: 412 Precondition Failed</span></pre>
+      <h3>Paginação e evolução</h3>
+      <p>Na paginação por <strong>offset</strong>, o cliente pede para pular N linhas; é simples, mas fica caro e pode duplicar ou omitir itens se houver alterações. Na paginação por <strong>keyset/cursor</strong>, o cliente envia uma posição opaca derivada da última chave ordenada, como data e ID; a próxima consulta continua dali. Limite o tamanho no servidor e imponha ordem estável com desempate por ID. Mudanças aditivas costumam ser compatíveis, desde que clientes ignorem campos desconhecidos. Mudanças de significado exigem versão, transição e política de depreciação.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — endpoint de pagamento repetível</h4><span class="exercise-tag d">difícil</span></div><p>Desenhe e implemente <code>POST /pagamentos</code> com idempotency key, Problem Details, 201 + Location e teste para duas requisições concorrentes com a mesma chave.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>Uma constraint única deve decidir a disputa. Não confie em um <code>if</code> em memória; ele falha com múltiplas threads ou instâncias.</p></div></div>
+    </section>

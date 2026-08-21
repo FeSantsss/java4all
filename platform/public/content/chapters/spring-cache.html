@@ -1,0 +1,49 @@
+<section class="section tk-spring" id="spring-cache">
+      <div class="section-head"><span class="section-num">68</span><h2 class="section-title">Spring Cache Abstraction</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#redis">38 · Redis</a>, <a class="prereq-tag" href="#spring-aop">70 · Spring AOP</a></div>
+      </div>
+
+      <p>Você implementou cache-aside na mão no exercício 38.1 (checar Redis, se não achar buscar do banco, gravar de volta). O Spring formaliza esse padrão inteiro em uma única anotação.</p>
+
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">LivroServico</span> {
+
+    <span class="annotation">@Cacheable</span>(value = <span class="str">"livros"</span>, key = <span class="str">"#id"</span>) <span class="com">// mesma lógica do exercício 38.1, automática</span>
+    <span class="kw">public</span> <span class="cls">LivroDTO</span> <span class="fn">buscarPorId</span>(<span class="kw">Long</span> id) {
+        System.out.println(<span class="str">"Buscando no banco -- só aparece no CACHE MISS"</span>);
+        <span class="kw">return</span> repository.findById(id).map(LivroDTO::from).orElseThrow();
+    }
+
+    <span class="annotation">@CacheEvict</span>(value = <span class="str">"livros"</span>, key = <span class="str">"#id"</span>) <span class="com">// invalida o cache quando o dado muda -- o problema do capítulo 38!</span>
+    <span class="kw">public void</span> <span class="fn">atualizar</span>(<span class="kw">Long</span> id, <span class="cls">LivroDTO</span> dto) {
+        <span class="com">// ... atualiza no banco ...</span>
+    }
+
+    <span class="annotation">@CachePut</span>(value = <span class="str">"livros"</span>, key = <span class="str">"#result.id"</span>) <span class="com">// #result referencia o retorno do método</span>
+    <span class="kw">public</span> <span class="cls">LivroDTO</span> <span class="fn">criar</span>(<span class="cls">LivroDTO</span> dto) { ... }
+}</pre>
+
+      <pre class="code"><span class="com"># application.properties -- conectando ao Redis real (capítulo 38):</span>
+spring.cache.type=redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379</pre>
+
+      <div class="secret"><code>@Cacheable</code> é literalmente um aspecto AOP (capítulo 70) construído pelo próprio time do Spring: o método real (<code>buscarPorId</code>) só é chamado se a chave não existir no cache — o proxy intercepta a chamada, checa o Redis primeiro, e só delega para o código real em caso de cache miss. É exatamente o padrão que você implementou manualmente no exercício 38.1, formalizado em uma anotação.</div>
+
+      <div class="warn"><b>O mesmo aviso do capítulo 38 continua valendo, agora automatizado:</b> esquecer o <code>@CacheEvict</code> correspondente em métodos de atualização é a causa mais comum de "por que o sistema mostra dado desatualizado" com Spring Cache — a anotação não invalida sozinha, você precisa declarar explicitamente qual operação de escrita deveria limpar qual cache.</div>
+
+      <div class="study-tip">Comece sempre sem cache. Adicione <code>@Cacheable</code> apenas depois de identificar, com dados reais (não suposição), que um método específico é chamado com frequência e é caro o suficiente para justificar a complexidade extra de invalidação. Cache prematuro tende a introduzir bugs de dado desatualizado sem ganho de performance mensurável.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 71.1 — Cache declarativo</h4><span class="exercise-tag m">médio</span></div>
+        <p>Adicione <code>@Cacheable</code> ao método <code>buscarPorId</code> do <code>LivroServico</code>, e <code>@CacheEvict</code> ao método de atualização correspondente. Habilite o cache no <code>application.properties</code> apontando para o Redis local do capítulo 30/38.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Inclua <code>@EnableCaching</code>, TTL, chave estável, política para resultado ausente e teste que conte acessos ao repositório. Verifique invalidação após commit e documente o comportamento com duas instâncias. Demonstre por teste que self-invocation não atravessa o proxy de cache.</p>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,163 @@
+<section class="section tk-java" id="concorrencia-profunda">
+      <div class="section-head"><span class="section-num">85</span><h2 class="section-title">Concorrência, Threads, Race Conditions &amp; Assíncrono — Aprofundamento</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Java Interno</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Multi-Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h30</b> de estudo — um dos tópicos mais difíceis de internalizar de verdade</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#threads">14 · Threads &amp; concorrência</a>, <a class="prereq-tag" href="#jvm-profundo">85 · JVM profundo</a></div>
+      </div>
+
+      <p>O capítulo 14 mostrou a race condition de "valor++" e a solução com <code>synchronized</code>. Este capítulo aprofunda <em>por que</em> isso acontece no nível de hardware/memória, formaliza os problemas clássicos de concorrência além de race conditions, e introduz programação assíncrona moderna.</p>
+
+      <h3>Por que "valor++" não é atômico — visualização em nível de instrução</h3>
+      <pre class="code">O código Java "valor++" na verdade vira TRÊS instruções de bytecode:
+
+    GETFIELD  valor        // 1. LER o valor atual da memória principal
+    ICONST_1
+    IADD                   // 2. SOMAR 1 (em um registrador da CPU)
+    PUTFIELD  valor        // 3. GRAVAR o resultado de volta na memória
+
+Duas threads executando "valor++" SIMULTANEAMENTE, quando valor=5:
+
+  TEMPO →
+
+  Thread A: LER(5) ────────────── SOMAR(6) ── GRAVAR(6)
+  Thread B:        LER(5) ── SOMAR(6) ── GRAVAR(6)
+                     ↑
+          Thread B leu o valor ANTES de A gravar --
+          as duas leram "5", as duas calcularam "6",
+          as duas gravaram "6" -- o incremento de uma
+          das duas threads foi COMPLETAMENTE PERDIDO.
+
+  Resultado esperado: valor = 7 (dois incrementos)
+  Resultado real:     valor = 6 (só um incremento "sobreviveu")</pre>
+
+      <h3>Visibilidade de memória — um problema diferente de race condition</h3>
+      <p>Existe um segundo problema, frequentemente confundido com race condition, mas conceitualmente distinto: <strong>visibilidade</strong>. Mesmo sem duas threads escrevendo ao mesmo tempo, uma thread pode nunca "enxergar" a escrita feita por outra, por causa de otimizações de cache de CPU e reordenação de instruções pelo compilador/processador.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Flag</span> {
+    <span class="kw">private boolean</span> pronto = <span class="kw">false</span>; <span class="com">// SEM volatile</span>
+
+    <span class="kw">void</span> <span class="fn">marcarPronto</span>() { pronto = <span class="kw">true</span>; }   <span class="com">// Thread A chama isso</span>
+    <span class="kw">void</span> <span class="fn">esperar</span>() {
+        <span class="kw">while</span> (!pronto) { }                <span class="com">// Thread B fica presa AQUI PARA SEMPRE,
+                                            // mesmo depois de A marcar pronto=true --
+                                            // porque B pode estar lendo um valor
+                                            // "cacheado" antigo, nunca atualizado
+                                            // da memória principal</span>
+    }
+}</pre>
+
+      <p>A palavra-chave <code>volatile</code> resolve exatamente este problema — <strong>não</strong> o de atomicidade (para isso, ainda é preciso <code>synchronized</code> ou <code>Atomic*</code>):</p>
+
+      <pre class="code"><span class="kw">private volatile boolean</span> pronto = <span class="kw">false</span>;
+<span class="com">// uma escrita volatile acontece-before de uma leitura posterior
+// da mesma variável: isso fornece visibilidade e restrições de ordenação.
+// Não significa "ignorar cache" literalmente e não torna valor++ atômico.</span></pre>
+
+      <div class="warn"><b>Erro comum: achar que <code>volatile</code> substitui <code>synchronized</code>.</b> <code>volatile</code> garante que a leitura mais recente sempre será vista — <strong>não</strong> garante que uma operação composta (ler + calcular + gravar, como <code>valor++</code>) seja atômica. Para uma flag booleana simples (como no exemplo acima), <code>volatile</code> sozinho é suficiente. Para um contador que precisa incrementar corretamente sob concorrência, você ainda precisa de <code>synchronized</code> ou <code>AtomicInteger</code> (capítulo 14).</div>
+
+      <h3>Deadlock — quando duas threads travam esperando uma pela outra para sempre</h3>
+      <div class="analogy">Imagine duas pessoas em um corredor estreito, cada uma segurando um objeto que a outra precisa, ambas recusando ceder passagem até receber o objeto do outro primeiro. Nenhuma das duas nunca vai ceder — as duas ficam paradas para sempre. Isso é exatamente um deadlock.</div>
+
+      <pre class="code"><span class="kw">Object</span> recursoA = <span class="kw">new</span> <span class="kw">Object</span>();
+<span class="kw">Object</span> recursoB = <span class="kw">new</span> <span class="kw">Object</span>();
+
+<span class="com">// Thread 1:</span>
+<span class="kw">synchronized</span> (recursoA) {
+    <span class="com">// ... faz algo ...</span>
+    <span class="kw">synchronized</span> (recursoB) { <span class="com">// espera conseguir travar B</span>
+        <span class="com">// ...</span>
+    }
+}
+
+<span class="com">// Thread 2 (rodando AO MESMO TEMPO):</span>
+<span class="kw">synchronized</span> (recursoB) {
+    <span class="com">// ... faz algo ...</span>
+    <span class="kw">synchronized</span> (recursoA) { <span class="com">// espera conseguir travar A</span>
+        <span class="com">// ...</span>
+    }
+}
+<span class="com">// se Thread 1 pegar recursoA e Thread 2 pegar recursoB QUASE ao mesmo
+// tempo, Thread 1 fica esperando recursoB (que Thread 2 tem), e
+// Thread 2 fica esperando recursoA (que Thread 1 tem) -- DEADLOCK,
+// as duas ficam bloqueadas PARA SEMPRE</span></pre>
+
+      <div class="rules-box">
+        <h4>Regras de ouro para evitar deadlock</h4>
+        <ul>
+          <li>Sempre adquira locks múltiplos <strong>na mesma ordem</strong> em todo o código — se toda thread sempre trava <code>recursoA</code> antes de <code>recursoB</code>, o cenário acima é estruturalmente impossível.</li>
+          <li>Prefira travar o mínimo de recursos possível, pelo menor tempo possível.</li>
+          <li>Use timeouts em locks quando disponível (<code>tryLock(tempo, unidade)</code> de <code>java.util.concurrent.locks.Lock</code>) em vez de esperar indefinidamente.</li>
+        </ul>
+      </div>
+
+      <h3>Livelock e Starvation — os primos menos famosos do deadlock</h3>
+      <table class="cmp">
+        <tbody><tr><th>Problema</th><th>O que acontece</th></tr>
+        <tr><td><strong>Deadlock</strong></td><td>Threads travadas, nenhuma progride, para sempre</td></tr>
+        <tr><td><strong>Livelock</strong></td><td>Threads continuam "trabalhando" (mudando de estado), mas nunca progridem de verdade — como duas pessoas se desviando repetidamente para o mesmo lado tentando passar uma pela outra em um corredor</td></tr>
+        <tr><td><strong>Starvation</strong></td><td>Uma thread nunca consegue acesso a um recurso porque outras threads (com prioridade mais alta, ou mais "espertas" na disputa) sempre chegam primeiro</td></tr>
+      </tbody></table>
+
+      <h3>Programação Assíncrona: CompletableFuture</h3>
+      <p>Threads (capítulo 14) e <code>ExecutorService</code> resolvem "executar código em paralelo". <code>CompletableFuture</code> resolve um problema diferente e complementar: <strong>compor</strong> operações assíncronas — encadear "quando isso terminar, faça aquilo", sem bloquear a thread principal esperando.</p>
+
+      <pre class="code">CompletableFuture&lt;<span class="cls">Livro</span>&gt; futuro = CompletableFuture
+    .supplyAsync(() -&gt; buscarLivroNoBanco(id))       <span class="com">// roda em outra thread, não bloqueia aqui</span>
+    .thenApply(livro -&gt; enriquecerComDadosExternos(livro)) <span class="com">// encadeia -- roda QUANDO o anterior terminar</span>
+    .thenApply(LivroDTO::from);                       <span class="com">// mais um passo encadeado</span>
+
+futuro.thenAccept(dto -&gt; System.out.println(<span class="str">"Pronto: "</span> + dto));
+<span class="com">// o código AQUI continua rodando IMEDIATAMENTE, sem esperar
+// o "futuro" terminar -- typical de programação assíncrona/reativa</span>
+
+<span class="com">// combinando DUAS operações assíncronas independentes:</span>
+CompletableFuture&lt;<span class="cls">Livro</span>&gt; buscaLivro = CompletableFuture.supplyAsync(() -&gt; buscarLivro(id));
+CompletableFuture&lt;<span class="cls">Autor</span>&gt; buscaAutor = CompletableFuture.supplyAsync(() -&gt; buscarAutor(autorId));
+
+CompletableFuture&lt;<span class="kw">String</span>&gt; combinado = buscaLivro.thenCombine(buscaAutor,
+    (livro, autor) -&gt; livro.getTitulo() + <span class="str">" por "</span> + autor.getNome());
+<span class="com">// as duas buscas rodam EM PARALELO, e "combinado" só resolve quando
+// AMBAS terminarem -- muito mais rápido que buscar uma, esperar, depois
+// buscar a outra sequencialmente</span></pre>
+
+      <div class="secret">Isso conecta diretamente com o <code>WebClient</code> reativo do capítulo 72 — <code>Mono&lt;T&gt;</code> do Project Reactor é, conceitualmente, muito próximo de <code>CompletableFuture&lt;T&gt;</code>: ambos representam "um valor que ainda não existe, mas vai existir". A diferença prática é que o ecossistema reativo completo (Reactor, RxJava) oferece muito mais operadores de composição, backpressure (controle de quando o produtor está gerando dados mais rápido do que o consumidor processa) e integração nativa com I/O não-bloqueante — <code>CompletableFuture</code> é a porta de entrada da própria linguagem Java para esse mesmo paradigma de pensamento.</div>
+
+      <div class="warn"><b>Assíncrono não é sinônimo de "mais rápido" automaticamente.</b> Para operações rápidas e simples, o overhead de criar e coordenar tasks assíncronas pode ser maior que simplesmente executar sequencialmente. Programação assíncrona compensa quando você tem operações genuinamente independentes e potencialmente lentas (chamadas de rede, I/O de disco) que podem rodar em paralelo — a mesma lição prática de "meça antes de otimizar" do capítulo 34/80 se aplica aqui também.</div>
+
+      <div class="study-tip">Antes de escrever qualquer código concorrente novo, sempre desenhe (no papel, como fizemos nos diagramas acima) a linha do tempo de duas threads executando simultaneamente, marcando exatamente onde cada uma lê e escreve dados compartilhados. Se você consegue identificar um ponto onde a ordem de execução entre as duas threads <em>importa</em> para o resultado final, esse é exatamente o ponto que precisa de sincronização — e agora você sabe exatamente qual mecanismo (synchronized, volatile, Atomic, Lock com timeout) resolve qual tipo específico de problema.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 88.1 — Reproduzindo e corrigindo um deadlock</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente o cenário de deadlock mostrado no exemplo acima com duas threads e dois objetos de lock. Rode e confirme que a aplicação trava (pode ser necessário usar um <code>Thread.sleep()</code> pequeno entre pegar o primeiro lock e tentar o segundo, para aumentar a chance da condição de corrida acontecer). Depois, corrija reordenando a aquisição de locks para que ambas as threads sempre travem na mesma ordem, e confirme que o deadlock não ocorre mais.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// versão CORRIGIDA -- ambas as threads travam recursoA ANTES de recursoB, sempre:</span>
+<span class="kw">Object</span> recursoA = <span class="kw">new</span> <span class="kw">Object</span>();
+<span class="kw">Object</span> recursoB = <span class="kw">new</span> <span class="kw">Object</span>();
+
+Runnable tarefa1 = () -&gt; {
+    <span class="kw">synchronized</span> (recursoA) {
+        <span class="kw">synchronized</span> (recursoB) {
+            System.out.println(<span class="str">"Tarefa 1 concluída"</span>);
+        }
+    }
+};
+
+Runnable tarefa2 = () -&gt; {
+    <span class="kw">synchronized</span> (recursoA) { <span class="com">// mesma ORDEM que tarefa1 -- nunca inverte!</span>
+        <span class="kw">synchronized</span> (recursoB) {
+            System.out.println(<span class="str">"Tarefa 2 concluída"</span>);
+        }
+    }
+};
+
+<span class="kw">new</span> Thread(tarefa1).start();
+<span class="kw">new</span> Thread(tarefa2).start();
+<span class="com">// como as DUAS threads sempre pedem recursoA primeiro, uma delas
+// sempre consegue pegar os dois locks em sequência antes da outra
+// sequer começar -- o cenário circular de espera se torna impossível</span></pre>
+        </div>
+      </div>
+    </section>

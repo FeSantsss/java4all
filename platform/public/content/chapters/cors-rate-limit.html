@@ -1,0 +1,69 @@
+<section class="section tk-security" id="cors-rate-limit">
+      <div class="section-head"><span class="section-num">50</span><h2 class="section-title">CORS &amp; rate limiting</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-security">Segurança</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-mvc">44 · Spring Web/MVC</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a></div>
+      </div>
+
+      <p>Essa é a primeira dor de cabeça que praticamente todo mundo enfrenta ao conectar um front-end separado a uma API Spring pela primeira vez — geralmente descoberta via um erro confuso no console do navegador, não do back-end.</p>
+
+      <h3>CORS — por que o navegador bloqueia sua própria API</h3>
+      <div class="analogy">CORS existe por causa de uma regra de segurança do <strong>navegador</strong> chamada "same-origin policy": por padrão, JavaScript rodando em <code>meusite.com</code> não pode fazer requisições para <code>api.outrosite.com</code> sem permissão explícita. É como um segurança de prédio que só deixa passar visitantes cujo nome está numa lista pré-aprovada pela recepção — mesmo que o visitante seja legítimo, sem estar na lista ele é barrado na porta.</div>
+
+      <pre class="code"><span class="com">// erro típico no console do navegador ao chamar a API sem CORS configurado:
+// "Access to fetch at 'http://localhost:8080/livros' from origin
+//  'http://localhost:3000' has been blocked by CORS policy"</span></pre>
+
+      <p>Note que isso é um bloqueio do <strong>navegador</strong>, não da sua API — testar o mesmo endpoint via Postman (capítulo futuro) ou <code>curl</code> funciona normalmente, porque essas ferramentas não aplicam same-origin policy. Esse é o motivo de tanta gente ficar confusa: "funciona no Postman mas não no meu front" é quase sempre CORS.</p>
+
+      <h3>Configurando CORS no Spring</h3>
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="kw">public class</span> <span class="cls">CorsConfig</span> {
+    <span class="annotation">@Bean</span>
+    <span class="kw">public</span> WebMvcConfigurer <span class="fn">corsConfigurer</span>() {
+        <span class="kw">return new</span> WebMvcConfigurer() {
+            <span class="annotation">@Override</span>
+            <span class="kw">public void</span> <span class="fn">addCorsMappings</span>(CorsRegistry registry) {
+                registry.addMapping(<span class="str">"/**"</span>)
+                    .allowedOrigins(<span class="str">"http://localhost:3000"</span>, <span class="str">"https://meufrontend.com"</span>) <span class="com">// lista explícita!</span>
+                    .allowedMethods(<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>)
+                    .allowedHeaders(<span class="str">"*"</span>)
+                    .allowCredentials(<span class="kw">true</span>); <span class="com">// necessário se usar cookies de autenticação</span>
+            }
+        };
+    }
+}</pre>
+
+      <div class="warn"><b>Não trate <code>allowedOrigins("*")</code> como padrão de produção.</b> O wildcard permite leitura por qualquer origem em requisições sem credenciais; navegadores não permitem combiná-lo com credenciais. Para cookies ou autorização entre origens, liste origens confiáveis explicitamente, processe CORS antes do Spring Security e mantenha CSRF coerente com o modelo de autenticação.</div>
+
+      <h3>Rate Limiting — primeira linha de defesa contra abuso</h3>
+      <p>Antes mesmo de autenticação (próximo capítulo), uma API pública precisa se proteger contra excesso de requisições — seja abuso deliberado ou um bug em algum cliente fazendo requisição em loop infinito.</p>
+
+      <pre class="code"><span class="com">// exemplo conceitual com Bucket4j (biblioteca de rate limiting):</span>
+Bucket bucket = Bucket.builder()
+    .addLimit(Bandwidth.classic(100, Refill.greedy(100, Duration.ofMinutes(1)))) <span class="com">// 100 requisições/minuto</span>
+    .build();
+
+<span class="kw">if</span> (!bucket.tryConsume(1)) {
+    <span class="kw">return</span> ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build(); <span class="com">// 429</span>
+}</pre>
+
+      <div class="analogy">Rate limiting é como uma catraca de estádio: mesmo que 10 mil pessoas tenham ingresso válido, a catraca só deixa passar uma de cada vez, num ritmo controlado, para nunca deixar todo mundo entrar simultaneamente e derrubar a estrutura.</div>
+
+      <div class="study-tip">Não precisa implementar rate limiting sofisticado (com Redis distribuído, algoritmos de sliding window) no primeiro projeto — o importante agora é entender <em>por que</em> ele existe e reconhecer o código <code>429 Too Many Requests</code> quando aparecer. A implementação robusta em escala geralmente vive numa camada de infraestrutura (API Gateway, CDN) antes mesmo de chegar no seu Spring Boot.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 50.1 — Configurando CORS corretamente</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Escreva a configuração de CORS do Spring permitindo requisições apenas de <code>http://localhost:5173</code> (porta padrão do Vite, ferramenta de front-end comum), métodos GET/POST/PUT/DELETE, com suporte a credenciais. Explique em uma frase por que <code>allowedOrigins("*")</code> não funcionaria junto com <code>allowCredentials(true)</code> (dica: é uma restrição de segurança do próprio navegador).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">registry.addMapping(<span class="str">"/**"</span>)
+    .allowedOrigins(<span class="str">"http://localhost:5173"</span>)
+    .allowedMethods(<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>)
+    .allowCredentials(<span class="kw">true</span>);</pre>
+          <p style="margin-top:12px">Navegadores modernos recusam a combinação <code>origin: *</code> + <code>credentials: true</code> por design — permitir cookies/credenciais de <strong>qualquer</strong> origem simultaneamente anularia a proteção que CORS existe para dar. Por isso, sempre que precisar de <code>allowCredentials(true)</code>, é obrigatório listar origens específicas.</p>
+        </div>
+      </div>
+    </section>

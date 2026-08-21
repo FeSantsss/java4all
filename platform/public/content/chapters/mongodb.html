@@ -1,0 +1,91 @@
+<section class="section tk-nosql" id="mongodb">
+      <div class="section-head"><span class="section-num">37</span><h2 class="section-title">MongoDB na prática</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-nosql">MongoDB</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#nosql">36 · NoSQL conceitos</a>, <a class="prereq-tag" href="#docker-conceitos">30 · Docker conceitos</a></div>
+      </div>
+
+      <div class="install-box">
+        <h4>Instalação</h4>
+        <div class="install-tabs">
+          <span class="install-tab active">Via Docker (recomendado)</span>
+          <span class="install-tab">macOS</span>
+          <span class="install-tab">Windows</span>
+        </div>
+        <div class="install-panel active"><pre class="code">docker run -d --name mongo -p 27017:27017 -v mongodata:/data/db mongo:7</pre></div>
+        <div class="install-panel"><pre class="code">brew tap mongodb/brew
+brew install mongodb-community@7.0
+brew services start mongodb-community@7.0</pre></div>
+        <div class="install-panel"><pre class="code"><span class="com"># instalador oficial em mongodb.com/try/download/community</span></pre></div>
+        <pre class="code">mongosh   <span class="com"># abre o shell interativo do Mongo, similar ao psql</span></pre>
+      </div>
+
+      <h3>Documentos — a unidade básica</h3>
+      <p>Em vez de linhas em uma tabela, o MongoDB guarda <strong>documentos</strong> BSON (um binário eficiente parecido com JSON) dentro de <strong>coleções</strong> (o equivalente a uma tabela, mas sem esquema fixo).</p>
+
+      <pre class="code">db.livros.insertOne({
+  titulo: "Duna",
+  autor: "Frank Herbert",
+  paginas: 688,
+  generos: ["ficção científica", "aventura"],   <span class="com">// array direto no documento!</span>
+  editora: { nome: "Aleph", pais: "Brasil" }     <span class="com">// objeto aninhado, sem precisar de JOIN</span>
+});
+
+db.livros.find({ paginas: { $gt: 300 } });        <span class="com">// equivalente a WHERE paginas &gt; 300</span>
+db.livros.find({ generos: "aventura" });          <span class="com">// busca dentro do array</span>
+db.livros.updateOne({ titulo: "Duna" }, { $set: { disponivel: false } });
+db.livros.deleteOne({ titulo: "Duna" });</pre>
+
+      <div class="analogy">Pense em um documento MongoDB como um objeto Java já "achatado" em JSON, guardado inteiro — inclusive listas e objetos aninhados, tudo junto. Em SQL você quebraria "editora" em uma tabela separada com chave estrangeira; em MongoDB, se a relação é "um livro tem uma editora e você quase sempre lê os dois juntos", faz sentido simplesmente aninhar — sem precisar de JOIN, porque tudo já vem junto na mesma leitura.</div>
+
+      <h3>Embedding vs Referencing — a decisão central de modelagem</h3>
+      <pre class="code"><span class="com">// EMBEDDING: dados aninhados dentro do mesmo documento
+// bom quando os dados são sempre lidos juntos e não crescem sem limite</span>
+{
+  titulo: "Duna",
+  autor: { nome: "Frank Herbert", nacionalidade: "EUA" }
+}
+
+<span class="com">// REFERENCING: guarda só o ID, como uma chave estrangeira "manual"
+// bom quando os dados são grandes, mudam com frequência, ou são
+// compartilhados entre muitos documentos</span>
+{
+  titulo: "Duna",
+  autorId: ObjectId("64f...")
+}</pre>
+
+      <div class="warn"><b>A armadilha mais comum de quem vem de SQL:</b> tentar "normalizar" tudo em MongoDB como faria em Postgres, criando referências para tudo e perdendo a vantagem principal do modelo de documento (ler tudo relacionado em uma única consulta). A regra prática: se você <strong>sempre</strong> lê os dados juntos e eles não crescem sem limite, aninhe (embedding). Se os dados são grandes, mudam independentemente, ou são compartilhados por muitos documentos diferentes, referencie.</div>
+
+      <h3>Consultas mais elaboradas</h3>
+      <pre class="code">db.livros.find({ paginas: { $gte: 200, $lte: 500 } });  <span class="com">// entre 200 e 500</span>
+
+db.livros.aggregate([
+  { $match: { disponivel: true } },
+  { $group: { _id: "$autor", total: { $sum: 1 } } },
+  { $sort: { total: -1 } }
+]);
+<span class="com">// o "aggregate" é o equivalente ao GROUP BY + JOIN combinados do SQL</span></pre>
+
+      <div class="study-tip">O shell <code>mongosh</code> é para MongoDB o que o <code>psql</code> é para Postgres — pratique digitando consultas direto nele antes de escrever qualquer código Java. Entender a "forma" da consulta em isolamento evita confundir erro de sintaxe do Mongo com erro de código Java quando você conectar as duas coisas via Spring Data MongoDB mais adiante.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 37.1 — Modelando com embedding</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando <code>mongosh</code> conectado a um MongoDB rodando via Docker, crie uma coleção <code>livros</code> e insira 3 documentos, cada um com <code>titulo</code>, <code>autor</code> (objeto aninhado com <code>nome</code> e <code>nacionalidade</code>) e um array <code>generos</code>. Escreva uma consulta que retorna só livros de ficção científica, e outra que conta quantos livros cada nacionalidade de autor tem, usando <code>aggregate</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">db.livros.insertMany([
+  { titulo: "Duna", autor: { nome: "Frank Herbert", nacionalidade: "EUA" }, generos: ["ficção científica"] },
+  { titulo: "Neuromancer", autor: { nome: "William Gibson", nacionalidade: "EUA" }, generos: ["ficção científica", "cyberpunk"] },
+  { titulo: "Dom Casmurro", autor: { nome: "Machado de Assis", nacionalidade: "Brasil" }, generos: ["romance"] }
+]);
+
+db.livros.find({ generos: "ficção científica" });
+
+db.livros.aggregate([
+  { $group: { _id: "$autor.nacionalidade", total: { $sum: 1 } } }
+]);</pre>
+        </div>
+      </div>
+    </section>

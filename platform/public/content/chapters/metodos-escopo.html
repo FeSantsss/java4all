@@ -1,0 +1,22 @@
+<section class="section tk-java" id="metodos-escopo">
+      <div class="section-head"><span class="section-num">08</span><h2 class="section-title">Métodos, parâmetros, retorno e escopo</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Iniciante+</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#strings-wrapper">String e wrappers</a></div></div>
+      <p>Método dá nome a uma operação e cria um limite de responsabilidade. Um bom método recebe apenas o necessário, devolve um resultado claro e evita alterar estado que o nome não anuncia.</p>
+      <pre class="code"><span class="kw">static double</span> <span class="fn">calcularMedia</span>(<span class="kw">double</span>[] valores) {
+    <span class="kw">if</span> (valores.length == <span class="num">0</span>) {
+        <span class="kw">throw new</span> IllegalArgumentException(<span class="str">"Array vazio"</span>);
+    }
+    <span class="kw">double</span> soma = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">double</span> valor : valores) soma += valor;
+    <span class="kw">return</span> soma / valores.length;
+}</pre>
+      <h3>Java passa tudo por valor</h3>
+      <p>Para primitivos, o método recebe uma cópia do valor. Para objetos, recebe uma cópia da referência. O método pode alterar o objeto apontado, mas reatribuir o parâmetro não muda a variável do chamador.</p>
+      <h3>Escopo e tempo de vida</h3>
+      <p>Uma variável local existe apenas no bloco em que foi declarada. Prefira o menor escopo possível: isso reduz estados simultâneos e impede uso acidental antes ou depois do ponto correto.</p>
+      <h3>Sobrecarga</h3>
+      <p>Métodos podem compartilhar o nome se diferirem na lista de parâmetros. O tipo de retorno sozinho não distingue sobrecargas. Use sobrecarga para variações coerentes da mesma operação, não para esconder comportamentos diferentes.</p>
+      <div class="secret"><b>O tamanho não é o único sinal.</b> Extraia um método quando um trecho tem um nome conceitual melhor do que o comentário que seria necessário para explicá-lo.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Decomposição</h4><span class="exercise-tag m">Prática</span></div><p>Crie um programa de relatório de notas separando leitura, validação, cálculo e apresentação. Nenhum método deve misturar as quatro responsabilidades.</p></div>
+      <div class="rules-box"><h4>Pronto para POO quando</h4><ul><li>Você escreve e chama métodos sem copiar exemplos.</li><li>Explica passagem por valor em primitivos e referências.</li><li>Usa retorno em vez de imprimir dentro de toda função.</li><li>Consegue dividir um problema em operações pequenas e nomeadas.</li></ul></div>
+    </section>

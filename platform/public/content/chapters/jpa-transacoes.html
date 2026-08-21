@@ -1,0 +1,35 @@
+<section class="section tk-spring" id="jpa-transacoes">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">JPA profundo e transações Spring</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~6h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">Spring Data JPA</a>, <a class="prereq-tag" href="#postgres-concorrencia">Concorrência no PostgreSQL</a></div></div>
+      
+      <p>JPA mantém uma unidade de trabalho chamada persistence context. Dentro dela, cada identidade de banco corresponde a uma instância gerenciada; alterações nessa instância podem ser detectadas e sincronizadas no <code>flush</code>. Entender esse ciclo evita SQL inesperado, entidades desatualizadas e transações gigantes.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>O mapa mínimo entre objetos e banco</h3></div>
+    <p>JPA não é o banco e uma entidade não é apenas uma linha. Estes termos explicam quem acompanha as mudanças e quando elas viram SQL.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>JPA</dt><dd>Especificação Java de persistência objeto-relacional. Hibernate é uma implementação comum dessa especificação.</dd></div><div class="concept-card"><dt>Entidade</dt><dd>Objeto persistente com identidade própria, normalmente mapeado a uma tabela.</dd></div><div class="concept-card"><dt>Persistence context</dt><dd>Conjunto de entidades que o EntityManager acompanha durante uma unidade de trabalho.</dd></div><div class="concept-card"><dt>Dirty checking</dt><dd>Detecção automática de alterações em entidades gerenciadas.</dd></div><div class="concept-card"><dt>Flush</dt><dd>Sincronização das mudanças pendentes com SQL; não confirma a transação por si só.</dd></div><div class="concept-card"><dt>Commit</dt><dd>Confirma a transação como unidade; rollback descarta seus efeitos ainda não confirmados.</dd></div></dl>
+  </aside>
+      <table class="cmp"><tbody><tr><th>Estado</th><th>Significado</th></tr><tr><td>transient</td><td>objeto novo, ainda não associado ao contexto</td></tr><tr><td>managed</td><td>rastreado; mudanças participam de dirty checking</td></tr><tr><td>detached</td><td>já teve identidade persistente, mas não é mais rastreado</td></tr><tr><td>removed</td><td>marcado para remoção no flush</td></tr></tbody></table>
+      <pre class="code"><span class="annotation">@Transactional</span>
+<span class="kw">public</span> Pedido confirmar(Long id, Long versaoEsperada) {
+    Pedido pedido = repositorio.findById(id).orElseThrow(PedidoNaoEncontrado::new);
+    pedido.confirmar(); <span class="com">// dirty checking: não precisa chamar save em entidade já gerenciada</span>
+    <span class="kw">return</span> pedido;
+}</pre>
+      <h3>Flush não é commit</h3>
+      <p><code>flush</code> sincroniza alterações pendentes com o banco para executar SQL e verificar parte das constraints; a transação ainda pode sofrer rollback. O commit encerra a unidade atômica. Uma consulta pode provocar flush automático antes de ser executada.</p>
+      <h3>Propagação, isolamento e rollback</h3>
+      <p><code>REQUIRED</code> participa da transação existente ou cria uma. <code>REQUIRES_NEW</code> suspende a atual e cria outra; use raramente, pois o efeito interno pode ser confirmado mesmo quando a operação externa falha. <code>NESTED</code> depende de savepoints e do gerenciador. Isolamento é uma propriedade do banco, não um substituto para invariantes.</p>
+      <pre class="code"><span class="annotation">@Transactional</span>(
+    isolation = Isolation.READ_COMMITTED,
+    timeout = 5,
+    rollbackFor = FalhaIntegracao.class)
+<span class="kw">public void</span> transferir(Long origem, Long destino, BigDecimal valor) { ... }</pre>
+      <p>Por padrão, o modelo declarativo tradicional faz rollback automático para exceções não verificadas; checked exceptions precisam de regra explícita quando representam falha atômica. <code>readOnly=true</code> é uma dica de otimização, não uma barreira universal contra escrita.</p>
+      <h3>O limite do proxy</h3>
+      <p><code>@Transactional</code> normalmente é aplicado por <strong>proxy</strong>: um objeto intermediário criado pelo Spring intercepta a chamada, abre a transação, chama o serviço e confirma ou reverte. Uma chamada de um método para outro no mesmo objeto não atravessa esse intermediário; métodos privados também não formam bons limites declarativos. Coloque a transação em um serviço público orientado ao caso de uso e mantenha chamadas lentas de rede fora dela.</p>
+      <h3>Relacionamentos e igualdade</h3>
+      <ul><li>Use <code>cascade</code> somente quando o ciclo de vida realmente pertence ao agregado.</li><li><code>orphanRemoval</code> expressa propriedade forte e remove filhos retirados da coleção.</li><li>Evite incluir associações lazy em <code>toString</code>, <code>equals</code> e serialização.</li><li>Uma implementação ingênua baseada apenas em ID gerado falha enquanto o ID é nulo. Defina igualdade conforme a identidade do domínio e teste entidades antes e depois da persistência.</li><li>Use <code>@Version</code> para optimistic locking e trate conflito como resultado esperado.</li></ul>
+      <pre class="code"><span class="annotation">@Version</span>
+<span class="kw">private long</span> versao;</pre>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — empréstimo concorrente</h4><span class="exercise-tag d">difícil</span></div><p>Escreva um teste com duas transações tentando emprestar o mesmo exemplar. Implemente uma versão com optimistic locking e outra com lock pessimista. Verifique que exatamente uma vence e que a outra recebe conflito traduzido para HTTP 409.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>O teste deve usar duas transações reais e sincronizar o ponto de disputa; um teste sequencial não comprova concorrência. Registre o trade-off entre contenção pessimista e repetição otimista.</p></div></div>
+    </section>

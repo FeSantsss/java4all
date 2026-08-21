@@ -1,0 +1,51 @@
+<section class="section" id="sistemas-distribuidos">
+      <div class="section-head"><span class="section-num">81</span><h2 class="section-title">Sistemas Distribuídos: CAP &amp; trade-offs de arquitetura sênior</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-security">Além do Impossível</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Além do Impossível</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo — releia quantas vezes precisar</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#arquitetura-software">75 · Arquitetura de Software</a>, <a class="prereq-tag" href="#mensageria">40 · Mensageria</a>, <a class="prereq-tag" href="#hospedagem-db">39 · Onde hospedar o banco</a>, <a class="prereq-tag" href="#resilience">55 · Resilience4j</a></div>
+      </div>
+
+      <p>Este é o capítulo que justifica a existência do nível "Além do Impossível". Não existe resposta certa aqui — só trade-offs, e reconhecer <em>quais</em> trade-offs um sistema real está fazendo é o tipo de julgamento que distingue um arquiteto sênior experiente.</p>
+
+      <h3>O Teorema CAP</h3>
+      <div class="analogy">Imagine três amigos tentando manter cópias idênticas de uma lista de compras em cadernos separados, se comunicando por bilhetes que às vezes se perdem no correio (a rede real nunca é 100% confiável). O teorema CAP diz: você não pode garantir simultaneamente que (C) todos os cadernos sempre mostrem exatamente a mesma lista, (A) qualquer amigo sempre possa ler/escrever no próprio caderno sem esperar confirmação dos outros, <strong>e</strong> (P) o sistema continue funcionando mesmo se um bilhete se perder no meio do caminho. Na prática, bilhetes <em>vão</em> se perder de vez em quando — então a escolha real é sempre entre C e A quando isso acontece.</div>
+
+      <table class="cmp">
+        <tbody><tr><th>Letra</th><th>Significa</th></tr>
+        <tr><td><strong>C</strong> — Consistency</td><td>Toda leitura recebe a escrita mais recente (ou um erro), nunca dado desatualizado</td></tr>
+        <tr><td><strong>A</strong> — Availability</td><td>Todo pedido recebe uma resposta (não uma garantia de que seja o dado mais recente)</td></tr>
+        <tr><td><strong>P</strong> — Partition Tolerance</td><td>O sistema continua funcionando mesmo que a rede entre nós falhe parcialmente</td></tr>
+      </tbody></table>
+
+      <p>Como falhas de rede (P) são uma realidade inevitável em qualquer sistema distribuído de verdade, a escolha prática do dia a dia é entre <strong>CP</strong> (prefere recusar responder a responder com dado desatualizado) e <strong>AP</strong> (prefere responder sempre, mesmo que com dado potencialmente desatualizado).</p>
+
+      <div class="secret"><b>Não classifique componentes isolados por analogia.</b> Um PostgreSQL executando em um único nó não é CP ou AP por causa de suas transações; CAP exige replicação e uma partição de rede. Cache com TTL descreve frescor e Kafka at-least-once descreve entrega — eixos diferentes de CAP. Para classificar um sistema, identifique nós, réplicas, operação analisada e comportamento observável durante a partição.</div>
+
+      <h3>Consistência eventual — a resposta prática mais comum</h3>
+      <p>Na prática, a maioria dos sistemas reais não escolhe CP ou AP de forma absoluta e única — escolhe <strong>por parte do sistema</strong>. Pagamento e estoque (capítulo 33, transações) tendem a exigir consistência forte. Contadores de curtidas, notificações, feeds de atividade toleram <strong>consistência eventual</strong> — o sistema garante que, dado tempo suficiente sem novas escritas, todas as réplicas convergem para o mesmo estado, mas não instantaneamente.</p>
+
+      <h3>Padrão Saga — transações através de múltiplos serviços</h3>
+      <p>O capítulo 33 mostrou uma transação SQL garantindo atomicidade <em>dentro de um único banco</em>. Mas e quando uma operação de negócio precisa coordenar múltiplos microsserviços (capítulo 75), cada um com seu próprio banco? Não existe <code>BEGIN`/`COMMIT</code> distribuído simples e eficiente em escala — o padrão <strong>Saga</strong> resolve isso com uma sequência de transações locais, cada uma publicando um evento (capítulo 40) que dispara a próxima, com <strong>compensações</strong> explícitas para desfazer passos já feitos se algo falhar no meio do caminho.</p>
+
+      <pre class="code"><span class="com">1. Serviço de Pedido: cria pedido (status PENDENTE) -- publica "PedidoCriado"
+2. Serviço de Estoque: reserva o item -- publica "EstoqueReservado"
+   (se falhar: publica "EstoqueIndisponivel" -&gt; Pedido é CANCELADO, sem próximo passo)
+3. Serviço de Pagamento: cobra o cliente -- publica "PagamentoAprovado"
+   (se falhar: publica "PagamentoRecusado" -&gt; COMPENSAÇÃO: Estoque é liberado de volta)
+4. Serviço de Pedido: marca pedido como CONFIRMADO</span></pre>
+
+      <div class="warn"><b>Não existe "a arquitetura certa" aqui, só trade-offs conscientes.</b> Sagas trocam a simplicidade de uma transação ACID local (capítulo 33) por escalabilidade e desacoplamento entre serviços — em troca, você assume a complexidade de escrever lógica de compensação explícita para cada passo que pode falhar, algo que uma transação de banco único resolve de graça com <code>ROLLBACK</code>.</div>
+
+      <div class="study-tip">Você não precisa "resolver" este capítulo como resolveu os exercícios anteriores do curso — o objetivo aqui é reconhecimento, não domínio operacional. Se, ao ler sobre um sistema real em produção (uma notícia técnica, um post de engenharia de alguma empresa), você conseguir identificar "ah, isso é uma escolha AP" ou "isso parece um padrão Saga", o capítulo cumpriu seu papel. A maestria operacional vem só com anos de experiência real em sistemas de escala — este capítulo é o mapa, não o território.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 84.1 — Classificando escolhas CAP</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Para cada cenário, primeiro proponha uma arquitetura replicada e uma partição de rede concreta. Então discuta o comportamento desejado: (a) confirmar a disponibilidade antes do empréstimo; (b) exibir contador histórico; (c) entregar notificação de reserva. Separe CAP de frescor do cache e semântica de entrega.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>(a)</strong> em um registro de empréstimos com líderes separados por partição, prefira impedir confirmações conflitantes no lado sem autoridade; isso favorece consistência durante a partição. <strong>(b)</strong> uma réplica pode continuar respondendo com um contador antigo se o contrato aceitar eventual consistency; isso favorece disponibilidade. <strong>(c)</strong> a fila pode persistir localmente e reconciliar depois, mas at-least-once e atraso devem ser analisados separadamente de CAP. Em todos os casos, declare o que é resposta válida e onde estão as réplicas.</p>
+        </div>
+      </div>
+    </section>

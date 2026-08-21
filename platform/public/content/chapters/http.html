@@ -1,0 +1,91 @@
+<section class="section" id="http">
+      <div class="section-head"><span class="section-num">26</span><h2 class="section-title">HTTP &amp; APIs REST</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
+      </div>
+
+      <p>O Spring MVC / Spring Web (o que você vai usar para criar APIs) é uma camada de conveniência em cima do protocolo <strong>HTTP</strong> e do estilo arquitetural <strong>REST</strong>. Entender os conceitos puros evita que anotações como <code>@GetMapping</code> pareçam arbitrárias.</p>
+
+      <h3>Métodos HTTP e o que cada um significa</h3>
+      <table class="cmp">
+        <tbody><tr><th>Método</th><th>Uso convencional (REST)</th><th>Idempotente?</th></tr>
+        <tr><td><code>GET</code></td><td>Buscar um recurso, sem efeitos colaterais</td><td>Sim</td></tr>
+        <tr><td><code>POST</code></td><td>Criar um novo recurso</td><td>Não</td></tr>
+        <tr><td><code>PUT</code></td><td>Substituir um recurso inteiro por completo</td><td>Sim</td></tr>
+        <tr><td><code>PATCH</code></td><td>Atualizar parcialmente um recurso</td><td>Não, em geral</td></tr>
+        <tr><td><code>DELETE</code></td><td>Remover um recurso</td><td>Sim</td></tr>
+      </tbody></table>
+      <p><strong>Idempotente</strong> significa: repetir a mesma requisição várias vezes tem o mesmo efeito de fazê-la uma única vez. <code>DELETE /livros/5</code> chamado duas vezes deixa o sistema no mesmo estado (livro removido); <code>POST /livros</code> chamado duas vezes cria dois livros.</p>
+
+      <h3>Códigos de status — o vocabulário de uma resposta HTTP</h3>
+      <table class="cmp">
+        <tbody><tr><th>Faixa</th><th>Significado</th><th>Exemplos comuns</th></tr>
+        <tr><td>2xx</td><td>Sucesso</td><td><code>200 OK</code>, <code>201 Created</code>, <code>204 No Content</code></td></tr>
+        <tr><td>3xx</td><td>Redirecionamento</td><td><code>301 Moved Permanently</code></td></tr>
+        <tr><td>4xx</td><td>Erro do cliente</td><td><code>400 Bad Request</code>, <code>401 Unauthorized</code>, <code>403 Forbidden</code>, <code>404 Not Found</code></td></tr>
+        <tr><td>5xx</td><td>Erro do servidor</td><td><code>500 Internal Server Error</code></td></tr>
+      </tbody></table>
+
+      <h3>Anatomia de uma requisição e resposta</h3>
+      <pre class="code"><span class="com">--- REQUISIÇÃO ---</span>
+POST /livros HTTP/1.1
+Host: api.biblioteca.com
+Content-Type: application/json
+Authorization: Bearer eyJhbGc...
+
+{"titulo": "1984", "autor": "Orwell", "paginas": 328}
+
+<span class="com">--- RESPOSTA ---</span>
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /livros/42
+
+{"id": 42, "titulo": "1984", "autor": "Orwell", "paginas": 328}</pre>
+
+      <p>O <strong>header</strong> <code>Content-Type: application/json</code> avisa ao servidor (e ao cliente, na resposta) que o corpo (<em>body</em>) da mensagem está em JSON — informação que o Jackson (capítulo 25) usa para decidir como interpretar os bytes.</p>
+
+      <h3>REST: recursos, não ações</h3>
+      <p>Uma API REST bem desenhada nomeia URLs como <strong>substantivos</strong> (recursos), e usa o <em>método HTTP</em> para expressar a ação — nunca verbos na URL.</p>
+      <pre class="code"><span class="com">// ❌ estilo RPC, verbos na URL:</span>
+GET /buscarLivroPorId?id=5
+POST /criarNovoLivro
+POST /deletarLivro?id=5
+
+<span class="com">// ✅ estilo REST, recursos + métodos HTTP:</span>
+GET    /livros          <span class="com">// listar todos</span>
+GET    /livros/5        <span class="com">// buscar um específico</span>
+POST   /livros          <span class="com">// criar</span>
+PUT    /livros/5        <span class="com">// substituir por completo</span>
+DELETE /livros/5        <span class="com">// remover</span></pre>
+
+      <div class="secret">Cada uma dessas linhas vai virar, quase literalmente, uma anotação Spring: <code>@GetMapping("/livros/{id}")</code>, <code>@PostMapping("/livros")</code>, <code>@PutMapping("/livros/{id}")</code>, <code>@DeleteMapping("/livros/{id}")</code>. Um <em>controller</em> Spring nada mais é do que uma classe cujos métodos são mapeados para combinações de "verbo HTTP + caminho de URL" — o mapeamento que você acabou de desenhar aqui em pseudo-REST.</div>
+
+      <h3>Cliente HTTP em Java puro</h3>
+      <pre class="code">HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(<span class="str">"https://api.biblioteca.com/livros"</span>))
+    .header(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+    .POST(HttpRequest.BodyPublishers.ofString(json))
+    .build();
+
+HttpResponse&lt;<span class="kw">String</span>&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());
+System.out.println(response.statusCode()); <span class="com">// 201</span>
+System.out.println(response.body());       <span class="com">// JSON de resposta</span></pre>
+
+      <div class="callout"><b>REST vs RPC vs GraphQL:</b> este curso foca em REST por ser o padrão histórico do Spring Web/Spring MVC (e o mais comum no mercado). Vale saber que existem alternativas (gRPC, GraphQL) que resolvem os mesmos problemas com trade-offs diferentes — mas dominar REST é o pré-requisito universal.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 26.1 — Desenhando uma API REST</h4><span class="exercise-tag m">médio</span></div>
+        <p>Para o sistema de biblioteca dos capítulos anteriores, desenhe (no papel, sem implementar) os endpoints REST para: listar todos os itens, buscar um item por código, emprestar um item, devolver um item, e cadastrar um novo livro. Para cada um, defina o verbo HTTP, o caminho da URL, e o código de status esperado em caso de sucesso.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">GET    /itens                 → 200 OK (lista todos)
+GET    /itens/{codigo}        → 200 OK ou 404 Not Found
+POST   /itens                 → 201 Created (cadastra um novo livro)
+POST   /itens/{codigo}/emprestimo → 200 OK ou 409 Conflict (já emprestado)
+POST   /itens/{codigo}/devolucao  → 200 OK</pre>
+          <p style="margin-top:12px">Repare que "emprestar" e "devolver" não são recursos no sentido estrito, mas <em>ações sobre um recurso</em> — uma convenção comum é tratá-los como sub-recursos (<code>POST /itens/{codigo}/emprestimo</code>) em vez de verbos soltos na URL principal, mantendo o estilo REST mesmo quando a ação não é um CRUD simples.</p>
+        </div>
+      </div>
+    </section>

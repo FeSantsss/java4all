@@ -1,0 +1,62 @@
+<section class="section tk-spring" id="dto-mapping">
+      <div class="section-head"><span class="section-num">47</span><h2 class="section-title">DTO Mapping — Entity ≠ DTO</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">45 · Spring Data JPA</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
+      </div>
+
+      <p>O capítulo 25 já mencionou DTOs de leve. Agora que você tem entidades JPA reais (capítulo 45), o problema fica concreto: por que não simplesmente retornar a <code>@Entity</code> direto no controller?</p>
+
+      <div class="warn"><b>Três problemas de expor Entity diretamente:</b> (1) você vaza detalhes internos do banco (nomes de coluna, relacionamentos inteiros) para quem consome a API; (2) mudar a entidade para uma necessidade interna do banco quebra silenciosamente o contrato público da API; (3) tentar serializar uma entidade com relacionamento <code>LAZY</code> não carregado fora de uma transação ativa lança <code>LazyInitializationException</code> — um erro clássico e confuso de quem pula direto para produção sem DTO.</div>
+
+      <div class="analogy">Pense na <code>@Entity</code> como o estoque interno de uma loja — cheio de código de fornecedor, custo de aquisição, localização exata na prateleira. O DTO é a vitrine — mostra só nome, foto e preço, o que o cliente realmente precisa ver. Ninguém deixa o cliente vasculhar o estoque diretamente; sempre existe uma "vitrine" controlada entre o mundo externo e os dados internos.</div>
+
+      <h3>Mapeamento manual — entenda antes de automatizar</h3>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(<span class="kw">Long</span> id, <span class="kw">String</span> titulo, <span class="kw">int</span> paginas, <span class="kw">String</span> nomeAutor) {
+    <span class="kw">public static</span> <span class="cls">LivroDTO</span> <span class="fn">from</span>(<span class="cls">Livro</span> livro) {
+        <span class="kw">return new</span> <span class="cls">LivroDTO</span>(
+            livro.getId(),
+            livro.getTitulo(),
+            livro.getPaginas(),
+            livro.getAutor().getNome() <span class="com">// achata o relacionamento -- o cliente da API nem precisa saber que existe uma tabela "autores"</span>
+        );
+    }
+}
+
+<span class="com">// no service:</span>
+<span class="kw">public</span> List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">listarTodos</span>() {
+    <span class="kw">return</span> livroRepository.buscarTodosComAutor() <span class="com">// JOIN FETCH, capítulo 46 -- evita N+1 aqui!</span>
+        .stream()
+        .map(LivroDTO::from) <span class="com">// method reference, capítulo 13</span>
+        .toList();
+}</pre>
+
+      <h3>MapStruct — automatizando o boilerplate óbvio</h3>
+      <p>Mapeamento manual é ótimo para entender o problema, mas em uma entidade com 15 campos vira repetição cansativa. <strong>MapStruct</strong> gera o código de mapeamento em tempo de <em>compilação</em> (não reflection em runtime, ao contrário do Jackson) — rápido e com erros pegos ainda em build.</p>
+
+      <pre class="code"><span class="annotation">@Mapper</span>(componentModel = <span class="str">"spring"</span>) <span class="com">// gera um @Component pronto para injeção!</span>
+<span class="kw">public interface</span> <span class="cls">LivroMapper</span> {
+    <span class="annotation">@Mapping</span>(target = <span class="str">"nomeAutor"</span>, source = <span class="str">"autor.nome"</span>) <span class="com">// campo com nome diferente</span>
+    <span class="cls">LivroDTO</span> <span class="fn">toDTO</span>(<span class="cls">Livro</span> livro);
+
+    List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">toDTOList</span>(List&lt;<span class="cls">Livro</span>&gt; livros);
+}
+<span class="com">// MapStruct gera, em tempo de compilação, uma classe LivroMapperImpl
+// com exatamente o código que você escreveria manualmente -- sem custo
+// de reflection em runtime, ao contrário do Jackson (capítulo 25)</span></pre>
+
+      <div class="secret">A diferença entre MapStruct e Jackson não é só de propósito (mapear Java↔Java vs Java↔JSON) — é de <strong>quando</strong> o trabalho acontece. Jackson usa reflection em <em>runtime</em>, a cada chamada. MapStruct gera código Java <em>de verdade</em> durante a compilação (você pode literalmente abrir o <code>.class</code> gerado e ver um método comum, sem reflection nenhuma) — por isso é consideravelmente mais rápido em cenários de alto volume.</div>
+
+      <div class="study-tip">Comece sempre mapeando manualmente (como no primeiro exemplo) até o padrão da sua entidade estabilizar. Só introduza MapStruct quando o mapeamento manual virar repetição óbvia entre várias entidades parecidas — ferramentas de geração de código economizam tempo, mas só valem a pena depois que você já entende exatamente o que estão automatizando.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 47.1 — DTO manual vs MapStruct</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva o <code>LivroDTO</code> (record) e o mapeamento manual <code>from(Livro)</code> como no exemplo. Depois, reescreva o mesmo mapeamento usando uma interface <code>@Mapper</code> do MapStruct. Compare as duas abordagens e escreva, em uma frase, quando cada uma faz mais sentido.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Ver os dois exemplos completos acima. <strong>Manual</strong> faz mais sentido em projetos pequenos ou quando o mapeamento tem lógica especial não-trivial (cálculos, formatação condicional). <strong>MapStruct</strong> compensa quando existem muitas entidades com muitos campos e o mapeamento é majoritariamente "campo bate com campo", já que elimina a repetição sem custo de performance em runtime.</p>
+        </div>
+      </div>
+    </section>

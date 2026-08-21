@@ -1,0 +1,56 @@
+<section class="section tk-spring" id="spring-profiles">
+      <div class="section-head"><span class="section-num">70</span><h2 class="section-title">Spring Profiles avançado</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#logging">27 · Logging &amp; config</a>, <a class="prereq-tag" href="#praticas-producao">59 · Práticas de produção</a> (environment parity)</div>
+      </div>
+
+      <p>O capítulo 27 mencionou <code>application-dev.properties</code> e <code>application-prod.properties</code> de leve. Aqui aprofundamos como o Spring decide qual arquivo usar, e como isso se conecta com beans inteiros que só deveriam existir em certos ambientes.</p>
+
+      <pre class="code"><span class="com"># application.properties (compartilhado por todos os profiles)
+# application-dev.properties (só quando o profile "dev" está ativo)
+# application-prod.properties (só quando "prod" está ativo)</span>
+
+<span class="com"># ativando um profile:</span>
+java -jar app.jar --spring.profiles.active=prod
+<span class="com"># ou via variável de ambiente (capítulo 57):</span>
+SPRING_PROFILES_ACTIVE=prod</pre>
+
+      <h3>Beans condicionais por profile</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="annotation">@Profile</span>(<span class="str">"dev"</span>)
+<span class="kw">public class</span> <span class="cls">EmailServicoFake</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="kw">String</span> msg) {
+        System.out.println(<span class="str">"[SIMULADO] "</span> + msg); <span class="com">// não envia e-mail de verdade em dev</span>
+    }
+}
+
+<span class="annotation">@Service</span>
+<span class="annotation">@Profile</span>(<span class="str">"prod"</span>)
+<span class="kw">public class</span> <span class="cls">EmailServicoReal</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="kw">String</span> msg) { <span class="com">/* SMTP real */</span> }
+}</pre>
+
+      <div class="analogy">Profiles são como trocar o cenário de um teatro sem trocar o roteiro (o código de negócio continua o mesmo) — em desenvolvimento, o "ator" que faz o papel de <code>NotificadorEmprestimo</code> é um dublê que só finge enviar e-mail; em produção, entra o ator principal que faz a ligação de verdade. A peça (a lógica de negócio da <code>Biblioteca</code>, capítulo 22) nunca sabe a diferença, porque só conhece a interface.</div>
+
+      <div class="secret">Repare que isso é literalmente <strong>Strategy Pattern</strong> (capítulo 23) combinado com <strong>injeção de dependência</strong> (capítulo 22) — o <code>@Profile</code> só decide, em tempo de inicialização, qual implementação concreta o Spring vai registrar como o bean daquela interface. Nenhum conceito novo, apenas uma nova forma de acionar padrões que você já domina profundamente.</div>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Nunca deixe um profile de teste/dev ativo acidentalmente em produção — sempre confirme explicitamente qual profile está ativo no deploy (capítulo 60).</li>
+          <li>Profiles não substituem secrets (capítulo 57) — a diferença entre "qual comportamento" (profile) e "qual credencial" (variável de ambiente) deveria continuar separada.</li>
+        </ul>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 73.1 — Notificador por ambiente</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>EmailServicoFake</code> (profile <code>dev</code>, só imprime no console) e <code>EmailServicoReal</code> (profile <code>prod</code>, simula envio real), ambos implementando <code>NotificadorEmprestimo</code>. Confirme que a <code>Biblioteca</code> (capítulo 22) continua funcionando sem nenhuma mudança de código, independente de qual profile está ativo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Escreva dois testes de contexto com profiles diferentes e confirme qual bean existe em cada um. Faça o contexto falhar quando nenhum profile fornecer a dependência e explique por que credencial não deve ficar em <code>application-prod.yml</code>. Como alternativa, use propriedade condicional e compare com <code>@Profile</code>.</p>
+        </div>
+      </div>
+    </section>

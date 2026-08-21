@@ -1,0 +1,54 @@
+<section class="section tk-devops" id="hospedagem-db">
+      <div class="section-head"><span class="section-num">39</span><h2 class="section-title">Onde hospedar o banco: dev, teste &amp; produção</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Infra</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#postgres">34 · PostgreSQL</a>, <a class="prereq-tag" href="#compose">32 · Docker Compose</a>, <a class="prereq-tag" href="#build">19 · Maven &amp; Gradle</a></div>
+      </div>
+
+      <p>Um sistema real nunca usa <strong>um único banco</strong> — usa pelo menos três "versões" dele, com propósitos diferentes. Confundir esses ambientes é uma das formas mais comuns de causar incidentes graves.</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Ambiente</th><th>Onde roda</th><th>Dados</th></tr>
+        <tr><td><strong>Desenvolvimento (dev)</strong></td><td>Docker local (capítulo 30-32), na sua máquina</td><td>Fictícios, descartáveis, recriados livremente</td></tr>
+        <tr><td><strong>Teste (automatizado)</strong></td><td>Container efêmero via Testcontainers (capítulo futuro), sobe e morre a cada execução</td><td>Gerados pelo próprio teste, isolados de tudo</td></tr>
+        <tr><td><strong>Staging/Homologação</strong></td><td>Ambiente gerenciado, similar à produção</td><td>Cópia (anonimizada) ou similar à produção, para validar antes do deploy real</td></tr>
+        <tr><td><strong>Produção</strong></td><td>Provedor gerenciado (ver abaixo)</td><td>Dados reais de usuários reais — tratamento máximo de cuidado</td></tr>
+      </tbody></table>
+
+      <div class="analogy">Pense nesses ambientes como as fases de escrever este próprio curso: primeiro você escreve e testa exemplos no seu rascunho (dev), depois roda os exercícios para confirmar que funcionam (teste automatizado), depois revisa tudo antes de publicar (staging), e só então o conteúdo vai ao ar para o público de verdade (produção). Pular etapas — testar uma mudança grande direto em produção — é como publicar um capítulo sem nunca ter revisado.</div>
+
+      <h3>Banco gerenciado — por que não simplesmente rodar Postgres em um servidor você mesmo</h3>
+      <p>É possível, mas significa que <strong>você</strong> vira responsável por backups, atualizações de segurança, monitoramento de disco cheio, réplicas de alta disponibilidade — tudo manualmente. Provedores de banco gerenciado assumem essa operação por você:</p>
+
+      <table class="cmp">
+        <tbody><tr><th>Provedor</th><th>Característica</th></tr>
+        <tr><td><strong>Supabase</strong></td><td>Postgres gerenciado + autenticação + API automática, camada gratuita generosa, ótimo para projetos pessoais/MVPs</td></tr>
+        <tr><td><strong>Neon</strong></td><td>Postgres serverless — escala a zero quando não usado, cobrança por uso real</td></tr>
+        <tr><td><strong>Railway / Render</strong></td><td>Banco + aplicação no mesmo lugar, deploy simples, bom para projetos pequenos/médios</td></tr>
+        <tr><td><strong>AWS RDS</strong></td><td>Padrão corporativo, altamente configurável, exige mais conhecimento de infraestrutura</td></tr>
+        <tr><td><strong>MongoDB Atlas</strong></td><td>Equivalente gerenciado para MongoDB</td></tr>
+      </tbody></table>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Nunca aponte seu ambiente de desenvolvimento para o banco de produção "só para testar rápido" — um <code>DELETE</code> sem <code>WHERE</code> nesse cenário é irreversível.</li>
+          <li>String de conexão de produção nunca vai para o código-fonte nem para o Git — sempre variável de ambiente (conecta com o capítulo 27 e com um capítulo futuro sobre secrets).</li>
+          <li>Staging deveria ter a <strong>mesma versão</strong> de Postgres/dependências que produção — divergência de versão é fonte clássica de "funcionou no staging, quebrou em produção".</li>
+          <li>Nunca copie dados reais de usuários para dev/staging sem anonimizar — é tanto risco de segurança quanto, em muitas jurisdições, problema legal (LGPD/GDPR).</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">Se você está construindo um projeto pessoal para portfólio, comece com Supabase ou Neon para produção (camada gratuita cobre a maioria dos projetos de aprendizado) e Docker local para desenvolvimento — exatamente a combinação que este curso usa como padrão. Só migre para AWS RDS quando o projeto realmente exigir a flexibilidade extra; começar direto por lá costuma significar mais tempo configurando infraestrutura do que escrevendo código.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 39.1 — Desenhando os ambientes do projeto biblioteca</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Para o projeto da biblioteca construído ao longo do curso, escreva (em texto) uma proposta de configuração de ambientes: onde rodaria o banco de dev, como os testes automatizados (capítulo 15/futuro Testcontainers) se conectariam a um banco, e qual provedor gerenciado você escolheria para produção, justificando a escolha.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>Dev:</strong> Postgres via <code>docker compose</code> (capítulo 32), rodando localmente, com dados fictícios recriados sempre que necessário. <strong>Testes automatizados:</strong> Testcontainers sobe um Postgres novo e isolado a cada execução da suíte de testes, garantindo que nenhum teste dependa de estado deixado por outro. <strong>Produção:</strong> Supabase ou Neon — para um projeto de biblioteca de porte pequeno/médio, a camada gratuita/inicial cobre bem, com backups automáticos incluídos, sem exigir que você mesmo administre um servidor de banco.</p>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,96 @@
+<section class="section tk-nosql" id="redis">
+      <div class="section-head"><span class="section-num">38</span><h2 class="section-title">Redis — cache &amp; estruturas em memória</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-nosql">Redis</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#nosql">36 · NoSQL conceitos</a>, <a class="prereq-tag" href="#colecoes">11 · Coleções</a></div>
+      </div>
+
+      <p><strong>Redis</strong> guarda tudo <strong>em memória RAM</strong> — é por isso que é absurdamente rápido (microssegundos, não milissegundos) e por isso que não é o lugar certo para seus dados "de verdade" e permanentes.</p>
+
+      <div class="analogy">Se Postgres é o arquivo morto da empresa — organizado, confiável, guarda tudo permanentemente — Redis é o post-it grudado no monitor: instantâneo de ler e escrever, mas você não colocaria ali informação que não pode se dar ao luxo de perder se alguém limpar a mesa. Toda consulta cara ao "arquivo morto" que se repete com frequência vale a pena anotar num post-it (cache), pra não ter que ir lá de novo toda vez.</div>
+
+      <div class="install-box">
+        <h4>Instalação</h4>
+        <div class="install-tabs">
+          <span class="install-tab active">Via Docker (recomendado)</span>
+          <span class="install-tab">macOS</span>
+        </div>
+        <div class="install-panel active"><pre class="code">docker run -d --name redis -p 6379:6379 redis:7</pre></div>
+        <div class="install-panel"><pre class="code">brew install redis
+brew services start redis</pre></div>
+        <pre class="code">redis-cli   <span class="com"># shell interativo</span></pre>
+      </div>
+
+      <h3>As estruturas de dados do Redis (não é só chave-valor simples)</h3>
+      <pre class="code">SET usuario:1:nome "Felipy"          <span class="com"># string simples</span>
+GET usuario:1:nome
+
+SET livro:42:visualizacoes 0
+INCR livro:42:visualizacoes          <span class="com"># operação atômica -- lembra da race condition do capítulo 14!</span>
+
+SET usuario:1:sessao "token-opaco" EX 3600 <span class="com"># cria a chave já com TTL atômico</span>
+TTL usuario:1:sessao                 <span class="com"># quanto tempo falta para expirar</span>
+
+LPUSH fila:emails "enviar-boas-vindas@user1"  <span class="com"># lista -- fila simples</span>
+RPOP fila:emails
+
+SADD tags:livro:42 "ficção" "aventura"   <span class="com"># set -- sem duplicatas, como o capítulo 11</span>
+
+HSET usuario:1 nome "Felipy" cidade "Custódia"  <span class="com"># hash -- como um objeto/Map dentro da chave</span>
+HGET usuario:1 nome</pre>
+
+      <div class="secret">Lembra do capítulo 14, sobre a race condition de "valor++" não ser atômico em Java puro sem <code>synchronized</code>? O comando <code>INCR</code> do Redis <strong>é</strong> atômico por natureza — Redis processa comandos um de cada vez, em uma única thread, então nunca existe a janela de "duas leituras antes de uma escrita" que causava aquele bug. É por isso que Redis é usado com frequência para contadores compartilhados entre múltiplas instâncias de uma aplicação, mesmo rodando em servidores diferentes.</div>
+
+      <h3>Cache-aside — o padrão mais comum na prática</h3>
+      <pre class="code"><span class="kw">public</span> <span class="cls">Livro</span> <span class="fn">buscarLivro</span>(<span class="kw">long</span> id) {
+    <span class="kw">String</span> chave = <span class="str">"livro:"</span> + id;
+    <span class="kw">String</span> cacheado = redis.get(chave);
+
+    <span class="kw">if</span> (cacheado != <span class="kw">null</span>) {
+        <span class="kw">return</span> desserializar(cacheado); <span class="com">// achou no cache -- retorna sem tocar no banco</span>
+    }
+
+    <span class="cls">Livro</span> livro = repositorio.buscarPorId(id); <span class="com">// não achou -- vai no Postgres</span>
+    redis.set(chave, serializar(livro), Duration.ofMinutes(10)); <span class="com">// guarda para a PRÓXIMA vez</span>
+    <span class="kw">return</span> livro;
+}</pre>
+
+      <div class="warn"><b>Cache invalidation é a parte difícil de verdade:</b> quando o livro é atualizado no Postgres, o valor em cache no Redis fica desatualizado até expirar ou ser explicitamente removido (<code>redis.delete(chave)</code>). Esquecer de invalidar o cache ao atualizar dados é a causa mais comum de "por que o sistema está mostrando informação errada" em produção — e o próprio Spring tem anotações (<code>@CacheEvict</code>) para automatizar isso quando você chegar no módulo Spring.</div>
+
+      <div class="study-tip">Não use Redis "porque é rápido" sem pensar em <em>quando</em> os dados em cache podem ficar errados e por quanto tempo isso é aceitável. A pergunta certa antes de cachear algo é: "se esse dado estiver 5 minutos desatualizado, algum problema real acontece?" Se a resposta for não, cachear com um TTL de alguns minutos já resolve 90% dos casos sem complicar a invalidação manual.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 38.1 — Cache-aside na mão</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Usando o Redis rodando via Docker e a classe <code>LivroRepositorioJdbc</code> do capítulo 24, implemente uma classe <code>LivroServicoComCache</code> que primeiro tenta buscar do Redis; se não encontrar, busca do repositório JDBC e grava no Redis com TTL de 5 minutos antes de retornar. Escreva um pequeno teste manual que busca o mesmo livro duas vezes e confirma (via log) que a segunda vez veio do cache, não do banco.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">LivroServicoComCache</span> {
+    <span class="kw">private final</span> <span class="cls">LivroRepositorio</span> repositorio;
+    <span class="kw">private final</span> JedisPool redisPool; <span class="com">// cliente Redis (biblioteca Jedis)</span>
+
+    <span class="kw">public</span> <span class="fn">LivroServicoComCache</span>(<span class="cls">LivroRepositorio</span> repositorio, JedisPool redisPool) {
+        <span class="kw">this</span>.repositorio = repositorio;
+        <span class="kw">this</span>.redisPool = redisPool;
+    }
+
+    <span class="kw">public</span> Optional&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarPorId</span>(<span class="kw">long</span> id) {
+        <span class="kw">String</span> chave = <span class="str">"livro:"</span> + id;
+        <span class="kw">try</span> (Jedis redis = redisPool.getResource()) {
+            <span class="kw">String</span> cacheado = redis.get(chave);
+            <span class="kw">if</span> (cacheado != <span class="kw">null</span>) {
+                System.out.println(<span class="str">"[CACHE HIT] "</span> + chave);
+                <span class="kw">return</span> Optional.of(desserializar(cacheado));
+            }
+
+            System.out.println(<span class="str">"[CACHE MISS] "</span> + chave + <span class="str">" -- indo ao banco"</span>);
+            Optional&lt;<span class="cls">Livro</span>&gt; livro = repositorio.buscarPorId(id);
+            livro.ifPresent(l -&gt; redis.setex(chave, 300, serializar(l))); <span class="com">// 300s = 5 minutos</span>
+            <span class="kw">return</span> livro;
+        }
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

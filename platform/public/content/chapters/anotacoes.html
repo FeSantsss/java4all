@@ -1,0 +1,174 @@
+<section class="section" id="anotacoes">
+      <div class="section-head"><span class="section-num">20</span><h2 class="section-title">Anotações &amp; Reflection</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#build">19 · Maven &amp; Gradle</a></div>
+      </div>
+
+      <p>Você já usa anotações desde o capítulo 05 (<code>@Override</code>) e capítulo 15 (<code>@Test</code>). Este capítulo explica <strong>o que elas realmente são</strong> e <strong>como o Spring lê <code>@Autowired</code>, <code>@Service</code> ou <code>@RestController</code> e faz "mágica" com eles</strong> — a resposta é <strong>reflection</strong>.</p>
+
+      <h3>Criando sua própria anotação</h3>
+      <pre class="code"><span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME) <span class="com">// precisa existir em runtime para ser lida via reflection</span>
+<span class="annotation">@Target</span>(ElementType.METHOD)          <span class="com">// só pode ser usada em métodos</span>
+<span class="kw">public @interface</span> <span class="cls">LogExecucao</span> {
+    <span class="kw">String</span> <span class="fn">valor</span>() <span class="kw">default</span> <span class="str">""</span>; <span class="com">// "atributo" da anotação, com valor padrão</span>
+}
+
+<span class="kw">public class</span> <span class="cls">Servico</span> {
+    <span class="annotation">@LogExecucao</span>(<span class="str">"processarPedido"</span>)
+    <span class="kw">public void</span> <span class="fn">processar</span>() { System.out.println(<span class="str">"processando..."</span>); }
+}</pre>
+
+      <p>Sozinha, uma anotação <strong>não faz nada</strong> — ela é só metadado. É preciso um código separado que <em>lê</em> essa anotação via reflection e decide o que fazer com ela. É exatamente isso que frameworks como o Spring fazem por trás dos panos.</p>
+
+      <h3>Reflection: inspecionando classes em tempo de execução</h3>
+      <pre class="code">Class&lt;?&gt; classe = Servico.<span class="kw">class</span>;
+
+<span class="kw">for</span> (Method metodo : classe.getDeclaredMethods()) {
+    <span class="kw">if</span> (metodo.isAnnotationPresent(LogExecucao.<span class="kw">class</span>)) {
+        LogExecucao anotacao = metodo.getAnnotation(LogExecucao.<span class="kw">class</span>);
+        System.out.println(<span class="str">"Método "</span> + metodo.getName() + <span class="str">" marcado com valor: "</span> + anotacao.valor());
+    }
+}
+
+<span class="com">// reflection também permite criar objetos e chamar métodos dinamicamente,
+// sem "new" explícito no código -- é assim que o Spring instancia seus beans:</span>
+<span class="cls">Servico</span> instancia = (<span class="cls">Servico</span>) classe.getDeclaredConstructor().newInstance();
+Method m = classe.getMethod(<span class="str">"processar"</span>);
+m.invoke(instancia); <span class="com">// chama servico.processar() dinamicamente</span></pre>
+
+      <div class="secret">Este é literalmente o segredo por trás do Spring: quando você escreve <code>@Service</code> em uma classe e <code>@Autowired</code> em um campo, o Spring, na inicialização da aplicação, faz um <strong>scan via reflection</strong> em todos os pacotes configurados, procurando classes anotadas. Para cada uma, ele cria a instância (às vezes chamada de <em>bean</em>) usando reflection, e para cada campo <code>@Autowired</code> encontrado, ele injeta a dependência certa — também via reflection, chamando <code>Field.set(objeto, valor)</code> por baixo dos panos. Não existe mágica: é reflection, aplicada em escala, orquestrada por um container.</div>
+
+      <h3>Aprofundando em Reflection: o mapa completo da API</h3>
+      <p>Tudo em reflection começa por um objeto <code>Class&lt;?&gt;</code>, que é a representação em runtime de um tipo. Existem três formas de obtê-lo:</p>
+      <pre class="code">Class&lt;?&gt; c1 = Livro.<span class="kw">class</span>;                 <span class="com">// quando você já conhece o tipo em compilação</span>
+Class&lt;?&gt; c2 = meuLivro.getClass();          <span class="com">// a partir de uma instância já existente</span>
+Class&lt;?&gt; c3 = Class.forName(<span class="str">"com.felipy.Livro"</span>); <span class="com">// pelo NOME, como String -- usado por drivers JDBC e frameworks</span></pre>
+
+      <h4 class="sub">Inspecionando a estrutura de uma classe</h4>
+      <pre class="code">Class&lt;?&gt; c = Livro.<span class="kw">class</span>;
+
+c.getName();                 <span class="com">// "com.felipy.Livro" -- nome totalmente qualificado</span>
+c.getSimpleName();           <span class="com">// "Livro"</span>
+c.getSuperclass();           <span class="com">// a classe pai (Object, se não houver extends explícito)</span>
+c.getInterfaces();           <span class="com">// array de interfaces implementadas</span>
+c.isInterface();             <span class="com">// false -- e existe isEnum(), isArray(), isAnnotation()...</span>
+
+<span class="com">// campos: getFields() só PUBLIC (inclusive herdados); getDeclaredFields() TODOS, só desta classe</span>
+<span class="kw">for</span> (Field f : c.getDeclaredFields()) {
+    System.out.println(f.getName() + <span class="str">" : "</span> + f.getType());
+}
+
+<span class="com">// o mesmo padrão vale para métodos e construtores:</span>
+c.getMethods();               <span class="com">// públicos, incluindo herdados</span>
+c.getDeclaredMethods();       <span class="com">// todos os declarados NESTA classe, qualquer modificador</span>
+c.getDeclaredConstructors();  <span class="com">// todos os construtores declarados</span></pre>
+
+      <div class="secret">A distinção <code>get*</code> vs <code>getDeclared*</code> é a pegadinha número um de quem começa em reflection: <code>getFields()</code> só enxerga membros <code>public</code> (inclusive herdados de superclasses), enquanto <code>getDeclaredFields()</code> enxerga <strong>todos</strong> os membros declarados diretamente na classe — <code>private</code> incluído — mas <strong>não</strong> os herdados. Para inspecionar uma hierarquia inteira de forma completa (como o Spring faz ao procurar campos <code>@Autowired</code> em qualquer nível), é preciso subir manualmente com <code>getSuperclass()</code> em loop.</div>
+
+      <h4 class="sub">Acessando membros privados e criando objetos dinamicamente</h4>
+      <pre class="code">Field campoPrivado = Livro.<span class="kw">class</span>.getDeclaredField(<span class="str">"titulo"</span>);
+campoPrivado.setAccessible(<span class="kw">true</span>);          <span class="com">// "quebra" o encapsulamento -- use com responsabilidade!</span>
+<span class="kw">String</span> valor = (<span class="kw">String</span>) campoPrivado.get(meuLivro);
+campoPrivado.set(meuLivro, <span class="str">"Novo Título"</span>);   <span class="com">// altera mesmo sendo private</span>
+
+<span class="com">// criando um objeto sem "new" explícito no código-fonte:</span>
+Constructor&lt;<span class="cls">Livro</span>&gt; construtor = Livro.<span class="kw">class</span>.getDeclaredConstructor(<span class="kw">String</span>.<span class="kw">class</span>, <span class="kw">String</span>.<span class="kw">class</span>, <span class="kw">int</span>.<span class="kw">class</span>);
+<span class="cls">Livro</span> instancia = construtor.newInstance(<span class="str">"1984"</span>, <span class="str">"Orwell"</span>, 328);
+
+<span class="com">// chamando um método privado dinamicamente:</span>
+Method metodoPrivado = Livro.<span class="kw">class</span>.getDeclaredMethod(<span class="str">"validar"</span>);
+metodoPrivado.setAccessible(<span class="kw">true</span>);
+metodoPrivado.invoke(instancia);</pre>
+
+      <div class="warn"><b><code>setAccessible(true)</code> é poderoso e perigoso:</b> ele contorna <code>private</code>/<code>protected</code> deliberadamente, quebrando encapsulamento (capítulo 04) por completo. Frameworks usam isso de forma controlada e bem testada; código de aplicação normal quase nunca deveria precisar disso. Desde o sistema de módulos do Java 9+ (JPMS), módulos podem inclusive <em>bloquear</em> esse acesso para pacotes não explicitamente abertos — mais uma camada de proteção contra o uso indevido dessa API.</div>
+
+      <h4 class="sub">Dynamic Proxy — a base do Spring AOP</h4>
+      <p>Um <strong>proxy dinâmico</strong> cria, em tempo de execução, uma implementação de uma interface que intercepta toda chamada de método antes de (opcionalmente) delegar para o objeto real. É assim que o Spring implementa recursos como <code>@Transactional</code> e logging automático (AOP — Programação Orientada a Aspectos) sem exigir que você escreva código repetitivo em cada método.</p>
+      <pre class="code"><span class="kw">interface</span> <span class="cls">Servico</span> { <span class="kw">void</span> <span class="fn">executar</span>(); }
+
+<span class="kw">class</span> <span class="cls">ServicoReal</span> <span class="kw">implements</span> <span class="cls">Servico</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">executar</span>() { System.out.println(<span class="str">"Executando lógica de negócio"</span>); }
+}
+
+<span class="cls">Servico</span> real = <span class="kw">new</span> <span class="cls">ServicoReal</span>();
+
+<span class="cls">Servico</span> proxy = (<span class="cls">Servico</span>) Proxy.newProxyInstance(
+    <span class="cls">Servico</span>.<span class="kw">class</span>.getClassLoader(),
+    <span class="kw">new</span> Class&lt;?&gt;[]{ <span class="cls">Servico</span>.<span class="kw">class</span> },
+    (proxyObj, metodo, args) -&gt; {
+        System.out.println(<span class="str">"[LOG] Antes de "</span> + metodo.getName()); <span class="com">// código "injetado" ao redor da chamada</span>
+        <span class="kw">Object</span> resultado = metodo.invoke(real, args);       <span class="com">// delega para o objeto real</span>
+        System.out.println(<span class="str">"[LOG] Depois de "</span> + metodo.getName());
+        <span class="kw">return</span> resultado;
+    }
+);
+
+proxy.executar();
+<span class="com">// [LOG] Antes de executar
+// Executando lógica de negócio
+// [LOG] Depois de executar</span></pre>
+
+      <div class="secret">Quando você anota um método com <code>@Transactional</code> no Spring, o objeto que você realmente recebe do container <strong>não é a sua classe original</strong> — é um proxy dinâmico exatamente como o de cima, gerado automaticamente na inicialização. Esse proxy abre a transação, chama seu método de verdade via reflection, e faz <code>commit</code> ou <code>rollback</code> dependendo se uma exceção foi lançada. É por isso que <code>@Transactional</code> não funciona quando um método chama outro método <em>da mesma classe</em> diretamente (<code>this.outroMetodo()</code>) — essa chamada nunca passa pelo proxy, então nunca é interceptada.</div>
+
+      <h3>Anotações padrão mais usadas (fora do Spring)</h3>
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Para que serve</th></tr>
+        <tr><td><code>@Override</code></td><td>Confirma sobrescrita de método — erro de compilação se não for uma sobrescrita de fato</td></tr>
+        <tr><td><code>@Deprecated</code></td><td>Marca um elemento como obsoleto, gera aviso ao usar</td></tr>
+        <tr><td><code>@SuppressWarnings</code></td><td>Silencia um aviso específico do compilador</td></tr>
+        <tr><td><code>@FunctionalInterface</code></td><td>Confirma que a interface tem exatamente um método abstrato (capítulo 13)</td></tr>
+      </tbody></table>
+
+      <div class="warn"><b>Reflection tem custo:</b> é mais lento que chamadas diretas e contorna checagens de tipo em tempo de compilação. Frameworks como Spring pagam esse custo <strong>uma vez</strong>, na inicialização da aplicação (montando o container de beans), não a cada requisição — por isso a "mágica" não é um problema de performance no dia a dia.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 20.0 — Explorando uma classe via reflection</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Escreva um método <code>inspecionar(Object objeto)</code> que recebe qualquer objeto e imprime: o nome completo da classe, o nome da superclasse, e o nome e tipo de cada campo declarado (mesmo os <code>private</code>) — usando apenas <code>getClass()</code>, <code>getDeclaredFields()</code> e um <code>for</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">static void</span> <span class="fn">inspecionar</span>(<span class="kw">Object</span> objeto) {
+    Class&lt;?&gt; classe = objeto.getClass();
+    System.out.println(<span class="str">"Classe: "</span> + classe.getName());
+    System.out.println(<span class="str">"Superclasse: "</span> + classe.getSuperclass().getName());
+    <span class="kw">for</span> (Field f : classe.getDeclaredFields()) {
+        System.out.println(<span class="str">"  campo: "</span> + f.getName() + <span class="str">" ("</span> + f.getType().getSimpleName() + <span class="str">")"</span>);
+    }
+}
+<span class="com">// inspecionar(new Livro("1984", "Orwell", 328));</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 20.1 — Sua própria anotação de validação</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma anotação <code>@NaoNulo</code> aplicável a campos (<code>ElementType.FIELD</code>), com retenção em runtime. Escreva uma classe utilitária <code>Validador</code> com um método estático <code>validar(Object objeto)</code> que usa reflection para percorrer todos os campos do objeto, e lança <code>IllegalStateException</code> se algum campo anotado com <code>@NaoNulo</code> estiver <code>null</code> (dica: <code>campo.setAccessible(true)</code> antes de <code>campo.get(objeto)</code> para acessar campos <code>private</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="annotation">@Target</span>(ElementType.FIELD)
+<span class="kw">public @interface</span> <span class="cls">NaoNulo</span> {}
+
+<span class="kw">public class</span> <span class="cls">Validador</span> {
+    <span class="kw">public static void</span> <span class="fn">validar</span>(<span class="kw">Object</span> objeto) <span class="kw">throws</span> <span class="cls">IllegalAccessException</span> {
+        <span class="kw">for</span> (Field campo : objeto.getClass().getDeclaredFields()) {
+            <span class="kw">if</span> (campo.isAnnotationPresent(NaoNulo.<span class="kw">class</span>)) {
+                campo.setAccessible(<span class="kw">true</span>);
+                <span class="kw">if</span> (campo.get(objeto) == <span class="kw">null</span>) {
+                    <span class="kw">throw new</span> <span class="cls">IllegalStateException</span>(<span class="str">"Campo obrigatório nulo: "</span> + campo.getName());
+                }
+            }
+        }
+    }
+}
+
+<span class="com">// uso:</span>
+<span class="kw">class</span> <span class="cls">Usuario</span> {
+    <span class="annotation">@NaoNulo</span> <span class="kw">String</span> nome;
+    <span class="kw">String</span> apelido; <span class="com">// não obrigatório</span>
+}
+<span class="cls">Usuario</span> u = <span class="kw">new</span> <span class="cls">Usuario</span>();
+Validador.validar(u); <span class="com">// lança IllegalStateException: "nome" é null</span></pre>
+          <p style="margin-top:12px">Isso é essencialmente uma versão simplificada do que o Bean Validation (<code>@NotNull</code> do Jakarta/Spring) faz por trás dos panos.</p>
+        </div>
+      </div>
+    </section>

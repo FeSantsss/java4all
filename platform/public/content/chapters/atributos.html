@@ -1,0 +1,107 @@
+<section class="section" id="atributos">
+      <div class="section-head"><span class="section-num">02</span><h2 class="section-title">Atributos e métodos</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Iniciante-Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#classes">01 · Classes e objetos</a></div>
+      </div>
+
+      <p><strong>Atributos</strong> (campos) guardam o estado do objeto. <strong>Métodos</strong> definem seu comportamento e podem receber parâmetros, retornar valores, ou apenas executar uma ação.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
+    <span class="kw">double</span> saldo;
+
+    <span class="kw">void</span> <span class="fn">depositar</span>(<span class="kw">double</span> valor) { saldo = saldo + valor; }
+
+    <span class="kw">boolean</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor &gt; saldo) <span class="kw">return false</span>;
+        saldo = saldo - valor;
+        <span class="kw">return true</span>;
+    }
+}</pre>
+
+      <h3>Passagem de parâmetros: sempre por valor</h3>
+      <p>Uma fonte comum de confusão: Java <strong>sempre</strong> passa parâmetros por valor — nunca por referência, no sentido estrito da palavra. A pegadinha é que, para objetos, o "valor" passado é a <em>referência</em> (o endereço), não o objeto em si.</p>
+
+      <pre class="code"><span class="kw">static void</span> <span class="fn">dobra</span>(<span class="kw">int</span> n) {
+    n = n * 2; <span class="com">// altera só a cópia local</span>
+}
+
+<span class="kw">static void</span> <span class="fn">renomeia</span>(<span class="cls">Cafe</span> c) {
+    c.tipo = <span class="str">"renomeado"</span>; <span class="com">// altera o OBJETO apontado (visível fora!)</span>
+}
+
+<span class="kw">static void</span> <span class="fn">trocaObjeto</span>(<span class="cls">Cafe</span> c) {
+    c = <span class="kw">new</span> <span class="cls">Cafe</span>(); <span class="com">// só troca para o que a cópia LOCAL da referência aponta</span>
+}
+
+<span class="com">// main:</span>
+<span class="kw">int</span> x = 5;
+<span class="fn">dobra</span>(x);
+System.out.println(x); <span class="com">// 5 -- inalterado, primitivo copiado por valor</span>
+
+<span class="cls">Cafe</span> meuCafe = <span class="kw">new</span> <span class="cls">Cafe</span>();
+meuCafe.tipo = <span class="str">"original"</span>;
+<span class="fn">renomeia</span>(meuCafe);
+System.out.println(meuCafe.tipo); <span class="com">// "renomeado" -- o objeto no heap foi alterado</span>
+
+<span class="fn">trocaObjeto</span>(meuCafe);
+System.out.println(meuCafe.tipo); <span class="com">// ainda "renomeado" -- reatribuir o parâmetro local não afeta a variável externa</span></pre>
+
+      <div class="secret">A regra mental que resolve 100% dos casos: <b>a cópia é sempre da referência (do "endereço"), nunca do objeto</b>. Se você usa a referência copiada para <em>mudar campos</em> do objeto apontado, o efeito é visível fora do método. Se você usa a referência copiada para <em>apontar para outro objeto</em> (<code>c = new Cafe()</code>), isso só afeta a variável local — a variável de fora continua apontando para o objeto original.</div>
+
+      <h3>Sobrecarga de métodos (overload) e como o compilador escolhe</h3>
+      <p>Java permite vários métodos com o <strong>mesmo nome</strong>, desde que a <strong>assinatura</strong> (tipo e quantidade de parâmetros) seja diferente. O tipo de retorno sozinho não conta.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Calculadora</span> {
+    <span class="kw">int</span> <span class="fn">somar</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a + b; }
+    <span class="kw">double</span> <span class="fn">somar</span>(<span class="kw">double</span> a, <span class="kw">double</span> b) { <span class="kw">return</span> a + b; }
+    <span class="kw">int</span> <span class="fn">somar</span>(<span class="kw">int</span> a, <span class="kw">int</span> b, <span class="kw">int</span> c) { <span class="kw">return</span> a + b + c; }
+
+    <span class="com">// ❌ NÃO compila: mesma assinatura, só o retorno muda</span>
+    <span class="com">// long somar(int a, int b) { return a + b; }</span>
+}</pre>
+
+      <div class="warn"><b>Segredo/pegadinha:</b> quando você chama <code>somar(1, 2)</code> com dois <code>int</code> literais, Java escolhe a versão <code>int</code> — mas se um dos argumentos for <code>long</code> e não existir overload exato, o compilador faz um <em>widening</em> automático (ex: <code>int</code>→<code>double</code>) antes de tentar autoboxing (<code>int</code>→<code>Integer</code>). A ordem de preferência do compilador é: 1) correspondência exata, 2) widening primitivo, 3) autoboxing, 4) varargs. Isso raramente importa, até o dia em que causa um bug sutil de overload ambíguo.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 2.1 — Calculadora de retângulo</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Crie uma classe <code>Retangulo</code> com <code>largura</code> e <code>altura</code> (double). Adicione métodos <code>area()</code> e <code>perimetro()</code>. Teste com um retângulo 4 por 5.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Retangulo</span> {
+    <span class="kw">double</span> largura, altura;
+    <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> largura * altura; }
+    <span class="kw">double</span> <span class="fn">perimetro</span>() { <span class="kw">return</span> 2 * (largura + altura); }
+}
+<span class="cls">Retangulo</span> r = <span class="kw">new</span> <span class="cls">Retangulo</span>();
+r.largura = 4; r.altura = 5;
+System.out.println(r.area());      <span class="com">// 20.0</span>
+System.out.println(r.perimetro()); <span class="com">// 18.0</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 2.2 — Prevendo o comportamento de referência</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva um método <code>esvaziar(ArrayList&lt;String&gt; lista)</code> que tenta esvaziar a lista recebida de duas formas: (a) usando <code>lista.clear()</code>, (b) usando <code>lista = new ArrayList&lt;&gt;()</code>. No <code>main</code>, chame os dois e imprima a lista original depois de cada chamada. Explique a diferença de resultado usando o que você aprendeu sobre passagem por valor de referências. (Não se preocupe se ainda não viu <code>ArrayList</code> em detalhes — veremos no capítulo 11; o objetivo aqui é só o conceito de referência.)</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">static void</span> <span class="fn">esvaziarComClear</span>(<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; lista) {
+    lista.clear(); <span class="com">// muda o OBJETO apontado -&gt; visível fora</span>
+}
+
+<span class="kw">static void</span> <span class="fn">esvaziarComNovaLista</span>(<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; lista) {
+    lista = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;(); <span class="com">// só troca a referência LOCAL -&gt; invisível fora</span>
+}
+
+<span class="com">// main:</span>
+<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; nomes = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
+nomes.add(<span class="str">"Ana"</span>);
+esvaziarComClear(nomes);
+System.out.println(nomes); <span class="com">// [] -- clear() alterou o objeto real</span>
+
+nomes.add(<span class="str">"Bruno"</span>);
+esvaziarComNovaLista(nomes);
+System.out.println(nomes); <span class="com">// [Bruno] -- a reatribuição local não afetou "nomes" fora do método</span></pre>
+        </div>
+      </div>
+    </section>

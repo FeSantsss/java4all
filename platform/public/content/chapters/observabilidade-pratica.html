@@ -1,0 +1,32 @@
+<section class="section tk-devops" id="observabilidade-pratica">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Observabilidade com logs, métricas, traces e SLOs</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-devops">Produção</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~5h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#actuator">Actuator</a>, <a class="prereq-tag" href="#logging">Logging</a></div></div>
+      
+      <p>Observabilidade é a capacidade de investigar o estado interno por sinais externos. Actuator expõe pontos de integração; ainda é necessário produzir, exportar, armazenar, correlacionar e consultar logs, métricas e traces.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Os três sinais antes das ferramentas</h3></div>
+    <p>Comece pela pergunta operacional; escolha o sinal que melhor a responde e correlacione-os quando necessário.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Log</dt><dd>Registro discreto de um acontecimento com contexto, como uma recusa de pagamento.</dd></div><div class="concept-card"><dt>Métrica</dt><dd>Série numérica agregável ao longo do tempo, boa para taxa, erro, duração e saturação.</dd></div><div class="concept-card"><dt>Trace</dt><dd>Caminho de uma requisição por operações e serviços, dividido em spans com duração e relação causal.</dd></div><div class="concept-card"><dt>Cardinalidade</dt><dd>Quantidade de valores distintos de um campo ou tag. IDs criam cardinalidade praticamente ilimitada e custo operacional alto.</dd></div><div class="concept-card"><dt>Micrometer</dt><dd>Camada de instrumentação usada pelo ecossistema Spring para registrar métricas em diferentes backends.</dd></div><div class="concept-card"><dt>OpenTelemetry</dt><dd>Padrão e conjunto de ferramentas para gerar e exportar traces, métricas e logs de forma interoperável.</dd></div></dl>
+  </aside>
+      <h3>Logs estruturados</h3>
+      <pre class="code">{
+  <span class="str">"timestamp"</span>: <span class="str">"2026-08-14T12:00:00Z"</span>,
+  <span class="str">"level"</span>: <span class="str">"WARN"</span>,
+  <span class="str">"event"</span>: <span class="str">"pagamento_recusado"</span>,
+  <span class="str">"traceId"</span>: <span class="str">"9f2..."</span>,
+  <span class="str">"pedidoId"</span>: 42,
+  <span class="str">"motivo"</span>: <span class="str">"limite"</span>
+}</pre>
+      <p>Use campos estáveis e cardinalidade controlada. Não registre senha, token, cartão, corpo integral nem <strong>PII</strong> — informação pessoal identificável — desnecessária. Um correlation/trace ID permite seguir a mesma operação entre serviços.</p>
+      <h3>Métricas e cardinalidade</h3>
+      <pre class="code">Counter.builder(<span class="str">"pedidos.criados"</span>).tag(<span class="str">"canal"</span>, canal).register(registry).increment();
+Timer.Sample sample = Timer.start(registry);
+<span class="kw">try</span> { processar(); }
+<span class="kw">finally</span> { sample.stop(registry.timer(<span class="str">"pedidos.duracao"</span>)); }</pre>
+      <p>Nunca use <code>usuarioId</code>, URL inteira ou mensagem de erro como tag: séries sem limite podem derrubar o backend de métricas. Meça taxa, erros, duração e saturação. Métrica diz que existe um padrão; trace mostra o caminho de uma requisição; log fornece detalhes discretos.</p>
+      <h3>SLI, SLO e alertas</h3>
+      <p><strong>SLI</strong> (<em>service level indicator</em>) é a medida, como proporção de requisições válidas abaixo de 300 ms. <strong>SLO</strong> (<em>service level objective</em>) é a meta, como 99,9% em 30 dias. O <strong>error budget</strong> é a parcela de falha permitida pela meta. <strong>Burn rate</strong> mede a velocidade de consumo desse orçamento. Alerte por impacto sustentado e consumo acelerado, não por todo pico momentâneo de CPU.</p>
+      <h3>Readiness e liveness</h3>
+      <p>Liveness responde se o processo precisa ser reiniciado; não deve cair apenas porque uma dependência externa está indisponível. Readiness responde se a instância pode receber tráfego. Misturar as duas transforma uma falha de banco em tempestade de reinícios.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — diagnosticar sem abrir o código</h4><span class="exercise-tag d">difícil</span></div><p>Instrumente um endpoint com Micrometer e tracing OpenTelemetry, provoque lentidão no banco e demonstre como dashboard, trace e log correlacionado conduzem à causa. Defina um SLO e um alerta de burn rate.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>O dashboard precisa separar latência por percentil, taxa e erro; IDs não podem virar tags; dados sensíveis devem ser redigidos.</p></div></div>
+    </section>

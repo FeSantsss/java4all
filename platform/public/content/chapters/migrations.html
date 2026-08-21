@@ -1,0 +1,72 @@
+<section class="section tk-db" id="migrations">
+      <div class="section-head"><span class="section-num">35</span><h2 class="section-title">Migrations — versionando o schema</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-db">Flyway</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#postgres">34 · PostgreSQL</a>, <a class="prereq-tag" href="#git">29 · Git</a></div>
+      </div>
+
+      <p>Você versiona código com Git (capítulo 29). Mas quem versiona o <strong>schema do banco</strong>? Sem um processo formal, o schema vira um segredo que só existe na cabeça de quem mexeu por último — e sincronizar isso entre sua máquina, a de um colega e o servidor de produção vira um pesadelo manual.</p>
+
+      <div class="analogy">Uma migration está para o banco de dados assim como um commit está para o código: uma mudança pequena, versionada, com uma mensagem descrevendo o que mudou, aplicada <strong>em ordem</strong>. Se Git é o histórico do seu código, o histórico de migrations é o histórico do seu schema — e os dois deveriam viver juntos no mesmo repositório.</div>
+
+      <h3>Flyway: convenção de nomes que vira ordem de execução</h3>
+      <pre class="code">src/main/resources/db/migration/
+├── V1__criar_tabela_autores.sql
+├── V2__criar_tabela_livros.sql
+├── V3__adicionar_coluna_isbn.sql
+└── V4__criar_indice_paginas.sql</pre>
+
+      <pre class="code"><span class="com">-- V1__criar_tabela_autores.sql</span>
+CREATE TABLE autores (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL
+);</pre>
+      <pre class="code"><span class="com">-- V3__adicionar_coluna_isbn.sql (aplicada DEPOIS que V1 e V2 já rodaram)</span>
+ALTER TABLE livros ADD COLUMN isbn VARCHAR(20);</pre>
+
+      <p>O Flyway mantém uma tabela de controle (<code>flyway_schema_history</code>) registrando quais versões já foram aplicadas em <em>cada</em> banco. Ao iniciar a aplicação, ele compara essa tabela com os arquivos disponíveis e aplica só o que ainda falta — automaticamente, na ordem certa, em qualquer ambiente (sua máquina, CI, produção).</p>
+
+      <div class="secret">Em produção, não use <code>ddl-auto=update</code> como mecanismo de evolução do schema. Alterações inferidas do modelo não passam por revisão SQL, não documentam a intenção, variam entre bancos e não oferecem uma estratégia confiável de implantação ou reversão. Use <code>ddl-auto=validate</code> para detectar incompatibilidade e mantenha mudanças estruturais em migrations versionadas, revisadas e testadas.</div>
+
+      <table class="cmp">
+        <tbody><tr><th>Prefixo</th><th>Significado</th></tr>
+        <tr><td><code>V</code></td><td>Versionada — roda uma única vez, em ordem, e nunca deveria ser editada depois de aplicada em algum ambiente</td></tr>
+        <tr><td><code>R</code></td><td>Repetível — roda toda vez que o conteúdo do arquivo muda (útil para views, procedures)</td></tr>
+      </tbody></table>
+
+      <div class="warn"><b>Nunca edite uma migration que já foi aplicada em produção.</b> O Flyway detecta alteração no conteúdo de um arquivo já registrado (via checksum) e recusa continuar — de propósito, para evitar inconsistência entre ambientes. Se precisar corrigir algo, crie uma <strong>nova</strong> migration (<code>V5__corrige_isbn.sql</code>), nunca reescreva a antiga.</div>
+
+      <h3>Flyway com Spring Boot: quase zero configuração</h3>
+      <pre class="code"><span class="com"># application.properties</span>
+spring.flyway.enabled=true
+spring.jpa.hibernate.ddl-auto=validate
+<span class="com"># o Spring Boot detecta o Flyway no classpath e roda as migrations
+# AUTOMATICAMENTE antes da aplicação subir, toda vez</span></pre>
+
+      <div class="study-tip">Trate cada migration como um commit Git: pequena, com nome descritivo, e nunca "uma migration gigante fazendo 10 coisas". Isso facilita revisar mudanças de schema em Pull Requests exatamente como você revisa código — e reduz o risco de uma migration ruim quebrar produção inteira de uma vez.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 35.1 — Sequência de migrations</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva três arquivos de migration Flyway para o projeto da biblioteca: <code>V1</code> criando a tabela <code>autores</code>, <code>V2</code> criando <code>livros</code> com chave estrangeira para <code>autores</code>, e <code>V3</code> adicionando uma coluna <code>ano_publicacao INTEGER</code> em <code>livros</code>. Nomeie os arquivos seguindo exatamente a convenção do Flyway.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">-- V1__criar_tabela_autores.sql</span>
+CREATE TABLE autores (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL
+);
+
+<span class="com">-- V2__criar_tabela_livros.sql</span>
+CREATE TABLE livros (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    autor_id INTEGER REFERENCES autores(id)
+);
+
+<span class="com">-- V3__adicionar_ano_publicacao.sql</span>
+ALTER TABLE livros ADD COLUMN ano_publicacao INTEGER;</pre>
+        </div>
+      </div>
+    </section>

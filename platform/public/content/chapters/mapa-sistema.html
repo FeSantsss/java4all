@@ -1,0 +1,50 @@
+<section class="section" id="mapa-sistema">
+      <div class="section-head"><span class="section-num">90</span><h2 class="section-title">Glossário &amp; mapa do sistema completo</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Revisão</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de revisão</div>
+        <div class="meta-item">Pré-requisitos: todos os capítulos anteriores</div>
+      </div>
+
+      <p>Antes do projeto final, um passo atrás para ver a floresta inteira, não só as árvores individuais que você plantou nos últimos capítulos.</p>
+
+      <div class="analogy">Cada capítulo deste curso foi uma peça de um quebra-cabeça montada isoladamente. Esta seção é virar o quebra-cabeça montado de cabeça para baixo na mesa e finalmente ver a imagem completa — de onde vem uma requisição do usuário até onde ela termina, passando por cada camada que você construiu.<p></p>
+      </div>
+
+      <h3>O caminho de uma requisição, ponta a ponta</h3>
+      <pre class="code">1. Usuário clica "Emprestar" no FRONT-END (React/TS, capítulos 62-63)
+2. axios envia POST /livros/{codigo}/emprestimo com JWT no header (capítulo 52)
+3. Requisição atravessa HTTPS (capítulo 53) até o back-end
+4. CORS (capítulo 50) já validou que essa origem tem permissão
+5. Spring Security Filter Chain (capítulo 52) valida o JWT ANTES do controller
+6. LivroController (capítulo 44) recebe a requisição, delega ao Service
+7. Biblioteca (Service, capítulo 43) aplica a regra de negócio
+8. Se o livro já está emprestado -&gt; ItemIndisponivelException
+   -&gt; capturada pelo @ControllerAdvice (capítulo 48) -&gt; 409 Conflict
+9. Se disponível: LivroRepository (Spring Data JPA, capítulo 45) faz UPDATE no Postgres
+10. Cache no Redis (capítulo 38) é invalidado, se existir
+11. Um evento é publicado no Kafka (capítulos 40-42): "livro emprestado"
+12. Um consumidor assíncrono processa esse evento (ex: enviar notificação)
+13. Uma notificação WebSocket (capítulo 64) é enviada em tempo real ao front
+14. O Service devolve um DTO (capítulo 47), nunca a Entity crua
+15. O Controller retorna 200 OK com o corpo em JSON (Jackson, capítulo 25)
+16. Actuator (capítulo 56) registrou métricas dessa requisição o tempo todo
+17. Se algo der muito errado, logs estruturados (capítulo 27) registram o ocorrido</pre>
+
+      <div class="secret">Repare que quase toda "mágica" nesse fluxo inteiro se resume a três mecanismos que você já domina profundamente desde os capítulos iniciais: <strong>reflection</strong> (descobrir e invocar código dinamicamente), <strong>dynamic proxy</strong> (interceptar chamadas para aplicar comportamento transversal — segurança, transação, circuit breaker, cache) e <strong>injeção de dependência</strong> (montar o grafo de objetos sem acoplamento direto). Spring Boot, Kafka, Spring Security — tudo isso são aplicações elaboradas dessas três ideias fundamentais, não conceitos completamente novos e desconectados.</div>
+
+      <h3>Glossário de termos-chave (também disponível no botão 🔍 flutuante)</h3>
+      <table class="cmp">
+        <tbody><tr><th>Termo</th><th>Definição resumida</th><th>Capítulo</th></tr>
+        <tr><td>Bean</td><td>Objeto gerenciado pelo container Spring (IoC)</td><td>43</td></tr>
+        <tr><td>DTO</td><td>Objeto usado só para transporte de dados entre camadas/API</td><td>47</td></tr>
+        <tr><td>N+1</td><td>Bug de performance: 1 query + N queries extras evitáveis</td><td>46</td></tr>
+        <tr><td>Idempotência</td><td>Repetir a operação tem o mesmo efeito de fazê-la uma vez</td><td>26, 40</td></tr>
+        <tr><td>Circuit Breaker</td><td>Interrompe chamadas a um serviço que está falhando repetidamente</td><td>55</td></tr>
+        <tr><td>JWT</td><td>Token de autenticação assinado, carregando sua própria informação</td><td>51</td></tr>
+        <tr><td>Migration</td><td>Mudança versionada e ordenada no schema do banco</td><td>35</td></tr>
+        <tr><td>Consumer Group</td><td>Conjunto de consumidores Kafka dividindo o processamento de um tópico</td><td>41</td></tr>
+      </tbody></table>
+
+      <div class="study-tip">Use o botão de modo revisão (👁, no canto da tela) para repassar rapidamente só os títulos, avisos e segredos de todos os capítulos antes de uma entrevista técnica ou de retomar o projeto final depois de um tempo parado — é bem mais rápido que reler tudo por extenso.</div>
+    </section>

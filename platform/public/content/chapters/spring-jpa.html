@@ -1,0 +1,89 @@
+<section class="section tk-spring" id="spring-jpa">
+      <div class="section-head"><span class="section-num">45</span><h2 class="section-title">Spring Data JPA — repositories &amp; relacionamentos</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#jdbc">24 · JDBC</a>, <a class="prereq-tag" href="#padroes">23 · Padrões de projeto</a>, <a class="prereq-tag" href="#sql">33 · SQL fundamentos</a>, <a class="prereq-tag" href="#migrations">35 · Migrations</a></div>
+      </div>
+
+      <p>Este é o capítulo em que todo o JDBC manual do capítulo 24 vira uma <strong>interface de poucas linhas</strong>. Se você entendeu <code>PreparedStatement</code>, <code>ResultSet</code> e o padrão Repository (capítulo 23), o que o Spring Data JPA automatiza vai parecer natural, não mágico.</p>
+
+      <h3>@Entity — mapeando classe Java para tabela</h3>
+      <pre class="code"><span class="annotation">@Entity</span>
+<span class="annotation">@Table</span>(name = <span class="str">"livros"</span>)
+<span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="annotation">@Id</span>
+    <span class="annotation">@GeneratedValue</span>(strategy = GenerationType.IDENTITY) <span class="com">// equivale a SERIAL do capítulo 34</span>
+    <span class="kw">private</span> <span class="kw">Long</span> id;
+
+    <span class="annotation">@Column</span>(nullable = <span class="kw">false</span>, length = 200)
+    <span class="kw">private String</span> titulo;
+
+    <span class="kw">private int</span> paginas;
+
+    <span class="annotation">@ManyToOne</span>
+    <span class="annotation">@JoinColumn</span>(name = <span class="str">"autor_id"</span>) <span class="com">// a chave estrangeira do capítulo 33</span>
+    <span class="kw">private</span> <span class="cls">Autor</span> autor;
+
+    <span class="com">// construtor sem args OBRIGATÓRIO (Hibernate cria via reflection, capítulo 20)
+    // getters e setters...</span>
+}</pre>
+
+      <h3>JpaRepository — a interface que se implementa sozinha</h3>
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">LivroRepository</span> <span class="kw">extends</span> JpaRepository&lt;<span class="cls">Livro</span>, <span class="kw">Long</span>&gt; {
+    <span class="com">// isso é TUDO. O Spring Data JPA gera a implementação inteira em runtime,
+    // via um Dynamic Proxy (capítulo 20!) que traduz cada chamada em SQL.</span>
+
+    List&lt;<span class="cls">Livro</span>&gt; <span class="fn">findByAutorNome</span>(<span class="kw">String</span> nome);        <span class="com">// vira: WHERE autor.nome = ?</span>
+    List&lt;<span class="cls">Livro</span>&gt; <span class="fn">findByPaginasGreaterThan</span>(<span class="kw">int</span> minimo); <span class="com">// vira: WHERE paginas &gt; ?</span>
+    Optional&lt;<span class="cls">Livro</span>&gt; <span class="fn">findByTitulo</span>(<span class="kw">String</span> titulo);       <span class="com">// vira: WHERE titulo = ? (retorna Optional!)</span>
+}
+
+<span class="com">// já vem de graça, sem você escrever nada:</span>
+livroRepository.save(livro);       <span class="com">// INSERT ou UPDATE</span>
+livroRepository.findById(5L);      <span class="com">// SELECT ... WHERE id = ?  -- Optional&lt;Livro&gt;, capítulo 21</span>
+livroRepository.findAll();         <span class="com">// SELECT * FROM livros</span>
+livroRepository.deleteById(5L);    <span class="com">// DELETE ... WHERE id = ?</span></pre>
+
+      <div class="analogy">O <strong>Query Method</strong> (<code>findByAutorNome</code>) funciona porque o Spring lê o <em>nome do método</em> via reflection e monta a query correspondente automaticamente — é como se o método fosse escrito em uma "mini-linguagem" que descreve a consulta, e o Spring traduzisse isso para SQL na hora de rodar. É exatamente o mesmo espírito do seu <code>@NaoNulo</code> do capítulo 20: uma convenção lida via reflection, virando comportamento automático.</div>
+
+      <h3>Relacionamentos: @OneToMany, @ManyToOne, @ManyToMany</h3>
+      <pre class="code"><span class="annotation">@Entity</span>
+<span class="kw">public class</span> <span class="cls">Autor</span> {
+    <span class="annotation">@Id</span> <span class="annotation">@GeneratedValue</span>
+    <span class="kw">private</span> <span class="kw">Long</span> id;
+    <span class="kw">private String</span> nome;
+
+    <span class="annotation">@OneToMany</span>(mappedBy = <span class="str">"autor"</span>, cascade = CascadeType.ALL)
+    <span class="kw">private</span> List&lt;<span class="cls">Livro</span>&gt; livros = <span class="kw">new</span> ArrayList&lt;&gt;();
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Relação</th><th>Exemplo</th></tr>
+        <tr><td><code>@ManyToOne</code></td><td>Vários para um</td><td>Vários livros → um autor</td></tr>
+        <tr><td><code>@OneToMany</code></td><td>Um para vários</td><td>Um autor → vários livros (o "lado inverso" do de cima)</td></tr>
+        <tr><td><code>@OneToOne</code></td><td>Um para um</td><td>Um usuário → um perfil</td></tr>
+        <tr><td><code>@ManyToMany</code></td><td>Vários para vários</td><td>Livros ↔ categorias, via tabela de junção</td></tr>
+      </tbody></table>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li><code>ddl-auto=validate</code> em produção, <strong>nunca</strong> <code>update</code> — o schema é gerenciado pelo Flyway (capítulo 35), não pelo Hibernate.</li>
+          <li>Prefira <code>FetchType.LAZY</code> em relacionamentos <code>@ManyToOne</code>/<code>@OneToMany</code> — carregar tudo eager por padrão é a raiz do problema do próximo capítulo (N+1).</li>
+          <li>Nunca exponha entidades <code>@Entity</code> diretamente em um controller — sempre converta para DTO (capítulo 47) antes de retornar via API.</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">Toda vez que um Query Method (<code>findByX</code>) parecer "mágico demais", escreva a query SQL equivalente à mão primeiro (usando o que você aprendeu no capítulo 33), depois compare com o nome do método. Isso constrói a intuição de tradução método↔SQL rapidamente, em vez de depender de decorar padrões de nomenclatura.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 45.1 — Modelando com relacionamento</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Modele <code>Pedido</code> e <code>ItemPedido</code> com relacionamento um-para-muitos, ownership explícito e remoção coerente com o agregado. Crie queries por status e por intervalo de criação. Teste persistência, orphan removal, lazy loading e a constraint que impede quantidade não positiva.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Critérios: <code>ItemPedido</code> referencia o dono da relação; métodos auxiliares mantêm os dois lados consistentes; cascade/orphan removal têm justificativa de ciclo de vida; queries retornam tipos adequados; e o teste inspeciona o comportamento após <code>flush</code> e <code>clear</code>, não apenas a coleção em memória.</p>
+        </div>
+      </div>
+    </section>

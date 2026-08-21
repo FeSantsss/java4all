@@ -1,0 +1,94 @@
+<section class="section tk-front" id="conectando-front-back">
+      <div class="section-head"><span class="section-num">62</span><h2 class="section-title">Conectando front-end e back-end</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-front">Front-end</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#cors-rate-limit">50 · CORS &amp; rate limiting</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a></div>
+      </div>
+
+      <p>O momento em que todo o curso converge: o front-end fazendo requisições reais para a API Spring Boot que você construiu, com CORS já configurado (capítulo 50) para permitir a conversa entre os dois.</p>
+
+      <h3>Testando manualmente antes do front existir: Postman/Insomnia</h3>
+      <p>Antes mesmo do front-end tocar na API, é assim que qualquer desenvolvedor back-end valida seus endpoints — e é exatamente por isso que "funciona no Postman mas não no front" quase sempre aponta para CORS (capítulo 50), não para um bug na lógica da API.</p>
+      <pre class="code"><span class="com">1. Cria uma nova requisição: POST http://localhost:8080/auth/login
+2. Aba "Body" → JSON: {"email": "teste@teste.com", "senha": "123456"}
+3. Envia e confere a resposta: {"token": "eyJhbGc..."}
+4. Copia o token, usa em requisições seguintes na aba "Authorization" → Bearer Token</span></pre>
+      <div class="study-tip">Monte uma "coleção" no Postman com todos os endpoints da sua API assim que os escrever — isso vira, na prática, uma documentação viva e testável, complementando (não substituindo) o Swagger automático do capítulo 49.</div>
+
+      <h3>fetch — requisição nativa do navegador</h3>
+      <pre class="code"><span class="com">// buscando a lista de livros:</span>
+<span class="kw">async function</span> <span class="fn">buscarLivros</span>() {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> fetch(<span class="str">`${import.meta.env.VITE_API_URL}/livros`</span>);
+  <span class="kw">if</span> (!resposta.ok) {
+    <span class="kw">throw new</span> Error(<span class="str">`Erro ${resposta.status}`</span>); <span class="com">// resposta.ok é false para 4xx/5xx, capítulo 26</span>
+  }
+  <span class="kw">return</span> resposta.json(); <span class="com">// desserializa o JSON, capítulo 25</span>
+}
+
+<span class="com">// enviando dados com autenticação:</span>
+<span class="kw">async function</span> <span class="fn">criarLivro</span>(dados, token) {
+  <span class="kw">const</span> resposta = <span class="kw">await</span> fetch(<span class="str">`${import.meta.env.VITE_API_URL}/livros`</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: {
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      <span class="str">'Authorization'</span>: <span class="str">`Bearer ${token}`</span> <span class="com">// o JWT do capítulo 52</span>
+    },
+    body: JSON.stringify(dados)
+  });
+  <span class="kw">return</span> resposta.json();
+}</pre>
+
+      <div class="analogy">Se o back-end é a cozinha e o Postman é você mesmo indo pedir na janela do balcão, o front-end usando <code>fetch</code> é o garçom fazendo esse mesmo pedido em nome do cliente — só que de forma automatizada, integrada à interface visual que o usuário realmente vê e interage.</div>
+
+      <h3>axios — a alternativa mais usada em projetos maiores</h3>
+      <pre class="code"><span class="kw">import</span> axios <span class="kw">from</span> <span class="str">'axios'</span>;
+
+<span class="kw">const</span> api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
+<span class="com">// interceptor: adiciona o token em TODA requisição automaticamente,
+// sem precisar repetir o header manualmente em cada chamada</span>
+api.interceptors.request.use((config) =&gt; {
+  <span class="kw">const</span> token = localStorage.getItem(<span class="str">'token'</span>);
+  <span class="kw">if</span> (token) config.headers.Authorization = <span class="str">`Bearer ${token}`</span>;
+  <span class="kw">return</span> config;
+});
+
+<span class="kw">const</span> { data } = <span class="kw">await</span> api.get(<span class="str">'/livros'</span>); <span class="com">// já vem parseado, sem precisar de .json()</span></pre>
+
+      <div class="secret">O padrão de <em>interceptor</em> do axios é a mesma ideia do <code>@ControllerAdvice</code> (capítulo 48) e do dynamic proxy (capítulo 20), só que do lado do cliente: um ponto único que intercepta <strong>toda</strong> requisição para aplicar uma regra transversal (adicionar token de autenticação), em vez de repetir esse código em cada chamada individual à API.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 62.1 — Cliente completo com autenticação</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando axios, crie um cliente configurado com <code>baseURL</code> apontando para a API da biblioteca, com um interceptor que adiciona o token JWT (guardado em algum lugar — veremos onde no próximo capítulo) em toda requisição. Escreva funções <code>listarLivros()</code>, <code>emprestarLivro(codigo)</code> e <code>login(email, senha)</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">const</span> api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+
+api.interceptors.request.use((config) =&gt; {
+  <span class="kw">const</span> token = localStorage.getItem(<span class="str">'token'</span>);
+  <span class="kw">if</span> (token) config.headers.Authorization = <span class="str">`Bearer ${token}`</span>;
+  <span class="kw">return</span> config;
+});
+
+<span class="kw">export async function</span> <span class="fn">listarLivros</span>() {
+  <span class="kw">const</span> { data } = <span class="kw">await</span> api.get(<span class="str">'/livros'</span>);
+  <span class="kw">return</span> data;
+}
+
+<span class="kw">export async function</span> <span class="fn">emprestarLivro</span>(codigo) {
+  <span class="kw">const</span> { data } = <span class="kw">await</span> api.post(<span class="str">`/livros/${codigo}/emprestimo`</span>);
+  <span class="kw">return</span> data;
+}
+
+<span class="kw">export async function</span> <span class="fn">login</span>(email, senha) {
+  <span class="kw">const</span> { data } = <span class="kw">await</span> api.post(<span class="str">'/auth/login'</span>, { email, senha });
+  localStorage.setItem(<span class="str">'token'</span>, data.token);
+  <span class="kw">return</span> data;
+}</pre>
+        </div>
+      </div>
+    </section>

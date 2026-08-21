@@ -1,0 +1,123 @@
+<section class="section" id="colecoes">
+      <div class="section-head"><span class="section-num">11</span><h2 class="section-title">Coleções &amp; ArrayList</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#excecoes">10 · Exceções</a></div>
+      </div>
+
+      <p>Arrays em Java têm tamanho fixo. Na prática, o dia a dia pede estruturas que crescem e encolhem — é para isso que existe o <strong>Java Collections Framework</strong>. As três interfaces mais usadas são <code>List</code>, <code>Set</code> e <code>Map</code>.</p>
+
+      <h3>List e ArrayList</h3>
+      <pre class="code">List&lt;<span class="kw">String</span>&gt; nomes = <span class="kw">new</span> ArrayList&lt;&gt;(); <span class="com">// programe contra a interface, instancie a implementação</span>
+nomes.add(<span class="str">"Ana"</span>);
+nomes.add(<span class="str">"Bruno"</span>);
+nomes.add(0, <span class="str">"Zeca"</span>);      <span class="com">// insere na posição 0</span>
+nomes.remove(<span class="str">"Bruno"</span>);       <span class="com">// remove pelo valor</span>
+nomes.remove(0);            <span class="com">// remove pelo índice -- CUIDADO com ambiguidade int vs Integer!</span>
+System.out.println(nomes.get(0));
+System.out.println(nomes.size());
+System.out.println(nomes.contains(<span class="str">"Ana"</span>));
+
+<span class="kw">for</span> (<span class="kw">String</span> nome : nomes) System.out.println(nome); <span class="com">// for-each</span></pre>
+
+      <div class="warn"><b>Pegadinha clássica:</b> <code>lista.remove(1)</code> remove o elemento no <strong>índice</strong> 1 se a lista é <code>List&lt;Integer&gt;</code> — mas para remover o <em>valor</em> <code>1</code>, você precisa de <code>lista.remove(Integer.valueOf(1))</code>, forçando autoboxing. Essa ambiguidade entre <code>remove(int)</code> e <code>remove(Object)</code> já causou bugs sutis em produção.</div>
+
+      <h3>Set — sem duplicatas</h3>
+      <pre class="code">Set&lt;<span class="kw">String</span>&gt; tags = <span class="kw">new</span> HashSet&lt;&gt;();
+tags.add(<span class="str">"java"</span>); tags.add(<span class="str">"java"</span>); <span class="com">// segunda chamada é ignorada</span>
+System.out.println(tags.size()); <span class="com">// 1</span>
+
+Set&lt;<span class="kw">String</span>&gt; ordenado = <span class="kw">new</span> TreeSet&lt;&gt;(tags);   <span class="com">// mantém ordem natural (alfabética)</span>
+Set&lt;<span class="kw">String</span>&gt; insercao = <span class="kw">new</span> LinkedHashSet&lt;&gt;(tags); <span class="com">// mantém ordem de inserção</span></pre>
+      <p>Lembre do capítulo 05: para <code>HashSet</code> reconhecer objetos "iguais" corretamente, <code>equals()</code> e <code>hashCode()</code> precisam estar implementados de forma coerente.</p>
+
+      <h3>Map — pares chave/valor</h3>
+      <pre class="code">Map&lt;<span class="kw">String</span>, <span class="kw">Double</span>&gt; precos = <span class="kw">new</span> HashMap&lt;&gt;();
+precos.put(<span class="str">"café"</span>, 8.5);
+precos.put(<span class="str">"chá"</span>, 6.0);
+precos.put(<span class="str">"café"</span>, 9.0); <span class="com">// sobrescreve o valor anterior da mesma chave</span>
+
+System.out.println(precos.get(<span class="str">"café"</span>));           <span class="com">// 9.0</span>
+System.out.println(precos.getOrDefault(<span class="str">"suco"</span>, 0.0)); <span class="com">// 0.0 -- não lança exceção</span>
+
+<span class="kw">for</span> (Map.Entry&lt;<span class="kw">String</span>, <span class="kw">Double</span>&gt; e : precos.entrySet()) {
+    System.out.println(e.getKey() + <span class="str">" -&gt; "</span> + e.getValue());
+}</pre>
+
+      <h3>Comparable vs Comparator — dois jeitos de ordenar</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Produto</span> <span class="kw">implements</span> Comparable&lt;<span class="cls">Produto</span>&gt; {
+    <span class="kw">String</span> nome; <span class="kw">double</span> preco;
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public int</span> <span class="fn">compareTo</span>(<span class="cls">Produto</span> outro) { <span class="com">// ordenação "natural" -- só existe UMA</span>
+        <span class="kw">return</span> Double.compare(<span class="kw">this</span>.preco, outro.preco);
+    }
+}
+Collections.sort(produtos); <span class="com">// usa compareTo</span>
+
+<span class="com">// Comparator: quantas ordenações alternativas você quiser, fora da classe</span>
+produtos.sort(Comparator.comparing(p -&gt; p.nome));
+produtos.sort(Comparator.comparingDouble((<span class="cls">Produto</span> p) -&gt; p.preco).reversed());</pre>
+
+      <div class="secret">Use <code>Comparable</code> quando existe uma ordem "óbvia e única" para o tipo (números por valor, datas cronologicamente). Use <code>Comparator</code> quando precisar de várias formas de ordenar o mesmo tipo dependendo do contexto — e prefira <code>Comparator</code> mesmo assim quando a ordenação for uma decisão de "quem está usando a lista", não do objeto em si, para não acoplar a classe a uma única forma de comparação.</div>
+
+      <table class="cmp">
+        <tbody><tr><th>Implementação</th><th>Ordem</th><th>Permite duplicata?</th><th>Quando usar</th></tr>
+        <tr><td><code>ArrayList</code></td><td>Inserção</td><td>Sim</td><td>Acesso por índice frequente, uso geral</td></tr>
+        <tr><td><code>LinkedList</code></td><td>Inserção</td><td>Sim</td><td>Muitas inserções/remoções nas pontas</td></tr>
+        <tr><td><code>HashSet</code></td><td>Nenhuma garantida</td><td>Não</td><td>Checar existência rapidamente, sem ordem</td></tr>
+        <tr><td><code>TreeSet</code></td><td>Ordenada</td><td>Não</td><td>Precisa de ordem + sem duplicata</td></tr>
+        <tr><td><code>HashMap</code></td><td>Nenhuma garantida</td><td>Chaves não</td><td>Uso geral chave→valor</td></tr>
+        <tr><td><code>LinkedHashMap</code></td><td>Inserção</td><td>Chaves não</td><td>Precisa lembrar ordem de inserção</td></tr>
+      </tbody></table>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 11.1 — Carrinho de compras</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Use um <code>Map&lt;String, Integer&gt;</code> para representar um carrinho (produto → quantidade). Escreva um método <code>adicionar(Map&lt;String,Integer&gt; carrinho, String produto, int qtd)</code> que soma à quantidade existente se o produto já estiver no carrinho, ou insere se for novo (dica: <code>getOrDefault</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">static void</span> <span class="fn">adicionar</span>(Map&lt;<span class="kw">String</span>, <span class="kw">Integer</span>&gt; carrinho, <span class="kw">String</span> produto, <span class="kw">int</span> qtd) {
+    carrinho.put(produto, carrinho.getOrDefault(produto, 0) + qtd);
+}
+<span class="com">// main:</span>
+Map&lt;<span class="kw">String</span>, <span class="kw">Integer</span>&gt; carrinho = <span class="kw">new</span> HashMap&lt;&gt;();
+adicionar(carrinho, <span class="str">"café"</span>, 2);
+adicionar(carrinho, <span class="str">"café"</span>, 1);
+System.out.println(carrinho.get(<span class="str">"café"</span>)); <span class="com">// 3</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 11.2 — Ordenando com Comparator</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando a classe <code>Livro</code> (título, autor, páginas), crie uma <code>List&lt;Livro&gt;</code> com pelo menos 4 livros e ordene por <code>paginas</code> crescente usando <code>Comparator.comparingInt</code>. Depois ordene por <code>autor</code> e, em caso de empate, por <code>titulo</code> (dica: <code>.thenComparing(...)</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">livros.sort(Comparator.comparingInt(<span class="cls">Livro</span>::getPaginas));
+
+livros.sort(
+    Comparator.comparing(<span class="cls">Livro</span>::getAutor)
+              .thenComparing(<span class="cls">Livro</span>::getTitulo)
+);</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 11.3 — ConcurrentModificationException</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva um <code>for-each</code> que tenta remover elementos pares de uma <code>List&lt;Integer&gt;</code> diretamente dentro do laço (<code>lista.remove(...)</code>). Rode e observe a exceção. Depois corrija usando um <code>Iterator</code> explícito com <code>iterator.remove()</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// ❌ lança ConcurrentModificationException:</span>
+List&lt;<span class="kw">Integer</span>&gt; numeros = <span class="kw">new</span> ArrayList&lt;&gt;(List.of(1,2,3,4,5,6));
+<span class="kw">for</span> (<span class="kw">Integer</span> n : numeros) {
+    <span class="kw">if</span> (n % 2 == 0) numeros.remove(n); <span class="com">// modifica a lista durante a iteração</span>
+}
+
+<span class="com">// ✅ correto -- Iterator sabe que a remoção está acontecendo:</span>
+Iterator&lt;<span class="kw">Integer</span>&gt; it = numeros.iterator();
+<span class="kw">while</span> (it.hasNext()) {
+    <span class="kw">if</span> (it.next() % 2 == 0) it.remove();
+}</pre>
+          <p style="margin-top:12px">O for-each usa um <code>Iterator</code> por baixo dos panos. Muitas coleções implementam detecção <em>fail-fast</em> de alterações estruturais por meio de um contador interno, frequentemente chamado <code>modCount</code>. Alterar a coleção fora do próprio iterator pode invalidar essa contagem e lançar a exceção. Isso ajuda a revelar uso incorreto, mas não oferece sincronização nem segurança entre threads.</p>
+        </div>
+      </div>
+    </section>

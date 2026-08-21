@@ -1,0 +1,114 @@
+<section class="section" id="threads">
+      <div class="section-head"><span class="section-num">14</span><h2 class="section-title">Threads &amp; concorrência</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#streams">13 · Lambdas &amp; Streams</a></div>
+      </div>
+
+      <p>Uma <strong>thread</strong> é um fluxo independente de execução dentro do mesmo processo. Múltiplas threads compartilham a mesma memória (heap) — o que é ótimo para performance, mas é exatamente essa memória compartilhada que causa a maioria dos bugs de concorrência.</p>
+
+      <h3>Criando threads: duas formas</h3>
+      <pre class="code"><span class="com">// forma 1: estender Thread (menos flexível -- Java só permite herança simples)</span>
+<span class="kw">class</span> <span class="cls">MinhaThread</span> <span class="kw">extends</span> Thread {
+    <span class="annotation">@Override</span>
+    <span class="kw">public void</span> <span class="fn">run</span>() { System.out.println(<span class="str">"Rodando em: "</span> + Thread.currentThread().getName()); }
+}
+<span class="kw">new</span> <span class="cls">MinhaThread</span>().start(); <span class="com">// start(), NUNCA run() diretamente!</span>
+
+<span class="com">// forma 2: implementar Runnable (preferida -- permite herdar de outra classe)</span>
+Runnable tarefa = () -&gt; System.out.println(<span class="str">"Rodando em: "</span> + Thread.currentThread().getName());
+<span class="kw">new</span> Thread(tarefa).start();</pre>
+
+      <div class="warn"><b>start() vs run():</b> chamar <code>.run()</code> diretamente executa o código na <strong>thread atual</strong>, como uma chamada de método comum — nenhuma thread nova é criada! Só <code>.start()</code> de fato agenda uma nova thread na JVM. Esse é um erro clássico de quem está aprendendo.</div>
+
+      <h3>O problema: race condition</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Contador</span> {
+    <span class="kw">private int</span> valor = 0;
+    <span class="kw">public void</span> <span class="fn">incrementar</span>() { valor++; } <span class="com">// NÃO é atômico! é ler + somar + gravar</span>
+    <span class="kw">public int</span> <span class="fn">getValor</span>() { <span class="kw">return</span> valor; }
+}
+
+<span class="com">// duas threads chamando incrementar() 100_000 vezes cada, ao mesmo tempo,
+// frequentemente NÃO resulta em 200_000 -- porque "valor++" não é uma
+// operação única: threads podem ler o mesmo valor antes de uma delas gravar.</span></pre>
+
+      <div class="secret">"valor++" parece uma instrução única, mas o bytecode faz três passos: ler o valor atual, somar 1, gravar o resultado. Se a Thread A lê <code>valor = 5</code> e, antes de gravar <code>6</code>, a Thread B também lê <code>valor = 5</code> e grava <code>6</code>, o incremento da Thread A se perde quando ela grava por cima com o mesmo <code>6</code>. Esse é o bug de concorrência mais comum que existe, e é justamente por isso que <code>synchronized</code> e as classes <code>Atomic*</code> existem.</div>
+
+      <h3>synchronized — exclusão mútua</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Contador</span> {
+    <span class="kw">private int</span> valor = 0;
+    <span class="kw">public synchronized void</span> <span class="fn">incrementar</span>() { valor++; } <span class="com">// só uma thread por vez executa isto</span>
+    <span class="kw">public synchronized int</span> <span class="fn">getValor</span>() { <span class="kw">return</span> valor; }
+}
+
+<span class="com">// ou um bloco sincronizado sobre um objeto específico -- mais granular:</span>
+<span class="kw">private final</span> Object trava = <span class="kw">new</span> Object();
+<span class="kw">void</span> <span class="fn">operacaoCritica</span>() {
+    <span class="kw">synchronized</span> (trava) {
+        <span class="com">// só uma thread por vez entra aqui</span>
+    }
+}</pre>
+
+      <h3>A alternativa moderna: java.util.concurrent</h3>
+      <pre class="code"><span class="com">// AtomicInteger: incremento atômico sem precisar de synchronized manual</span>
+<span class="kw">import</span> java.util.concurrent.atomic.AtomicInteger;
+AtomicInteger contador = <span class="kw">new</span> AtomicInteger(0);
+contador.incrementAndGet(); <span class="com">// thread-safe de verdade</span>
+
+<span class="com">// ExecutorService: um pool de threads gerenciado, em vez de "new Thread()" solto</span>
+<span class="kw">import</span> java.util.concurrent.*;
+ExecutorService pool = Executors.newFixedThreadPool(4);
+Future&lt;<span class="kw">Integer</span>&gt; resultado = pool.submit(() -&gt; {
+    <span class="kw">return</span> 2 + 2; <span class="com">// tarefa que retorna um valor</span>
+});
+System.out.println(resultado.get()); <span class="com">// bloqueia até o resultado ficar pronto</span>
+pool.shutdown(); <span class="com">// sempre encerre o pool quando não precisar mais dele</span></pre>
+
+      <div class="callout"><b>Regra prática em código moderno:</b> raramente você vai instanciar <code>Thread</code> diretamente em uma aplicação real. O padrão em produção é usar <code>ExecutorService</code> (pool gerenciado) ou, em Java 21+, <em>virtual threads</em> (<code>Thread.ofVirtual()</code>), que são muito mais leves. <code>synchronized</code> continua essencial para entender <em>por que</em> essas abstrações existem.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 14.1 — Reproduzindo uma race condition</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie a classe <code>Contador</code> (sem <code>synchronized</code>) do exemplo acima. No <code>main</code>, crie duas threads, cada uma chamando <code>incrementar()</code> 100.000 vezes, use <code>.join()</code> em ambas para esperar terminarem, e imprima <code>getValor()</code>. Rode algumas vezes e observe que o resultado nem sempre é 200.000. Depois adicione <code>synchronized</code> nos métodos e confirme que o resultado passa a ser sempre correto.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Contador</span> {
+    <span class="kw">private int</span> valor = 0;
+    <span class="kw">public synchronized void</span> <span class="fn">incrementar</span>() { valor++; }
+    <span class="kw">public int</span> <span class="fn">getValor</span>() { <span class="kw">return</span> valor; }
+}
+
+<span class="com">// main:</span>
+<span class="cls">Contador</span> contador = <span class="kw">new</span> <span class="cls">Contador</span>();
+Runnable tarefa = () -&gt; { <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; 100_000; i++) contador.incrementar(); };
+
+Thread t1 = <span class="kw">new</span> Thread(tarefa);
+Thread t2 = <span class="kw">new</span> Thread(tarefa);
+t1.start(); t2.start();
+t1.join(); t2.join(); <span class="com">// espera as duas terminarem antes de continuar</span>
+
+System.out.println(contador.getValor()); <span class="com">// 200000, sempre, graças ao synchronized</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 14.2 — ExecutorService</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando <code>ExecutorService</code> com um pool de 3 threads, submeta 5 tarefas que calculam o quadrado de um número (1 a 5) e retornam o resultado via <code>Future</code>. Colete todos os resultados em uma lista e imprima a soma total. Não esqueça de chamar <code>shutdown()</code> no final.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">ExecutorService pool = Executors.newFixedThreadPool(3);
+List&lt;Future&lt;<span class="kw">Integer</span>&gt;&gt; futuros = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+<span class="kw">for</span> (<span class="kw">int</span> i = 1; i &lt;= 5; i++) {
+    <span class="kw">final int</span> n = i;
+    futuros.add(pool.submit(() -&gt; n * n));
+}
+
+<span class="kw">int</span> soma = 0;
+<span class="kw">for</span> (Future&lt;<span class="kw">Integer</span>&gt; f : futuros) {
+    soma += f.get(); <span class="com">// bloqueia até essa tarefa terminar</span>
+}
+System.out.println(<span class="str">"Soma dos quadrados: "</span> + soma); <span class="com">// 55</span>
+pool.shutdown();</pre>
+        </div>
+      </div>
+    </section>

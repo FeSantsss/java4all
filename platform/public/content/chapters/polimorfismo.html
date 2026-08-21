@@ -1,0 +1,93 @@
+<section class="section" id="polimorfismo">
+      <div class="section-head"><span class="section-num">06</span><h2 class="section-title">Polimorfismo</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#heranca">05 · Herança</a></div>
+      </div>
+
+      <p><strong>Polimorfismo</strong> ("muitas formas") é tratar objetos de subclasses diferentes de maneira uniforme através de uma referência do tipo da superclasse — cada um responde de um jeito próprio ao mesmo método chamado.</p>
+
+      <pre class="code"><span class="cls">Funcionario</span>[] equipe = {
+    <span class="kw">new</span> <span class="cls">Funcionario</span>(<span class="str">"Ana"</span>, 3000),
+    <span class="kw">new</span> <span class="cls">Gerente</span>(<span class="str">"Bruno"</span>, 3000, 1500)
+};
+<span class="kw">for</span> (<span class="cls">Funcionario</span> f : equipe) System.out.println(f.calcularSalario());
+<span class="com">// 3000.0  (versão de Funcionario)
+// 4500.0  (versão sobrescrita em Gerente)</span></pre>
+
+      <p>Isso é <strong>upcasting</strong>: uma variável <code>Funcionario</code> guarda referência para um objeto <code>Gerente</code>. O tipo da <em>variável</em> é <code>Funcionario</code>, mas o tipo do <em>objeto</em> continua <code>Gerente</code> — é o objeto real, não a variável, quem decide qual versão do método rodar (<strong>ligação dinâmica</strong>, dynamic binding).</p>
+
+      <h3>Binding estático vs dinâmico — a distinção que separa júnior de pleno</h3>
+      <p>Nem tudo em Java é resolvido em tempo de execução. Métodos <code>static</code>, <code>private</code> e <code>final</code>, além de <strong>atributos</strong>, usam <strong>binding estático</strong> — resolvido em tempo de compilação, pelo tipo da <em>variável</em>, não do objeto.</p>
+
+      <pre class="code"><span class="kw">class</span> <span class="cls">Animal</span> {
+    <span class="kw">String</span> nome = <span class="str">"animal genérico"</span>; <span class="com">// atributo -- binding ESTÁTICO</span>
+    <span class="kw">static void</span> <span class="fn">classificar</span>() { System.out.println(<span class="str">"reino Animalia"</span>); } <span class="com">// static -- binding ESTÁTICO</span>
+    <span class="kw">void</span> <span class="fn">emitirSom</span>() { System.out.println(<span class="str">"..."</span>); } <span class="com">// instância -- binding DINÂMICO</span>
+}
+<span class="kw">class</span> <span class="cls">Cachorro</span> <span class="kw">extends</span> <span class="cls">Animal</span> {
+    <span class="kw">String</span> nome = <span class="str">"cachorro"</span>;
+    <span class="kw">static void</span> <span class="fn">classificar</span>() { System.out.println(<span class="str">"canídeo"</span>); }
+    <span class="annotation">@Override</span> <span class="kw">void</span> <span class="fn">emitirSom</span>() { System.out.println(<span class="str">"Au au"</span>); }
+}
+
+<span class="cls">Animal</span> a = <span class="kw">new</span> <span class="cls">Cachorro</span>();
+System.out.println(a.nome);   <span class="com">// "animal genérico" -- atributo lido pelo tipo da VARIÁVEL</span>
+a.emitirSom();                <span class="com">// "Au au" -- método pelo tipo do OBJETO</span>
+a.classificar();               <span class="com">// "reino Animalia" -- static pelo tipo da VARIÁVEL (evite chamar static assim!)</span></pre>
+
+      <div class="secret">Este exemplo é a pegadinha número um de provas de Java: <strong>atributos não são polimórficos</strong>. Só métodos de instância sobrescritos (não <code>static</code>, não <code>private</code>, não <code>final</code>) têm ligação dinâmica. Isso é uma razão prática, não só teórica, para nunca acessar campos <code>public</code> diretamente — use getters, que <em>são</em> polimórficos.</div>
+
+      <h3>Downcasting e instanceof</h3>
+      <pre class="code"><span class="cls">Animal</span> a = <span class="kw">new</span> <span class="cls">Cachorro</span>();
+
+<span class="com">// forma clássica</span>
+<span class="kw">if</span> (a <span class="kw">instanceof</span> <span class="cls">Cachorro</span>) {
+    <span class="cls">Cachorro</span> c = (<span class="cls">Cachorro</span>) a; <span class="com">// downcast explícito</span>
+    c.buscar();
+}
+
+<span class="com">// pattern matching for instanceof (Java 16+) -- mais direto</span>
+<span class="kw">if</span> (a <span class="kw">instanceof</span> <span class="cls">Cachorro</span> c) {
+    c.buscar(); <span class="com">// "c" já vem com o cast feito</span>
+}</pre>
+
+      <div class="warn"><b>ClassCastException:</b> um downcast para um tipo incompatível com o objeto real compila normalmente, mas <strong>lança exceção em tempo de execução</strong>. Sempre proteja um downcast com <code>instanceof</code> antes, a menos que tenha certeza absoluta do tipo.</div>
+
+      <div class="callout"><b>Sobrecarga vs sobrescrita, de novo:</b> <em>sobrecarga</em> (capítulo 02) é resolvida em compilação pelo tipo dos <em>argumentos</em>; <em>sobrescrita</em> é resolvida em execução pelo tipo do <em>objeto</em>. São mecanismos completamente diferentes que só compartilham o fato de "reaproveitar um nome de método".</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 6.1 — Formas geométricas polimórficas</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie <code>Forma</code> com <code>double area()</code> retornando 0. Crie <code>Circulo</code> e <code>Quadrado</code> sobrescrevendo. Monte um <code>Forma[]</code> misto e some a área total com um <code>for</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Forma</span> { <span class="kw">public double</span> <span class="fn">area</span>() { <span class="kw">return</span> 0; } }
+
+<span class="kw">public class</span> <span class="cls">Circulo</span> <span class="kw">extends</span> <span class="cls">Forma</span> {
+    <span class="kw">private double</span> raio;
+    <span class="kw">public</span> <span class="fn">Circulo</span>(<span class="kw">double</span> raio) { <span class="kw">this</span>.raio = raio; }
+    <span class="annotation">@Override</span> <span class="kw">public double</span> <span class="fn">area</span>() { <span class="kw">return</span> Math.PI * raio * raio; }
+}
+
+<span class="kw">public class</span> <span class="cls">Quadrado</span> <span class="kw">extends</span> <span class="cls">Forma</span> {
+    <span class="kw">private double</span> lado;
+    <span class="kw">public</span> <span class="fn">Quadrado</span>(<span class="kw">double</span> lado) { <span class="kw">this</span>.lado = lado; }
+    <span class="annotation">@Override</span> <span class="kw">public double</span> <span class="fn">area</span>() { <span class="kw">return</span> lado * lado; }
+}
+
+<span class="cls">Forma</span>[] formas = { <span class="kw">new</span> <span class="cls">Circulo</span>(3), <span class="kw">new</span> <span class="cls">Quadrado</span>(4) };
+<span class="kw">double</span> total = 0;
+<span class="kw">for</span> (<span class="cls">Forma</span> f : formas) total += f.area();
+System.out.println(<span class="str">"Área total: "</span> + total);</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 6.2 — Binding estático vs dinâmico</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Reproduza exatamente o exemplo de <code>Animal</code>/<code>Cachorro</code> mostrado acima na sua IDE. Antes de rodar, escreva no papel o que cada uma das três linhas (<code>a.nome</code>, <code>a.emitirSom()</code>, <code>a.classificar()</code>) vai imprimir e por quê. Depois confira.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><code>a.nome</code> → <em>"animal genérico"</em> (atributos usam o tipo da variável). <code>a.emitirSom()</code> → <em>"Au au"</em> (métodos de instância sobrescritos usam o tipo real do objeto). <code>a.classificar()</code> → <em>"reino Animalia"</em> (métodos <code>static</code> são resolvidos pelo tipo da variável, não do objeto — e chamar um <code>static</code> através de uma variável de instância é, aliás, um mau hábito: o certo seria <code>Animal.classificar()</code>).</p>
+        </div>
+      </div>
+    </section>

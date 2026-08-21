@@ -1,0 +1,208 @@
+<section class="section" id="quiz">
+      <div class="section-head"><span class="section-num">92</span><h2 class="section-title">Quiz de revisão</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Revisão geral</b></div>
+        <div class="meta-item">Pré-requisito: todo o curso</div>
+      </div>
+      <p>Vinte perguntas cobrindo do básico ao avançado. Clique em uma alternativa para ver o feedback na hora.</p>
+
+      <div class="quiz">
+        <p class="q">1. Qual a diferença fundamental entre sobrecarga (overload) e sobrescrita (override)?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="true">Sobrecarga é resolvida em compilação (mesma classe), sobrescrita em execução (herança).</div>
+          <div class="quiz-opt" data-correct="false">São sinônimos, apenas nomes diferentes para o mesmo conceito.</div>
+          <div class="quiz-opt" data-correct="false">Sobrecarga só existe em interfaces; sobrescrita só em classes abstratas.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">2. Ao atribuir um objeto a outra variável (<code>b = a</code>), o que é copiado?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Uma cópia completa e independente do objeto no heap.</div>
+          <div class="quiz-opt" data-correct="true">Apenas a referência (endereço) — ambas apontam para o mesmo objeto.</div>
+          <div class="quiz-opt" data-correct="false">Só os atributos marcados como <code>public</code>.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">3. Se você sobrescreve <code>equals()</code>, o que é obrigatório fazer junto?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Nada além disso — <code>equals()</code> funciona sozinho.</div>
+          <div class="quiz-opt" data-correct="true">Sobrescrever <code>hashCode()</code> de forma coerente.</div>
+          <div class="quiz-opt" data-correct="false">Tornar a classe <code>final</code>.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">4. Atributos (campos) de instância têm ligação dinâmica (polimorfismo)?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Sim, exatamente como métodos sobrescritos.</div>
+          <div class="quiz-opt" data-correct="true">Não — atributos usam o tipo da variável, resolvido em compilação.</div>
+          <div class="quiz-opt" data-correct="false">Só se forem declarados <code>protected</code>.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">5. Qual a diferença principal entre uma exceção checked e uma unchecked?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="true">Checked obriga tratar/declarar em compilação; unchecked não.</div>
+          <div class="quiz-opt" data-correct="false">Checked só existe em testes unitários.</div>
+          <div class="quiz-opt" data-correct="false">Unchecked não pode ser capturada com <code>catch</code>.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">6. Em generics, o que significa "type erasure"?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Que o tipo genérico é escolhido aleatoriamente em runtime.</div>
+          <div class="quiz-opt" data-correct="true">Que a informação de tipo genérico existe só em compilação, não no bytecode final.</div>
+          <div class="quiz-opt" data-correct="false">Que classes genéricas não podem ter métodos.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">7. Por que um Stream só pode ser consumido (operação terminal) uma única vez?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">É uma limitação de performance que será corrigida em versões futuras.</div>
+          <div class="quiz-opt" data-correct="true">Streams representam um pipeline de execução única, não uma estrutura de dados reutilizável.</div>
+          <div class="quiz-opt" data-correct="false">Na verdade pode ser consumido quantas vezes quiser.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">8. Por que "valor++" não é seguro em múltiplas threads sem sincronização?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Porque o operador <code>++</code> não existe de fato em Java.</div>
+          <div class="quiz-opt" data-correct="true">Porque envolve ler, somar e gravar em três passos separados, que podem intercalar entre threads.</div>
+          <div class="quiz-opt" data-correct="false">Porque só funciona com tipos <code>double</code>.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">9. Qual estrutura de teste representa o padrão AAA?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Assert, Assert, Assert.</div>
+          <div class="quiz-opt" data-correct="true">Arrange, Act, Assert.</div>
+          <div class="quiz-opt" data-correct="false">API, Application, Assertion.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">10. O que o princípio de Liskov (o "L" de SOLID) afirma?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Toda classe deve implementar pelo menos uma interface.</div>
+          <div class="quiz-opt" data-correct="true">Uma subclasse deve poder substituir sua superclasse sem quebrar o comportamento esperado.</div>
+          <div class="quiz-opt" data-correct="false">Métodos <code>static</code> não podem ser sobrescritos.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">11. Por que <code>FetchType.LAZY</code> sozinho não resolve o problema N+1?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Porque LAZY na verdade piora a performance sempre.</div>
+          <div class="quiz-opt" data-correct="true">Porque só adia a query extra para quando o campo é acessado — ainda uma query por vez.</div>
+          <div class="quiz-opt" data-correct="false">Porque LAZY desabilita relacionamentos completamente.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">12. Um JWT decodificado revela o conteúdo do payload sem nenhuma chave secreta. Isso significa que:</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="true">JWT é assinado, não criptografado — nunca deve carregar dados sensíveis.</div>
+          <div class="quiz-opt" data-correct="false">O JWT está corrompido e não deveria funcionar.</div>
+          <div class="quiz-opt" data-correct="false">Isso só acontece se o servidor estiver mal configurado.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">13. Qual a principal diferença entre Kafka e uma fila tradicional como RabbitMQ?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Kafka não suporta múltiplos consumidores.</div>
+          <div class="quiz-opt" data-correct="true">Kafka retém mensagens por um período, permitindo replay; filas tradicionais removem ao confirmar.</div>
+          <div class="quiz-opt" data-correct="false">RabbitMQ é sempre mais rápido em qualquer cenário.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">14. Por que consumidores de mensageria deveriam ser idempotentes?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="true">Porque a garantia mais comum é "at-least-once" — a mesma mensagem pode chegar mais de uma vez.</div>
+          <div class="quiz-opt" data-correct="false">Porque idempotência é exigida por lei em sistemas de mensageria.</div>
+          <div class="quiz-opt" data-correct="false">Porque só assim o Kafka aceita processar a mensagem.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">15. Qual a diferença entre guardar um JWT em <code>localStorage</code> vs em um cookie <code>httpOnly</code>?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="true">Cookie httpOnly é inacessível via JavaScript, reduzindo risco de roubo via XSS.</div>
+          <div class="quiz-opt" data-correct="false">Não há diferença prática de segurança entre os dois.</div>
+          <div class="quiz-opt" data-correct="false">localStorage é sempre mais seguro por ser mais simples.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">16. Por que Testcontainers é preferível a mocks para testar um Repository JPA?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Testcontainers é mais rápido que mocks em todos os casos.</div>
+          <div class="quiz-opt" data-correct="true">Testa contra um banco real, validando comportamento que um mock não consegue simular fielmente.</div>
+          <div class="quiz-opt" data-correct="false">Mocks não funcionam com Spring Data JPA.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">17. O que um Circuit Breaker faz quando um serviço externo falha repetidamente?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Tenta reconectar infinitamente até dar certo.</div>
+          <div class="quiz-opt" data-correct="true">Abre o circuito e para de tentar chamar o serviço real, usando um fallback.</div>
+          <div class="quiz-opt" data-correct="false">Reinicia a aplicação automaticamente.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">18. Por que nunca usar <code>ddl-auto=update</code> em produção?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Porque essa opção não existe no Hibernate.</div>
+          <div class="quiz-opt" data-correct="true">Porque o Hibernate pode alterar o schema de forma imprevisível; migrations versionadas (Flyway) são a fonte confiável.</div>
+          <div class="quiz-opt" data-correct="false">Porque só funciona com MongoDB.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">19. Por que uma imagem Docker de aplicação Java deveria usar multi-stage build?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">É a única forma de o Docker funcionar com Java.</div>
+          <div class="quiz-opt" data-correct="true">Separa o JDK/compilador (só necessário no build) do JRE enxuto necessário em runtime, reduzindo o tamanho final.</div>
+          <div class="quiz-opt" data-correct="false">Multi-stage torna o build mais lento, mas obrigatório por segurança.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">20. Por que expor uma <code>@Entity</code> JPA diretamente em um endpoint REST é uma má prática?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt" data-correct="false">Entidades JPA não podem ser serializadas para JSON de forma alguma.</div>
+          <div class="quiz-opt" data-correct="true">Vaza detalhes internos do banco, acopla o contrato da API ao modelo interno, e pode causar LazyInitializationException.</div>
+          <div class="quiz-opt" data-correct="false">É proibido pelo Spring Boot em tempo de compilação.</div>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </section>

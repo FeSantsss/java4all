@@ -1,0 +1,162 @@
+<section class="section tk-spring" id="di-ioc-profundo">
+      <div class="section-head"><span class="section-num">84</span><h2 class="section-title">Injeção de Dependência, IoC &amp; Ciclo de Vida de Beans — Aprofundamento</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring Interno</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#di">22 · Injeção de dependência</a>, <a class="prereq-tag" href="#spring-core">43 · Spring Core</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
+      </div>
+
+      <p>Os capítulos 22, 28 e 43 já construíram — na mão e depois com Spring real — o mecanismo de injeção de dependência. Este capítulo separa dois conceitos que costumam ser confundidos como sinônimos, e detalha exatamente o que o container Spring faz, em ordem, do início ao fim da vida de um bean.</p>
+
+      <h3>Inversão de Controle (IoC) não é a mesma coisa que Injeção de Dependência (DI)</h3>
+      <p>Essa distinção é sutil, mas separa quem realmente entende o padrão de quem só decorou o termo.</p>
+
+      <pre class="code">SEM IoC (controle NORMAL do fluxo -- seu código decide tudo):
+┌─────────────────────────────────────────┐
+│  PedidoServico decide:                   │
+│  1. QUANDO criar um EmailServico          │
+│  2. COMO criar (new EmailServico())       │
+│  3. QUAL implementação usar               │
+│                                            │
+│  new EmailServico() ← seu código no       │
+│                        controle total     │
+└─────────────────────────────────────────┘
+
+COM IoC (o controle é INVERTIDO -- um container externo decide):
+┌─────────────────────────────────────────┐
+│  Spring Container decide:                 │
+│  1. QUANDO criar (na inicialização)       │
+│  2. COMO criar (via reflection)           │
+│  3. QUAL implementação usar (baseado      │
+│     em qual @Component foi registrado)    │
+│                                            │
+│  PedidoServico só DECLARA "eu preciso     │
+│  de um Notificador" e RECEBE de fora --   │
+│  perdeu o controle sobre a criação        │
+└─────────────────────────────────────────┘</pre>
+
+      <p><strong>Inversão de Controle</strong> é o princípio geral: em vez do seu código controlar o fluxo de criação e orquestração de objetos, essa responsabilidade é transferida ("invertida") para um framework/container externo. <strong>Injeção de Dependência</strong> é <em>uma técnica específica</em> de implementar IoC — a mais comum, mas não a única. Outras formas de IoC incluem o <em>Service Locator pattern</em> (onde você pede ativamente ao container por uma dependência, em vez de recebê-la automaticamente) e frameworks de eventos, onde o controle de "quando seu código roda" é invertido para o framework que dispara callbacks.</p>
+
+      <div class="analogy">Pense em restaurantes. No modelo tradicional (sem IoC), você (o cliente, seu código) vai até a cozinha, escolhe os ingredientes, cozinha sua própria comida — controle total, mas todo o trabalho é seu. Em um restaurante de verdade (com IoC), você diz o que quer ("preciso de um Notificador") e o restaurante (o container Spring) decide como preparar, com quais ingredientes, e te entrega pronto — você perdeu o controle sobre o "como", mas ganhou simplicidade e desacoplamento da cozinha em si.</div>
+
+      <h3>O ciclo de vida completo de um Bean — cada etapa, em ordem exata</h3>
+      <p>Quando a aplicação Spring Boot inicia, para <strong>cada</strong> bean gerenciado, este é o percurso completo:</p>
+
+      <pre class="code">┌──────────────────────────────────────────────────────────────┐
+│ 1. INSTANCIAÇÃO                                                 │
+│    O Spring encontra a classe anotada (@Component/@Service/etc, │
+│    capítulo 43) via @ComponentScan (reflection, capítulo 20) e  │
+│    chama o construtor -- criando o objeto "cru", sem dependências│
+└──────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 2. INJEÇÃO DE DEPENDÊNCIAS                                       │
+│    Se a injeção é via CONSTRUTOR (capítulo 22, a preferida),     │
+│    isso já aconteceu no passo 1 -- o Spring resolve o GRAFO       │
+│    de dependências primeiro (quem precisa de quem) para saber    │
+│    em que ORDEM instanciar. Se é via campo (@Autowired em field),│
+│    a injeção acontece AQUI, depois da instanciação, via           │
+│    reflection (Field.set(), capítulo 20)                          │
+└──────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 3. BeanNameAware / ApplicationContextAware (se implementados)    │
+│    Callbacks opcionais -- o bean "sabe" seu próprio nome no        │
+│    container, ou tem acesso ao container inteiro, se precisar     │
+└──────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 4. @PostConstruct                                                │
+│    Método anotado, chamado DEPOIS que TODAS as dependências já    │
+│    foram injetadas -- o lugar certo para inicialização que        │
+│    DEPENDE de outro bean já estar pronto (algo que o construtor   │
+│    sozinho não garantiria com segurança)                          │
+└──────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 5. BEAN PRONTO PARA USO                                          │
+│    Fica assim durante toda a vida da aplicação (se escopo         │
+│    singleton, capítulo 43 -- o padrão) ou até ser descartado,      │
+│    se escopo prototype                                            │
+└──────────────────────────────────────────────────────────────┘
+                            │
+                    (aplicação encerrando...)
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 6. @PreDestroy                                                   │
+│    Método anotado, chamado ANTES do container destruir o bean --  │
+│    o lugar certo para liberar recursos (fechar conexões,          │
+│    parar threads próprias, capítulo 14)                           │
+└──────────────────────────────────────────────────────────────┘</pre>
+
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">ConexaoExternaServico</span> {
+    <span class="kw">private</span> Connection conexaoPersistente;
+
+    <span class="annotation">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="fn">inicializar</span>() {
+        <span class="com">// roda DEPOIS de todas as dependências injetadas --
+        // seguro para usar qualquer @Autowired daqui</span>
+        conexaoPersistente = abrirConexaoComServicoExterno();
+        System.out.println(<span class="str">"Conexão externa estabelecida"</span>);
+    }
+
+    <span class="annotation">@PreDestroy</span>
+    <span class="kw">public void</span> <span class="fn">encerrar</span>() {
+        conexaoPersistente.fechar(); <span class="com">// libera o recurso antes da JVM desligar</span>
+        System.out.println(<span class="str">"Conexão externa encerrada"</span>);
+    }
+}</pre>
+
+      <div class="secret">Por que <code>@PostConstruct</code> existe, se você já tem o construtor? Porque no momento em que o <strong>construtor</strong> roda, para injeção via campo (<code>@Autowired</code> em atributo, capítulo 22), as dependências <strong>ainda não foram injetadas</strong> — elas só são preenchidas depois, no passo 2 do ciclo acima. Chamar um método que usa uma dependência ainda não injetada dentro do próprio construtor causaria <code>NullPointerException</code>. Com injeção via <strong>construtor</strong> (a forma preferida, exatamente porque evita essa armadilha), as dependências já chegam prontas no momento da instanciação — reduzindo bastante a necessidade prática de <code>@PostConstruct</code>, mas ele continua essencial quando a inicialização envolve algo além de simplesmente receber dependências (abrir uma conexão de rede, validar configuração externa).</div>
+
+      <h3>BeanFactory vs ApplicationContext — a fundação por trás do container</h3>
+      <p><code>ApplicationContext</code> estende capacidades de <code>BeanFactory</code> com eventos, mensagens, recursos e integração com post-processors. Por padrão, singletons não lazy são pré-instanciados durante o refresh, permitindo descobrir muitos erros cedo. Beans marcados como lazy, outros escopos e objetos criados sob demanda são exceções; “BeanFactory é sempre lazy e ApplicationContext sempre eager” é uma simplificação.</p>
+
+      <h3>Dependências circulares — quando o grafo não tem ordem válida</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">ServicoA</span> {
+    <span class="kw">public</span> <span class="fn">ServicoA</span>(<span class="cls">ServicoB</span> b) { ... } <span class="com">// A precisa de B</span>
+}
+
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">ServicoB</span> {
+    <span class="kw">public</span> <span class="fn">ServicoB</span>(<span class="cls">ServicoA</span> a) { ... } <span class="com">// B precisa de A -- CICLO!</span>
+}
+<span class="com">// erro na inicialização: "The dependencies of some of the beans in the
+// application context form a cycle" -- o Spring NÃO consegue decidir
+// qual instanciar primeiro, porque cada um exige que o outro já exista</span></pre>
+
+      <div class="warn"><b>Uma dependência circular quase sempre indica um problema de design</b>, não apenas um obstáculo técnico a contornar. Na maioria dos casos, isso sinaliza que <code>ServicoA</code> e <code>ServicoB</code> deveriam ter uma responsabilidade em comum extraída para um terceiro serviço, do qual ambos dependeriam unidirecionalmente — a mesma lição de SRP do capítulo 16. Embora exista uma forma técnica de contornar isso (injeção via campo, que o Spring resolve de forma "preguiçosa" através de um proxy intermediário), a solução correta na maioria absoluta dos casos reais é refatorar o design, não burlar a checagem.</div>
+
+      <div class="study-tip">Ao debugar um problema de inicialização do Spring ("bean não encontrado", "dependência circular", "múltiplos candidatos"), sempre volte para o diagrama do ciclo de vida acima e pergunte: "em que passo exato esse erro está acontecendo?" Isso transforma uma mensagem de erro genérica e assustadora em um problema concreto e localizável — quase sempre um dos passos 1 ou 2 (grafo de dependências) ou um <code>@PostConstruct</code> tentando usar algo que ainda não existe.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 87.1 — Ciclo de vida na prática</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie um <code>@Service</code> chamado <code>PoolDeConexoesServico</code> que, no <code>@PostConstruct</code>, imprime "Pool inicializado com N conexões" (simule N=10), e no <code>@PreDestroy</code>, imprime "Pool encerrado, todas as conexões fechadas". Injete esse serviço em outro bean via construtor e explique, em texto, em que exato momento do ciclo de vida do Spring cada uma dessas mensagens vai aparecer no log da aplicação.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">PoolDeConexoesServico</span> {
+    <span class="kw">private int</span> conexoesAtivas;
+
+    <span class="annotation">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="fn">inicializar</span>() {
+        conexoesAtivas = 10;
+        System.out.println(<span class="str">"Pool inicializado com "</span> + conexoesAtivas + <span class="str">" conexões"</span>);
+    }
+
+    <span class="annotation">@PreDestroy</span>
+    <span class="kw">public void</span> <span class="fn">encerrar</span>() {
+        System.out.println(<span class="str">"Pool encerrado, todas as conexões fechadas"</span>);
+    }
+}</pre>
+          <p style="margin-top:12px">"Pool inicializado..." aparece no refresh para esse singleton não lazy, depois da construção e injeção. "Pool encerrado..." aparece no fechamento gracioso do contexto, como em SIGTERM tratado dentro do prazo. Crash abrupto, <code>SIGKILL</code> ou falha do host não garantem callbacks de destruição.</p>
+        </div>
+      </div>
+    </section>

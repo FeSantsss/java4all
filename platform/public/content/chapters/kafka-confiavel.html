@@ -1,0 +1,35 @@
+<section class="section tk-kafka" id="kafka-confiavel">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Kafka confiável: schemas, retries, DLT, outbox e exactly-once</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-kafka">Kafka</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~7h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-kafka">Spring Kafka</a>, <a class="prereq-tag" href="#jpa-transacoes">Transações</a></div></div>
+      
+      <p>Mensagens podem duplicar, atrasar, chegar fora da ordem esperada ou falhar permanentemente. Confiabilidade vem de contratos evolutivos, observabilidade e processamento idempotente, não da expectativa de entrega perfeita.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>O caminho mínimo de uma mensagem</h3></div>
+    <p>Visualize primeiro produtor → tópico/partição → consumidor. As técnicas seguintes protegem pontos diferentes desse caminho.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Evento</dt><dd>Registro imutável de algo que aconteceu, nomeado no passado, como PedidoCriado.</dd></div><div class="concept-card"><dt>Schema</dt><dd>Contrato estrutural e de tipos da mensagem, com regras de evolução entre versões.</dd></div><div class="concept-card"><dt>Partição</dt><dd>Log ordenado dentro de um tópico; Kafka preserva ordem por partição, não globalmente.</dd></div><div class="concept-card"><dt>Offset</dt><dd>Posição de uma mensagem dentro de uma partição e progresso registrado pelo consumidor.</dd></div><div class="concept-card"><dt>Idempotência</dt><dd>Capacidade de processar repetição sem aplicar o efeito de negócio outra vez.</dd></div><div class="concept-card"><dt>DLT</dt><dd><em>Dead-letter topic</em>: tópico separado para mensagens que não puderam ser processadas após a política definida.</dd></div></dl>
+  </aside>
+      <h3>Schema e evolução</h3>
+      <p>Não produza JSON por concatenação. Um <strong>serializer</strong> transforma o objeto em bytes conforme o contrato. Avro, Protocol Buffers (Protobuf) e JSON Schema são alternativas para descrever dados e evolução. Adições opcionais com valor padrão tendem a ser compatíveis; renomear ou mudar significado exige transição. <strong>Correlation ID</strong> agrupa mensagens da mesma operação; <strong>causation ID</strong> aponta qual mensagem causou diretamente a atual.</p>
+      <pre class="code"><span class="kw">public record</span> PedidoCriado(
+    UUID eventId,
+    <span class="kw">int</span> schemaVersion,
+    UUID pedidoId,
+    Instant occurredAt,
+    List&lt;ItemEvento&gt; itens) {}</pre>
+      <h3>Retry e dead-letter topic</h3>
+      <p>Erros transitórios podem receber retries limitados com backoff e jitter. Erros permanentes, como schema inválido, não devem bloquear a partição indefinidamente: envie à DLT com causa e metadados, gere alerta e ofereça reprocessamento auditável. Retry topics podem alterar a ordem relativa; declare se a ordem é requisito.</p>
+      <h3>Idempotent consumer</h3>
+      <pre class="code"><span class="kw">BEGIN</span>;
+<span class="kw">INSERT INTO</span> mensagem_processada(consumer, event_id)
+<span class="kw">VALUES</span> (:consumer, :eventId)
+<span class="kw">ON CONFLICT DO NOTHING</span>;
+<span class="com">-- continue somente quando uma linha foi inserida</span>
+<span class="kw">UPDATE</span> estoque <span class="kw">SET</span> reservado = reservado + :qtd <span class="kw">WHERE</span> produto_id = :id;
+<span class="kw">COMMIT</span>;</pre>
+      <p>A deduplicação e o efeito devem estar na mesma transação local. Idempotência do produtor Kafka não torna automaticamente o banco do consumidor idempotente.</p>
+      <h3>Transactional outbox</h3>
+      <p>Grave mudança de domínio e linha de <strong>outbox</strong> — uma tabela de eventos pendentes — na mesma transação. Um <strong>relay</strong> lê e publica essa tabela; outra opção é <strong>CDC</strong> (<em>Change Data Capture</em>), que observa o log de mudanças do banco. A publicação ainda pode repetir após falha, portanto consumidores continuam idempotentes. Uma <strong>inbox</strong> registra mensagens recebidas e aplica o mesmo princípio na entrada.</p>
+      <h3>Exactly-once: limite da garantia</h3>
+      <p>Transações Kafka podem coordenar leitura, escrita em tópicos e offsets dentro do Kafka. Elas não incluem automaticamente um PostgreSQL ou uma API de pagamento. Descreva sempre o limite: exactly-once em qual sistema e para qual efeito?</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — falhas reais</h4><span class="exercise-tag d">difícil</span></div><p>Implemente outbox, relay, consumidor idempotente, retry e DLT. Mate o processo depois de publicar e antes de marcar a outbox; confirme que a repetição não duplica estoque.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>Meça consumer lag, conte DLTs, preserve event ID e prove o comportamento após restart. O teste deve falhar se a constraint de deduplicação for removida.</p></div></div>
+    </section>

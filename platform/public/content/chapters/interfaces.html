@@ -1,0 +1,98 @@
+<section class="section" id="interfaces">
+      <div class="section-head"><span class="section-num">08</span><h2 class="section-title">Interfaces</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#abstracao">07 · Classes abstratas</a></div>
+      </div>
+
+      <p>Uma <strong>interface</strong> define um contrato puro: métodos que qualquer classe implementadora promete ter. Diferente de herança, uma classe pode implementar <strong>várias</strong> interfaces — é como Java contorna a ausência de herança múltipla.</p>
+
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">Comparavel</span> { <span class="kw">int</span> <span class="fn">comparar</span>(<span class="kw">Object</span> outro); }
+<span class="kw">public interface</span> <span class="cls">Imprimivel</span> { <span class="kw">void</span> <span class="fn">imprimir</span>(); }
+
+<span class="kw">public class</span> <span class="cls">Produto</span> <span class="kw">implements</span> <span class="cls">Comparavel</span>, <span class="cls">Imprimivel</span> {
+    <span class="kw">private double</span> preco;
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public int</span> <span class="fn">comparar</span>(<span class="kw">Object</span> outro) {
+        <span class="cls">Produto</span> p = (<span class="cls">Produto</span>) outro;
+        <span class="kw">return</span> Double.compare(<span class="kw">this</span>.preco, p.preco);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() { System.out.println(<span class="str">"Produto: R$"</span> + preco); }
+}</pre>
+
+      <h3>Métodos default, static e private (Java 8+)</h3>
+      <p>Desde o Java 8, interfaces deixaram de ser 100% abstratas. Isso foi introduzido principalmente para permitir evoluir a API de <code>Collection</code>/<code>List</code> sem quebrar todo código já escrito.</p>
+
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">Notificador</span> {
+    <span class="kw">void</span> <span class="fn">enviar</span>(<span class="kw">String</span> mensagem); <span class="com">// abstrato -- cada implementação define</span>
+
+    <span class="com">// default: implementação padrão, subclasses podem sobrescrever ou não</span>
+    <span class="kw">default void</span> <span class="fn">enviarUrgente</span>(<span class="kw">String</span> mensagem) {
+        enviar(<span class="str">"[URGENTE] "</span> + mensagem);
+    }
+
+    <span class="com">// static: pertence à interface, chamado como Notificador.padrao()</span>
+    <span class="kw">static</span> <span class="cls">Notificador</span> <span class="fn">padrao</span>() {
+        <span class="kw">return</span> msg -&gt; System.out.println(<span class="str">"Log: "</span> + msg); <span class="com">// lambda -- capítulo 13</span>
+    }
+}</pre>
+
+      <div class="secret">Se uma classe implementa duas interfaces que têm um método <code>default</code> com a <strong>mesma assinatura</strong>, o compilador força você a sobrescrever esse método explicitamente na classe — Java não escolhe um dos dois por conta própria. Esse é o único jeito de "herança múltipla de implementação" ser tolerado, e ainda assim de forma explícita e segura.</div>
+
+      <h3>Interface vs classe abstrata — quando usar cada uma</h3>
+      <table class="cmp">
+        <tbody><tr><th>Situação</th><th>Use</th></tr>
+        <tr><td>Classes não relacionadas precisam prometer o mesmo comportamento (ex: <code>Voador</code> em Pássaro e Avião)</td><td>Interface</td></tr>
+        <tr><td>Existe hierarquia real ("é um") com estado e comportamento compartilhados</td><td>Classe abstrata</td></tr>
+        <tr><td>A classe já herda de outra e ainda precisa do contrato</td><td>Interface (única forma de "herança múltipla")</td></tr>
+        <tr><td>Você quer expor só o comportamento, sem se importar como é implementado por trás</td><td>Interface</td></tr>
+      </tbody></table>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 8.1 — Contrato de pagamento</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>MetodoPagamento</code> com <code>boolean pagar(double valor)</code>. Implemente <code>Pix</code> e <code>CartaoCredito</code>. No <code>main</code>, itere um array chamando <code>pagar(100)</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public interface</span> <span class="cls">MetodoPagamento</span> { <span class="kw">boolean</span> <span class="fn">pagar</span>(<span class="kw">double</span> valor); }
+
+<span class="kw">public class</span> <span class="cls">Pix</span> <span class="kw">implements</span> <span class="cls">MetodoPagamento</span> {
+    <span class="annotation">@Override</span> <span class="kw">public boolean</span> <span class="fn">pagar</span>(<span class="kw">double</span> valor) {
+        System.out.println(<span class="str">"Pagando R$"</span> + valor + <span class="str">" via Pix"</span>); <span class="kw">return true</span>;
+    }
+}
+<span class="kw">public class</span> <span class="cls">CartaoCredito</span> <span class="kw">implements</span> <span class="cls">MetodoPagamento</span> {
+    <span class="annotation">@Override</span> <span class="kw">public boolean</span> <span class="fn">pagar</span>(<span class="kw">double</span> valor) {
+        System.out.println(<span class="str">"Pagando R$"</span> + valor + <span class="str">" no cartão"</span>); <span class="kw">return true</span>;
+    }
+}
+
+<span class="cls">MetodoPagamento</span>[] metodos = { <span class="kw">new</span> <span class="cls">Pix</span>(), <span class="kw">new</span> <span class="cls">CartaoCredito</span>() };
+<span class="kw">for</span> (<span class="cls">MetodoPagamento</span> m : metodos) m.pagar(100);</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 8.2 — Método default com conflito</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie duas interfaces, <code>Voador</code> e <code>Nadador</code>, cada uma com um método <code>default String mover()</code> retornando textos diferentes ("Voando" e "Nadando"). Crie a classe <code>PatoSelvagem implements Voador, Nadador</code> e resolva o conflito de assinatura sobrescrevendo <code>mover()</code> explicitamente para retornar <em>"Voando e nadando"</em>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public interface</span> <span class="cls">Voador</span> {
+    <span class="kw">default String</span> <span class="fn">mover</span>() { <span class="kw">return</span> <span class="str">"Voando"</span>; }
+}
+<span class="kw">public interface</span> <span class="cls">Nadador</span> {
+    <span class="kw">default String</span> <span class="fn">mover</span>() { <span class="kw">return</span> <span class="str">"Nadando"</span>; }
+}
+
+<span class="kw">public class</span> <span class="cls">PatoSelvagem</span> <span class="kw">implements</span> <span class="cls">Voador</span>, <span class="cls">Nadador</span> {
+    <span class="annotation">@Override</span>
+    <span class="kw">public String</span> <span class="fn">mover</span>() {
+        <span class="kw">return</span> <span class="str">"Voando e nadando"</span>; <span class="com">// obrigatório resolver o conflito manualmente</span>
+        <span class="com">// também seria possível chamar Voador.super.mover() para reusar uma delas</span>
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

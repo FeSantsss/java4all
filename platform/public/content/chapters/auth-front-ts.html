@@ -1,0 +1,83 @@
+<section class="section tk-front" id="auth-front-ts">
+      <div class="section-head"><span class="section-num">63</span><h2 class="section-title">Autenticação no front &amp; pincelada de TypeScript</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-front">Front-end</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#conectando-front-back">62 · Conectando front e back</a>, <a class="prereq-tag" href="#autenticacao-conceitos">51 · Autenticação conceitos</a></div>
+      </div>
+
+      <p>Onde guardar o JWT (capítulo 51/52) no navegador é uma decisão de segurança real, não um detalhe de implementação — errar aqui abre a porta para roubo de sessão via XSS.</p>
+
+      <h3>localStorage vs cookie httpOnly</h3>
+      <table class="cmp">
+        <tbody><tr><th></th><th><code>localStorage</code></th><th>Cookie <code>httpOnly</code></th></tr>
+        <tr><td>Acessível via JavaScript</td><td>Sim — <code>localStorage.getItem(...)</code></td><td>Não — invisível para JS, só o navegador o envia</td></tr>
+        <tr><td>Risco de XSS</td><td>Alto — script malicioso injetado pode roubar o token diretamente</td><td>Baixo — mesmo com XSS, o script não consegue ler o cookie</td></tr>
+        <tr><td>Precisa enviar manualmente</td><td>Sim, no header <code>Authorization</code> (capítulo 62)</td><td>Não — o navegador envia automaticamente em toda requisição para o domínio</td></tr>
+        <tr><td>Risco de CSRF</td><td>Baixo (não é enviado automaticamente)</td><td>Precisa de proteção CSRF adicional</td></tr>
+      </tbody></table>
+
+      <div class="analogy">Guardar o token em <code>localStorage</code> é como deixar a chave de casa embaixo do tapete — qualquer um que descubra onde procurar (nesse caso, qualquer script rodando na sua página, inclusive um malicioso injetado via XSS) consegue pegar. Um cookie <code>httpOnly</code> é como um chaveiro eletrônico que só a fechadura em si consegue ler — mesmo que alguém entre na sala, não consegue copiar a chave manualmente.</div>
+
+      <div class="warn"><b>O exemplo do capítulo 62 usando <code>localStorage</code> foi simplificado para fins didáticos.</b> Em uma aplicação de produção real, especialmente uma que lida com dados sensíveis, cookie <code>httpOnly</code> + <code>Secure</code> + <code>SameSite=Strict</code> é a escolha mais segura — exige que o back-end (Spring Security, capítulo 52) defina o cookie na resposta de login, em vez do front-end guardar o token manualmente.</div>
+
+      <div class="study-tip">Para projetos de aprendizado, começar com <code>localStorage</code> é aceitável — é mais simples de implementar e entender o fluxo completo primeiro. Migrar para cookie <code>httpOnly</code> é o passo natural assim que o projeto sair do estágio de portfólio pessoal para algo que lida com dados reais de usuários reais.</div>
+
+      <h3>TypeScript — por que vale a pena mesmo sem "precisar"</h3>
+      <p>JavaScript puro deixa passar erros de contrato que só aparecem em runtime — exatamente o problema que a tipagem estática do Java (capítulo 01) já te ensinou a evitar.</p>
+
+      <div class="code-toggle-bar">
+        <button class="ct-btn bad active">❌ JavaScript puro</button>
+        <button class="ct-btn good">✅ Com TypeScript</button>
+      </div>
+      <div class="ct-panel active">
+<pre class="code"><span class="kw">function</span> <span class="fn">exibirLivro</span>(livro) {
+  <span class="kw">return</span> <span class="str">`${livro.titulo} (${livro.paginas} páginas)`</span>;
+  <span class="com">// se a API mudar "paginas" para "totalPaginas" sem avisar,
+  // isso só quebra em RUNTIME, silenciosamente, como "undefined" na tela</span>
+}</pre>
+      </div>
+      <div class="ct-panel">
+<pre class="code"><span class="kw">interface</span> <span class="cls">Livro</span> {
+  titulo: <span class="kw">string</span>;
+  paginas: <span class="kw">number</span>;
+}
+
+<span class="kw">function</span> <span class="fn">exibirLivro</span>(livro: <span class="cls">Livro</span>): <span class="kw">string</span> {
+  <span class="kw">return</span> <span class="str">`${livro.titulo} (${livro.paginas} páginas)`</span>;
+  <span class="com">// se a API mudar o campo, o editor avisa AGORA, em tempo de
+  // desenvolvimento -- exatamente como o compilador Java (capítulo 00) faz</span>
+}</pre>
+      </div>
+
+      <div class="secret">O <code>interface Livro</code> do TypeScript deveria, idealmente, espelhar exatamente o <code>LivroDTO</code> (capítulo 47) do back-end — na prática, times maduros geram esses tipos automaticamente a partir do contrato OpenAPI/Swagger (capítulo 49), garantindo que front e back nunca fiquem dessincronizados quanto ao formato dos dados trocados.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 63.1 — Tipando o cliente da API</h4><span class="exercise-tag m">médio</span></div>
+        <p>Reescreva as funções <code>listarLivros()</code> e <code>login(email, senha)</code> do exercício 62.1 em TypeScript, definindo interfaces <code>Livro</code> e <code>RespostaLogin</code> correspondentes ao formato retornado pela API.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">interface</span> <span class="cls">Livro</span> {
+  id: <span class="kw">number</span>;
+  titulo: <span class="kw">string</span>;
+  paginas: <span class="kw">number</span>;
+  nomeAutor: <span class="kw">string</span>;
+}
+
+<span class="kw">interface</span> <span class="cls">RespostaLogin</span> {
+  token: <span class="kw">string</span>;
+}
+
+<span class="kw">export async function</span> <span class="fn">listarLivros</span>(): <span class="cls">Promise</span>&lt;<span class="cls">Livro</span>[]&gt; {
+  <span class="kw">const</span> { data } = <span class="kw">await</span> api.get&lt;<span class="cls">Livro</span>[]&gt;(<span class="str">'/livros'</span>);
+  <span class="kw">return</span> data;
+}
+
+<span class="kw">export async function</span> <span class="fn">login</span>(email: <span class="kw">string</span>, senha: <span class="kw">string</span>): <span class="cls">Promise</span>&lt;<span class="cls">RespostaLogin</span>&gt; {
+  <span class="kw">const</span> { data } = <span class="kw">await</span> api.post&lt;<span class="cls">RespostaLogin</span>&gt;(<span class="str">'/auth/login'</span>, { email, senha });
+  <span class="kw">return</span> data;
+}</pre>
+        </div>
+      </div>
+    </section>

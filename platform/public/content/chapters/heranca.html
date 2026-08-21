@@ -1,0 +1,138 @@
+<section class="section" id="heranca">
+      <div class="section-head"><span class="section-num">05</span><h2 class="section-title">Herança</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#encapsulamento">04 · Encapsulamento</a></div>
+      </div>
+
+      <p><strong>Herança</strong> permite que uma classe (subclasse) reaproveite atributos e métodos de outra (superclasse), usando <code>extends</code>. É a ferramenta certa quando existe uma relação genuína de "é um tipo de" — um <em>Gerente</em> <strong>é um</strong> <em>Funcionario</em>.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Funcionario</span> {
+    <span class="kw">protected String</span> nome;
+    <span class="kw">protected double</span> salarioBase;
+
+    <span class="kw">public</span> <span class="fn">Funcionario</span>(<span class="kw">String</span> nome, <span class="kw">double</span> salarioBase) {
+        <span class="kw">this</span>.nome = nome; <span class="kw">this</span>.salarioBase = salarioBase;
+    }
+
+    <span class="kw">public double</span> <span class="fn">calcularSalario</span>() { <span class="kw">return</span> salarioBase; }
+}
+
+<span class="kw">public class</span> <span class="cls">Gerente</span> <span class="kw">extends</span> <span class="cls">Funcionario</span> {
+    <span class="kw">private double</span> bonus;
+
+    <span class="kw">public</span> <span class="fn">Gerente</span>(<span class="kw">String</span> nome, <span class="kw">double</span> salarioBase, <span class="kw">double</span> bonus) {
+        <span class="kw">super</span>(nome, salarioBase);
+        <span class="kw">this</span>.bonus = bonus;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public double</span> <span class="fn">calcularSalario</span>() { <span class="kw">return</span> salarioBase + bonus; }
+}</pre>
+
+      <div class="callout"><b>protected vs private:</b> usamos <code>protected</code> em <code>nome</code> e <code>salarioBase</code> porque <code>Gerente</code> precisa acessá-los diretamente. Java só permite <strong>herança simples</strong> — uma classe tem no máximo uma superclasse direta.</div>
+
+      <h3>Toda classe herda de Object (mesmo sem dizer)</h3>
+      <p>Se você não escreve <code>extends</code>, sua classe estende <code>java.lang.Object</code> implicitamente. É de lá que vêm três métodos que você vai sobrescrever o tempo todo:</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Ponto</span> {
+    <span class="kw">private final int</span> x, y;
+    <span class="kw">public</span> <span class="fn">Ponto</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) { <span class="kw">this</span>.x = x; <span class="kw">this</span>.y = y; }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> <span class="str">"Ponto("</span> + x + <span class="str">", "</span> + y + <span class="str">")"</span>;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="kw">Object</span> obj) {
+        <span class="kw">if</span> (<span class="kw">this</span> == obj) <span class="kw">return true</span>;
+        <span class="kw">if</span> (!(obj <span class="kw">instanceof</span> <span class="cls">Ponto</span>)) <span class="kw">return false</span>;
+        <span class="cls">Ponto</span> outro = (<span class="cls">Ponto</span>) obj;
+        <span class="kw">return</span> <span class="kw">this</span>.x == outro.x &amp;&amp; <span class="kw">this</span>.y == outro.y;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public int</span> <span class="fn">hashCode</span>() {
+        <span class="kw">return</span> java.util.Objects.hash(x, y);
+    }
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Método</th><th>Para que serve</th></tr>
+        <tr><td><code>toString()</code></td><td>Representação textual — usada implicitamente em <code>println(obj)</code> e concatenação com String</td></tr>
+        <tr><td><code>equals(Object)</code></td><td>Igualdade de <em>conteúdo</em> (padrão é <code>==</code>, ou seja, mesma referência)</td></tr>
+        <tr><td><code>hashCode()</code></td><td>Código numérico usado por <code>HashMap</code>/<code>HashSet</code> para localizar o objeto rapidamente</td></tr>
+      </tbody></table>
+
+      <div class="warn"><b>Regra de ouro, sem exceção:</b> se você sobrescreve <code>equals()</code>, é <strong>obrigatório</strong> sobrescrever <code>hashCode()</code> junto — e ambos precisam usar os mesmos campos. Quebrar esse contrato faz objetos "iguais" sumirem silenciosamente de <code>HashSet</code>s e chaves de <code>HashMap</code> pararem de bater, um dos bugs mais difíceis de rastrear em Java. A IDE geralmente gera os dois juntos automaticamente — use essa opção em vez de escrever na mão.</div>
+
+      <h3>Herança multinível e a cadeia de super</h3>
+      <pre class="code"><span class="kw">class</span> <span class="cls">A</span> { <span class="kw">void</span> <span class="fn">falar</span>() { System.out.println(<span class="str">"A"</span>); } }
+<span class="kw">class</span> <span class="cls">B</span> <span class="kw">extends</span> <span class="cls">A</span> {
+    <span class="annotation">@Override</span> <span class="kw">void</span> <span class="fn">falar</span>() { <span class="kw">super</span>.falar(); System.out.println(<span class="str">"B"</span>); }
+}
+<span class="kw">class</span> <span class="cls">C</span> <span class="kw">extends</span> <span class="cls">B</span> {
+    <span class="annotation">@Override</span> <span class="kw">void</span> <span class="fn">falar</span>() { <span class="kw">super</span>.falar(); System.out.println(<span class="str">"C"</span>); }
+}
+<span class="com">// new C().falar(); imprime "A", "B", "C" nessa ordem</span></pre>
+
+      <p><code>super.metodo()</code> chama a versão do método na superclasse <strong>imediata</strong>, permitindo estender o comportamento herdado em vez de substituí-lo por completo.</p>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 5.1 — Hierarquia de veículos</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>Veiculo</code> com <code>marca</code>, <code>modelo</code> e <code>ligar()</code>. Crie <code>Carro</code> e <code>Moto</code> estendendo, cada uma com um atributo próprio e um método exclusivo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Veiculo</span> {
+    <span class="kw">protected String</span> marca, modelo;
+    <span class="kw">public</span> <span class="fn">Veiculo</span>(<span class="kw">String</span> marca, <span class="kw">String</span> modelo) { <span class="kw">this</span>.marca = marca; <span class="kw">this</span>.modelo = modelo; }
+    <span class="kw">public void</span> <span class="fn">ligar</span>() { System.out.println(modelo + <span class="str">" ligado"</span>); }
+}
+
+<span class="kw">public class</span> <span class="cls">Carro</span> <span class="kw">extends</span> <span class="cls">Veiculo</span> {
+    <span class="kw">private int</span> numeroPortas;
+    <span class="kw">public</span> <span class="fn">Carro</span>(<span class="kw">String</span> marca, <span class="kw">String</span> modelo, <span class="kw">int</span> numeroPortas) {
+        <span class="kw">super</span>(marca, modelo); <span class="kw">this</span>.numeroPortas = numeroPortas;
+    }
+    <span class="kw">public void</span> <span class="fn">abrirPortaMalas</span>() { System.out.println(<span class="str">"Porta-malas aberto"</span>); }
+}
+
+<span class="kw">public class</span> <span class="cls">Moto</span> <span class="kw">extends</span> <span class="cls">Veiculo</span> {
+    <span class="kw">private int</span> cilindradas;
+    <span class="kw">public</span> <span class="fn">Moto</span>(<span class="kw">String</span> marca, <span class="kw">String</span> modelo, <span class="kw">int</span> cilindradas) {
+        <span class="kw">super</span>(marca, modelo); <span class="kw">this</span>.cilindradas = cilindradas;
+    }
+    <span class="kw">public void</span> <span class="fn">empinar</span>() { System.out.println(modelo + <span class="str">" empinando!"</span>); }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 5.2 — equals e hashCode corretos</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma classe <code>Cpf</code> com um único atributo <code>numero</code> (String). Implemente <code>equals()</code> (dois CPFs são iguais se o número for igual) e <code>hashCode()</code> coerente. No <code>main</code>, coloque dois objetos <code>Cpf</code> com o mesmo número dentro de um <code>HashSet&lt;Cpf&gt;</code> e mostre que o set considera os dois como duplicados (tamanho final = 1).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Cpf</span> {
+    <span class="kw">private final String</span> numero;
+    <span class="kw">public</span> <span class="fn">Cpf</span>(<span class="kw">String</span> numero) { <span class="kw">this</span>.numero = numero; }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="kw">Object</span> obj) {
+        <span class="kw">if</span> (<span class="kw">this</span> == obj) <span class="kw">return true</span>;
+        <span class="kw">if</span> (!(obj <span class="kw">instanceof</span> <span class="cls">Cpf</span>)) <span class="kw">return false</span>;
+        <span class="kw">return</span> numero.equals(((<span class="cls">Cpf</span>) obj).numero);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public int</span> <span class="fn">hashCode</span>() { <span class="kw">return</span> numero.hashCode(); }
+}
+
+<span class="com">// main:</span>
+java.util.Set&lt;<span class="cls">Cpf</span>&gt; set = <span class="kw">new</span> java.util.HashSet&lt;&gt;();
+set.add(<span class="kw">new</span> <span class="cls">Cpf</span>(<span class="str">"111.222.333-44"</span>));
+set.add(<span class="kw">new</span> <span class="cls">Cpf</span>(<span class="str">"111.222.333-44"</span>));
+System.out.println(set.size()); <span class="com">// 1 -- considerados duplicados</span></pre>
+        </div>
+      </div>
+    </section>

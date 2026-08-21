@@ -1,0 +1,132 @@
+<section class="section" id="di">
+      <div class="section-head"><span class="section-num">22</span><h2 class="section-title">Injeção de dependência (na mão)</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#javamoderno">21 · Java moderno</a>, <a class="prereq-tag" href="#solid">16 · SOLID</a></div>
+      </div>
+
+      <p>Este é, sem exagero, <strong>o capítulo mais importante para entender o Spring</strong>. O Spring é, na essência, um container de <strong>Inversão de Controle (IoC)</strong> que faz injeção de dependência automaticamente. Antes de ver isso "de graça" via anotações, vamos construir manualmente para entender o que realmente está acontecendo.</p>
+
+      <h3>O problema: acoplamento a implementações concretas</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">PedidoServico</span> {
+    <span class="kw">private final</span> <span class="cls">EmailServico</span> email = <span class="kw">new</span> <span class="cls">EmailServico</span>(); <span class="com">// ❌ PedidoServico CRIA sua própria dependência</span>
+
+    <span class="kw">public void</span> <span class="fn">finalizar</span>(<span class="cls">Pedido</span> p) {
+        <span class="com">// ...</span>
+        email.enviar(p.getEmailCliente(), <span class="str">"Pedido confirmado"</span>);
+    }
+}</pre>
+      <p>Problemas: <code>PedidoServico</code> está travado em <code>EmailServico</code> — impossível trocar por um <code>SmsServico</code> sem editar essa classe, e impossível testar <code>finalizar()</code> sem realmente enviar e-mails (nada de mock, capítulo 15).</p>
+
+      <h3>A solução: inverter quem cria a dependência</h3>
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">Notificador</span> {
+    <span class="kw">void</span> <span class="fn">enviar</span>(<span class="kw">String</span> destino, <span class="kw">String</span> mensagem);
+}
+
+<span class="kw">public class</span> <span class="cls">EmailServico</span> <span class="kw">implements</span> <span class="cls">Notificador</span> {
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="kw">String</span> destino, <span class="kw">String</span> mensagem) { <span class="com">/* SMTP */</span> }
+}
+
+<span class="kw">public class</span> <span class="cls">PedidoServico</span> {
+    <span class="kw">private final</span> <span class="cls">Notificador</span> notificador; <span class="com">// depende da ABSTRAÇÃO (capítulo 16, o "D" de SOLID)</span>
+
+    <span class="com">// injeção via CONSTRUTOR -- a dependência vem de FORA, PedidoServico não cria nada</span>
+    <span class="kw">public</span> <span class="fn">PedidoServico</span>(<span class="cls">Notificador</span> notificador) {
+        <span class="kw">this</span>.notificador = notificador;
+    }
+
+    <span class="kw">public void</span> <span class="fn">finalizar</span>(<span class="cls">Pedido</span> p) {
+        notificador.enviar(p.getEmailCliente(), <span class="str">"Pedido confirmado"</span>);
+    }
+}
+
+<span class="com">// quem "monta" a aplicação decide a implementação real:</span>
+<span class="cls">Notificador</span> notificador = <span class="kw">new</span> <span class="cls">EmailServico</span>();
+<span class="cls">PedidoServico</span> servico = <span class="kw">new</span> <span class="cls">PedidoServico</span>(notificador); <span class="com">// injeção manual</span></pre>
+
+      <p>Agora testar fica trivial (com um mock ou uma implementação falsa), e trocar para SMS é criar <code>SmsServico implements Notificador</code> sem tocar em <code>PedidoServico</code>.</p>
+
+      <h3>Um container de DI simples, feito à mão</h3>
+      <p>Quando o número de dependências cresce, montar tudo manualmente em um <code>main</code> vira um emaranhado. Um <strong>container de IoC</strong> resolve isso: você registra "receitas" de como criar cada tipo, e o container resolve a árvore de dependências automaticamente.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">ContainerSimples</span> {
+    <span class="kw">private final</span> Map&lt;Class&lt;?&gt;, Object&gt; instancias = <span class="kw">new</span> HashMap&lt;&gt;();
+
+    <span class="kw">public</span> &lt;T&gt; <span class="kw">void</span> <span class="fn">registrar</span>(Class&lt;T&gt; tipo, T instancia) {
+        instancias.put(tipo, instancia);
+    }
+
+    <span class="annotation">@SuppressWarnings</span>(<span class="str">"unchecked"</span>)
+    <span class="kw">public</span> &lt;T&gt; T <span class="fn">resolver</span>(Class&lt;T&gt; tipo) {
+        <span class="kw">return</span> (T) instancias.get(tipo);
+    }
+}
+
+<span class="com">// "montagem" da aplicação, uma única vez:</span>
+<span class="cls">ContainerSimples</span> container = <span class="kw">new</span> <span class="cls">ContainerSimples</span>();
+container.registrar(Notificador.<span class="kw">class</span>, <span class="kw">new</span> <span class="cls">EmailServico</span>());
+container.registrar(<span class="cls">PedidoServico</span>.<span class="kw">class</span>,
+    <span class="kw">new</span> <span class="cls">PedidoServico</span>(container.resolver(Notificador.<span class="kw">class</span>)));
+
+<span class="cls">PedidoServico</span> servico = container.resolver(<span class="cls">PedidoServico</span>.<span class="kw">class</span>);</pre>
+
+      <div class="secret">Isso, em miniatura ingênua, <strong>é</strong> o que o <code>ApplicationContext</code> do Spring faz — só que em escala industrial: ele faz um scan via reflection (capítulo 20) por classes anotadas com <code>@Component</code>/<code>@Service</code>/<code>@Repository</code>, decide sozinho a ordem de criação analisando quem depende de quem, cria cada instância (chamada de <em>bean</em>) e injeta as dependências nos construtores ou campos <code>@Autowired</code> — automaticamente. Quando você aprender Spring, cada <code>@Autowired</code> vai literalmente significar "o container, resolva essa dependência para mim", exatamente como <code>container.resolver(...)</code> fez aqui.</div>
+
+      <h3>Os três tipos de injeção</h3>
+      <table class="cmp">
+        <tbody><tr><th>Tipo</th><th>Como</th><th>Recomendação</th></tr>
+        <tr><td>Via construtor</td><td>Parâmetro do construtor, como no exemplo acima</td><td><strong>Preferida</strong> — permite campos <code>final</code>, deixa dependências obrigatórias explícitas, facilita testes</td></tr>
+        <tr><td>Via setter</td><td>Um método <code>setNotificador(Notificador n)</code></td><td>Para dependências opcionais</td></tr>
+        <tr><td>Via campo</td><td>Direto no campo (no Spring: <code>@Autowired private Notificador n;</code>)</td><td>Mais conveniente, mas dificulta testes e esconde dependências — evite quando possível</td></tr>
+      </tbody></table>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 22.1 — Refatorando para injeção de dependência</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Pegue a classe <code>Biblioteca</code> (capítulo 17). Crie uma interface <code>NotificadorEmprestimo</code> com <code>void notificar(String mensagem)</code>. Refatore <code>Biblioteca</code> para receber um <code>NotificadorEmprestimo</code> via construtor, e chame <code>notificar(...)</code> dentro de <code>emprestar(...)</code> quando o empréstimo for bem-sucedido. Escreva um teste JUnit que usa um <code>NotificadorEmprestimo</code> "falso" (uma classe simples que só guarda a última mensagem recebida em uma lista) para verificar que a notificação foi disparada, sem enviar nada de verdade.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public interface</span> <span class="cls">NotificadorEmprestimo</span> {
+    <span class="kw">void</span> <span class="fn">notificar</span>(<span class="kw">String</span> mensagem);
+}
+
+<span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="kw">private final</span> List&lt;<span class="cls">ItemAcervo</span>&gt; acervo = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">private final</span> <span class="cls">NotificadorEmprestimo</span> notificador;
+
+    <span class="kw">public</span> <span class="fn">Biblioteca</span>(<span class="cls">NotificadorEmprestimo</span> notificador) {
+        <span class="kw">this</span>.notificador = notificador;
+    }
+
+    <span class="kw">public void</span> <span class="fn">emprestar</span>(<span class="kw">String</span> codigo) <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        <span class="cls">ItemAcervo</span> item = acervo.stream()
+            .filter(i -&gt; i.getCodigo().equals(codigo))
+            .findFirst()
+            .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">ItemIndisponivelException</span>(<span class="str">"Item não encontrado"</span>));
+        <span class="kw">if</span> (!item.disponivelParaEmprestimo()) {
+            <span class="kw">throw new</span> <span class="cls">ItemIndisponivelException</span>(<span class="str">"Item já emprestado"</span>);
+        }
+        item.emprestar();
+        notificador.notificar(<span class="str">"Empréstimo realizado: "</span> + item.getTitulo());
+    }
+    <span class="kw">public void</span> <span class="fn">adicionar</span>(<span class="cls">ItemAcervo</span> i) { acervo.add(i); }
+}
+
+<span class="com">// --- classe de teste "falsa" (test double) ---</span>
+<span class="kw">class</span> <span class="cls">NotificadorFalso</span> <span class="kw">implements</span> <span class="cls">NotificadorEmprestimo</span> {
+    List&lt;<span class="kw">String</span>&gt; mensagens = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="kw">String</span> mensagem) { mensagens.add(mensagem); }
+}
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveNotificarAoEmprestar</span>() <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+    <span class="cls">NotificadorFalso</span> fake = <span class="kw">new</span> <span class="cls">NotificadorFalso</span>();
+    <span class="cls">Biblioteca</span> biblioteca = <span class="kw">new</span> <span class="cls">Biblioteca</span>(fake); <span class="com">// injeção manual do "mock"</span>
+    biblioteca.adicionar(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Clean Code"</span>, <span class="str">"L001"</span>, <span class="str">"Robert Martin"</span>));
+
+    biblioteca.emprestar(<span class="str">"L001"</span>);
+
+    assertEquals(1, fake.mensagens.size());
+}</pre>
+        </div>
+      </div>
+    </section>

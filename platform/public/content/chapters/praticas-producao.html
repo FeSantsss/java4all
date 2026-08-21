@@ -1,0 +1,64 @@
+<section class="section tk-devops" id="praticas-producao">
+      <div class="section-head"><span class="section-num">59</span><h2 class="section-title">Práticas de produção: parity, backup, feature flags &amp; versionamento</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">DevOps</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#hospedagem-db">39 · Onde hospedar o banco</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#cicd">58 · CI/CD</a></div>
+      </div>
+
+      <p>Quatro práticas que raramente aparecem em tutorial nenhum, mas que separam "sei fazer deploy" de "sei operar um sistema em produção".</p>
+
+      <h4 class="sub">Environment Parity — "funciona na minha máquina" é um sintoma, não uma desculpa</h4>
+      <p>Quanto mais diferente seu ambiente de dev é do de produção (versão do Postgres, versão do Java, variáveis diferentes), mais surpresas desagradáveis esperam no deploy. <strong>Environment parity</strong> é o princípio de manter dev, staging e produção o mais parecidos possível.</p>
+      <div class="analogy">É como ensaiar uma peça de teatro no palco real em vez de só na sala de ensaio — quanto mais o ensaio se parece com a apresentação de verdade (mesma iluminação, mesmo som, mesmo espaço), menos surpresa acontece na estreia. Docker (capítulos 30-32) é a ferramenta que mais ajuda aqui: a mesma imagem que roda no seu Compose local é, idealmente, exatamente a mesma que roda em produção.</div>
+
+      <h4 class="sub">Backup &amp; Disaster Recovery</h4>
+      <p>Ninguém pensa em backup até o dia em que precisa dele — e nesse dia, já é tarde para configurar. Todo provedor de banco gerenciado (capítulo 39) sério oferece <strong>backup automático</strong> e, frequentemente, <strong>point-in-time recovery</strong> (restaurar o banco para o estado exato de um momento específico, não só do último backup diário).</p>
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Confirme que backups automáticos estão <strong>ativados</strong> no provedor escolhido — não é sempre o padrão.</li>
+          <li>Teste a restauração pelo menos uma vez — um backup nunca testado é uma suposição, não uma garantia.</li>
+          <li>Backup não substitui as migrations do Flyway (capítulo 35) — um protege dados, o outro protege estrutura; você precisa dos dois.</li>
+        </ul>
+      </div>
+
+      <h4 class="sub">Feature Flags — deploy de código sem ativar a funcionalidade</h4>
+      <p>Um <strong>feature flag</strong> separa "o código está em produção" de "a funcionalidade está visível para os usuários" — permitindo fazer deploy de código incompleto ou arriscado com segurança, ativando gradualmente.</p>
+      <pre class="code"><span class="kw">if</span> (featureFlags.isEnabled(<span class="str">"novo-checkout"</span>, usuario)) {
+    <span class="kw">return</span> novoFluxoCheckout(pedido);
+}
+<span class="kw">return</span> fluxoCheckoutAtual(pedido); <span class="com">// comportamento padrão, sem risco</span></pre>
+      <div class="secret">Isso conecta direto com o Strategy Pattern do capítulo 23 — uma feature flag é, na essência, uma decisão de qual "estratégia" executar em runtime, só que a decisão vem de configuração externa (às vezes um simples <code>application.properties</code>, às vezes uma ferramenta dedicada como LaunchDarkly) em vez de lógica fixa no código. Isso permite desligar uma funcionalidade problemática em produção <strong>sem</strong> precisar de um novo deploy — só mudando a flag.</div>
+
+      <h4 class="sub">Versionamento de API — evoluir sem quebrar quem já usa</h4>
+      <p>Sua API já tem clientes reais consumindo (o próprio front-end, capítulos futuros). Mudar um campo de resposta sem cuidado quebra tudo que depende dela silenciosamente.</p>
+      <pre class="code">GET /api/v1/livros    <span class="com">-- versão atual, clientes antigos continuam funcionando</span>
+GET /api/v2/livros    <span class="com">-- nova versão, com mudanças incompatíveis, coexistindo com v1</span></pre>
+      <div class="analogy">É a mesma lógica do Semantic Versioning que bibliotecas usam (<code>MAJOR.MINOR.PATCH</code>): mudanças que quebram compatibilidade incrementam a versão maior (v1 → v2), permitindo que clientes migrem no seu próprio ritmo, em vez de serem forçados a atualizar da noite para o dia porque a API mudou embaixo deles sem aviso.</div>
+
+      <div class="study-tip">Nenhuma dessas quatro práticas precisa ser implementada com ferramentas sofisticadas desde o primeiro projeto. Comece simples: environment parity via Docker Compose (que você já tem), backup ativado no painel do provedor (um clique), uma flag booleana lida de <code>application.properties</code>, e um prefixo <code>/api/v1</code> nas suas rotas desde o início. A disciplina importa mais que a ferramenta.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 59.1 — Feature flag simples</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Adicione uma propriedade <code>feature.busca-avancada.enabled=false</code> ao <code>application.properties</code>. No <code>LivroController</code>, injete esse valor com <code>@Value("${feature.busca-avancada.enabled}")</code> e use-o para decidir, no endpoint de listagem, se aplica um filtro de busca avançado (pode ser um comentário simulando a lógica) ou o comportamento padrão.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@RestController</span>
+<span class="kw">public class</span> <span class="cls">LivroController</span> {
+
+    <span class="annotation">@Value</span>(<span class="str">"${feature.busca-avancada.enabled}"</span>)
+    <span class="kw">private boolean</span> buscaAvancadaHabilitada;
+
+    <span class="annotation">@GetMapping</span>(<span class="str">"/api/v1/livros"</span>)
+    <span class="kw">public</span> List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">listar</span>(<span class="annotation">@RequestParam</span>(required=<span class="kw">false</span>) <span class="kw">String</span> q) {
+        <span class="kw">if</span> (buscaAvancadaHabilitada &amp;&amp; q != <span class="kw">null</span>) {
+            <span class="kw">return</span> servico.buscaAvancada(q); <span class="com">// lógica nova, só ativa com a flag</span>
+        }
+        <span class="kw">return</span> servico.listarTodos(); <span class="com">// comportamento padrão, sempre seguro</span>
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

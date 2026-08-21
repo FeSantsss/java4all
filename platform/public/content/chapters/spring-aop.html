@@ -1,0 +1,90 @@
+<section class="section tk-spring" id="spring-aop">
+      <div class="section-head"><span class="section-num">67</span><h2 class="section-title">Spring AOP — formalizando o dynamic proxy</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a> (dynamic proxy), <a class="prereq-tag" href="#spring-security">52 · Spring Security</a>, <a class="prereq-tag" href="#resilience">55 · Resilience4j</a></div>
+      </div>
+
+      <p>Você já viu o efeito de AOP quatro vezes no curso — <code>@Transactional</code>, <code>@PreAuthorize</code>, <code>@CircuitBreaker</code>, <code>@Cacheable</code> (próximo capítulo) — sempre com a mesma explicação de "dynamic proxy intercepta a chamada". Este capítulo formaliza esse padrão para você escrever o <strong>seu próprio</strong> aspecto.</p>
+
+      <div class="analogy"><strong>AOP</strong> (Aspect-Oriented Programming) existe para resolver "preocupações transversais" — código que se repetiria de forma idêntica em dezenas de métodos não relacionados entre si (logar tempo de execução, verificar permissão, abrir transação). Pense nisso como uma câmera de segurança instalada no teto de um prédio, em vez de pedir para cada funcionário carregar sua própria câmera pessoal — uma única "camada" observa tudo, sem precisar duplicar o código de vigilância em cada sala.</div>
+
+      <pre class="code"><span class="annotation">@Aspect</span>
+<span class="annotation">@Component</span>
+<span class="kw">public class</span> <span class="cls">LogExecucaoAspect</span> {
+
+    <span class="kw">private static final</span> Logger log = LoggerFactory.getLogger(<span class="cls">LogExecucaoAspect</span>.<span class="kw">class</span>);
+
+    <span class="com">// "pointcut": QUAIS métodos interceptar -- todo método em qualquer classe do pacote servico</span>
+    <span class="annotation">@Around</span>(<span class="str">"execution(* com.felipy.biblioteca.servico..*(..))"</span>)
+    <span class="kw">public</span> <span class="kw">Object</span> <span class="fn">medirTempo</span>(ProceedingJoinPoint joinPoint) <span class="kw">throws</span> <span class="cls">Throwable</span> {
+        <span class="kw">long</span> inicio = System.nanoTime();
+        <span class="kw">Object</span> resultado = joinPoint.proceed(); <span class="com">// chama o método REAL -- exatamente como metodo.invoke() do capítulo 20</span>
+        <span class="kw">long</span> duracaoMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - inicio);
+        log.info(<span class="str">"{} executou em {}ms"</span>, joinPoint.getSignature(), duracaoMs);
+        <span class="kw">return</span> resultado;
+    }
+}</pre>
+
+      <h3>Os tipos de advice</h3>
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Quando executa</th></tr>
+        <tr><td><code>@Before</code></td><td>Antes do método real</td></tr>
+        <tr><td><code>@After</code></td><td>Depois do método real (sucesso ou exceção)</td></tr>
+        <tr><td><code>@AfterReturning</code></td><td>Só se o método retornar normalmente</td></tr>
+        <tr><td><code>@AfterThrowing</code></td><td>Só se o método lançar exceção</td></tr>
+        <tr><td><code>@Around</code></td><td>Envolve a chamada inteira — o mais poderoso, permite decidir se o método real roda ou não</td></tr>
+      </tbody></table>
+
+      <h3>Uma anotação customizada, como o seu @LogExecucao do capítulo 20 — agora funcionando de verdade</h3>
+      <pre class="code"><span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="annotation">@Target</span>(ElementType.METHOD)
+<span class="kw">public @interface</span> <span class="cls">MedirTempo</span> {}
+
+<span class="annotation">@Aspect</span> <span class="annotation">@Component</span>
+<span class="kw">public class</span> <span class="cls">MedirTempoAspect</span> {
+    <span class="annotation">@Around</span>(<span class="str">"@annotation(MedirTempo)"</span>) <span class="com">// intercepta qualquer método marcado com @MedirTempo</span>
+    <span class="kw">public</span> <span class="kw">Object</span> <span class="fn">medir</span>(ProceedingJoinPoint jp) <span class="kw">throws</span> <span class="cls">Throwable</span> { <span class="com">/* ... */</span> }
+}
+
+<span class="com">// uso, em qualquer service:</span>
+<span class="annotation">@MedirTempo</span>
+<span class="kw">public void</span> <span class="fn">processarPedido</span>(<span class="cls">Pedido</span> p) { ... }</pre>
+
+      <div class="secret">Este é o fechamento do ciclo que começou no capítulo 20: seu <code>@LogExecucao</code> lá era só metadado lido manualmente. Aqui, o <code>@Aspect</code> registra automaticamente um dynamic proxy (capítulo 20) para toda classe gerenciada pelo Spring cujo método bata com o <em>pointcut</em> — exatamente o mesmo mecanismo por trás de <code>@Transactional</code>, <code>@PreAuthorize</code> e <code>@CircuitBreaker</code>, só que agora você escreve a <strong>regra de interceptação</strong> em vez de só consumir uma pronta.</div>
+
+      <div class="warn"><b>A mesma limitação do proxy sempre se aplica:</b> chamar um método anotado a partir de <strong>outro método da mesma classe</strong> (<code>this.metodoAnotado()</code>) nunca passa pelo proxy, então o aspecto nunca dispara — a chamada interna não passa pela "câmera de segurança" que só observa chamadas vindas de fora da classe. Isso já apareceu no capítulo 52, e reaparece aqui pela mesma razão estrutural.</div>
+
+      <div class="study-tip">Não crie aspectos customizados como primeira solução — a maioria dos casos de uso reais já é coberta pelos aspectos prontos do Spring (<code>@Transactional</code>, <code>@Cacheable</code>, <code>@PreAuthorize</code>). Escreva seu próprio <code>@Aspect</code> quando identificar uma preocupação transversal genuinamente específica do seu domínio, repetida em muitos lugares — não para logar uma única chamada, onde um log direto já resolveria mais simplesmente.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 70.1 — Aspecto de auditoria</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma anotação <code>@Auditavel</code> e um <code>@Aspect</code> correspondente que, usando <code>@Around</code>, registra em log o nome do método, os argumentos recebidos e se a execução terminou com sucesso ou exceção. Aplique em um método de <code>Biblioteca</code> (ex: <code>emprestar</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Retention</span>(RetentionPolicy.RUNTIME)
+<span class="annotation">@Target</span>(ElementType.METHOD)
+<span class="kw">public @interface</span> <span class="cls">Auditavel</span> {}
+
+<span class="annotation">@Aspect</span> <span class="annotation">@Component</span>
+<span class="kw">public class</span> <span class="cls">AuditoriaAspect</span> {
+    <span class="kw">private static final</span> Logger log = LoggerFactory.getLogger(<span class="cls">AuditoriaAspect</span>.<span class="kw">class</span>);
+
+    <span class="annotation">@Around</span>(<span class="str">"@annotation(Auditavel)"</span>)
+    <span class="kw">public</span> <span class="kw">Object</span> <span class="fn">auditar</span>(ProceedingJoinPoint jp) <span class="kw">throws</span> <span class="cls">Throwable</span> {
+        log.info(<span class="str">"Chamando {}"</span>, jp.getSignature().getName()); <span class="com">// não registre args: podem conter senha, token ou PII</span>
+        <span class="kw">try</span> {
+            <span class="kw">Object</span> resultado = jp.proceed();
+            log.info(<span class="str">"{} concluído com sucesso"</span>, jp.getSignature().getName());
+            <span class="kw">return</span> resultado;
+        } <span class="kw">catch</span> (<span class="cls">Throwable</span> e) {
+            log.warn(<span class="str">"{} lançou exceção: {}"</span>, jp.getSignature().getName(), e.getMessage());
+            <span class="kw">throw</span> e; <span class="com">// SEMPRE relance -- um aspecto nunca deve engolir a exceção original</span>
+        }
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

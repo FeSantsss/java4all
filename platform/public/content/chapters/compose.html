@@ -1,0 +1,80 @@
+<section class="section tk-docker" id="compose">
+      <div class="section-head"><span class="section-num">32</span><h2 class="section-title">Docker Compose — app + banco juntos</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-docker">Docker</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#dockerfile">31 · Dockerfile</a></div>
+      </div>
+
+      <p>Um sistema real não é um container sozinho — é a API, o banco, talvez um Redis e um Kafka, todos rodando juntos e conversando entre si. <strong>Docker Compose</strong> descreve essa "orquestra" inteira em um único arquivo YAML.</p>
+
+      <pre class="code"><span class="com"># docker-compose.yml</span>
+services:
+  api:
+    build: .                    <span class="com"># usa o Dockerfile da pasta atual</span>
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/biblioteca  <span class="com"># "db" -- o NOME do serviço vira hostname!</span>
+      DB_USER: postgres
+      DB_PASSWORD: senha123
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: biblioteca
+      POSTGRES_PASSWORD: senha123
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:</pre>
+
+      <pre class="code">docker compose up -d        <span class="com"># sobe TODOS os serviços definidos</span>
+docker compose logs -f api  <span class="com"># acompanha o log só do serviço "api"</span>
+docker compose down         <span class="com"># derruba tudo (mas mantém os volumes por padrão)</span>
+docker compose down -v      <span class="com"># derruba tudo E apaga os volumes (cuidado!)</span></pre>
+
+      <div class="secret">Dentro da rede interna que o Compose cria automaticamente, os serviços se enxergam <strong>pelo nome</strong> — é por isso que a URL do banco no exemplo usa <code>db</code> (o nome do serviço), não <code>localhost</code>. Esse é o ponto que mais confunde quem começa: de dentro do container da API, <code>localhost</code> se refere ao <em>próprio container da API</em>, não ao container do banco ao lado.</div>
+
+      <div class="warn"><b>depends_on não espera o banco "estar pronto"</b> — só espera o container <em>ter iniciado</em>, o que não é o mesmo que o Postgres já aceitar conexões. Em produção real, isso é resolvido com healthchecks no Compose ou lógica de retry na própria aplicação (Spring Boot tem isso configurável).</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 32.1 — Ambiente completo com Compose</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva um <code>docker-compose.yml</code> com dois serviços: <code>api</code> (build a partir do Dockerfile do capítulo 31, porta 8080) e <code>db</code> (Postgres 16, com volume nomeado e variáveis de ambiente para nome do banco, usuário e senha). Suba tudo com um único comando e confirme com <code>docker compose ps</code> que os dois serviços estão de pé.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/biblioteca
+      DB_USER: postgres
+      DB_PASSWORD: biblioteca123
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: biblioteca
+      POSTGRES_PASSWORD: biblioteca123
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:</pre>
+<pre class="code">docker compose up -d
+docker compose ps</pre>
+        </div>
+      </div>
+    </section>

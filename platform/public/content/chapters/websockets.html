@@ -1,0 +1,83 @@
+<section class="section tk-front" id="websockets">
+      <div class="section-head"><span class="section-num">64</span><h2 class="section-title">WebSockets — quando HTTP não basta</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-front">Tempo real</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#conectando-front-back">62 · Conectando front e back</a>, <a class="prereq-tag" href="#threads">14 · Threads &amp; concorrência</a></div>
+      </div>
+
+      <p>Todo o curso até aqui usou o modelo requisição/resposta: o cliente pergunta, o servidor responde, a conexão fecha. Isso não serve para "o servidor avisar o cliente sozinho" — um chat, uma notificação ao vivo, um dashboard atualizando sem o usuário recarregar a página.</p>
+
+      <div class="analogy">HTTP tradicional é como mandar uma carta e esperar a resposta chegar pelo correio a cada pergunta nova — funcional, mas cada troca exige uma carta nova do zero. WebSocket é abrir uma <strong>ligação telefônica</strong> que fica aberta: depois de discar uma vez (o "handshake" inicial), os dois lados podem falar a qualquer momento, sem precisar disparar uma requisição nova para cada mensagem.</div>
+
+      <h3>Quando usar (e quando NÃO usar)</h3>
+      <table class="cmp">
+        <tbody><tr><th>Cenário</th><th>Ferramenta</th></tr>
+        <tr><td>Listar livros, criar pedido, qualquer CRUD comum</td><td>REST tradicional (capítulo 26) — mais simples, cacheável, já dominado</td></tr>
+        <tr><td>Chat em tempo real</td><td>WebSocket</td></tr>
+        <tr><td>Notificação instantânea ("seu empréstimo está atrasado")</td><td>WebSocket (ou Server-Sent Events, mais simples para via única servidor→cliente)</td></tr>
+        <tr><td>Dashboard com métricas atualizando sozinho</td><td>WebSocket</td></tr>
+      </tbody></table>
+
+      <h3>Spring WebSocket — configuração básica</h3>
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="annotation">@EnableWebSocketMessageBroker</span>
+<span class="kw">public class</span> <span class="cls">WebSocketConfig</span> <span class="kw">implements</span> WebSocketMessageBrokerConfigurer {
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public void</span> <span class="fn">registerStompEndpoints</span>(StompEndpointRegistry registry) {
+        registry.addEndpoint(<span class="str">"/ws"</span>).setAllowedOrigins(<span class="str">"http://localhost:5173"</span>); <span class="com">// CORS, capítulo 50, aplicado aqui também</span>
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public void</span> <span class="fn">configureMessageBroker</span>(MessageBrokerRegistry registry) {
+        registry.enableSimpleBroker(<span class="str">"/topico"</span>); <span class="com">// canais que o servidor publica para</span>
+        registry.setApplicationDestinationPrefixes(<span class="str">"/app"</span>); <span class="com">// prefixo para mensagens do cliente</span>
+    }
+}
+
+<span class="annotation">@Controller</span>
+<span class="kw">public class</span> <span class="cls">NotificacaoController</span> {
+    <span class="annotation">@MessageMapping</span>(<span class="str">"/emprestimo"</span>)      <span class="com">// cliente manda para /app/emprestimo</span>
+    <span class="annotation">@SendTo</span>(<span class="str">"/topico/notificacoes"</span>)  <span class="com">// servidor retransmite para todos inscritos</span>
+    <span class="kw">public</span> <span class="cls">Notificacao</span> <span class="fn">notificar</span>(<span class="cls">PedidoEmprestimo</span> pedido) {
+        <span class="kw">return new</span> <span class="cls">Notificacao</span>(<span class="str">"Livro emprestado: "</span> + pedido.getTitulo());
+    }
+}</pre>
+
+      <pre class="code"><span class="com">// front-end (usando a biblioteca STOMP sobre SockJS):</span>
+<span class="kw">const</span> socket = <span class="kw">new</span> SockJS(<span class="str">`${import.meta.env.VITE_API_URL}/ws`</span>);
+<span class="kw">const</span> stompClient = Stomp.over(socket);
+
+stompClient.connect({}, () =&gt; {
+  stompClient.subscribe(<span class="str">'/topico/notificacoes'</span>, (mensagem) =&gt; {
+    <span class="kw">const</span> notificacao = JSON.parse(mensagem.body);
+    <span class="fn">exibirNotificacao</span>(notificacao.texto); <span class="com">// atualiza a UI sem recarregar a página</span>
+  });
+});</pre>
+
+      <div class="secret">Uma conexão WebSocket permanece aberta e consome socket, buffers, estado e capacidade do event loop ou runtime, mas servidores não bloqueantes não dedicam necessariamente uma thread por conexão. Em escala, planeje autenticação no handshake e nas mensagens, heartbeat, reconexão com backoff, limites, backpressure, broker relay e distribuição entre instâncias.</div>
+
+      <div class="study-tip">Não introduza WebSocket "porque é mais moderno" — ele resolve um problema específico (servidor precisa falar primeiro) que REST não resolve bem. Se o seu projeto não tem nenhuma funcionalidade de tempo real genuína, adicionar WebSocket só aumenta complexidade sem benefício real. Pergunte sempre: "o usuário precisa ver isso mudar na tela sem recarregar, iniciado pelo servidor?" — só aí vale a pena.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 64.1 — Notificação de empréstimo em tempo real</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Configure um endpoint WebSocket <code>/ws</code> no back-end da biblioteca. Ao chamar o endpoint REST de empréstimo (capítulo 44/52), publique também uma mensagem no tópico <code>/topico/notificacoes</code> informando qual livro foi emprestado — de forma que qualquer cliente conectado via WebSocket receba a notificação instantaneamente, sem precisar dar refresh na página.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="kw">private final</span> SimpMessagingTemplate mensageria; <span class="com">// injeção, capítulo 22</span>
+
+    <span class="kw">public</span> <span class="fn">Biblioteca</span>(SimpMessagingTemplate mensageria) { <span class="kw">this</span>.mensageria = mensageria; }
+
+    <span class="kw">public void</span> <span class="fn">emprestar</span>(<span class="kw">String</span> codigo) <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        <span class="com">// ... lógica de empréstimo já existente (capítulo 17/22) ...</span>
+        mensageria.convertAndSend(<span class="str">"/topico/notificacoes"</span>,
+            <span class="kw">new</span> <span class="cls">Notificacao</span>(<span class="str">"Livro emprestado: "</span> + codigo));
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

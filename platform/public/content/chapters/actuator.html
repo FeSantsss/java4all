@@ -1,0 +1,80 @@
+<section class="section tk-devops" id="actuator">
+      <div class="section-head"><span class="section-num">56</span><h2 class="section-title">Spring Boot Actuator &amp; health checks</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">DevOps</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">43 · Spring Core</a>, <a class="prereq-tag" href="#compose">32 · Docker Compose</a></div>
+      </div>
+
+      <p>Como você sabe se sua aplicação em produção está "de pé" e saudável, sem precisar logar manualmente no servidor? <strong>Actuator</strong> expõe endpoints prontos com informações operacionais da aplicação.</p>
+
+      <pre class="code"><span class="com">&lt;!-- pom.xml --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre>
+
+      <pre class="code">GET /actuator/health
+<span class="com">{"status": "UP"}</span>
+
+GET /actuator/health   <span class="com">(com detalhes habilitados)</span>
+<span class="com">{
+  "status": "UP",
+  "components": {
+    "db": {"status": "UP"},
+    "diskSpace": {"status": "UP"}
+  }
+}</span></pre>
+
+      <div class="analogy"><code>/actuator/health</code> é um sinal operacional. Kubernetes pode usar probes para retirar uma instância do tráfego ou reiniciá-la conforme a configuração. Docker e Compose, isoladamente, apenas marcam o container como <code>unhealthy</code>; o <code>HEALTHCHECK</code> não cria uma política automática de restart.</div>
+
+      <pre class="code"><span class="com"># docker-compose.yml -- usando o health check para o Compose saber quando a API está pronta:</span>
+services:
+  api:
+    build: .
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+<span class="com"># a imagem precisa conter wget; se não contiver, use um probe disponível
+# ou faça a checagem externamente. Não adicione curl sem ajustar a imagem.</span></pre>
+
+      <h3>Outros endpoints úteis</h3>
+      <table class="cmp">
+        <tbody><tr><th>Endpoint</th><th>Mostra</th></tr>
+        <tr><td><code>/actuator/health</code></td><td>Status geral e de dependências (banco, disco)</td></tr>
+        <tr><td><code>/actuator/metrics</code></td><td>Métricas de JVM, requisições, threads</td></tr>
+        <tr><td><code>/actuator/info</code></td><td>Metadados customizáveis da aplicação (versão, build)</td></tr>
+        <tr><td><code>/actuator/loggers</code></td><td>Ver e <strong>alterar</strong> nível de log em runtime, sem reiniciar</td></tr>
+      </tbody></table>
+
+      <div class="warn"><b>Nunca exponha o Actuator completo publicamente sem proteção</b> — endpoints como <code>/actuator/env</code> podem vazar variáveis de ambiente (incluindo secrets, capítulo seguinte). Em produção, restrinja quais endpoints ficam expostos e proteja-os atrás de autenticação (capítulo 52), geralmente liberando só <code>/actuator/health</code> publicamente para health checks de infraestrutura.</div>
+
+      <div class="study-tip">Habilite o Actuator desde o primeiro dia do projeto, mesmo antes de precisar dele — é mais fácil configurar corretamente (incluindo o que deve ou não ficar público) desde o início do que descobrir em produção, sob pressão, que um endpoint sensível estava exposto o tempo todo.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 56.1 — Health check no Compose</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Adicione o Actuator ao projeto da biblioteca. Configure um <code>healthcheck</code> no serviço <code>api</code> do <code>docker-compose.yml</code> (capítulo 32), apontando para <code>/actuator/health</code>, e ajuste o <code>depends_on</code> do serviço para esperar o healthcheck do banco também (dica: <code>depends_on: db: condition: service_healthy</code>).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">services:
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+
+  db:
+    image: postgres:16
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s</pre>
+        </div>
+      </div>
+    </section>

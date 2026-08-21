@@ -1,0 +1,28 @@
+<section class="section tk-spring" id="estrategia-testes">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Estratégia de testes: slices, contratos, concorrência e qualidade</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~5h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#testcontainers">Testcontainers</a>, <a class="prereq-tag" href="#mockito">Mockito</a></div></div>
+      
+      <p>Uma suíte útil oferece feedback rápido e confiança proporcional ao risco. Testes unitários isolam regras; slices verificam uma camada com infraestrutura reduzida; integração verifica fronteiras reais; end-to-end cobre poucos fluxos críticos. Nenhuma única categoria substitui as outras.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Da unidade à jornada completa</h3></div>
+    <p>O tamanho de um teste é definido pelo que ele integra, não pelo número de linhas do método.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Unitário</dt><dd>Verifica uma unidade de comportamento com dependências simples ou substituídas; deve localizar falhas rapidamente.</dd></div><div class="concept-card"><dt>Slice</dt><dd>Carrega uma fatia do Spring, como MVC ou JPA, evitando o contexto completo.</dd></div><div class="concept-card"><dt>Integração</dt><dd>Verifica a colaboração com fronteiras reais relevantes, como PostgreSQL ou Kafka.</dd></div><div class="concept-card"><dt>Contrato</dt><dd>Verifica que consumidor e provedor concordam sobre mensagens, campos e semântica.</dd></div><div class="concept-card"><dt>End-to-end (E2E)</dt><dd>Exercita uma jornada por várias camadas do sistema; é valioso, porém mais lento e difícil de diagnosticar.</dd></div><div class="concept-card"><dt>Mutation testing</dt><dd>Altera deliberadamente o código e verifica se os testes detectam a mudança; mutante sobrevivente revela uma asserção fraca ou ausência de cenário.</dd></div></dl>
+  </aside>
+      <table class="cmp"><tbody><tr><th>Ferramenta</th><th>Escopo</th></tr><tr><td>JUnit + AssertJ</td><td>regra pura, exemplos e testes parametrizados</td></tr><tr><td><code>@WebMvcTest</code></td><td>contrato MVC, JSON, validation e security web</td></tr><tr><td><code>@DataJpaTest</code></td><td>mapeamento, queries, constraints e locks</td></tr><tr><td><code>@SpringBootTest</code></td><td>integração ampla; use quando precisa do contexto completo</td></tr><tr><td>Testcontainers</td><td>serviço real descartável, não isolamento automático dos dados</td></tr></tbody></table>
+      <pre class="code"><span class="annotation">@WebMvcTest</span>(PedidoController.class)
+<span class="kw">class</span> PedidoControllerTest {
+    <span class="annotation">@Autowired</span> MockMvc mvc;
+    <span class="annotation">@MockitoBean</span> CriarPedido casoDeUso;
+
+    <span class="annotation">@Test</span> <span class="kw">void</span> rejeitaQuantidadeInvalida() <span class="kw">throws</span> Exception {
+        mvc.perform(post(<span class="str">"/pedidos"</span>).contentType(APPLICATION_JSON)
+            .content(<span class="str">"{"produtoId":1,"quantidade":0}"</span>))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath(<span class="str">"$.status"</span>).value(400));
+    }
+}</pre>
+      <p>Em versões atuais do Spring Boot, prefira <code>@MockitoBean</code> ao antigo <code>@MockBean</code>. Para Testcontainers integrado ao Boot, <code>@ServiceConnection</code> reduz configuração manual. Um container estático pode ser compartilhado pela classe; limpe dados, use rollback ou bancos/schemas exclusivos quando os testes exigirem isolamento.</p>
+      <h3>Assíncrono, contratos e mutação</h3>
+      <p>Não use <code>Thread.sleep</code> como sincronização. Espere uma condição observável com timeout. Testes de contrato verificam compatibilidade entre consumidor e provedor; testes de migration partem da versão anterior do schema; mutation testing revela testes que executam código sem realmente distinguir comportamento.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — pirâmide de confiança</h4><span class="exercise-tag d">difícil</span></div><p>Para o fluxo criar pedido, escreva testes de domínio, MVC, repository com PostgreSQL real, migration e evento Kafka. Introduza propositalmente uma duplicata e comprove a idempotência.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>A suíte deve ser repetível em qualquer ordem, não depender de portas fixas, ter timeouts explícitos e produzir diagnóstico útil quando falhar.</p></div></div>
+    </section>

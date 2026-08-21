@@ -1,0 +1,21 @@
+<section class="section tk-java" id="arrays-matrizes">
+      <div class="section-head"><span class="section-num">06</span><h2 class="section-title">Arrays, matrizes e raciocínio por índice</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Iniciante+</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#lacos-repeticao">Laços</a></div></div>
+      <p>Array é um objeto de tamanho fixo que armazena elementos do mesmo tipo. A variável guarda uma referência; o objeto array conhece seu tamanho por <code>length</code>. Fixar isso evita a falsa ideia de que <code>int[]</code> é apenas uma lista de variáveis soltas.</p>
+      <pre class="code"><span class="kw">int</span>[] notas = {<span class="num">7</span>, <span class="num">9</span>, <span class="num">6</span>};
+notas[<span class="num">1</span>] = <span class="num">10</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    System.out.printf(<span class="str">"notas[%d] = %d%n"</span>, i, notas[i]);
+}</pre>
+      <h3>Cópia rasa e mutabilidade</h3>
+      <pre class="code"><span class="kw">int</span>[] a = {<span class="num">1</span>, <span class="num">2</span>};
+<span class="kw">int</span>[] b = a;                 <span class="com">// mesmo array</span>
+<span class="kw">int</span>[] c = a.clone();         <span class="com">// novo array de primitivos</span>
+b[<span class="num">0</span>] = <span class="num">99</span>;                    <span class="com">// a[0] também vira 99</span></pre>
+      <p>Em arrays de objetos, <code>clone</code> cria outro array, mas copia referências dos elementos. Os objetos internos continuam compartilhados. Isso é uma cópia rasa.</p>
+      <h3>Matrizes são arrays de arrays</h3>
+      <p><code>int[][]</code> não exige linhas do mesmo tamanho. Cada linha é outro array e pode até ser <code>null</code>. Percorra usando <code>matriz.length</code> para linhas e <code>matriz[i].length</code> para colunas.</p>
+      <div class="warn"><b>Array não cresce.</b> Se o tamanho varia durante a execução, a coleção adequada costuma ser <code>ArrayList</code>. Não reimplemente crescimento manual sem uma razão técnica.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Estatísticas sem atalhos</h4><span class="exercise-tag m">Prática</span></div><p>Receba um array e encontre mínimo, máximo, média e posição do primeiro máximo. Trate array vazio explicitamente.</p></div>
+    </section>

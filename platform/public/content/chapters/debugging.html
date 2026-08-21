@@ -1,0 +1,105 @@
+<section class="section" id="debugging">
+      <div class="section-head"><span class="section-num">89</span><h2 class="section-title">Técnicas de Debugging na Prática</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Ferramenta</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de prática ativa (esse capítulo se aprende fazendo, não só lendo)</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#logica-programacao">79 · Lógica de programação</a>, <a class="prereq-tag" href="#jvm-profundo">85 · JVM profundo</a> (stack frames)</div>
+      </div>
+
+      <p>O capítulo 79 ensinou "dry run" — rastrear código manualmente no papel. Um <strong>debugger</strong> é a versão automatizada e interativa dessa mesma habilidade, integrada à sua IDE, permitindo pausar a execução e inspecionar o estado exato do programa em qualquer ponto.</p>
+
+      <h3>Breakpoints — pausando a execução exatamente onde você precisa</h3>
+      <p>Um breakpoint de linha é o mais básico: clique na margem esquerda do editor (IntelliJ IDEA ou VS Code) ao lado do número da linha, e a execução pausa <strong>antes</strong> daquela linha rodar, toda vez que o fluxo do programa chegar ali.</p>
+
+      <pre class="code"><span class="kw">public</span> <span class="cls">LivroDTO</span> <span class="fn">buscarPorId</span>(<span class="kw">Long</span> id) {
+    Optional&lt;<span class="cls">Livro</span>&gt; livro = repository.findById(id);  <span class="com">← clique aqui na margem para
+                                                       breakpoint de linha</span>
+    <span class="kw">return</span> livro.map(LivroDTO::from)
+        .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">LivroNaoEncontradoException</span>(id));
+}</pre>
+
+      <p>Ao rodar em modo <strong>Debug</strong> (não "Run" normal — na IntelliJ, o ícone de inseto verde; no VS Code, F5 com a configuração de debug ativa) e a execução chegar naquela linha, tudo congela: você pode inspecionar o valor de <code>id</code>, de qualquer variável em escopo, o estado exato da Stack (capítulo 85) naquele momento.</p>
+
+      <h3>Conditional Breakpoints — pausando só quando uma condição específica é verdadeira</h3>
+      <div class="analogy">Um breakpoint comum pausa toda vez que a linha é alcançada — se esse código roda dentro de um loop de 10.000 iterações e o bug só acontece na iteração 7.432, você não quer apertar "continuar" sete mil vezes. Um <strong>breakpoint condicional</strong> é como dizer ao segurança "só me chame se o visitante que entrar tiver exatamente este nome específico" — ele só pausa quando a condição que você configurou é verdadeira.</div>
+
+      <pre class="code"><span class="com">// clique com o botão direito no breakpoint já criado, e defina uma condição:</span>
+livro.getId() == 42L
+
+<span class="com">// ou, para um loop:</span>
+<span class="kw">for</span> (<span class="cls">Livro</span> livro : todosOsLivros) {
+    processar(livro);  <span class="com">← breakpoint condicional: "livro.getPaginas() &gt; 900"
+                          -- só pausa quando encontrar um livro específico com
+                          mais de 900 páginas, ignorando todos os outros</span>
+}</pre>
+
+      <h3>Field Watchpoints — pausando quando um CAMPO muda de valor, não uma linha específica</h3>
+      <p>Às vezes você não sabe <em>onde</em> um campo está sendo alterado incorretamente — só sabe que, em algum ponto do fluxo, ele muda para um valor errado. Um <strong>watchpoint de campo</strong> (na IntelliJ: clique com botão direito no nome do campo na declaração, "Add Field Watchpoint") pausa a execução <strong>toda vez que aquele campo específico é lido ou escrito</strong>, em qualquer lugar do código, sem você precisar adivinhar onde colocar um breakpoint de linha tradicional.</p>
+
+      <div class="secret">Isso é especialmente valioso para depurar bugs de concorrência (capítulo 88) — se um campo compartilhado entre threads está sendo alterado inesperadamente, um field watchpoint revela <strong>qual thread exata</strong> e <strong>qual linha exata</strong> fez a alteração, algo quase impossível de descobrir só lendo o código estaticamente quando múltiplas threads têm acesso ao mesmo campo.</div>
+
+      <h3>Navegando a execução pausada: Step Over, Step Into, Step Out</h3>
+      <pre class="code">┌─────────────────────────────────────────────────────────────┐
+│ Você está PARADO nesta linha, prestes a executá-la:            │
+│                                                                   │
+│     LivroDTO dto = converterParaDTO(livro);                     │
+│                                                                   │
+│  STEP OVER (F8 na IntelliJ)                                     │
+│    Executa a linha INTEIRA de uma vez, incluindo qualquer        │
+│    chamada de método dentro dela, sem "entrar" no método --      │
+│    você para na PRÓXIMA linha do método atual                    │
+│                                                                   │
+│  STEP INTO (F7 na IntelliJ)                                     │
+│    "Entra" dentro do método converterParaDTO(), pausando na      │
+│    PRIMEIRA linha DENTRO dele -- útil quando o bug pode estar    │
+│    dentro dessa chamada específica                                │
+│                                                                   │
+│  STEP OUT (Shift+F8 na IntelliJ)                                │
+│    Se você já entrou em um método com Step Into e quer voltar    │
+│    para quem o chamou, Step Out executa o RESTO do método         │
+│    atual de uma vez e pausa de volta no método CHAMADOR           │
+└─────────────────────────────────────────────────────────────┘</pre>
+
+      <div class="analogy">Pense nisso como navegar capítulos de um livro com marca-páginas aninhados. Step Over é "pular para a próxima página deste capítulo, sem ler os capítulos referenciados dentro dela". Step Into é "seguir a referência e começar a ler aquele capítulo referenciado agora". Step Out é "já entendi esse capítulo referenciado, pular direto de volta para onde eu estava antes de entrar nele".</div>
+
+      <h3>Inspecionando memória: Variables, Watches e Evaluate Expression</h3>
+      <p>Com a execução pausada, a maioria das IDEs mostra um painel <strong>Variables</strong>, listando todas as variáveis em escopo naquele ponto exato — incluindo os campos de <code>this</code>, permitindo expandir objetos aninhados e navegar sua estrutura completa em memória, exatamente como o dry run manual do capítulo 79, mas sem erro humano de cálculo.</p>
+
+      <pre class="code">Painel "Variables" durante a pausa:
+┌─────────────────────────────────┐
+│ this = Biblioteca@7a3f2c1        │
+│   ├─ acervo = ArrayList size=3   │
+│   │    ├─ [0] = Livro@1b2c3d      │
+│   │    │    ├─ titulo = "1984"    │
+│   │    │    └─ codigo = "L001"    │
+│   │    ├─ [1] = Livro@4e5f6g      │
+│   │    └─ [2] = Livro@7h8i9j      │
+│   └─ notificador = EmailServico   │
+│                                    │
+│ livro = Livro@1b2c3d (parâmetro   │
+│         local do método atual)    │</pre>
+
+      <p>Um recurso ainda mais poderoso: <strong>Evaluate Expression</strong> (Alt+F8 na IntelliJ) permite executar código Java arbitrário no contexto exato da execução pausada — testar uma expressão, chamar um método, verificar uma condição — sem precisar modificar o código-fonte e reiniciar tudo.</p>
+
+      <div class="rules-box">
+        <h4>Regras de ouro do debugging eficiente</h4>
+        <ul>
+          <li>Formule uma <strong>hipótese</strong> antes de começar a debugar ("acho que o problema é X") — debugar sem hipótese vira navegação aleatória sem direção.</li>
+          <li>Comece o breakpoint o mais próximo possível de onde você suspeita que o problema está, não no início absoluto do fluxo — economiza dezenas de "Step Over" desnecessários.</li>
+          <li>Use breakpoints condicionais sempre que o bug só acontece em condições específicas dentro de loops ou chamadas repetidas.</li>
+          <li>Nunca deixe breakpoints esquecidos no código antes de commitar (capítulo 29) — eles não afetam o código em si, mas podem confundir quem for debugar depois de você.</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">A habilidade de debugar bem não vem de ler sobre debugging — vem de praticar em bugs reais, seus ou de exercícios anteriores deste curso. Pegue um exercício qualquer que você já resolveu, insira deliberadamente um bug sutil (um off-by-one, capítulo 79, ou uma condição invertida), e pratique encontrá-lo usando <strong>só</strong> o debugger, sem olhar o código com os olhos primeiro — force-se a usar Step Over/Into, inspecionar variáveis, e formular hipóteses até localizar o problema.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 92.1 — Depurando com breakpoint condicional</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando o método <code>segundoMaior</code> do exercício 79.1, insira um bug deliberado (troque <code>n &gt; maior</code> por <code>n &gt;= maior</code>) e escreva um teste com um array de 20 números aleatórios que expõe o bug apenas em alguns casos específicos. Configure um breakpoint condicional na linha do bug, ativo apenas quando <code>n == maior</code> (o caso-limite exato que expõe o defeito), e descreva o que você observaria no painel de variáveis nesse ponto exato de pausa.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Com o breakpoint condicional <code>n == maior</code> ativo, a execução só pausaria no exato momento em que o array contivesse um valor duplicado igual ao maior valor já encontrado até aquele ponto. No painel de variáveis, seria possível observar <code>maior</code> e <code>segundoMaior</code> com o mesmo valor imediatamente após essa iteração — evidenciando o bug: com <code>n &gt;= maior</code> em vez de <code>n &gt; maior</code>, um valor <em>igual</em> ao maior também dispara a atualização de <code>segundoMaior</code> para o mesmo valor de <code>maior</code>, quebrando a lógica de "segundo maior distinto" pretendida pelo exercício original. Esse é exatamente o tipo de bug que um breakpoint condicional revela rapidamente, mas que seria tedioso encontrar pausando em toda iteração de um array de 20 elementos.</p>
+        </div>
+      </div>
+    </section>

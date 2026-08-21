@@ -1,0 +1,92 @@
+<section class="section" id="logging">
+      <div class="section-head"><span class="section-num">27</span><h2 class="section-title">Logging &amp; configuração externa</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#excecoes">10 · Exceções</a></div>
+      </div>
+
+      <h3>Por que não usar System.out.println em produção</h3>
+      <p><code>println</code> não tem nível de severidade, não pode ser desligado seletivamente, não vai para arquivo automaticamente, e não tem timestamp nem contexto. Um <strong>framework de logging</strong> (SLF4J + Logback, o padrão de fato usado pelo Spring Boot) resolve tudo isso.</p>
+
+      <pre class="code"><span class="kw">import</span> org.slf4j.Logger;
+<span class="kw">import</span> org.slf4j.LoggerFactory;
+
+<span class="kw">public class</span> <span class="cls">PedidoServico</span> {
+    <span class="kw">private static final</span> Logger log = LoggerFactory.getLogger(<span class="cls">PedidoServico</span>.<span class="kw">class</span>);
+
+    <span class="kw">public void</span> <span class="fn">finalizar</span>(<span class="cls">Pedido</span> p) {
+        log.info(<span class="str">"Finalizando pedido {}"</span>, p.getId());  <span class="com">// placeholder "{}", não concatenação</span>
+        <span class="kw">try</span> {
+            <span class="com">// ...</span>
+        } <span class="kw">catch</span> (<span class="cls">PagamentoRecusadoException</span> e) {
+            log.error(<span class="str">"Falha ao processar pagamento do pedido {}"</span>, p.getId(), e); <span class="com">// exception vai no final -- imprime a stack trace</span>
+        }
+    }
+}</pre>
+
+      <h3>Níveis de log, do mais ao menos verboso</h3>
+      <table class="cmp">
+        <tbody><tr><th>Nível</th><th>Quando usar</th></tr>
+        <tr><td><code>TRACE</code></td><td>Detalhe extremo, só em depuração profunda</td></tr>
+        <tr><td><code>DEBUG</code></td><td>Informação útil durante desenvolvimento, desligada em produção</td></tr>
+        <tr><td><code>INFO</code></td><td>Eventos relevantes do fluxo normal ("pedido criado", "aplicação iniciada")</td></tr>
+        <tr><td><code>WARN</code></td><td>Algo inesperado, mas não quebrou o fluxo</td></tr>
+        <tr><td><code>ERROR</code></td><td>Falha real que precisa de atenção</td></tr>
+      </tbody></table>
+
+      <div class="secret">O motivo de usar <code>log.info("Pedido {}", id)</code> em vez de <code>log.info("Pedido " + id)</code> não é só estilo: a concatenação de String acontece <strong>sempre</strong>, mesmo que o nível <code>INFO</code> esteja desligado, desperdiçando processamento. Com o placeholder <code>{}</code>, o framework só monta a mensagem final se aquele nível estiver realmente ativo — relevante em métodos chamados milhares de vezes por segundo, típico de uma API em produção.</div>
+
+      <h3>Configuração externa: por que nada de senha "hardcoded"</h3>
+      <p>URLs de banco, senhas, chaves de API e afins nunca devem estar escritos diretamente no código-fonte. O padrão é externalizar em arquivos de configuração (Spring Boot usa <code>application.properties</code> ou <code>application.yml</code>) ou variáveis de ambiente.</p>
+
+      <pre class="code"><span class="com"># application.properties (formato chave=valor)</span>
+servidor.porta=8080
+banco.url=jdbc:postgresql://localhost:5432/biblioteca
+banco.usuario=${DB_USER}       <span class="com"># ${...} lê de variável de ambiente</span>
+banco.senha=${DB_PASSWORD}</pre>
+
+      <pre class="code"><span class="com"># application.yml (formato hierárquico, também aceito pelo Spring Boot)</span>
+servidor:
+  porta: 8080
+banco:
+  url: jdbc:postgresql://localhost:5432/biblioteca
+  usuario: <span class="str">${DB_USER}</span>
+  senha: <span class="str">${DB_PASSWORD}</span></pre>
+
+      <p>Lendo um arquivo <code>.properties</code> em Java puro (o que o Spring Boot faz automaticamente por trás dos panos):</p>
+      <pre class="code">Properties props = <span class="kw">new</span> Properties();
+<span class="kw">try</span> (InputStream input = <span class="kw">new</span> FileInputStream(<span class="str">"config.properties"</span>)) {
+    props.load(input);
+}
+<span class="kw">String</span> porta = props.getProperty(<span class="str">"servidor.porta"</span>);</pre>
+
+      <div class="callout"><b>Profiles:</b> o Spring Boot também usa esse mecanismo para separar configurações por ambiente — <code>application-dev.properties</code>, <code>application-prod.properties</code> — trocando o banco de dados, nível de log, etc. entre desenvolvimento e produção sem alterar uma linha de código Java.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 27.1 — Substituindo println por logging</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Pegue a classe <code>Biblioteca</code> (com a injeção de <code>NotificadorEmprestimo</code> do capítulo 22) e substitua qualquer <code>System.out.println</code> por chamadas a um <code>Logger</code> SLF4J: <code>log.info(...)</code> para o empréstimo bem-sucedido e <code>log.warn(...)</code> quando o item não estiver disponível (antes de lançar a exceção).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Biblioteca</span> {
+    <span class="kw">private static final</span> Logger log = LoggerFactory.getLogger(<span class="cls">Biblioteca</span>.<span class="kw">class</span>);
+    <span class="com">// ... campos existentes ...</span>
+
+    <span class="kw">public void</span> <span class="fn">emprestar</span>(<span class="kw">String</span> codigo) <span class="kw">throws</span> <span class="cls">ItemIndisponivelException</span> {
+        <span class="cls">ItemAcervo</span> item = acervo.stream()
+            .filter(i -&gt; i.getCodigo().equals(codigo))
+            .findFirst()
+            .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">ItemIndisponivelException</span>(<span class="str">"Item não encontrado"</span>));
+
+        <span class="kw">if</span> (!item.disponivelParaEmprestimo()) {
+            log.warn(<span class="str">"Tentativa de emprestar item indisponível: {}"</span>, codigo);
+            <span class="kw">throw new</span> <span class="cls">ItemIndisponivelException</span>(<span class="str">"Item já emprestado"</span>);
+        }
+
+        item.emprestar();
+        log.info(<span class="str">"Item emprestado com sucesso: {}"</span>, codigo);
+        notificador.notificar(<span class="str">"Empréstimo realizado: "</span> + item.getTitulo());
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

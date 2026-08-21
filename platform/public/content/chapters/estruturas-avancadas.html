@@ -1,0 +1,101 @@
+<section class="section" id="estruturas-avancadas">
+      <div class="section-head"><span class="section-num">79</span><h2 class="section-title">Estruturas de Dados Avançadas</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Algoritmos</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#recursao">81 · Recursão</a>, <a class="prereq-tag" href="#colecoes">11 · Coleções</a></div>
+      </div>
+
+      <p>Você domina <code>List</code>, <code>Set</code> e <code>Map</code> desde o capítulo 11. Este capítulo cobre as estruturas por trás delas e outras que aparecem constantemente em entrevistas técnicas e em problemas reais que <code>ArrayList</code>/<code>HashMap</code> não resolvem elegantemente.</p>
+
+      <h3>Pilha (Stack) — último a entrar, primeiro a sair (LIFO)</h3>
+      <div class="analogy">Uma pilha de pratos: você só pode adicionar ou remover pelo topo. O último prato colocado é sempre o primeiro a ser retirado.</div>
+      <pre class="code">Deque&lt;<span class="kw">String</span>&gt; pilha = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="com">// Java não tem uma classe "Stack" idiomática -- usa-se Deque</span>
+pilha.push(<span class="str">"a"</span>);
+pilha.push(<span class="str">"b"</span>);
+pilha.pop(); <span class="com">// remove "b" -- o último que entrou</span>
+
+<span class="com">// uso real: a própria stack de chamadas de função (capítulo 01, 81) é uma pilha!
+// e é assim que o método "undo" de um editor de texto costuma funcionar</span></pre>
+
+      <h3>Fila (Queue) — primeiro a entrar, primeiro a sair (FIFO)</h3>
+      <div class="analogy">Uma fila de banco: quem chegou primeiro é atendido primeiro. Você já implementou isso, sem saber o nome formal, no exercício 15.2 (<code>Fila&lt;T&gt;</code>) e viu na prática no Kafka (capítulo 41, onde consumer groups processam mensagens em ordem de chegada).</div>
+      <pre class="code">Queue&lt;<span class="kw">String</span>&gt; fila = <span class="kw">new</span> LinkedList&lt;&gt;();
+fila.offer(<span class="str">"a"</span>);
+fila.offer(<span class="str">"b"</span>);
+fila.poll(); <span class="com">// remove "a" -- o primeiro que entrou</span></pre>
+
+      <h3>Árvore Binária — a base de índices de banco e buscas eficientes</h3>
+      <pre class="code"><span class="kw">class</span> <span class="cls">No</span> {
+    <span class="kw">int</span> valor;
+    <span class="cls">No</span> esquerda, direita;
+    <span class="fn">No</span>(<span class="kw">int</span> valor) { <span class="kw">this</span>.valor = valor; }
+}
+
+<span class="com">// árvore de busca: esquerda menor, direita maior.
+// Busca é O(log n) quando a altura é logarítmica; sem balanceamento,
+// inserções ordenadas podem formar uma lista e degradar para O(n).</span>
+<span class="kw">boolean</span> <span class="fn">buscar</span>(<span class="cls">No</span> raiz, <span class="kw">int</span> alvo) {
+    <span class="kw">if</span> (raiz == <span class="kw">null</span>) <span class="kw">return false</span>;              <span class="com">// caso base da recursão</span>
+    <span class="kw">if</span> (raiz.valor == alvo) <span class="kw">return true</span>;
+    <span class="kw">return</span> alvo &lt; raiz.valor
+        ? buscar(raiz.esquerda, alvo)      <span class="com">// descarta a metade direita inteira</span>
+        : buscar(raiz.direita, alvo);      <span class="com">// descarta a metade esquerda inteira</span>
+}</pre>
+
+      <div class="secret">Este é o mesmo raciocínio da lista telefônica ordenada do capítulo 80 — a cada passo, metade dos dados restantes é descartada sem nunca ser examinada. É também, estruturalmente, muito próximo de como um índice B-tree do Postgres (capítulo 34) funciona por baixo dos panos: uma árvore balanceada, permitindo que <code>EXPLAIN ANALYZE</code> mostre <code>Index Scan</code> em vez de <code>Seq Scan</code>.</div>
+
+      <h3>Grafo — modelando relacionamentos que não são hierárquicos</h3>
+      <div class="analogy">Uma árvore tem uma hierarquia clara (um pai, vários filhos). Um <strong>grafo</strong> é mais livre: qualquer nó pode se conectar a qualquer outro, em qualquer direção — como o mapa de conexões de uma rede social, ou o mapa de rotas entre cidades.</div>
+      <pre class="code"><span class="com">// representação simples: lista de adjacência</span>
+Map&lt;<span class="kw">String</span>, List&lt;<span class="kw">String</span>&gt;&gt; grafo = <span class="kw">new</span> HashMap&lt;&gt;();
+grafo.put(<span class="str">"A"</span>, List.of(<span class="str">"B"</span>, <span class="str">"C"</span>));
+grafo.put(<span class="str">"B"</span>, List.of(<span class="str">"D"</span>));
+grafo.put(<span class="str">"C"</span>, List.of(<span class="str">"D"</span>));
+grafo.put(<span class="str">"D"</span>, List.of());
+
+<span class="com">// busca em largura (BFS) -- percorre "camada por camada", usando uma Fila:</span>
+<span class="kw">void</span> <span class="fn">bfs</span>(<span class="kw">String</span> inicio) {
+    Queue&lt;<span class="kw">String</span>&gt; fila = <span class="kw">new</span> LinkedList&lt;&gt;();
+    Set&lt;<span class="kw">String</span>&gt; visitados = <span class="kw">new</span> HashSet&lt;&gt;();
+    fila.offer(inicio);
+    visitados.add(inicio);
+
+    <span class="kw">while</span> (!fila.isEmpty()) {
+        <span class="kw">String</span> atual = fila.poll();
+        System.out.println(atual);
+        <span class="kw">for</span> (<span class="kw">String</span> vizinho : grafo.get(atual)) {
+            <span class="kw">if</span> (!visitados.contains(vizinho)) {
+                visitados.add(vizinho);
+                fila.offer(vizinho);
+            }
+        }
+    }
+}</pre>
+
+      <div class="warn"><b>Grafos são a estrutura conceitual por trás de problemas de "menor caminho"</b> (rotas de entrega, redes de dependência de pacotes Maven, capítulo 19) — reconhecer quando um problema real é "na verdade um grafo" é frequentemente mais difícil do que implementar o algoritmo em si.</div>
+
+      <div class="study-tip">Não decore implementações de estruturas de dados de cor — foque em reconhecer <em>qual estrutura combina com qual formato de problema</em>. Pilha para "desfazer/histórico". Fila para "processar na ordem de chegada" (o próprio Kafka, capítulo 41). Árvore para "hierarquia com busca eficiente". Grafo para "relacionamentos livres, não hierárquicos". Essa associação problema→estrutura é o que realmente é cobrado, na prática e em entrevistas.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 82.1 — Verificador de parênteses balanceados</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Usando uma <code>Deque</code> como pilha, escreva um método <code>boolean balanceado(String expressao)</code> que verifica se todos os parênteses/colchetes/chaves de uma expressão estão corretamente balanceados (ex: <code>"(a[b]{c})"</code> → true, <code>"(a[b)]"</code> → false).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">boolean</span> <span class="fn">balanceado</span>(<span class="kw">String</span> expressao) {
+    Deque&lt;<span class="kw">Character</span>&gt; pilha = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+    Map&lt;<span class="kw">Character</span>, <span class="kw">Character</span>&gt; pares = Map.of(<span class="str">')'</span>, <span class="str">'('</span>, <span class="str">']'</span>, <span class="str">'['</span>, <span class="str">'}'</span>, <span class="str">'{'</span>);
+
+    <span class="kw">for</span> (<span class="kw">char</span> c : expressao.toCharArray()) {
+        <span class="kw">if</span> (c == <span class="str">'('</span> || c == <span class="str">'['</span> || c == <span class="str">'{'</span>) {
+            pilha.push(c);
+        } <span class="kw">else if</span> (pares.containsKey(c)) {
+            <span class="kw">if</span> (pilha.isEmpty() || pilha.pop() != pares.get(c)) <span class="kw">return false</span>;
+        }
+    }
+    <span class="kw">return</span> pilha.isEmpty(); <span class="com">// tudo que abriu precisa ter fechado</span>
+}</pre>
+        </div>
+      </div>
+    </section>

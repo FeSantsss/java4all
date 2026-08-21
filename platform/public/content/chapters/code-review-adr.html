@@ -1,0 +1,86 @@
+<section class="section" id="code-review-adr">
+      <div class="section-head"><span class="section-num">74</span><h2 class="section-title">Code Review &amp; Architecture Decision Records</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Engenharia</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#git">29 · Git</a>, <a class="prereq-tag" href="#clean-code">74 · Clean Code</a></div>
+      </div>
+
+      <p>Escrever código bom sozinho é só metade da engenharia de software profissional — a outra metade é comunicar decisões técnicas de forma que outras pessoas (incluindo você mesmo, seis meses depois) entendam o <em>porquê</em>, não só o <em>o quê</em>.</p>
+
+      <h3>Code Review — revisando com intenção, não só procurando erro</h3>
+      <table class="cmp">
+        <tbody><tr><th>Nível</th><th>O que revisar</th></tr>
+        <tr><td>Corretude</td><td>O código faz o que deveria? Cobre os casos-limite discutidos no capítulo 15?</td></tr>
+        <tr><td>Design</td><td>Segue SOLID (capítulo 16)? Está no lugar certo da arquitetura (capítulo 75)?</td></tr>
+        <tr><td>Legibilidade</td><td>Nomes claros (capítulo 74)? Um novo desenvolvedor entenderia sem perguntar?</td></tr>
+        <tr><td>Segurança</td><td>Alguma validação faltando (capítulo 48)? Secret vazando (capítulo 57)?</td></tr>
+      </tbody></table>
+
+      <div class="analogy">Um bom code review é como um piloto e copiloto revisando o checklist antes da decolagem juntos — não é desconfiança de que o piloto errou, é reconhecer que uma segunda perspectiva pega coisas que a primeira, sozinha e cansada de tanto olhar o mesmo código, deixa passar. O objetivo nunca é "pegar" quem escreveu, é elevar a qualidade coletiva do que vai para produção.</div>
+
+      <div class="rules-box">
+        <h4>Regras de ouro ao revisar código de outra pessoa</h4>
+        <ul>
+          <li>Comente o <em>código</em>, nunca a <em>pessoa</em> — "esse método poderia ficar mais claro assim" em vez de "você escreveu isso errado".</li>
+          <li>Separe sugestões obrigatórias ("isso vai quebrar em produção") de preferências estéticas ("eu preferiria assim, mas não é bloqueante") — muitas ferramentas de PR permitem marcar isso explicitamente.</li>
+          <li>Revise em blocos pequenos — um Pull Request de 2000 linhas recebe revisão superficial por fadiga; PRs pequenos e frequentes (capítulo 29) recebem revisão de verdade.</li>
+        </ul>
+      </div>
+
+      <h3>Architecture Decision Records (ADR) — a memória da arquitetura</h3>
+      <p>Meses depois de uma decisão técnica importante ("por que escolhemos MongoDB em vez de Postgres para esse módulo?"), ninguém lembra o raciocínio — só o resultado. Um <strong>ADR</strong> é um documento curto, versionado junto com o código, registrando <em>por que</em> uma decisão arquitetural foi tomada.</p>
+
+      <pre class="code"><span class="com"># docs/adr/0003-usar-mongodb-para-catalogo.md</span>
+
+## Status
+Aceito
+
+## Contexto
+O catálogo de produtos tem atributos que variam muito entre categorias
+(capítulo 36) -- roupas têm tamanho/cor, eletrônicos têm voltagem/garantia.
+Modelar isso em tabelas relacionais exigiria uma estrutura de atributos
+genéricos difícil de consultar e manter.
+
+## Decisão
+Usar MongoDB para o serviço de catálogo, mantendo Postgres para pedidos
+e pagamentos (que exigem transações fortes, capítulo 33).
+
+## Consequências
++ Esquema flexível sem migrations a cada nova categoria de produto
+- Introduz um segundo banco no stack, aumentando complexidade operacional
+- Equipe precisa de familiaridade com consultas MongoDB (capítulo 37)</pre>
+
+      <div class="secret">ADRs não documentam <em>o que</em> foi decidido (isso o próprio código já mostra) — documentam o <strong>raciocínio e o contexto</strong> no momento da decisão, incluindo as alternativas descartadas e por quê. Isso evita o problema clássico de alguém, anos depois, "corrigir" uma decisão arquitetural sem saber que ela já foi cuidadosamente avaliada e descartada por um motivo específico que não estava mais visível em lugar nenhum.</div>
+
+      <div class="study-tip">Comece pequeno: escreva seu primeiro ADR para a próxima decisão não-trivial que você tomar em qualquer projeto pessoal (por que Redis e não Memcached, por que REST e não GraphQL). O formato não precisa ser elaborado — um arquivo Markdown com Contexto/Decisão/Consequências, como no exemplo, já captura o essencial.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 77.1 — Escrevendo seu primeiro ADR</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Escreva um ADR documentando a decisão de usar JWT em vez de sessão tradicional (capítulo 51) para autenticação da API da biblioteca, incluindo contexto, decisão e pelo menos duas consequências (uma positiva, uma negativa).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"># ADR 0001: Usar JWT em vez de sessão tradicional
+
+## Status
+Aceito
+
+## Contexto
+A API da biblioteca é consumida por um front-end React separado (SPA)
+e, potencialmente, um app mobile no futuro -- múltiplos clientes
+independentes do back-end.
+
+## Decisão
+Usar autenticação stateless via JWT (capítulo 51), em vez de sessão
+tradicional com cookie.
+
+## Consequências
++ Não exige compartilhar estado de sessão entre múltiplas instâncias
+  do back-end (capítulo 43, escopo Singleton) -- escala horizontalmente
+  sem configuração extra de sessão distribuída.
+- Revogar um token antes da expiração é mais complexo que simplesmente
+  apagar uma sessão no servidor -- exige lista de revogação se necessário.</pre>
+        </div>
+      </div>
+    </section>

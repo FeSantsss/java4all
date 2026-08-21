@@ -1,0 +1,129 @@
+<section class="section tk-kafka" id="kafka">
+      <div class="section-head"><span class="section-num">41</span><h2 class="section-title">Kafka na prática</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-kafka">Kafka</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#mensageria">40 · Mensageria conceitos</a>, <a class="prereq-tag" href="#compose">32 · Docker Compose</a></div>
+      </div>
+
+      <p><strong>Kafka</strong> é a ferramenta de mensageria mais usada em sistemas de médio/grande porte — não é exatamente uma fila tradicional, e sim um <strong>log distribuído</strong>: mensagens são gravadas em ordem e mantidas por um tempo configurável, permitindo que múltiplos consumidores leiam o mesmo histórico de formas independentes.</p>
+
+      <div class="install-box">
+        <h4>Subindo Kafka localmente</h4>
+        <pre class="code"><span class="com"># docker-compose.yml -- Kafka moderno não precisa mais de Zookeeper separado (modo KRaft):</span>
+services:
+  kafka:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER</pre>
+        <pre class="code">docker compose up -d kafka</pre>
+      </div>
+
+      <h3>Tópicos e partições — o vocabulário do Kafka</h3>
+      <div class="analogy">Um <strong>tópico</strong> Kafka é como uma revista publicada em edições numeradas — cada mensagem é uma edição nova, sempre adicionada ao final, nunca alterada. Uma <strong>partição</strong> é como imprimir essa revista em várias gráficas simultâneas para ir mais rápido: o conteúdo total do tópico é dividido entre partições, cada uma mantendo sua própria ordem interna, mas a ordem entre partições diferentes não é garantida.</div>
+
+      <pre class="code"><span class="com"># dentro do container:</span>
+kafka-topics.sh --create --topic pedidos-finalizados --bootstrap-server localhost:9092 --partitions 3
+kafka-topics.sh --list --bootstrap-server localhost:9092</pre>
+
+      <h3>Producer e Consumer em Java puro</h3>
+      <pre class="code"><span class="com">// --- Producer: publica uma mensagem ---</span>
+Properties props = <span class="kw">new</span> Properties();
+props.put(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
+props.put(<span class="str">"key.serializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringSerializer"</span>);
+props.put(<span class="str">"value.serializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringSerializer"</span>);
+
+KafkaProducer&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; producer = <span class="kw">new</span> KafkaProducer&lt;&gt;(props);
+producer.send(<span class="kw">new</span> ProducerRecord&lt;&gt;(<span class="str">"pedidos-finalizados"</span>, <span class="str">"pedido-42"</span>, jsonDoEvento));
+producer.close();
+
+<span class="com">// --- Consumer: lê mensagens ---</span>
+Properties consumerProps = <span class="kw">new</span> Properties();
+consumerProps.put(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
+consumerProps.put(<span class="str">"group.id"</span>, <span class="str">"servico-email"</span>);
+consumerProps.put(<span class="str">"key.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+consumerProps.put(<span class="str">"value.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+
+KafkaConsumer&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; consumer = <span class="kw">new</span> KafkaConsumer&lt;&gt;(consumerProps);
+consumer.subscribe(List.of(<span class="str">"pedidos-finalizados"</span>));
+
+<span class="kw">while</span> (<span class="kw">true</span>) {
+    ConsumerRecords&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; registros = consumer.poll(Duration.ofMillis(500));
+    <span class="kw">for</span> (ConsumerRecord&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; r : registros) {
+        System.out.println(<span class="str">"Recebido: "</span> + r.value());
+    }
+}</pre>
+
+      <h3>Consumer Groups — como Kafka escala consumidores</h3>
+      <p>Vários consumidores com o <strong>mesmo</strong> <code>group.id</code> dividem as partições de um tópico entre si — cada mensagem vai para <strong>um</strong> consumidor do grupo (comportamento de fila). Consumidores com <code>group.id</code> <strong>diferentes</strong> recebem <strong>cada um</strong> uma cópia completa das mensagens (comportamento de pub/sub).</p>
+
+      <div class="analogy">Pense em um tópico como um grupo de WhatsApp e o <code>group.id</code> como "qual equipe está lendo". Se o serviço de e-mail e o serviço de estoque têm <code>group.id</code> diferentes, os dois recebem <strong>toda</strong> mensagem — como duas pessoas diferentes lendo o mesmo grupo. Mas dentro do próprio serviço de e-mail, se você roda 3 instâncias com o <strong>mesmo</strong> <code>group.id</code> (para dividir a carga), cada mensagem vai para só uma das três — como revezar quem responde cada mensagem do grupo, sem duplicar trabalho.</div>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Kafka</th><th>RabbitMQ</th></tr>
+        <tr><td>Modelo</td><td>Log distribuído, mensagens retidas por tempo configurável</td><td>Fila tradicional, mensagem some ao ser confirmada (ack)</td></tr>
+        <tr><td>Replay</td><td>Consumidor pode reler mensagens antigas</td><td>Não, uma vez consumida e confirmada, some</td></tr>
+        <tr><td>Melhor para</td><td>Alto volume, múltiplos consumidores do mesmo evento, streaming de eventos</td><td>Roteamento de mensagens complexo, filas de prioridade, menor volume</td></tr>
+      </tbody></table>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Sempre trate consumidores como <strong>at-least-once</strong> — projete idempotência desde o início (capítulo 40), não como remendo depois.</li>
+          <li>A chave (<code>key</code>) da mensagem determina a partição — mensagens com a mesma chave sempre vão para a mesma partição, preservando ordem <em>entre elas</em>.</li>
+          <li>Nunca use Kafka como banco de dados principal — ele é ótimo para eventos e streaming, não para consultas ad-hoc como um Postgres.</li>
+        </ul>
+      </div>
+
+      <div class="study-tip">Antes de configurar Kafka via Spring (próximo capítulo), pratique só com <code>kafka-console-producer.sh</code> e <code>kafka-console-consumer.sh</code> (ferramentas de linha de comando que vêm com o Kafka) publicando e lendo mensagens de texto simples. Ver o comportamento "cru" evita confundir problema de configuração do Spring com problema de entendimento do Kafka em si.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 41.1 — Producer e Consumer simples</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Suba Kafka via Docker Compose. Crie o tópico <code>pedidos-finalizados</code> com 3 partições. Escreva uma classe <code>PedidoProducer</code> que publica uma mensagem JSON simples (id do pedido) sempre que chamada. Escreva uma classe <code>NotificacaoConsumer</code> que consome desse tópico e imprime cada mensagem recebida. Rode os dois e confirme que mensagens publicadas aparecem no consumidor.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">kafka-topics.sh --create --topic pedidos-finalizados --bootstrap-server localhost:9092 --partitions 3</pre>
+<pre class="code"><span class="kw">public class</span> <span class="cls">PedidoProducer</span> {
+    <span class="kw">private final</span> KafkaProducer&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; producer;
+
+    <span class="kw">public</span> <span class="fn">PedidoProducer</span>() {
+        Properties props = <span class="kw">new</span> Properties();
+        props.put(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
+        props.put(<span class="str">"key.serializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringSerializer"</span>);
+        props.put(<span class="str">"value.serializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringSerializer"</span>);
+        <span class="kw">this</span>.producer = <span class="kw">new</span> KafkaProducer&lt;&gt;(props);
+    }
+
+    <span class="kw">public void</span> <span class="fn">publicar</span>(<span class="kw">String</span> pedidoId) {
+        producer.send(<span class="kw">new</span> ProducerRecord&lt;&gt;(<span class="str">"pedidos-finalizados"</span>, pedidoId, <span class="str">"{\"id\":\""</span> + pedidoId + <span class="str">"\"}"</span>));
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">NotificacaoConsumer</span> {
+    <span class="kw">public void</span> <span class="fn">iniciar</span>() {
+        Properties props = <span class="kw">new</span> Properties();
+        props.put(<span class="str">"bootstrap.servers"</span>, <span class="str">"localhost:9092"</span>);
+        props.put(<span class="str">"group.id"</span>, <span class="str">"servico-notificacao"</span>);
+        props.put(<span class="str">"key.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+        props.put(<span class="str">"value.deserializer"</span>, <span class="str">"org.apache.kafka.common.serialization.StringDeserializer"</span>);
+
+        KafkaConsumer&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; consumer = <span class="kw">new</span> KafkaConsumer&lt;&gt;(props);
+        consumer.subscribe(List.of(<span class="str">"pedidos-finalizados"</span>));
+
+        <span class="kw">while</span> (<span class="kw">true</span>) {
+            <span class="kw">var</span> registros = consumer.poll(Duration.ofMillis(500));
+            <span class="kw">for</span> (<span class="kw">var</span> r : registros) System.out.println(<span class="str">"Notificando sobre: "</span> + r.value());
+        }
+    }
+}</pre>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,22 @@
+<section class="section tk-java" id="mini-reservas-testadas">
+      <div class="section-head"><span class="section-num">P5</span><h2 class="section-title">Mini-projeto: motor de reservas guiado por testes</h2></div>
+      <div class="topic-meta"><div class="meta-item">Objetivo: <b>testes e arquitetura</b></div><div class="time-est">Tempo: <b>10–16 horas</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#mockito">Mockito</a></div></div>
+      <p>Implemente reservas de salas com conflitos de horário, cancelamento e política de antecedência. Comece pelos testes das regras, não pela interface.</p>
+      <h3>Matriz mínima</h3><ul class="checklist"><li><input type="checkbox"><span>Reservas adjacentes permitidas; intervalos sobrepostos recusados.</span></li><li><input type="checkbox"><span>Intervalo invertido e duração zero recusados.</span></li><li><input type="checkbox"><span>Relógio injetável para testar regras dependentes de “agora”.</span></li><li><input type="checkbox"><span>Mocks apenas nas fronteiras externas; entidades testadas sem mocks.</span></li><li><input type="checkbox"><span>README justificando arquitetura e trade-offs.</span></li></ul>
+      <div class="rules-box"><h4>Meta de qualidade</h4><ul><li>Testes descrevem comportamento, não detalhes internos.</li><li>Uma refatoração interna não quebra testes desnecessariamente.</li><li>Casos-limite estão nomeados e reproduzíveis.</li></ul></div>
+    <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Qual teste comprova uma disputa concorrente?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">Duas transações reais sincronizadas no ponto de conflito e uma única vencedora.</div><div class="quiz-opt" data-correct="false">Chamar o método duas vezes sequencialmente.</div><div class="quiz-opt" data-correct="false">Mockar o lock e assumir que funcionou.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
+      <h3>Execução guiada e evidências</h3>
+      <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>
+      <h4 class="sub">Marcos obrigatórios</h4>
+      <ol>
+        <li><strong>Contrato:</strong> escreva regras, entradas, saídas, invariantes e casos-limite antes da implementação.</li>
+        <li><strong>Caminho mínimo:</strong> entregue uma fatia vertical executável com um teste de aceitação.</li>
+        <li><strong>Falhas:</strong> implemente validação, mensagens úteis, cleanup e comportamento após interrupção.</li>
+        <li><strong>Qualidade:</strong> automatize testes, formatação e build; remova segredos e dados pessoais dos logs.</li>
+        <li><strong>Operação:</strong> documente como executar, diagnosticar, atualizar e recuperar o projeto.</li>
+      </ol>
+      <h4 class="sub">Matriz mínima de testes</h4>
+      <table class="cmp"><tbody><tr><th>Categoria</th><th>Evidência</th></tr><tr><td>caminho feliz</td><td>resultado e estado final esperados</td></tr><tr><td>limites</td><td>vazio, mínimo, máximo, duplicado e formato inválido</td></tr><tr><td>falha</td><td>dependência indisponível, timeout ou exceção sem corrupção de estado</td></tr><tr><td>repetição</td><td>retry ou execução duplicada não produz efeito indevido</td></tr><tr><td>regressão</td><td>bug corrigido ganha teste que falhava antes</td></tr></tbody></table>
+      <ul class="checklist"><li><input type="checkbox"><span>README contém requisitos, arquitetura, decisões e comandos reproduzíveis.</span></li><li><input type="checkbox"><span>Build e testes executam do zero sem passos secretos.</span></li><li><input type="checkbox"><span>Casos-limite e falhas foram demonstrados, não apenas descritos.</span></li><li><input type="checkbox"><span>Existe uma retrospectiva com dívida técnica e próximo incremento.</span></li></ul>
+      <div class="warn"><b>Regra de conclusão:</b> captura de tela não prova comportamento. Entregue código, testes, dados de exemplo, comandos e resultados verificáveis. Se uma tecnologia externa for necessária, fixe versões e forneça um ambiente reproduzível.</div>
+      </div></section>

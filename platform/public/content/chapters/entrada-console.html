@@ -1,0 +1,89 @@
+<section class="section tk-java" id="entrada-console">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Entrada pelo console, parsing e validação</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-java">Java</span><div class="meta-item">Dificuldade: <b>Iniciante</b></div><div class="time-est">⏱ <b>~3h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#metodos-escopo">Métodos e escopo</a></div></div>
+      
+      <p>Neste capítulo você começa com o menor programa interativo possível e o evolui em camadas. Primeiro leremos texto; depois entenderemos o caminho percorrido pelos caracteres; somente então entraremos em conversão, validação, término da entrada e valores monetários.</p>
+      <ol class="learning-layers"><li><span>1</span><div><strong>Fazer funcionar</strong><p>Ler nome e idade como texto e imprimir uma resposta.</p></div></li><li><span>2</span><div><strong>Entender</strong><p>Distinguir terminal, CLI, entrada, saída, linha e buffer.</p></div></li><li><span>3</span><div><strong>Tornar resistente</strong><p>Converter, validar e repetir a pergunta sem encerrar o programa.</p></div></li><li><span>4</span><div><strong>Aprofundar</strong><p>Tratar EOF, dinheiro, formatos regionais e propriedade de recursos.</p></div></li></ol>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Antes do código: o que é um programa de console?</h3></div>
+    <p>Estes nomes descrevem o ambiente no qual o programa conversa com a pessoa. Nenhum conhecimento de rede é necessário para começar.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Terminal</dt><dd>A janela textual que mostra a saída do processo e encaminha a ele o que foi digitado.</dd></div><div class="concept-card"><dt>CLI</dt><dd><em>Command-line interface</em>, ou interface de linha de comando: uma interface controlada por texto, argumentos e comandos, em vez de botões. Um menu textual simples já é uma CLI.</dd></div><div class="concept-card"><dt>Entrada padrão</dt><dd>Canal de entrada do processo, representado em Java por <code>System.in</code>. No uso comum, recebe o que é digitado no terminal.</dd></div><div class="concept-card"><dt>Saída padrão</dt><dd>Canal normal de saída, representado por <code>System.out</code>. <code>System.err</code> é um canal separado para erros e diagnóstico.</dd></div><div class="concept-card"><dt>Fluxo de dados</dt><dd>Uma sequência de dados que chega ou sai ao longo do tempo. Aqui “fluxo” não é a API <code>Stream</code> de coleções.</dd></div></dl>
+  </aside>
+      <h3>Camada 1 — seu primeiro uso de Scanner</h3>
+      <p><code>Scanner</code> é uma classe da biblioteca padrão que ajuda a separar a entrada em linhas ou partes menores. O <code>import</code> informa ao compilador onde a classe está. <code>new Scanner(System.in)</code> cria um leitor ligado à entrada padrão, e <code>nextLine()</code> espera até receber uma linha terminada por Enter.</p>
+      <pre class="code"><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> Saudacao {
+    <span class="kw">public static void</span> main(String[] args) {
+        Scanner scanner = <span class="kw">new</span> Scanner(System.in);
+
+        System.out.print(<span class="str">"Qual é o seu nome? "</span>);
+        String nome = scanner.nextLine();
+
+        System.out.println(<span class="str">"Olá, "</span> + nome + <span class="str">"!"</span>);
+    }
+}</pre>
+      <div class="callout"><b>Leia o programa de cima para baixo:</b> importar a classe → iniciar o programa → criar o leitor → mostrar a pergunta → aguardar uma linha → guardar a linha em <code>nome</code> → imprimir a resposta. Copie, compile e execute esta versão antes de continuar.</div>
+      <h3>Camada 2 — linha, token e buffer</h3>
+      <p>Ao pressionar Enter, os caracteres digitados e uma marca de fim de linha entram no canal. O <strong>buffer</strong> é uma pequena área temporária que guarda dados já recebidos, mas ainda não consumidos pelo programa. Uma <strong>linha</strong> termina nessa marca; um <strong>token</strong> é apenas uma parte separada normalmente por espaço.</p>
+      <table class="cmp"><tbody><tr><th>Método</th><th>O que consome</th><th>Exemplo</th></tr><tr><td><code>nextLine()</code></td><td>o restante da linha, incluindo sua terminação</td><td><code>"Ana Maria"</code></td></tr><tr><td><code>next()</code></td><td>o próximo token</td><td><code>"Ana"</code></td></tr><tr><td><code>nextInt()</code></td><td>o próximo token interpretado como inteiro</td><td><code>21</code></td></tr></tbody></table>
+      <p>Se <code>nextInt()</code> lê o número de <code>21⏎</code>, a marca de fim de linha pode continuar no buffer. O <code>nextLine()</code> seguinte encontra essa marca e devolve uma linha vazia. Para manter um único modelo mental, o curso adotará esta regra: <strong>leia sempre a linha inteira e depois converta o texto</strong>.</p>
+      <h3>Camada 3 — ler, normalizar, converter e validar</h3>
+      <p>Essas são quatro operações diferentes. <strong>Ler</strong> obtém texto. <strong>Normalizar</strong> remove apenas variações permitidas, como espaços externos com <code>strip()</code>. <strong>Parsing</strong> converte a representação textual para um tipo, como <code>int</code>. <strong>Validar</strong> verifica a regra do domínio: <code>"200"</code> é um inteiro válido, mas não uma idade humana aceita pelo programa.</p>
+      <pre class="code">System.out.print(<span class="str">"Idade: "</span>);
+String texto = scanner.nextLine().strip();
+<span class="kw">int</span> idade = Integer.parseInt(texto);
+
+<span class="kw">if</span> (idade &lt; 0 || idade &gt; 130) {
+    System.out.println(<span class="str">"A idade deve estar entre 0 e 130."</span>);
+}</pre>
+      <p><code>Integer.parseInt</code> não consegue converter <code>"vinte"</code>. Nesse caso ele sinaliza uma <code>NumberFormatException</code>. Uma <strong>exceção</strong> é um objeto que representa uma interrupção do fluxo normal; <code>try</code> delimita a tentativa e <code>catch</code> escolhe como reagir àquele tipo de falha. O capítulo <a href="#excecoes">Exceções, try/catch e recursos</a> aprofundará propagação, hierarquia e criação de exceções.</p>
+      <pre class="code"><span class="kw">static int</span> lerInteiro(Scanner scanner, String pergunta, <span class="kw">int</span> minimo, <span class="kw">int</span> maximo) {
+    <span class="kw">while</span> (<span class="kw">true</span>) {
+        System.out.print(pergunta);
+        String texto = scanner.nextLine().strip();
+
+        <span class="kw">try</span> {
+            <span class="kw">int</span> valor = Integer.parseInt(texto);
+            <span class="kw">if</span> (valor &gt;= minimo &amp;&amp; valor &lt;= maximo) {
+                <span class="kw">return</span> valor;
+            }
+            System.out.printf(<span class="str">"Use um valor entre %d e %d.%n"</span>, minimo, maximo);
+        } <span class="kw">catch</span> (NumberFormatException erro) {
+            System.out.println(<span class="str">"Digite um número inteiro, como 18."</span>);
+        }
+    }
+}</pre>
+      <p>No <code>printf</code>, <code>%d</code> é substituído por um inteiro e <code>%n</code> produz a quebra de linha adequada ao sistema operacional. O laço repete somente a coleta; a regra de negócio pode continuar em outro método, sem conhecer teclado ou mensagens.</p>
+      <h3>Camada 4 — quando a entrada termina</h3>
+      <p><strong>EOF</strong> significa <em>end of file</em>, ou fim da entrada: não existe outra linha para ler. Isso pode acontecer ao redirecionar um arquivo ou quando a pessoa sinaliza o fim com <kbd>Ctrl</kbd>+<kbd>D</kbd> em Linux/macOS ou <kbd>Ctrl</kbd>+<kbd>Z</kbd> e Enter no Windows. <code>hasNextLine()</code> permite verificar antes de chamar <code>nextLine()</code>.</p>
+      <pre class="code"><span class="kw">while</span> (scanner.hasNextLine()) {
+    String comando = scanner.nextLine().strip();
+    <span class="kw">if</span> (comando.equalsIgnoreCase(<span class="str">"sair"</span>)) <span class="kw">break</span>;
+    System.out.println(<span class="str">"Recebido: "</span> + comando);
+}
+System.out.println(<span class="str">"Entrada encerrada."</span>);</pre>
+      <p>EOF não é automaticamente um erro: em um programa que lê arquivo pela entrada padrão, é o encerramento esperado. Em um formulário interativo, pode significar que a operação ficou incompleta. O contrato do programa decide como reagir.</p>
+      <h3>Aprofundamento — dinheiro e formato regional</h3>
+      <p><code>double</code> representa números em formato binário e vários decimais comuns, como 0,1, não possuem representação exata. <code>BigDecimal</code> armazena um decimal com precisão controlada, por isso é apropriado quando centavos precisam ser exatos. Construa-o a partir do texto, nunca a partir de um <code>double</code> já aproximado.</p>
+      <p><strong>Locale</strong> é o conjunto de convenções regionais de idioma e formatação. No Brasil, <code>123,45</code> é comum; em formatos técnicos, <code>123.45</code> é comum. O <strong>contrato de entrada</strong> deve declarar qual aceita. Não troque vírgulas e pontos indiscriminadamente, pois <code>1.234</code> pode significar um inteiro com milhar ou um decimal.</p>
+      <pre class="code"><span class="kw">import</span> java.math.BigDecimal;
+<span class="kw">import</span> java.math.RoundingMode;
+
+<span class="kw">static</span> BigDecimal converterReais(String texto) {
+    BigDecimal valor = <span class="kw">new</span> BigDecimal(texto.strip()); <span class="com">// contrato: 123.45</span>
+    <span class="kw">if</span> (valor.signum() &lt;= 0) {
+        <span class="kw">throw new</span> IllegalArgumentException(<span class="str">"O valor deve ser positivo."</span>);
+    }
+    <span class="kw">return</span> valor.setScale(2, RoundingMode.HALF_EVEN);
+}</pre>
+      <p><code>setScale(2, ...)</code> fixa duas casas decimais. <code>HALF_EVEN</code> é uma regra de arredondamento: no empate exato, escolhe o último dígito par, reduzindo viés em muitas operações. Em um sistema real, a regra deve vir do domínio, e erros de formato devem ser convertidos em mensagens úteis na fronteira da CLI.</p>
+      <h3>Depois do Scanner: arquivos, sockets e protocolos</h3>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Uma prévia, não um pré-requisito</h3></div>
+    <p>Os conceitos abaixo não são usados no exercício. Eles explicam apenas por que uma API conveniente para teclado não é a resposta para toda fonte de dados.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Arquivo</dt><dd>Uma sequência persistida de bytes. Arquivos grandes costumam ser processados aos poucos para não ocupar toda a memória.</dd></div><div class="concept-card"><dt>Socket</dt><dd>Uma extremidade de comunicação entre processos, normalmente através da rede. Ele entrega bytes; sozinho não diz onde termina uma mensagem.</dd></div><div class="concept-card"><dt>Protocolo</dt><dd>O acordo que dá significado aos bytes: formato, ordem das mensagens, limites, erros e encerramento. HTTP é um protocolo.</dd></div><div class="concept-card"><dt>API bufferizada</dt><dd>Leitor que agrupa acessos ao recurso em uma memória temporária, reduzindo operações pequenas e permitindo leitura eficiente.</dd></div><div class="concept-card"><dt>Recurso</dt><dd>Algo externo ao objeto Java, como arquivo, conexão ou socket, que possui ciclo de vida e geralmente precisa ser fechado.</dd></div></dl>
+  </aside>
+      <p>Um <code>Scanner</code> é ótimo para exercícios e CLIs pequenas. Para texto de arquivo, você conhecerá <code>BufferedReader</code> em <a href="#java-io">Arquivos e Java I/O</a>. Para rede, HTTP e formato das mensagens, avance até <a href="#http">HTTP</a>. A regra de propriedade é: quem cria ou recebe responsabilidade explícita por um recurso decide quando fechá-lo. <code>System.in</code> pertence ao processo; código reutilizável de biblioteca não deve fechá-lo e surpreender o restante da aplicação.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório em quatro etapas — menu resistente a erros</h4><span class="exercise-tag m">médio</span></div><p>1) leia e repita um nome; 2) adicione um menu textual; 3) converta a opção e repita a pergunta quando ela for inválida; 4) acrescente depósito, saque, extrato, saída e término por EOF. Só depois troque os valores monetários por <code>BigDecimal</code>. Separe leitura, regra de negócio e impressão.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><ul><li>Cada etapa compila e funciona antes da próxima.</li><li>Entrada inválida produz orientação e permite nova tentativa, sem stack trace.</li><li>EOF encerra o programa conscientemente.</li><li>Dinheiro usa <code>BigDecimal</code> com formato de entrada documentado.</li><li>A opção de saída termina o laço explicitamente.</li><li>A classe da conta não conhece <code>Scanner</code> nem imprime mensagens.</li></ul></div></div>
+    </section>

@@ -1,0 +1,19 @@
+<section class="section tk-java" id="java-io">
+      <div class="section-head"><span class="section-num">—</span><h2 class="section-title">Arquivos, Paths e Java I/O</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#excecoes">Exceções</a>, <a class="prereq-tag" href="#colecoes">Coleções</a></div></div>
+      <p>Aplicações reais precisam atravessar a fronteira entre memória e recursos externos. Em Java moderno, <code>Path</code> representa caminhos e <code>Files</code> concentra operações comuns de leitura, escrita, cópia, movimentação e inspeção.</p>
+      <h3>Texto pequeno versus fluxo de dados</h3>
+      <pre class="code">Path arquivo = Path.of(<span class="str">"dados"</span>, <span class="str">"pedidos.csv"</span>);
+List&lt;String&gt; linhas = Files.readAllLines(arquivo, StandardCharsets.UTF_8);
+
+<span class="kw">try</span> (Stream&lt;String&gt; stream = Files.lines(arquivo, StandardCharsets.UTF_8)) {
+    <span class="kw">long</span> validas = stream.filter(linha -&gt; !linha.isBlank()).count();
+}</pre>
+      <p><code>readAllLines</code> carrega tudo na memória e serve para arquivos pequenos. <code>Files.lines</code> permite processamento gradual, mas mantém um recurso aberto e exige fechamento. O <code>try-with-resources</code> garante isso mesmo quando ocorre uma exceção.</p>
+      <h3>Bytes, caracteres e codificação</h3>
+      <p>Bytes são dados brutos; texto depende de uma codificação que converte bytes em caracteres. Declare UTF-8 explicitamente quando o formato exigir. Confiar no padrão da máquina torna o comportamento diferente entre ambientes.</p>
+      <div class="warn"><b>Não capture <code>IOException</code> e continue como se nada tivesse ocorrido.</b> Decida se a operação pode ser repetida, convertida em erro de domínio ou propagada com contexto.</div>
+      <h3>Prática</h3>
+      <div class="exercise"><div class="exercise-head"><h4>Leitor de log</h4><span class="exercise-tag m">Obrigatório</span></div><p>Leia um arquivo grande linha a linha, conte ocorrências por nível e grave um resumo em outro arquivo. Prove que arquivos inexistentes, linhas malformadas e diretório de saída ausente recebem tratamentos diferentes.</p></div>
+      <div class="rules-box"><h4>Critério de domínio</h4><ul><li>Distingue caminho, arquivo, byte e caractere.</li><li>Escolhe entre carregar tudo e processar por fluxo.</li><li>Fecha recursos automaticamente.</li><li>Não perde a causa original ao tratar uma falha de I/O.</li></ul></div>
+    </section>

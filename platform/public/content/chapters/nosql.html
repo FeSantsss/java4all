@@ -1,0 +1,47 @@
+<section class="section tk-nosql" id="nosql">
+      <div class="section-head"><span class="section-num">36</span><h2 class="section-title">NoSQL — conceitos &amp; quando usar</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-nosql">NoSQL</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#sql">33 · SQL fundamentos</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
+      </div>
+
+      <p>"NoSQL" não é um produto — é um guarda-chuva para bancos não relacionais com modelos e garantias muito diferentes. Alguns oferecem validação de schema, transações, replicação e consistência configurável; outros priorizam disponibilidade, latência ou escala. Avalie o produto e a configuração concretos, não uma suposta regra universal de NoSQL.</p>
+
+      <div class="analogy">Se um banco relacional é como uma planilha rigidamente formatada — toda linha <strong>precisa</strong> ter as mesmas colunas, nos mesmos tipos — um banco de documentos (o tipo de NoSQL mais comum) é como uma pasta cheia de fichas de papel: cada ficha pode ter campos diferentes, algumas com mais anotações que outras, sem forçar um molde único para todo mundo.<p></p>
+
+      <h3>As quatro famílias principais</h3>
+      <table class="cmp">
+        <tbody><tr><th>Família</th><th>Unidade de dado</th><th>Exemplo</th><th>Bom para</th></tr>
+        <tr><td><strong>Documento</strong></td><td>Documento JSON-like, esquema flexível</td><td>MongoDB</td><td>Dados semi-estruturados, protótipos rápidos, catálogos de produto</td></tr>
+        <tr><td><strong>Chave-valor</strong></td><td>Par chave → valor simples</td><td>Redis</td><td>Cache, sessão, contadores, filas simples</td></tr>
+        <tr><td><strong>Coluna larga</strong></td><td>Linhas com colunas dinâmicas por família</td><td>Cassandra</td><td>Escrita massiva, séries temporais em grande escala</td></tr>
+        <tr><td><strong>Grafo</strong></td><td>Nós e relacionamentos</td><td>Neo4j</td><td>Redes sociais, recomendações, dados fortemente interconectados</td></tr>
+      </tbody></table>
+
+      <h3>SQL vs NoSQL: a pergunta certa não é "qual é melhor"</h3>
+      <p>É "qual encaixa melhor no formato dos meus dados e no meu padrão de acesso". Um sistema real frequentemente usa <strong>os dois</strong> — Postgres para dados transacionais estruturados (pedidos, pagamentos, usuários) e MongoDB/Redis para partes específicas onde flexibilidade ou velocidade importam mais que rigidez relacional.</p>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Relacional (SQL)</th><th>Documento (NoSQL)</th></tr>
+        <tr><td>Esquema</td><td>Fixo, definido antes (migrations)</td><td>Flexível, cada documento pode variar</td></tr>
+        <tr><td>Relacionamentos</td><td>JOINs nativos e eficientes</td><td>Geralmente aninha dados ou referencia manualmente</td></tr>
+        <tr><td>Transações complexas</td><td>ACID e relacionamentos são centrais</td><td>Varia por produto; MongoDB oferece transações, mas o modelo deve evitar depender delas indiscriminadamente</td></tr>
+        <tr><td>Escala horizontal</td><td>Depende do produto, particionamento e operação</td><td>Muitos foram desenhados para distribuição, ainda com custo operacional</td></tr>
+        <tr><td>Exemplo de bom uso</td><td>Sistema financeiro, estoque, pedidos</td><td>Catálogo de produtos com atributos variáveis, logs, cache de sessão</td></tr>
+      </tbody></table>
+
+      <div class="secret">A "promessa" de NoSQL de escalar infinitamente sem esforço é um mito que já causou muita dor de cabeça em produção. Na prática, times maduros escolhem NoSQL para o <strong>problema específico</strong> que ele resolve bem (documentos flexíveis, cache ultrarrápido), e continuam usando Postgres para tudo que precisa de consistência forte e relacionamentos — não por modismo, mas porque cada ferramenta tem seu propósito.</div>
+
+      <div class="study-tip">Não tente decorar "quando usar cada banco" como uma tabela de regras fixas. Em vez disso, pergunte sempre: <em>"meus dados têm uma estrutura previsível e relacionamentos importantes?"</em> — se sim, SQL. <em>"Preciso de leitura absurdamente rápida de algo simples, tipo sessão de usuário?"</em> — Redis. <em>"Meus documentos variam muito de formato entre si?"</em> — MongoDB. A decisão nasce do formato real do problema, não de uma lista memorizada.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 36.1 — Escolhendo a ferramenta certa</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Para cada cenário, decida se SQL (Postgres) ou um banco de documentos (MongoDB) encaixa melhor, justificando em uma frase: (a) sistema de pedidos de um e-commerce com estoque e pagamento; (b) catálogo de produtos onde cada categoria tem atributos completamente diferentes (roupas têm tamanho/cor, eletrônicos têm voltagem/garantia); (c) log de eventos de uma aplicação, gravado em alto volume e raramente consultado por relacionamento.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>(a) SQL/Postgres</strong> — pedidos, estoque e pagamento têm relacionamentos fortes e exigem transações consistentes (débito de estoque + criação de pedido precisam ser atômicos, como vimos no capítulo 33). <strong>(b) MongoDB</strong> — atributos variáveis por categoria de produto é exatamente o caso onde esquema flexível economiza a dor de ter colunas vazias ou tabelas de atributos genéricas complicadas. <strong>(c) MongoDB (ou um banco de coluna larga em escala maior)</strong> — logs são escritos em alto volume, raramente precisam de JOIN, e o formato pode variar entre tipos de evento; forçar isso em tabelas relacionais rígidas costuma ser desnecessariamente trabalhoso.</p>
+        </div>
+      </div>
+    </div></section>

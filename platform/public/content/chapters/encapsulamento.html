@@ -1,0 +1,128 @@
+<section class="section" id="encapsulamento">
+      <div class="section-head"><span class="section-num">04</span><h2 class="section-title">Encapsulamento</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#construtores">03 · Construtores</a></div>
+      </div>
+
+      <p>Até agora, qualquer código externo pode escrever <code>conta.saldo = -9999</code> diretamente. Isso quebra a integridade do objeto. <strong>Encapsulamento</strong> é esconder os atributos (<code>private</code>) e controlar o acesso por meio de métodos públicos.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
+    <span class="kw">private String</span> titular;
+    <span class="kw">private double</span> saldo;
+
+    <span class="kw">public</span> <span class="fn">ContaBancaria</span>(<span class="kw">String</span> titular, <span class="kw">double</span> saldoInicial) {
+        <span class="kw">this</span>.titular = titular;
+        <span class="kw">this</span>.saldo = Math.max(saldoInicial, 0);
+    }
+
+    <span class="kw">public double</span> <span class="fn">getSaldo</span>() { <span class="kw">return</span> saldo; }
+
+    <span class="kw">public void</span> <span class="fn">depositar</span>(<span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor &gt; 0) saldo += valor;
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor &lt;= 0 || valor &gt; saldo) <span class="kw">return false</span>;
+        saldo -= valor;
+        <span class="kw">return true</span>;
+    }
+}</pre>
+
+      <div class="callout"><b>O ganho real:</b> ninguém consegue mais colocar o saldo em estado inválido, porque a única porta de entrada são métodos que aplicam regras. Se a regra mudar, você muda em um único lugar e todo o sistema respeita.</div>
+
+      <h3>Os quatro níveis de acesso em Java</h3>
+      <table class="cmp">
+        <tbody><tr><th>Modificador</th><th>Mesma classe</th><th>Mesmo pacote</th><th>Subclasse (outro pacote)</th><th>Qualquer lugar</th></tr>
+        <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td><code>(default)</code></td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+        <tr><td><code>public</code></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      </tbody></table>
+
+      <h3>Encapsulamento não é só "botar getters e setters"</h3>
+      <p>Um erro comum: gerar getter e setter <em>public</em> para <strong>todos</strong> os atributos automaticamente (muitas IDEs fazem isso com um clique). Isso é apenas encapsulamento de fachada — na prática, o objeto continua totalmente mutável de fora, só que através de métodos em vez de campos. Encapsulamento de verdade pensa em <em>quais operações</em> fazem sentido no domínio, não em expor 1 getter/setter por campo.</p>
+
+      <pre class="code"><span class="com">// encapsulamento "de fachada" -- não resolve nada:</span>
+<span class="kw">public void</span> <span class="fn">setSaldo</span>(<span class="kw">double</span> saldo) { <span class="kw">this</span>.saldo = saldo; } <span class="com">// ainda permite saldo negativo!</span>
+
+<span class="com">// encapsulamento de verdade -- expõe operações, não o campo:</span>
+<span class="kw">public boolean</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) { <span class="com">/* valida regra de negócio */</span> }</pre>
+
+      <h3>Imutabilidade: o encapsulamento levado ao extremo</h3>
+      <p>Uma classe <strong>imutável</strong> não permite alteração de estado <em>depois</em> de construída — nenhum setter, todos os campos <code>final</code>. Isso elimina uma classe inteira de bugs relacionados a estado mutável compartilhado (especialmente importante em threads, capítulo 14).</p>
+
+      <pre class="code"><span class="kw">public final class</span> <span class="cls">Ponto</span> {
+    <span class="kw">private final double</span> x;
+    <span class="kw">private final double</span> y;
+
+    <span class="kw">public</span> <span class="fn">Ponto</span>(<span class="kw">double</span> x, <span class="kw">double</span> y) { <span class="kw">this</span>.x = x; <span class="kw">this</span>.y = y; }
+
+    <span class="kw">public double</span> <span class="fn">getX</span>() { <span class="kw">return</span> x; }
+    <span class="kw">public double</span> <span class="fn">getY</span>() { <span class="kw">return</span> y; }
+
+    <span class="com">// "modificar" retorna um NOVO Ponto, nunca altera o atual</span>
+    <span class="kw">public</span> <span class="cls">Ponto</span> <span class="fn">transladar</span>(<span class="kw">double</span> dx, <span class="kw">double</span> dy) {
+        <span class="kw">return new</span> <span class="cls">Ponto</span>(x + dx, y + dy);
+    }
+}</pre>
+
+      <div class="secret">Desde o Java 16, existe o tipo <code>record</code>, que gera automaticamente uma classe imutável com construtor, getters, <code>equals()</code>, <code>hashCode()</code> e <code>toString()</code>: <code>public record Ponto(double x, double y) {}</code> substitui toda a classe acima em uma linha. Vale conhecer o conceito manual primeiro (como fizemos) para entender o que o <code>record</code> está economizando para você.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 4.1 — Encapsulando Livro</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Torne <code>Livro</code> totalmente encapsulado: atributos <code>private</code>, construtor com os três valores, getters para todos, e um setter apenas para <code>paginas</code> que rejeite valores ≤ 0.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">private String</span> titulo, autor;
+    <span class="kw">private int</span> paginas;
+
+    <span class="kw">public</span> <span class="fn">Livro</span>(<span class="kw">String</span> titulo, <span class="kw">String</span> autor, <span class="kw">int</span> paginas) {
+        <span class="kw">this</span>.titulo = titulo; <span class="kw">this</span>.autor = autor; <span class="kw">this</span>.paginas = paginas;
+    }
+    <span class="kw">public String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+    <span class="kw">public String</span> <span class="fn">getAutor</span>()  { <span class="kw">return</span> autor; }
+    <span class="kw">public int</span>    <span class="fn">getPaginas</span>() { <span class="kw">return</span> paginas; }
+    <span class="kw">public void</span> <span class="fn">setPaginas</span>(<span class="kw">int</span> paginas) {
+        <span class="kw">if</span> (paginas &gt; 0) <span class="kw">this</span>.paginas = paginas;
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 4.2 — Classe imutável</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie uma classe imutável <code>Dinheiro</code> com <code>valor</code> (double) e <code>moeda</code> (String), ambos <code>final</code>. Adicione um método <code>somar(Dinheiro outro)</code> que retorna um <strong>novo</strong> <code>Dinheiro</code> com a soma dos valores (lance uma <code>IllegalArgumentException</code> se as moedas forem diferentes — veremos exceções a fundo no capítulo 10, mas <code>throw new IllegalArgumentException("mensagem")</code> já funciona sozinho).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public final class</span> <span class="cls">Dinheiro</span> {
+    <span class="kw">private final double</span> valor;
+    <span class="kw">private final String</span> moeda;
+
+    <span class="kw">public</span> <span class="fn">Dinheiro</span>(<span class="kw">double</span> valor, <span class="kw">String</span> moeda) {
+        <span class="kw">this</span>.valor = valor; <span class="kw">this</span>.moeda = moeda;
+    }
+
+    <span class="kw">public</span> <span class="cls">Dinheiro</span> <span class="fn">somar</span>(<span class="cls">Dinheiro</span> outro) {
+        <span class="kw">if</span> (!<span class="kw">this</span>.moeda.equals(outro.moeda)) {
+            <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"Moedas diferentes"</span>);
+        }
+        <span class="kw">return new</span> <span class="cls">Dinheiro</span>(<span class="kw">this</span>.valor + outro.valor, <span class="kw">this</span>.moeda);
+    }
+
+    <span class="kw">public double</span> <span class="fn">getValor</span>() { <span class="kw">return</span> valor; }
+}</pre>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <p class="q">O que acontece se você tentar acessar um atributo <code>private</code> de fora da classe?</p>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-correct="false">Funciona normalmente, apenas gera um aviso (warning).</button>
+          <button class="quiz-opt" data-correct="true">Erro de compilação — o código não compila.</button>
+          <button class="quiz-opt" data-correct="false">Funciona, mas o valor retornado é sempre nulo.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </section>

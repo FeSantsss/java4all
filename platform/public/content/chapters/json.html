@@ -1,0 +1,73 @@
+<section class="section" id="json">
+      <div class="section-head"><span class="section-num">25</span><h2 class="section-title">JSON &amp; serialização</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
+      </div>
+
+      <p>Toda API REST (próximo capítulo) troca dados em <strong>JSON</strong>. O Spring Boot usa a biblioteca <strong>Jackson</strong> para converter automaticamente objetos Java em JSON (serialização) e vice-versa (desserialização) — e isso é feito, mais uma vez, via reflection.</p>
+
+      <h3>De objeto Java para JSON (serialização)</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">private</span> <span class="kw">String</span> titulo;
+    <span class="kw">private</span> <span class="kw">String</span> autor;
+    <span class="kw">private int</span> paginas;
+    <span class="com">// getters obrigatórios -- é assim que o Jackson DESCOBRE os campos a serializar</span>
+    <span class="kw">public String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
+    <span class="kw">public String</span> <span class="fn">getAutor</span>() { <span class="kw">return</span> autor; }
+    <span class="kw">public int</span> <span class="fn">getPaginas</span>() { <span class="kw">return</span> paginas; }
+}
+
+ObjectMapper mapper = <span class="kw">new</span> ObjectMapper();
+<span class="kw">String</span> json = mapper.writeValueAsString(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"1984"</span>, <span class="str">"Orwell"</span>, 328));
+<span class="com">// {"titulo":"1984","autor":"Orwell","paginas":328}</span></pre>
+
+      <div class="secret">O Jackson não lê os campos <code>private</code> diretamente — por padrão, ele usa <strong>introspecção via getters/setters</strong> (o padrão JavaBeans: qualquer <code>getX()</code> vira a propriedade JSON <code>"x"</code>). É por isso que uma classe sem getters é serializada como <code>{}</code> vazio, mesmo tendo campos preenchidos — um erro clássico de quem está começando com Spring e não entende por que o JSON de resposta veio vazio.</div>
+
+      <h3>De JSON para objeto Java (desserialização)</h3>
+      <pre class="code"><span class="kw">String</span> json = <span class="str">"""
+    {"titulo": "Dom Casmurro", "autor": "Machado de Assis", "paginas": 256}
+    """</span>;
+
+<span class="cls">Livro</span> livro = mapper.readValue(json, <span class="cls">Livro</span>.<span class="kw">class</span>);
+<span class="com">// Jackson usa reflection para: 1) criar o objeto via construtor sem args,
+// 2) chamar os setters correspondentes a cada campo do JSON</span></pre>
+
+      <div class="warn"><b>Por isso o Jackson exige um construtor sem argumentos</b> (implícito ou explícito) na maioria dos cenários: ele cria o objeto "vazio" primeiro e preenche os campos depois via setters/reflection. Classes totalmente imutáveis (capítulo 04, só com construtor cheio e sem setters) exigem anotações extras como <code>@JsonCreator</code> para funcionar.</div>
+
+      <h3>Controlando a serialização com anotações</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Usuario</span> {
+    <span class="kw">private</span> <span class="kw">String</span> nome;
+
+    <span class="annotation">@JsonIgnore</span> <span class="com">// nunca aparece no JSON de saída (ex: senha)</span>
+    <span class="kw">private</span> <span class="kw">String</span> senha;
+
+    <span class="annotation">@JsonProperty</span>(<span class="str">"nome_completo"</span>) <span class="com">// renomeia o campo no JSON</span>
+    <span class="kw">public String</span> <span class="fn">getNome</span>() { <span class="kw">return</span> nome; }
+}</pre>
+
+      <h3>Records e JSON — a combinação favorita do Spring moderno</h3>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(<span class="kw">String</span> titulo, <span class="kw">String</span> autor, <span class="kw">int</span> paginas) {}
+<span class="com">// Jackson serializa/desserializa records automaticamente desde a versão 2.12+ --
+// sem precisar de getters "get*" (usa os métodos de acesso do record: titulo(), autor()...)</span></pre>
+
+      <div class="callout"><b>DTO (Data Transfer Object):</b> em uma API real, você raramente serializa suas entidades de domínio diretamente — cria classes específicas (ou records) só para representar o formato de entrada/saída da API, desacoplando o "formato de rede" do "modelo interno". Isso vai aparecer o tempo todo em controllers Spring.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 25.1 — Serializando e desserializando</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie um record <code>LivroDTO(String titulo, String autor, int paginas)</code>. Usando <code>ObjectMapper</code> (biblioteca Jackson), serialize uma instância para JSON e imprima o resultado. Depois, desserialize uma <code>String</code> JSON de volta para <code>LivroDTO</code> e imprima os campos.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(<span class="kw">String</span> titulo, <span class="kw">String</span> autor, <span class="kw">int</span> paginas) {}
+
+ObjectMapper mapper = <span class="kw">new</span> ObjectMapper();
+
+<span class="cls">LivroDTO</span> dto = <span class="kw">new</span> <span class="cls">LivroDTO</span>(<span class="str">"O Alquimista"</span>, <span class="str">"Paulo Coelho"</span>, 208);
+<span class="kw">String</span> json = mapper.writeValueAsString(dto);
+System.out.println(json); <span class="com">// {"titulo":"O Alquimista","autor":"Paulo Coelho","paginas":208}</span>
+
+<span class="cls">LivroDTO</span> devolta = mapper.readValue(json, <span class="cls">LivroDTO</span>.<span class="kw">class</span>);
+System.out.println(devolta.titulo() + <span class="str">" - "</span> + devolta.autor());</pre>
+        </div>
+      </div>
+    </section>

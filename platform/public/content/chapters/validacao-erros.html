@@ -1,0 +1,85 @@
+<section class="section tk-spring" id="validacao-erros">
+      <div class="section-head"><span class="section-num">48</span><h2 class="section-title">Bean Validation &amp; tratamento global de erros</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-mvc">44 · Spring Web/MVC</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a>, <a class="prereq-tag" href="#excecoes">10 · Exceções</a></div>
+      </div>
+
+      <p>Duas peças que sempre andam juntas: validar o que entra na API, e tratar de forma consistente o que dá errado — sem nenhuma delas, uma API real vira um campo minado de <code>500 Internal Server Error</code> genéricos e stack traces vazando para o cliente.</p>
+
+      <h3>Bean Validation — seu @NaoNulo, oficial</h3>
+      <p>Lembra do <code>@NaoNulo</code> que você construiu no exercício 20.1? Isso é exatamente o Bean Validation, versão oficial e madura.</p>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(
+    <span class="annotation">@NotBlank</span>(message = <span class="str">"Título é obrigatório"</span>)
+    <span class="kw">String</span> titulo,
+
+    <span class="annotation">@Positive</span>(message = <span class="str">"Páginas deve ser maior que zero"</span>)
+    <span class="kw">int</span> paginas,
+
+    <span class="annotation">@Email</span>
+    <span class="kw">String</span> emailContatoEditora
+) {}
+
+<span class="annotation">@PostMapping</span>
+<span class="kw">public</span> ResponseEntity&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">criar</span>(<span class="annotation">@Valid</span> <span class="annotation">@RequestBody</span> <span class="cls">LivroDTO</span> dto) {
+    <span class="com">// se a validação falhar, o método NUNCA é executado --
+    // o Spring já responde 400 Bad Request antes de chegar aqui</span>
+    <span class="kw">return</span> ResponseEntity.ok(servico.salvar(dto));
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Anotação</th><th>Valida</th></tr>
+        <tr><td><code>@NotNull</code></td><td>Não pode ser <code>null</code></td></tr>
+        <tr><td><code>@NotBlank</code></td><td>String não nula e não vazia (ignorando espaços)</td></tr>
+        <tr><td><code>@Positive</code> / <code>@Min</code> / <code>@Max</code></td><td>Restrições numéricas</td></tr>
+        <tr><td><code>@Email</code></td><td>Formato de e-mail válido</td></tr>
+        <tr><td><code>@Size(min=, max=)</code></td><td>Tamanho de String/Coleção</td></tr>
+      </tbody></table>
+
+      <h3>@ControllerAdvice — centralizando o tratamento de erro</h3>
+      <p>Sem isso, cada controller precisaria de seu próprio <code>try/catch</code> repetido. Um <code>@ControllerAdvice</code> intercepta exceções lançadas em <strong>qualquer</strong> controller da aplicação, um único lugar para decidir como cada tipo de erro vira resposta HTTP.</p>
+
+      <pre class="code"><span class="annotation">@ControllerAdvice</span>
+<span class="kw">public class</span> <span class="cls">GlobalExceptionHandler</span> {
+
+    <span class="annotation">@ExceptionHandler</span>(<span class="cls">ItemIndisponivelException</span>.<span class="kw">class</span>) <span class="com">// sua exceção do capítulo 17!</span>
+    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarItemIndisponivel</span>(<span class="cls">ItemIndisponivelException</span> e) {
+        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CONFLICT) <span class="com">// 409</span>
+            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"ITEM_INDISPONIVEL"</span>, e.getMessage()));
+    }
+
+    <span class="annotation">@ExceptionHandler</span>(MethodArgumentNotValidException.<span class="kw">class</span>) <span class="com">// disparada por @Valid quando falha</span>
+    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarValidacao</span>(MethodArgumentNotValidException e) {
+        <span class="kw">String</span> mensagens = e.getBindingResult().getFieldErrors().stream()
+            .map(erro -&gt; erro.getField() + <span class="str">": "</span> + erro.getDefaultMessage())
+            .collect(Collectors.joining(<span class="str">"; "</span>)); <span class="com">// streams, capítulo 13</span>
+        <span class="kw">return</span> ResponseEntity.badRequest() <span class="com">// 400</span>
+            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"VALIDACAO"</span>, mensagens));
+    }
+
+    <span class="annotation">@ExceptionHandler</span>(<span class="cls">Exception</span>.<span class="kw">class</span>) <span class="com">// rede de segurança -- NUNCA deixe stack trace vazar</span>
+    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarErroGenerico</span>(<span class="cls">Exception</span> e) {
+        <span class="kw">return</span> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) <span class="com">// 500</span>
+            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"ERRO_INTERNO"</span>, <span class="str">"Algo deu errado. Tente novamente."</span>));
+    }
+}
+
+<span class="kw">public record</span> <span class="cls">ErroDTO</span>(<span class="kw">String</span> codigo, <span class="kw">String</span> mensagem) {}</pre>
+
+      <div class="secret">Repare que os <code>@ExceptionHandler</code> mais específicos deveriam vir antes do genérico — exatamente a mesma regra dos blocos <code>catch</code> em cascata do capítulo 10 (exercício 10.2), só que agora aplicada a nível de aplicação inteira em vez de um único método. O <code>@ControllerAdvice</code> é, no fundo, um dynamic proxy interceptando exceções não capturadas — o mesmo mecanismo do capítulo 20.</div>
+
+      <div class="warn"><b>Nunca inclua a mensagem original da exceção genérica (<code>e.getMessage()</code>) na resposta do handler de <code>Exception.class</code></b> — ela pode conter detalhes internos (nome de tabela, query SQL, caminho de arquivo) que ajudam um atacante a entender sua infraestrutura. Log o detalhe internamente, devolva uma mensagem genérica para o cliente.</div>
+
+      <div class="study-tip">Trate seu <code>@ControllerAdvice</code> como o "cardápio de erros" da sua API — cada tipo de falha do domínio (item indisponível, saldo insuficiente, validação) deveria ter uma entrada clara, assim como você documentaria diferentes tipos de exceção customizada no capítulo 10. Um bom teste: se alguém que nunca viu seu código conseguir entender o que deu errado só pelo <code>codigo</code> retornado, o design está bom.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 48.1 — Validação + erro end-to-end</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Adicione validação Bean Validation ao <code>LivroDTO</code> (título obrigatório, páginas positivas). Escreva um <code>@ControllerAdvice</code> tratando <code>MethodArgumentNotValidException</code> (400) e <code>ItemIndisponivelException</code> (409), mais um handler genérico para <code>Exception</code> (500, sem vazar detalhes internos).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Ver o <code>GlobalExceptionHandler</code> completo acima — cobre exatamente os três casos pedidos.</p>
+        </div>
+      </div>
+    </section>

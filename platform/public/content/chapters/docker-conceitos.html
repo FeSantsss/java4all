@@ -1,0 +1,89 @@
+<section class="section tk-docker" id="docker-conceitos">
+      <div class="section-head"><span class="section-num">30</span><h2 class="section-title">Docker — conceitos &amp; instalação</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-docker">Docker</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#git">29 · Git</a>, <a class="prereq-tag" href="#build">19 · Maven &amp; Gradle</a></div>
+      </div>
+
+      <p>"Na minha máquina funciona" é o problema que Docker resolve. Um <strong>container</strong> empacota sua aplicação junto com tudo que ela precisa para rodar (runtime Java, bibliotecas, variáveis de ambiente) em uma unidade isolada e portátil, idêntica em qualquer máquina.</p>
+
+      <div class="install-box">
+        <h4>Instalação (Docker Desktop / Engine)</h4>
+        <div class="install-tabs">
+          <span class="install-tab active">Windows</span>
+          <span class="install-tab">macOS</span>
+          <span class="install-tab">Linux</span>
+        </div>
+        <div class="install-panel active"><pre class="code"><span class="com"># baixe o Docker Desktop em docker.com (exige WSL2 habilitado)</span>
+wsl --install     <span class="com"># se ainda não tiver o WSL2</span>
+<span class="com"># depois instale o Docker Desktop pelo site e reinicie</span></pre></div>
+        <div class="install-panel"><pre class="code">brew install --cask docker
+<span class="com"># abra o Docker Desktop uma vez para iniciar o daemon</span></pre></div>
+        <div class="install-panel"><pre class="code"><span class="com"># Ubuntu/Debian -- use o repositório apt oficial documentado em docs.docker.com.
+# Evite executar scripts remotos diretamente com "curl | sh".
+# Depois de instalar docker-ce e os plugins, valide:</span>
+sudo systemctl status docker
+docker version</pre></div>
+        <pre class="code">docker --version
+docker run hello-world   <span class="com"># confirma que tudo está funcionando</span></pre>
+      </div>
+
+      <h3>Imagem vs Container — a distinção fundamental</h3>
+      <table class="cmp">
+        <tbody><tr><th>Conceito</th><th>O que é</th><th>Analogia</th></tr>
+        <tr><td><strong>Imagem</strong></td><td>Um "molde" somente leitura, com o sistema de arquivos e configuração da aplicação</td><td>A classe (capítulo 01)</td></tr>
+        <tr><td><strong>Container</strong></td><td>Uma instância em execução dessa imagem, isolada</td><td>O objeto (capítulo 01)</td></tr>
+        <tr><td><strong>Volume</strong></td><td>Armazenamento persistente fora do ciclo de vida do container</td><td>Um HD externo plugado no container</td></tr>
+      </tbody></table>
+
+      <pre class="code">docker pull postgres:16          <span class="com"># baixa a imagem do Docker Hub</span>
+docker run -d --name meu-postgres -e POSTGRES_PASSWORD=senha123 -p 5432:5432 postgres:16
+<span class="com"># -d: roda em background (detached)
+# -e: variável de ambiente
+# -p host:container: mapeia a porta 5432 da sua máquina para a 5432 do container</span>
+
+docker ps                         <span class="com"># containers rodando</span>
+docker logs meu-postgres          <span class="com"># ver a saída/log do container</span>
+docker exec -it meu-postgres bash <span class="com"># abre um terminal DENTRO do container</span>
+docker stop meu-postgres
+docker rm meu-postgres            <span class="com"># remove o container (a imagem continua no disco)</span></pre>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Containers são <strong>efêmeros por natureza</strong> — qualquer dado gravado dentro dele some ao removê-lo, a menos que você use um <strong>volume</strong>.</li>
+          <li>Nunca rode processos como <code>root</code> dentro de um container em produção sem necessidade — é uma superfície de ataque desnecessária.</li>
+          <li>Uma imagem deveria fazer <strong>uma coisa</strong> — evite meter banco + API + front na mesma imagem; use containers separados conectados por rede (é para isso que existe o Docker Compose, próximo capítulo).</li>
+        </ul>
+      </div>
+
+      <h3>Volumes — persistindo dados de verdade</h3>
+      <pre class="code">docker run -d --name meu-postgres -e POSTGRES_PASSWORD=senha123 \
+  -v dados_postgres:/var/lib/postgresql/data \
+  -p 5432:5432 postgres:16
+<span class="com"># "dados_postgres" é um volume nomeado, gerenciado pelo Docker --
+# mesmo removendo e recriando o container, os dados do banco sobrevivem</span>
+
+docker volume ls
+docker volume rm dados_postgres  <span class="com"># só aí os dados são realmente apagados</span></pre>
+
+      <div class="secret">Todo tutorial de Spring Boot moderno assume que você sabe subir um Postgres com um comando <code>docker run</code> em vez de instalar o banco na máquina. Isso não é só conveniência: significa que seu ambiente de desenvolvimento é <strong>descartável e reproduzível</strong> — se algo quebrar, você apaga o container e sobe outro do zero em segundos, sem "desinstalar e reinstalar" nada no seu sistema operacional.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 30.1 — Subindo um Postgres com volume</h4><span class="exercise-tag m">médio</span></div>
+        <p>Suba um container Postgres 16 com senha <code>biblioteca123</code>, expondo a porta 5432, com um volume nomeado <code>db_biblioteca</code> para persistência. Confirme que está rodando com <code>docker ps</code>, entre no container com <code>docker exec -it</code> e rode <code>psql -U postgres</code> para confirmar acesso ao banco.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">docker run -d --name pg-biblioteca \
+  -e POSTGRES_PASSWORD=biblioteca123 \
+  -v db_biblioteca:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:16
+
+docker ps
+docker exec -it pg-biblioteca psql -U postgres</pre>
+        </div>
+      </div>
+    </section>

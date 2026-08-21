@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Curso progressivo de Java, backend e inglês técnico, do primeiro programa a sistemas distribuídos.">
+    <meta name="application-name" content="java4br">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icon.svg">
+    <link rel="preload" href="./course-content.json" as="fetch" crossorigin>
+    <title>java4br - Java, backend e inglês técnico</title>
+    <script>
+      (() => {
+        const contrast = matchMedia('(prefers-color-scheme: dark)').matches
+          || matchMedia('(prefers-contrast: more)').matches
+          || matchMedia('(forced-colors: active)').matches;
+        document.documentElement.dataset.theme = contrast ? 'contrast' : 'white';
+        document.querySelector('meta[name="theme-color"]').content = contrast ? '#050505' : '#ffffff';
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <main class="boot-shell" role="status" aria-live="polite">
+        <div class="boot-card">
+          <span class="boot-mark" aria-hidden="true">J</span>
+          <strong>java4br</strong>
+          <p>Carregando trilha completa...</p>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<section class="section tk-spring" id="webclient">
+      <div class="section-head"><span class="section-num">69</span><h2 class="section-title">WebClient &amp; RestTemplate — consumindo APIs externas</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Spring</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#resilience">55 · Resilience4j</a></div>
+      </div>
+
+      <p>Sua API não vive isolada — frequentemente ela mesma precisa consumir <strong>outra</strong> API (serviço de frete, gateway de pagamento, API de terceiros). O capítulo 62 mostrou o front-end fazendo isso com <code>fetch</code>/axios; este capítulo mostra o back-end Spring fazendo o equivalente.</p>
+
+      <h3>WebClient — cliente não bloqueante e reativo</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">CepServico</span> {
+    <span class="kw">private final</span> WebClient webClient;
+
+    <span class="kw">public</span> <span class="fn">CepServico</span>(WebClient.Builder builder) {
+        <span class="kw">this</span>.webClient = builder.baseUrl(<span class="str">"https://viacep.com.br"</span>).build();
+    }
+
+    <span class="annotation">@CircuitBreaker</span>(name = <span class="str">"cep-servico"</span>, fallbackMethod = <span class="str">"enderecoFallback"</span>) <span class="com">// capítulo 55!</span>
+    <span class="kw">public</span> <span class="cls">EnderecoDTO</span> <span class="fn">buscarEndereco</span>(<span class="kw">String</span> cep) {
+        <span class="kw">return</span> webClient.get()
+            .uri(<span class="str">"/ws/{cep}/json"</span>, cep)
+            .retrieve()
+            .bodyToMono(<span class="cls">EnderecoDTO</span>.<span class="kw">class</span>)
+            .block(); <span class="com">// versão síncrona simples -- .block() espera o resultado</span>
+    }
+
+    <span class="kw">public</span> <span class="cls">EnderecoDTO</span> <span class="fn">enderecoFallback</span>(<span class="kw">String</span> cep, <span class="cls">Throwable</span> t) {
+        <span class="kw">return new</span> <span class="cls">EnderecoDTO</span>(<span class="str">"Endereço indisponível"</span>);
+    }
+}</pre>
+
+      <h3>RestTemplate — o cliente clássico, ainda comum em código legado</h3>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> RestTemplate <span class="fn">restTemplate</span>() { <span class="kw">return new</span> RestTemplate(); }
+
+<span class="com">// uso:</span>
+<span class="cls">EnderecoDTO</span> endereco = restTemplate.getForObject(
+    <span class="str">"https://viacep.com.br/ws/{cep}/json"</span>, <span class="cls">EnderecoDTO</span>.<span class="kw">class</span>, cep);</pre>
+
+      <div class="warn"><b>Escolha pelo modelo da aplicação e pela versão:</b> em Spring Framework 7, <code>RestTemplate</code> está deprecated em favor do <code>RestClient</code> síncrono. Use <code>WebClient</code> quando o fluxo for não bloqueante, reativo ou streaming. Em Spring Framework 6, <code>RestTemplate</code> permanece comum em legado, mas <code>RestClient</code> oferece a API síncrona moderna.</div>
+
+      <div class="analogy">Se o fluxo síncrono tradicional (<code>@RestController</code> chamando <code>@Service</code> chamando o banco, capítulo 44) é uma conversa cara a cara, uma chamada via <code>WebClient</code> para uma API externa é uma ligação telefônica para um fornecedor terceiro — mais lenta, sujeita a falhar por motivos fora do seu controle, e por isso <strong>sempre</strong> deveria estar protegida por circuit breaker (capítulo 55), timeout e, quando fizer sentido, cache (capítulo 71).</div>
+
+      <div class="secret"><code>WebClient</code> retorna <code>Mono&lt;T&gt;</code> ou <code>Flux&lt;T&gt;</code> e preserva I/O não bloqueante enquanto a cadeia inteira permanece reativa. Chamar <code>.block()</code> transforma a fronteira em síncrona e não deve ocorrer em uma thread de event loop. Para uma aplicação MVC síncrona, <code>RestClient</code> costuma comunicar melhor a intenção; para WebFlux, componha o <code>Mono</code> sem bloquear.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 72.1 — Consumindo uma API externa protegida</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva um <code>CepServico</code> usando <code>WebClient</code> para consultar a API pública ViaCEP, protegido por <code>@CircuitBreaker</code> com um fallback retornando um endereço genérico "indisponível" em caso de falha.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Inclua timeout de conexão e resposta, mapeamento de 4xx/5xx, circuit breaker e teste com servidor HTTP simulado. O fallback não deve transformar CEP inválido em sucesso; falha funcional e indisponibilidade transitória precisam de resultados diferentes. Em MVC síncrono, apresente também a versão com <code>RestClient</code>.</p>
+        </div>
+      </div>
+    </section>

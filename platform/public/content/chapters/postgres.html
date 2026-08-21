@@ -1,0 +1,102 @@
+<section class="section tk-db" id="postgres">
+      <div class="section-head"><span class="section-num">34</span><h2 class="section-title">PostgreSQL na prática</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-db">PostgreSQL</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#sql">SQL fundamentos</a></div>
+      </div>
+
+      <p>SQL é o idioma; <strong>PostgreSQL</strong> é o "sotaque" específico que você vai usar no dia a dia — o banco relacional open-source mais popular do ecossistema Spring, com recursos avançados (JSON nativo, full-text search, extensões) que muitos concorrentes não têm.</p>
+
+      <div class="install-box">
+        <h4>Instalação</h4>
+        <div class="install-tabs">
+          <span class="install-tab active">Via Docker (recomendado)</span>
+          <span class="install-tab">Windows</span>
+          <span class="install-tab">macOS</span>
+        </div>
+        <div class="install-panel active"><pre class="code"><span class="com"># já vimos isso no capítulo 30 -- é assim que praticamente todo mundo
+# roda Postgres em desenvolvimento hoje em dia:</span>
+docker run -d --name pg -e POSTGRES_PASSWORD=senha123 -p 5432:5432 -v pgdata:/var/lib/postgresql/data postgres:16</pre></div>
+        <div class="install-panel"><pre class="code"><span class="com"># instalador oficial em postgresql.org/download/windows
+# ou via winget:</span>
+winget install PostgreSQL.PostgreSQL</pre></div>
+        <div class="install-panel"><pre class="code">brew install postgresql@16
+brew services start postgresql@16</pre></div>
+        <pre class="code"><span class="com"># cliente de linha de comando -- funciona igual, instalado localmente ou via Docker:</span>
+psql -U postgres -h localhost
+<span class="com">\l          -- listar bancos
+\c biblioteca  -- conectar a um banco
+\dt         -- listar tabelas
+\d livros   -- descrever a estrutura da tabela livros
+\q          -- sair</span></pre>
+      </div>
+
+      <div class="study-tip">Não decore os comandos do <code>psql</code> de uma vez. Deixe uma aba com <code>\?</code> (lista todos os comandos) aberta enquanto pratica os primeiros exercícios do capítulo anterior — o hábito vem do uso repetido, não da memorização.</div>
+
+      <h3>Tipos de dados que você vai usar o tempo todo</h3>
+      <table class="cmp">
+        <tbody><tr><th>Tipo Postgres</th><th>Equivalente Java</th><th>Observação</th></tr>
+        <tr><td><code>SERIAL</code> / <code>BIGSERIAL</code></td><td><code>int</code>/<code>long</code> auto-incrementado</td><td>Ideal para chaves primárias simples</td></tr>
+        <tr><td><code>VARCHAR(n)</code> / <code>TEXT</code></td><td><code>String</code></td><td><code>TEXT</code> sem limite de tamanho, <code>VARCHAR(n)</code> com limite</td></tr>
+        <tr><td><code>NUMERIC(p,s)</code></td><td><code>BigDecimal</code></td><td>Use para <strong>dinheiro</strong>, nunca <code>double</code> (capítulo 15 já avisou sobre imprecisão)</td></tr>
+        <tr><td><code>TIMESTAMP</code> / <code>DATE</code></td><td><code>LocalDateTime</code> / <code>LocalDate</code></td><td>Conecta direto com o capítulo 21 (java.time)</td></tr>
+        <tr><td><code>BOOLEAN</code></td><td><code>boolean</code></td><td></td></tr>
+        <tr><td><code>JSONB</code></td><td>String/objeto serializado</td><td>Postgres consegue indexar e consultar <em>dentro</em> do JSON — recurso raro em bancos relacionais</td></tr>
+      </tbody></table>
+
+      <h3>EXPLAIN — enxergando o que o banco realmente faz</h3>
+      <pre class="code">EXPLAIN ANALYZE
+SELECT * FROM livros WHERE autor_id = 5;</pre>
+      <p>Isso mostra o <strong>plano de execução</strong> real da consulta: se o banco está usando um índice (rápido) ou fazendo um <em>Seq Scan</em> — varredura sequencial da tabela inteira (lento em tabelas grandes). É a ferramenta que separa "acho que está lento" de "sei exatamente por quê".</p>
+
+      <pre class="code"><span class="com">-- sem índice em autor_id:</span>
+Seq Scan on livros  (cost=0.00..18.50 rows=5 width=64) (actual time=0.02..0.15 rows=5 loops=1)
+  Filter: (autor_id = 5)
+
+<span class="com">-- depois de "CREATE INDEX idx_livros_autor ON livros(autor_id);":</span>
+Index Scan using idx_livros_autor on livros  (cost=0.15..8.30 rows=5 width=64) (actual time=0.01..0.02 rows=5 loops=1)
+  Index Cond: (autor_id = 5)</pre>
+
+      <div class="analogy">Rodar <code>EXPLAIN</code> é como pedir ao banco "me mostre seu raciocínio" — parecido com pedir para alguém explicar passo a passo como resolveu um problema, em vez de só aceitar a resposta final. <code>Seq Scan</code> é "eu li linha por linha até achar"; <code>Index Scan</code> é "eu fui direto no índice remissivo e pulei pra página certa" (lembra da analogia do capítulo anterior).</div>
+
+      <h3>Conectando do Java via JDBC (revisão aplicada)</h3>
+      <pre class="code"><span class="kw">String</span> url = <span class="str">"jdbc:postgresql://localhost:5432/biblioteca"</span>;
+<span class="com">// exatamente o mesmo padrão do capítulo 24 -- agora com um Postgres real rodando</span>
+Connection conexao = DriverManager.getConnection(url, <span class="str">"postgres"</span>, <span class="str">"senha123"</span>);</pre>
+
+      <div class="rules-box">
+        <h4>Regras de ouro</h4>
+        <ul>
+          <li>Nunca use <code>double</code>/<code>float</code> para dinheiro — use <code>NUMERIC</code> no banco e <code>BigDecimal</code> no Java.</li>
+          <li>Toda tabela deveria ter uma chave primária explícita — nunca confie na "ordem de inserção" para identificar uma linha.</li>
+          <li>Rode <code>EXPLAIN ANALYZE</code> antes de "otimizar" qualquer coisa — otimização sem medir é só um palpite caro.</li>
+          <li>Faça backup <strong>antes</strong> de rodar qualquer <code>DELETE</code> ou <code>UPDATE</code> sem <code>WHERE</code> em produção — sim, isso já aconteceu com todo mundo pelo menos uma vez.</li>
+        </ul>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 34.1 — Medindo o efeito de um índice</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando o Postgres rodando via Docker (capítulo 30), crie uma tabela <code>livros</code> com pelo menos 3 colunas, e insira 1000 linhas de teste (dica: <code>INSERT INTO livros (titulo, paginas) SELECT 'Livro ' || i, (random()*500)::int FROM generate_series(1,1000) AS i;</code>). Rode <code>EXPLAIN ANALYZE</code> em uma busca por <code>paginas &gt; 400</code> sem índice, depois crie um índice em <code>paginas</code> e rode de novo, comparando o plano de execução.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">CREATE TABLE livros (id SERIAL PRIMARY KEY, titulo TEXT, paginas INTEGER);
+
+INSERT INTO livros (titulo, paginas)
+SELECT 'Livro ' || i, (random()*500)::int
+FROM generate_series(1,1000) AS i;
+
+EXPLAIN ANALYZE SELECT * FROM livros WHERE paginas &gt; 400;
+<span class="com">-- provavelmente Seq Scan, já que a tabela é pequena o suficiente para o
+-- planner decidir que vale mais a pena ler tudo do que usar índice</span>
+
+CREATE INDEX idx_livros_paginas ON livros(paginas);
+EXPLAIN ANALYZE SELECT * FROM livros WHERE paginas &gt; 400;
+<span class="com">-- com uma tabela pequena, o Postgres pode CONTINUAR escolhendo Seq Scan --
+-- e essa é a lição real: índice não é garantia automática de velocidade,
+-- o "planner" decide com base em estatísticas reais da tabela. O efeito
+-- fica claro em tabelas de centenas de milhares de linhas ou mais.</span></pre>
+        </div>
+      </div>
+    </section>

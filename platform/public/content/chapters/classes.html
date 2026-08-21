@@ -1,0 +1,87 @@
+<section class="section" id="classes">
+      <div class="section-head"><span class="section-num">01</span><h2 class="section-title">Classes e objetos</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#intro">00 · Introdução</a></div>
+      </div>
+
+      <p>Uma <strong>classe</strong> é um molde — define quais atributos e métodos os objetos criados a partir dela terão. Um <strong>objeto</strong> é uma instância concreta desse molde, vivendo na memória com seus próprios valores.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Cafe</span> {
+    <span class="kw">String</span> tipo;
+    <span class="kw">boolean</span> comAcucar;
+
+    <span class="kw">void</span> <span class="fn">descrever</span>() {
+        System.out.println(<span class="str">"Um "</span> + tipo + (comAcucar ? <span class="str">" doce"</span> : <span class="str">" puro"</span>));
+    }
+}
+
+<span class="cls">Cafe</span> expresso = <span class="kw">new</span> <span class="cls">Cafe</span>();
+expresso.tipo = <span class="str">"expresso"</span>;
+expresso.comAcucar = <span class="kw">false</span>;
+expresso.descrever(); <span class="com">// Um expresso puro</span></pre>
+
+      <h3>Onde os objetos vivem: stack e heap</h3>
+      <p>Este é o ponto que separa quem "decora sintaxe" de quem realmente entende Java. Existem duas regiões de memória relevantes para o seu programa:</p>
+      <ul style="color:var(--ink-dim)">
+        <li><strong>Stack</strong> — guarda variáveis locais e parâmetros de método. Para tipos primitivos (<code>int</code>, <code>double</code>, <code>boolean</code>...), o <em>valor</em> em si fica na stack.</li>
+        <li><strong>Heap</strong> — é onde todo objeto criado com <code>new</code> realmente existe. A variável que você declara na stack não guarda o objeto — guarda uma <strong>referência</strong> (um endereço) apontando para o objeto no heap.</li>
+      </ul>
+
+      <pre class="code"><span class="cls">Cafe</span> a = <span class="kw">new</span> <span class="cls">Cafe</span>();
+a.tipo = <span class="str">"expresso"</span>;
+
+<span class="cls">Cafe</span> b = a;              <span class="com">// b aponta para o MESMO objeto que a</span>
+b.tipo = <span class="str">"latte"</span>;
+
+System.out.println(a.tipo); <span class="com">// "latte" -- a e b são a mesma referência!</span></pre>
+
+      <div class="secret">Esse comportamento surpreende quem vem de linguagens que copiam objetos por valor. Em Java, atribuir um objeto a outra variável (<code>b = a</code>) <strong>não</strong> cria uma cópia — copia apenas a referência. Os dois nomes de variável agora apontam para o mesmo espaço no heap. Se quiser um objeto realmente independente, você precisa criar um novo com <code>new</code> e copiar os campos manualmente (ou implementar um método <code>clone()</code> ou um construtor de cópia).</div>
+
+      <div class="callout"><b>Garbage Collector:</b> diferente de C/C++, você nunca chama <code>delete</code> ou <code>free</code> em Java. Quando nenhuma variável mais referencia um objeto no heap, o <strong>Garbage Collector</strong> (GC) identifica isso automaticamente em segundo plano e libera a memória. Isso é ótimo para produtividade, mas significa que você não controla exatamente <em>quando</em> um objeto é destruído.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 1.1 — Sua primeira classe</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Crie uma classe <code>Livro</code> com atributos <code>titulo</code>, <code>autor</code> (String) e <code>paginas</code> (int). Adicione um método <code>resumo()</code> que imprime <em>"Dom Casmurro, de Machado de Assis (256 páginas)"</em>. Crie dois objetos <code>Livro</code> diferentes no <code>main</code> e chame <code>resumo()</code> em cada.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public class</span> <span class="cls">Livro</span> {
+    <span class="kw">String</span> titulo;
+    <span class="kw">String</span> autor;
+    <span class="kw">int</span> paginas;
+
+    <span class="kw">void</span> <span class="fn">resumo</span>() {
+        System.out.println(titulo + <span class="str">", de "</span> + autor + <span class="str">" ("</span> + paginas + <span class="str">" páginas)"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="kw">String</span>[] args) {
+        <span class="cls">Livro</span> l1 = <span class="kw">new</span> <span class="cls">Livro</span>();
+        l1.titulo = <span class="str">"Dom Casmurro"</span>; l1.autor = <span class="str">"Machado de Assis"</span>; l1.paginas = 256;
+        l1.resumo();
+
+        <span class="cls">Livro</span> l2 = <span class="kw">new</span> <span class="cls">Livro</span>();
+        l2.titulo = <span class="str">"1984"</span>; l2.autor = <span class="str">"George Orwell"</span>; l2.paginas = 328;
+        l2.resumo();
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 1.2 — Referência compartilhada</h4><span class="exercise-tag m">médio</span></div>
+        <p>Sem rodar em uma IDE, preveja no papel a saída deste código, depois explique o porquê usando o conceito de stack/heap:</p>
+        <pre class="code"><span class="cls">Cafe</span> x = <span class="kw">new</span> <span class="cls">Cafe</span>();
+x.tipo = <span class="str">"coado"</span>;
+<span class="cls">Cafe</span> y = <span class="kw">new</span> <span class="cls">Cafe</span>();
+y.tipo = <span class="str">"coado"</span>;
+System.out.println(x == y);
+y = x;
+System.out.println(x == y);</pre>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>Saída: <code>false</code> depois <code>true</code>.</strong> No primeiro <code>==</code>, <code>x</code> e <code>y</code> são referências para dois objetos <em>diferentes</em> no heap (mesmo com o mesmo valor de <code>tipo</code>) — <code>==</code> em objetos compara <em>referência</em>, não conteúdo. Depois de <code>y = x</code>, ambas as variáveis passam a apontar para o mesmo objeto, então <code>==</code> retorna <code>true</code>. (Para comparar conteúdo, usa-se <code>equals()</code> — capítulo 05.)</p>
+        </div>
+      </div>
+    </section>

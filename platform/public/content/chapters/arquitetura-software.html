@@ -1,0 +1,61 @@
+<section class="section" id="arquitetura-software">
+      <div class="section-head"><span class="section-num">72</span><h2 class="section-title">Arquitetura de Software</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Engenharia</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Multi-Avançado</b></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#clean-code">74 · Clean Code</a>, <a class="prereq-tag" href="#kafka">41 · Kafka</a>, <a class="prereq-tag" href="#deploy-backend">60 · Deploy do back-end</a></div>
+      </div>
+
+      <p>Enquanto Clean Code organiza a árvore, arquitetura decide o desenho da floresta inteira — como os grandes blocos do sistema se relacionam, comunicam e evoluem independentemente.</p>
+
+      <h3>Monolito vs Microsserviços — a decisão mais debatida da engenharia moderna</h3>
+      <table class="cmp">
+        <tbody><tr><th></th><th>Monolito</th><th>Microsserviços</th></tr>
+        <tr><td>Deploy</td><td>Uma unidade, tudo junto</td><td>Cada serviço deployado independentemente</td></tr>
+        <tr><td>Comunicação interna</td><td>Chamadas de método diretas (rápido, simples)</td><td>Rede — HTTP/mensageria (capítulos 26, 40) — mais lento, mais falhas possíveis</td></tr>
+        <tr><td>Escalar</td><td>A aplicação inteira escala junto</td><td>Só o serviço sob carga escala, independente dos outros</td></tr>
+        <tr><td>Complexidade operacional</td><td>Baixa — um único artefato para monitorar</td><td>Alta — muitos serviços, cada um com seus próprios logs, deploy, falhas</td></tr>
+        <tr><td>Bom para</td><td>Times pequenos, produto em validação, a maioria dos projetos reais</td><td>Times grandes com fronteiras de domínio claras, escala genuína de produto maduro</td></tr>
+      </tbody></table>
+
+      <div class="secret">A recomendação de arquitetos sêniores experientes, com frequência contraintuitiva para quem está começando: <strong>comece com um monolito bem organizado</strong> (com separação clara de camadas/módulos internos), não com microsserviços. Microsserviços resolvem problemas de <em>escala organizacional</em> (muitos times trabalhando sem pisar um no pé do outro) — adotá-los antes de ter esse problema real significa pagar toda a complexidade operacional (rede, mensageria, observabilidade distribuída) sem nenhum dos benefícios que a justificariam. Martin Fowler descreve isso como o "MonolithFirst" — e times maduros do Netflix ao Shopify já passaram por essa lição publicamente.</div>
+
+      <h3>Arquitetura em Camadas (a que você já construiu)</h3>
+      <pre class="code">Controller  (capítulo 44)  → recebe requisição HTTP
+    ↓
+Service     (capítulo 43)  → regra de negócio
+    ↓
+Repository  (capítulo 45)  → acesso a dados
+    ↓
+Banco de dados (capítulo 34)</pre>
+      <p>Essa é a arquitetura que você já pratica desde o capítulo 43 — cada camada só conhece a camada logo abaixo, nunca pula etapas (um controller nunca deveria chamar o repository diretamente, por exemplo).</p>
+
+      <h3>Arquitetura Hexagonal (Ports &amp; Adapters) — indo um passo além</h3>
+      <div class="analogy">Na arquitetura em camadas tradicional, a lógica de negócio ainda "sabe" que existe um banco relacional embaixo dela. Na arquitetura <strong>hexagonal</strong>, o núcleo de regras de negócio fica completamente isolado no centro, comunicando-se com o mundo externo (banco, API REST, fila) só através de <em>interfaces</em> ("portas") — exatamente o padrão Repository do capítulo 23, generalizado para <strong>toda</strong> dependência externa, não só o banco. É como uma tomada elétrica universal: o aparelho (regra de negócio) não sabe nem se importa se a energia vem de uma usina hidrelétrica ou solar (Postgres ou MongoDB) — só precisa que o adaptador encaixe na porta certa.</div>
+
+      <pre class="code"><span class="com">// núcleo de domínio -- NÃO sabe que existe JPA, HTTP, ou Kafka:</span>
+<span class="kw">public interface</span> <span class="cls">LivroRepositorioPort</span> { <span class="com">// a "porta"</span>
+    <span class="kw">void</span> <span class="fn">salvar</span>(<span class="cls">Livro</span> livro);
+}
+
+<span class="com">// adaptador concreto -- É aqui que JPA aparece, isolado do núcleo:</span>
+<span class="annotation">@Repository</span>
+<span class="kw">public class</span> <span class="cls">LivroRepositorioJpaAdapter</span> <span class="kw">implements</span> <span class="cls">LivroRepositorioPort</span> {
+    <span class="kw">private final</span> <span class="cls">LivroJpaRepository</span> jpaRepository; <span class="com">// Spring Data, capítulo 45</span>
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">salvar</span>(<span class="cls">Livro</span> livro) { jpaRepository.save(toEntity(livro)); }
+}</pre>
+
+      <div class="warn"><b>Arquitetura hexagonal tem custo real de complexidade</b> — mais interfaces, mais mapeamento entre modelo de domínio e modelo de persistência. Vale a pena quando o núcleo de regras de negócio é genuinamente complexo e precisa sobreviver a trocas de infraestrutura (trocar banco, trocar de REST para gRPC). Para um CRUD simples, é over-engineering — a arquitetura em camadas tradicional já é suficiente e mais direta.</div>
+
+      <div class="study-tip">Não trate "qual arquitetura usar" como uma pergunta com resposta certa universal — é sempre um trade-off contextual. A pergunta certa de um arquiteto sênior nunca é "qual é a melhor arquitetura", é "quais problemas eu realmente tenho, e qual arquitetura resolve <em>esses</em> problemas sem introduzir complexidade desnecessária para problemas que não tenho".</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 75.1 — Monolito ou microsserviços?</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Para cada cenário, decida se monolito ou microsserviços encaixa melhor, justificando: (a) uma startup de 3 desenvolvedores validando um produto novo; (b) uma empresa com 200 desenvolvedores organizados em 15 times de produto diferentes; (c) um sistema de biblioteca de uma faculdade, uso interno, baixo tráfego.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>(a) Monolito</strong> — 3 pessoas não têm o problema de coordenação entre times que microsserviços resolvem; velocidade de iteração importa mais que escala nesse estágio. <strong>(b) Microsserviços</strong> (ou pelo menos um monolito modular bem preparado para split) — 15 times fazendo deploy do mesmo artefato monolítico geraria gargalos de coordenação constantes. <strong>(c) Monolito</strong>, sem dúvida — baixo tráfego e escopo bem definido não justificam a complexidade operacional extra de serviços distribuídos.</p>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,55 @@
+<section class="section" id="big-o">
+      <div class="section-head"><span class="section-num">77</span><h2 class="section-title">Complexidade de Algoritmos (Big O)</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-java">Algoritmos</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#logica-programacao">79 · Lógica de programação</a>, <a class="prereq-tag" href="#colecoes">11 · Coleções</a></div>
+      </div>
+
+      <p>O capítulo 34 já mostrou <code>EXPLAIN ANALYZE</code> comparando <em>Seq Scan</em> com <em>Index Scan</em>. Big O é a linguagem formal para descrever exatamente esse tipo de diferença de performance — não em milissegundos (que variam por máquina), mas em <strong>como o tempo cresce</strong> conforme o tamanho da entrada cresce.</p>
+
+      <div class="analogy">Imagine procurar um nome em uma lista telefônica. Se a lista <strong>não está ordenada</strong>, você precisa olhar nome por nome até achar — dobrar o tamanho da lista dobra o tempo de busca. Se a lista <strong>está ordenada</strong> (como uma lista telefônica de verdade), você pode abrir no meio, decidir se o nome está antes ou depois, e repetir — dobrar o tamanho da lista adiciona só <strong>um</strong> passo a mais de busca, não o dobro. Essa diferença de comportamento, não o tempo exato em segundos, é o que Big O descreve.</div>
+
+      <h3>As complexidades mais comuns, da melhor para a pior</h3>
+      <table class="cmp">
+        <tbody><tr><th>Notação</th><th>Nome</th><th>Exemplo</th></tr>
+        <tr><td><code>O(1)</code></td><td>Constante</td><td>Acessar <code>array[5]</code>, ou <code>HashMap.get(chave)</code> — capítulo 11</td></tr>
+        <tr><td><code>O(log n)</code></td><td>Logarítmica</td><td>Busca binária, <code>TreeMap</code>, um índice de banco (capítulo 34)</td></tr>
+        <tr><td><code>O(n)</code></td><td>Linear</td><td>Percorrer uma lista uma vez — um <code>for</code> simples</td></tr>
+        <tr><td><code>O(n log n)</code></td><td>Log-linear</td><td>Algoritmos de ordenação eficientes (capítulo 83)</td></tr>
+        <tr><td><code>O(n²)</code></td><td>Quadrática</td><td>Loop dentro de loop sobre a mesma coleção</td></tr>
+        <tr><td><code>O(2ⁿ)</code></td><td>Exponencial</td><td>Recursão ingênua de Fibonacci (capítulo 81)</td></tr>
+      </tbody></table>
+
+      <pre class="code"><span class="com">// O(1) -- não importa o tamanho de "lista", sempre um passo:</span>
+<span class="kw">int</span> primeiro = lista.get(0);
+
+<span class="com">// O(n) -- um passo POR elemento:</span>
+<span class="kw">for</span> (<span class="kw">int</span> x : lista) { System.out.println(x); }
+
+<span class="com">// O(n²) -- para cada elemento, percorre TODOS de novo -- CUIDADO:</span>
+<span class="kw">for</span> (<span class="kw">int</span> a : lista) {
+    <span class="kw">for</span> (<span class="kw">int</span> b : lista) {
+        <span class="kw">if</span> (a == b) System.out.println(<span class="str">"achou par"</span>);
+    }
+}</pre>
+
+      <div class="secret">Essa é exatamente a mesma matemática por trás do problema N+1 (capítulo 46) — se buscar 1 autor custa <code>O(1)</code> mas você faz isso <strong>dentro</strong> de um loop de N livros, o custo total vira <code>O(n)</code> chamadas ao banco, cada uma com seu próprio custo de rede, em vez de <code>O(1)</code> chamada com um <code>JOIN</code>. Big O não é só teoria acadêmica — é literalmente o vocabulário formal para explicar por que aquele bug de performance específico acontece.</div>
+
+      <h3>Complexidade de espaço, não só de tempo</h3>
+      <p>Big O também mede memória usada, não só tempo de execução — um algoritmo pode ser rápido (<code>O(n)</code> em tempo) mas gastar memória proporcional ao tamanho da entrada (<code>O(n)</code> em espaço) para conseguir isso, um trade-off clássico entre os dois recursos.</p>
+
+      <div class="warn"><b>Não otimize prematuramente com base só em Big O.</b> Um algoritmo <code>O(n²)</code> rodando em uma coleção de 50 itens é instantâneo na prática — otimizar isso "porque O(n²) é ruim" sem medir é desperdiçar esforço em algo que nunca seria um problema real. Big O importa quando <code>n</code> é (ou pode vir a ser) genuinamente grande — a mesma lição prática do <code>EXPLAIN ANALYZE</code> do capítulo 34: meça antes de otimizar.</div>
+
+      <div class="study-tip">Ao analisar a complexidade de um trecho de código, pergunte: "para cada elemento da entrada, quantas vezes eu toco em outros elementos?" Se a resposta é "uma vez, no máximo" → provavelmente <code>O(n)</code>. Se é "para cada elemento, eu olho todos os outros de novo" → provavelmente <code>O(n²)</code>. Esse hábito de perguntar resolve a maioria das análises do dia a dia sem precisar de matemática formal.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 80.1 — Classificando complexidade</h4><span class="exercise-tag m">médio</span></div>
+        <p>Para cada trecho, identifique a complexidade Big O e justifique: (a) buscar um elemento em um <code>HashSet</code>; (b) verificar se um array tem elementos duplicados usando dois loops aninhados; (c) o mesmo problema (b), mas usando um <code>HashSet</code> auxiliar para rastrear valores já vistos.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>(a) O(1) em média</strong> — <code>HashSet</code> usa hashing como <code>HashMap</code>; colisões, distribuição ruim e redimensionamento impedem tratar isso como garantia absoluta. <strong>(b) O(n²)</strong> — para cada elemento, compara com os demais. <strong>(c) O(n) esperado</strong> — percorre uma vez e usa consultas/inserções de custo médio constante, trocando memória adicional por tempo.</p>
+        </div>
+      </div>
+    </section>

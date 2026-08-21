@@ -1,0 +1,170 @@
+<section class="section" id="testes">
+      <div class="section-head"><span class="section-num">15</span><h2 class="section-title">Testes unitários</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#excecoes">10 · Exceções</a></div>
+      </div>
+
+      <p>Um <strong>teste unitário</strong> verifica automaticamente que uma unidade de código (geralmente um método) se comporta como esperado, isolada do resto do sistema. Em Java, o padrão de mercado é o <strong>JUnit 5</strong> (Jupiter).</p>
+
+      <h3>Anatomia de um teste JUnit 5</h3>
+      <pre class="code"><span class="kw">import</span> org.junit.jupiter.api.Test;
+<span class="kw">import static</span> org.junit.jupiter.api.Assertions.*;
+
+<span class="kw">class</span> <span class="cls">ContaBancariaTest</span> {
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveDepositarCorretamente</span>() {
+        <span class="com">// Arrange (organizar)</span>
+        <span class="cls">ContaBancaria</span> conta = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Ana"</span>, 100);
+
+        <span class="com">// Act (agir)</span>
+        conta.depositar(50);
+
+        <span class="com">// Assert (verificar)</span>
+        assertEquals(150, conta.getSaldo());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveRecusarSaqueMaiorQueSaldo</span>() {
+        <span class="cls">ContaBancaria</span> conta = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Ana"</span>, 100);
+        assertFalse(conta.sacar(200));
+        assertEquals(100, conta.getSaldo()); <span class="com">// saldo não deve ter mudado</span>
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveLancarExcecaoParaMoedasDiferentes</span>() {
+        <span class="cls">Dinheiro</span> real = <span class="kw">new</span> <span class="cls">Dinheiro</span>(10, <span class="str">"BRL"</span>);
+        <span class="cls">Dinheiro</span> dolar = <span class="kw">new</span> <span class="cls">Dinheiro</span>(10, <span class="str">"USD"</span>);
+        assertThrows(<span class="cls">IllegalArgumentException</span>.<span class="kw">class</span>, () -&gt; real.somar(dolar));
+    }
+}</pre>
+
+      <p>O padrão <strong>AAA — Arrange, Act, Assert</strong> (organizar, agir, verificar) é a estrutura universal de um teste bem escrito: prepare o cenário, execute a ação, confirme o resultado. Cada teste deve testar <strong>uma única coisa</strong>.</p>
+
+      <h3>Principais assertions</h3>
+      <pre class="code">assertEquals(esperado, atual);          <span class="com">// valores iguais</span>
+assertTrue(condicao);  assertFalse(condicao);
+assertNull(objeto);    assertNotNull(objeto);
+assertThrows(<span class="cls">MinhaExcecao</span>.<span class="kw">class</span>, () -&gt; metodoQueDeveFalhar());
+assertEquals(3.14159, resultado, 0.001); <span class="com">// double: sempre com margem de erro (delta)!</span></pre>
+
+      <div class="warn"><b>Nunca compare <code>double</code> com <code>assertEquals</code> sem um delta.</b> Ponto flutuante tem imprecisão inerente — <code>0.1 + 0.2 == 0.3</code> é <code>false</code> em Java (e em quase toda linguagem). Sempre use a versão com terceiro parâmetro de tolerância.</div>
+
+      <h3>@BeforeEach, @AfterEach e ciclo de vida</h3>
+      <pre class="code"><span class="kw">class</span> <span class="cls">ContaBancariaTest</span> {
+    <span class="kw">private</span> <span class="cls">ContaBancaria</span> conta;
+
+    <span class="annotation">@BeforeEach</span> <span class="com">// roda antes de CADA teste -- evita repetir setup</span>
+    <span class="kw">void</span> <span class="fn">setup</span>() { conta = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Ana"</span>, 100); }
+
+    <span class="annotation">@AfterEach</span> <span class="com">// roda depois de CADA teste -- útil para limpar recursos</span>
+    <span class="kw">void</span> <span class="fn">tearDown</span>() { <span class="com">/* fechar conexão, apagar arquivo temporário... */</span> }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">testeUmUsandoConta</span>() { assertEquals(100, conta.getSaldo()); }
+}</pre>
+
+      <h3>Testes parametrizados — um teste, vários cenários</h3>
+      <pre class="code"><span class="annotation">@ParameterizedTest</span>
+<span class="annotation">@ValueSource</span>(ints = {-1, -10, -100})
+<span class="kw">void</span> <span class="fn">deveRecusarSaldoInicialNegativo</span>(<span class="kw">int</span> valorInvalido) {
+    <span class="cls">ContaBancaria</span> conta = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Ana"</span>, valorInvalido);
+    assertEquals(0, conta.getSaldo()); <span class="com">// roda 3 vezes, uma para cada valor</span>
+}</pre>
+
+      <h3>Mocks: isolando dependências</h3>
+      <p>Quando uma classe depende de outra (ex: um serviço que depende de um banco de dados ou de uma API externa), testar a classe real acoplada a essa dependência deixa o teste lento e frágil. Um <strong>mock</strong> (com a biblioteca Mockito) simula essa dependência.</p>
+      <pre class="code"><span class="kw">import static</span> org.mockito.Mockito.*;
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveEnviarEmailAoFinalizarPedido</span>() {
+    <span class="cls">ServicoEmail</span> emailMock = mock(<span class="cls">ServicoEmail</span>.<span class="kw">class</span>); <span class="com">// dependência "falsa"</span>
+    <span class="cls">Pedido</span> pedido = <span class="kw">new</span> <span class="cls">Pedido</span>(emailMock);
+
+    pedido.finalizar();
+
+    verify(emailMock).enviar(<span class="kw">any</span>()); <span class="com">// confirma que o método FOI chamado, sem mandar e-mail de verdade</span>
+}</pre>
+
+      <div class="secret">A regra de ouro dos testes unitários é <strong>F.I.R.S.T.</strong>: <b>F</b>ast (rápidos, rodam em milissegundos), <b>I</b>ndependent (não dependem de ordem nem de outros testes), <b>R</b>epeatable (mesmo resultado sempre, em qualquer máquina), <b>S</b>elf-validating (o teste diz sozinho se passou ou falhou, sem inspeção manual de log) e <b>T</b>imely (escrito perto de quando o código de produção foi escrito — idealmente antes, no estilo TDD).</div>
+
+      <h3>TDD — Test-Driven Development em 3 passos</h3>
+      <p>O ciclo <strong>Red → Green → Refactor</strong>: (1) escreva um teste que falha, porque o código ainda não existe; (2) escreva o código mínimo para o teste passar; (3) refatore o código com confiança, porque o teste garante que você não quebrou o comportamento.</p>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 15.1 — Testando ContaBancaria</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva uma classe de teste completa para <code>ContaBancaria</code> (capítulo 04) cobrindo: depósito válido, saque válido, saque recusado por saldo insuficiente, e saldo inicial negativo virando zero. Use <code>@BeforeEach</code> para criar a conta antes de cada teste.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">class</span> <span class="cls">ContaBancariaTest</span> {
+    <span class="kw">private</span> <span class="cls">ContaBancaria</span> conta;
+
+    <span class="annotation">@BeforeEach</span>
+    <span class="kw">void</span> <span class="fn">setup</span>() { conta = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Ana"</span>, 100); }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveDepositarCorretamente</span>() {
+        conta.depositar(50);
+        assertEquals(150, conta.getSaldo());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveSacarQuandoHaSaldo</span>() {
+        assertTrue(conta.sacar(30));
+        assertEquals(70, conta.getSaldo());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveRecusarSaqueSemSaldo</span>() {
+        assertFalse(conta.sacar(500));
+        assertEquals(100, conta.getSaldo());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveZerarSaldoInicialNegativo</span>() {
+        <span class="cls">ContaBancaria</span> outra = <span class="kw">new</span> <span class="cls">ContaBancaria</span>(<span class="str">"Bruno"</span>, -50);
+        assertEquals(0, outra.getSaldo());
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 15.2 — TDD na prática</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Pratique o ciclo Red-Green-Refactor: escreva primeiro o teste (que vai falhar, pois a classe nem existe) para uma classe <code>Fila&lt;T&gt;</code> com <code>enfileirar(T item)</code> e <code>desenfileirar()</code> (FIFO — o primeiro que entra é o primeiro que sai), verificando que desenfileirar uma fila vazia lança <code>NoSuchElementException</code>. Só depois implemente a classe até o teste passar.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="com">// 1) RED -- o teste, escrito primeiro:</span>
+<span class="kw">class</span> <span class="cls">FilaTest</span> {
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveDesenfileirarNaOrdemDeEntrada</span>() {
+        <span class="cls">Fila</span>&lt;<span class="kw">String</span>&gt; fila = <span class="kw">new</span> <span class="cls">Fila</span>&lt;&gt;();
+        fila.enfileirar(<span class="str">"a"</span>); fila.enfileirar(<span class="str">"b"</span>);
+        assertEquals(<span class="str">"a"</span>, fila.desenfileirar());
+        assertEquals(<span class="str">"b"</span>, fila.desenfileirar());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveLancarExcecaoQuandoVazia</span>() {
+        <span class="cls">Fila</span>&lt;<span class="kw">String</span>&gt; fila = <span class="kw">new</span> <span class="cls">Fila</span>&lt;&gt;();
+        assertThrows(java.util.NoSuchElementException.<span class="kw">class</span>, fila::desenfileirar);
+    }
+}
+
+<span class="com">// 2) GREEN -- implementação mínima para passar:</span>
+<span class="kw">public class</span> <span class="cls">Fila</span>&lt;T&gt; {
+    <span class="kw">private final</span> java.util.LinkedList&lt;T&gt; itens = <span class="kw">new</span> java.util.LinkedList&lt;&gt;();
+
+    <span class="kw">public void</span> <span class="fn">enfileirar</span>(T item) { itens.addLast(item); }
+
+    <span class="kw">public</span> T <span class="fn">desenfileirar</span>() {
+        <span class="kw">if</span> (itens.isEmpty()) <span class="kw">throw new</span> java.util.NoSuchElementException(<span class="str">"Fila vazia"</span>);
+        <span class="kw">return</span> itens.removeFirst();
+    }
+}
+<span class="com">// 3) REFACTOR -- com os testes verdes, dá pra trocar a implementação interna
+// (ex: usar um array circular) sem medo de quebrar o comportamento.</span></pre>
+        </div>
+      </div>
+    </section>

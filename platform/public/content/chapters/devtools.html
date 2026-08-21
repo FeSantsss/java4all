@@ -1,0 +1,41 @@
+<section class="section tk-spring" id="devtools">
+      <div class="section-head"><span class="section-num">66</span><h2 class="section-title">Spring Boot DevTools</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Ferramenta</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="time-est">⏱ <b>~30min</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">43 · Spring Core</a></div>
+      </div>
+
+      <p>Sem DevTools, toda mudança em um controller ou service exige parar a aplicação, recompilar e subir de novo manualmente — um ciclo de segundos a minutos, repetido centenas de vezes por dia de trabalho.</p>
+
+      <pre class="code"><span class="com">&lt;!-- pom.xml --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;optional&gt;true&lt;/optional&gt; <span class="com">&lt;!-- nunca vai para o build de produção --&gt;</span>
+&lt;/dependency&gt;</pre>
+
+      <div class="analogy">DevTools é como escrever com um editor que salva e formata automaticamente a cada pausa, em vez de precisar clicar "salvar" manualmente toda vez — o <strong>restart automático</strong> detecta mudanças no classpath e reinicia a aplicação sozinho, muito mais rápido que um restart manual completo, porque reaproveita partes já carregadas da JVM.</div>
+
+      <table class="cmp">
+        <tbody><tr><th>Recurso</th><th>O que faz</th></tr>
+        <tr><td>Restart automático</td><td>Detecta mudança de código compilado e reinicia a aplicação sozinho</td></tr>
+        <tr><td>LiveReload</td><td>Recarrega o navegador automaticamente após o restart (com extensão do navegador)</td></tr>
+        <tr><td>Propriedades de desenvolvimento</td><td>Desabilita cache de templates e outras otimizações que atrapalham durante o desenvolvimento</td></tr>
+      </tbody></table>
+
+      <div class="warn"><b>O <code>&lt;optional&gt;true&lt;/optional&gt;</code> e <code>scope=runtime</code> não são detalhes decorativos:</b> eles garantem que o DevTools nunca seja empacotado no <code>.jar</code> final de produção, mesmo que alguém esqueça de removê-lo do <code>pom.xml</code>. O próprio Spring Boot detecta se está rodando de um <code>.jar</code> empacotado e desativa o DevTools automaticamente como segurança extra — mas não vale confiar só nisso.</div>
+
+      <div class="study-tip">DevTools economiza tempo real, mas não é "mágico" — se o restart automático não disparar, geralmente é porque a IDE não está configurada para compilar automaticamente ao salvar (no IntelliJ: <code>Build → Compile automatically</code>). Vale configurar isso uma vez e esquecer, em vez de reiniciar manualmente achando que é bug do DevTools.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 69.1 — Configurando o ciclo rápido de desenvolvimento</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Adicione a dependência do DevTools ao <code>pom.xml</code> do projeto da biblioteca, com o escopo correto. Explique em uma frase por que <code>optional=true</code> é importante mesmo com <code>scope=runtime</code> já configurado.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><code>optional=true</code> evita que projetos que dependem <em>do seu</em> projeto (se ele for usado como biblioteca por outro módulo) herdem a dependência do DevTools transitivamente — <code>scope=runtime</code> sozinho não impede essa propagação transitiva em todos os cenários de build.</p>
+        </div>
+      </div>
+    </section>

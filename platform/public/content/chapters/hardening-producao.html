@@ -1,0 +1,33 @@
+<section class="section tk-devops" id="hardening-producao">
+      <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Hardening, entrega segura e recuperação operacional</h2></div>
+      <div class="topic-meta"><span class="tech-badge tech-devops">Produção</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~5h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#dockerfile">Dockerfile</a>, <a class="prereq-tag" href="#cicd">CI/CD</a>, <a class="prereq-tag" href="#observabilidade-pratica">Observabilidade</a></div></div>
+      
+      <p>Produção exige uma cadeia verificável: construir uma vez, testar o mesmo artefato, promover por digest, observar, reverter e recuperar dados. Um deploy que funcionou uma vez não é uma estratégia operacional.</p>
+      <aside class="concept-foundation">
+    <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Da imagem ao serviço recuperável</h3></div>
+    <p>Hardening reduz possibilidades desnecessárias de ataque e operação. Entrega segura mantém identidade e rastreabilidade do artefato.</p>
+    <dl class="concept-grid"><div class="concept-card"><dt>Artefato</dt><dd>Saída imutável do build que será implantada, como um JAR ou imagem de container.</dd></div><div class="concept-card"><dt>Digest</dt><dd>Hash que identifica exatamente o conteúdo de uma imagem; ao contrário de uma tag, não muda para apontar a outra versão.</dd></div><div class="concept-card"><dt>Hardening</dt><dd>Redução da superfície de ataque por configuração mínima, menos privilégios e remoção do que não é necessário.</dd></div><div class="concept-card"><dt>SBOM</dt><dd><em>Software Bill of Materials</em>: inventário de componentes e versões presentes no artefato.</dd></div><div class="concept-card"><dt>Rollback</dt><dd>Retorno controlado a uma versão anterior da aplicação. Não reverte automaticamente dados já migrados.</dd></div><div class="concept-card"><dt>Runbook</dt><dd>Procedimento operacional reproduzível para diagnosticar, mitigar ou recuperar um serviço.</dd></div></dl>
+  </aside>
+      <h3>Imagem mínima e processo correto</h3>
+      <pre class="code"><span class="kw">FROM</span> eclipse-temurin:21-jdk <span class="kw">AS</span> build
+<span class="kw">WORKDIR</span> /workspace
+<span class="kw">COPY</span> .mvn/ .mvn/
+<span class="kw">COPY</span> mvnw pom.xml ./
+<span class="kw">RUN</span> ./mvnw -B -DskipTests dependency:go-offline
+<span class="kw">COPY</span> src/ src/
+<span class="kw">RUN</span> ./mvnw -B package
+
+<span class="kw">FROM</span> eclipse-temurin:21-jre
+<span class="kw">RUN</span> useradd --system --uid 10001 app
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=build /workspace/target/*.jar app.jar
+<span class="kw">USER</span> 10001
+<span class="kw">ENTRYPOINT</span> [<span class="str">"java"</span>,<span class="str">"-jar"</span>,<span class="str">"/app/app.jar"</span>]</pre>
+      <p>Fixe a imagem base por digest no pipeline real, gere SBOM, escaneie dependências e imagem, execute como usuário sem privilégios e prefira filesystem somente leitura com diretórios temporários explícitos. <strong>Capabilities</strong> são permissões específicas do kernel Linux; removê-las evita conceder poderes que o processo não usa.</p>
+      <h3>Deploy e rollback</h3>
+      <ul><li>Migrations devem ser compatíveis com a versão anterior durante rolling deploy: primeiro expanda, migre dados, depois contraia.</li><li>Blue-green troca todo o tráfego após validação; canary expõe gradualmente e exige métricas automáticas.</li><li>Rollback de aplicação não desfaz automaticamente migrations destrutivas.</li><li>Configure graceful shutdown, tempo máximo e tratamento de sinais.</li><li>Separe readiness de liveness e teste o comportamento durante indisponibilidade.</li></ul>
+      <h3>Backup não é recuperação</h3>
+      <p>Defina <strong>RPO</strong> (<em>Recovery Point Objective</em>) — quanto dado pode ser perdido, medido como distância até o ponto recuperável — e <strong>RTO</strong> (<em>Recovery Time Objective</em>) — quanto tempo a recuperação pode levar. Faça backup criptografado, com retenção e cópia fora do mesmo domínio de falha. Restaure periodicamente em ambiente isolado e verifique integridade; somente então existe evidência de recuperação.</p>
+      <div class="warn"><b>Compose não vira produção apenas por estar em uma VM.</b> Não exponha a porta do banco publicamente, não grave senha no arquivo, configure limites, atualização, TLS, firewall, monitoramento e responsabilidade operacional.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Game day — falha controlada</h4><span class="exercise-tag d">difícil</span></div><p>Derrube uma instância, interrompa o banco, entregue uma versão incompatível e restaure um backup. Registre detecção, impacto, rollback, RPO/RTO observado e ações preventivas.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>O exercício só termina quando existe runbook executável por outra pessoa, evidência de restauração e uma ação corretiva priorizada.</p></div></div>
+    </section>

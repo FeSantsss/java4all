@@ -1,0 +1,19 @@
+<section class="section tk-java" id="strings-wrapper">
+      <div class="section-head"><span class="section-num">07</span><h2 class="section-title">String, imutabilidade e classes wrapper</h2></div>
+      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Iniciante+</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#arrays-matrizes">Arrays</a></div></div>
+      <p><code>String</code> é objeto imutável. Operações como <code>toUpperCase</code>, <code>replace</code> e concatenação não modificam a instância; produzem outra. Ignorar o retorno é um erro lógico frequente.</p>
+      <pre class="code">String nome = <span class="str">"  Ada Lovelace  "</span>;
+String normalizado = nome.trim().toLowerCase();
+<span class="kw">boolean</span> contemAda = normalizado.contains(<span class="str">"ada"</span>);</pre>
+      <h3>Concatenação repetida</h3>
+      <p>Em um laço grande, concatenar repetidamente pode criar muitos objetos temporários. Use <code>StringBuilder</code> quando estiver construindo texto incrementalmente.</p>
+      <pre class="code">StringBuilder builder = <span class="kw">new</span> StringBuilder();
+<span class="kw">for</span> (String item : itens) {
+    builder.append(item).append(System.lineSeparator());
+}
+String resultado = builder.toString();</pre>
+      <h3>Wrappers e autoboxing</h3>
+      <p><code>Integer</code>, <code>Long</code>, <code>Double</code> e <code>Boolean</code> representam primitivos como objetos. São necessários em generics e podem ser <code>null</code>. A conversão automática entre <code>int</code> e <code>Integer</code> é conveniente, mas desempacotar <code>null</code> causa <code>NullPointerException</code>.</p>
+      <div class="warn"><b>Dinheiro não é <code>double</code>.</b> Para valores monetários decimais exatos, estude <code>BigDecimal</code>, escala e modo de arredondamento.</div>
+      <div class="exercise"><div class="exercise-head"><h4>Normalizador</h4><span class="exercise-tag f">Fundamento</span></div><p>Normalize nomes removendo espaços externos, recusando texto vazio e capitalizando cada palavra sem destruir acentos.</p></div>
+    </section>

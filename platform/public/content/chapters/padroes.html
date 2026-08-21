@@ -1,0 +1,102 @@
+<section class="section" id="padroes">
+      <div class="section-head"><span class="section-num">23</span><h2 class="section-title">Padrões de projeto essenciais</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#di">22 · Injeção de dependência</a></div>
+      </div>
+
+      <p>O Spring é literalmente construído sobre estes padrões — reconhecê-los agora significa reconhecer o Spring depois, em vez de decorar anotações sem entender o que elas automatizam.</p>
+
+      <h4 class="sub">Singleton</h4>
+      <p>Garante que exista <strong>uma única instância</strong> de uma classe em toda a aplicação.</p>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">ConfiguracaoApp</span> {
+    <span class="kw">private static final</span> <span class="cls">ConfiguracaoApp</span> INSTANCIA = <span class="kw">new</span> <span class="cls">ConfiguracaoApp</span>();
+    <span class="kw">private</span> <span class="fn">ConfiguracaoApp</span>() {} <span class="com">// construtor PRIVADO -- ninguém de fora cria uma nova</span>
+    <span class="kw">public static</span> <span class="cls">ConfiguracaoApp</span> <span class="fn">getInstance</span>() { <span class="kw">return</span> INSTANCIA; }
+}</pre>
+      <div class="secret">No Spring, todo <code>@Bean</code>/<code>@Component</code> é <strong>Singleton por padrão</strong> — o container cria uma única instância e a reutiliza em toda a aplicação, exatamente essa ideia, só que gerenciada pelo framework em vez de escrita manualmente com construtor privado.</div>
+
+      <h4 class="sub">Factory Method</h4>
+      <p>Centraliza a lógica de <em>como criar</em> um objeto, escondendo a decisão de qual implementação concreta usar.</p>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">NotificadorFactory</span> {
+    <span class="kw">public static</span> <span class="cls">Notificador</span> <span class="fn">criar</span>(<span class="kw">String</span> tipo) {
+        <span class="kw">return switch</span> (tipo) {
+            <span class="kw">case</span> <span class="str">"email"</span> -&gt; <span class="kw">new</span> <span class="cls">EmailServico</span>();
+            <span class="kw">case</span> <span class="str">"sms"</span> -&gt; <span class="kw">new</span> <span class="cls">SmsServico</span>();
+            <span class="kw">default</span> -&gt; <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"Tipo desconhecido: "</span> + tipo);
+        };
+    }
+}</pre>
+
+      <h4 class="sub">Strategy</h4>
+      <p>Encapsula algoritmos intercambiáveis atrás de uma interface comum — já vimos isso na prática no exercício 8.1 (<code>MetodoPagamento</code>).</p>
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">EstrategiaDesconto</span> { <span class="kw">double</span> <span class="fn">aplicar</span>(<span class="kw">double</span> valor); }
+
+<span class="kw">class</span> <span class="cls">DescontoBlackFriday</span> <span class="kw">implements</span> <span class="cls">EstrategiaDesconto</span> {
+    <span class="kw">public double</span> <span class="fn">aplicar</span>(<span class="kw">double</span> v) { <span class="kw">return</span> v * 0.5; }
+}
+<span class="kw">class</span> <span class="cls">SemDesconto</span> <span class="kw">implements</span> <span class="cls">EstrategiaDesconto</span> {
+    <span class="kw">public double</span> <span class="fn">aplicar</span>(<span class="kw">double</span> v) { <span class="kw">return</span> v; }
+}
+<span class="com">// o "cliente" escolhe a estratégia em runtime, sem if/else espalhado</span></pre>
+
+      <h4 class="sub">Repository (e DAO)</h4>
+      <p>Isola a lógica de acesso a dados atrás de uma interface, como se fosse uma coleção em memória. É o padrão que o Spring Data JPA leva ao extremo — você declara uma interface e o framework <em>gera a implementação inteira sozinho</em>.</p>
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">LivroRepositorio</span> {
+    <span class="kw">void</span> <span class="fn">salvar</span>(<span class="cls">Livro</span> livro);
+    Optional&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarPorId</span>(<span class="kw">long</span> id);
+    List&lt;<span class="cls">Livro</span>&gt; <span class="fn">listarTodos</span>();
+}
+
+<span class="com">// implementação hoje: em memória. Amanhã: JDBC (capítulo 24). Depois: Spring Data JPA.
+// o código que USA LivroRepositorio não muda em NENHUM desses casos.</span>
+<span class="kw">public class</span> <span class="cls">LivroRepositorioEmMemoria</span> <span class="kw">implements</span> <span class="cls">LivroRepositorio</span> {
+    <span class="kw">private final</span> Map&lt;<span class="kw">Long</span>, <span class="cls">Livro</span>&gt; dados = <span class="kw">new</span> HashMap&lt;&gt;();
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">salvar</span>(<span class="cls">Livro</span> l) { dados.put(l.getId(), l); }
+    <span class="annotation">@Override</span> <span class="kw">public</span> Optional&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarPorId</span>(<span class="kw">long</span> id) { <span class="kw">return</span> Optional.ofNullable(dados.get(id)); }
+    <span class="annotation">@Override</span> <span class="kw">public</span> List&lt;<span class="cls">Livro</span>&gt; <span class="fn">listarTodos</span>() { <span class="kw">return</span> List.copyOf(dados.values()); }
+}</pre>
+
+      <h4 class="sub">Observer</h4>
+      <p>Um objeto ("sujeito") notifica múltiplos "observadores" quando seu estado muda — a base conceitual de eventos (e do <code>ApplicationEventPublisher</code> do Spring).</p>
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">ObservadorPedido</span> { <span class="kw">void</span> <span class="fn">aoFinalizarPedido</span>(<span class="cls">Pedido</span> p); }
+
+<span class="kw">public class</span> <span class="cls">PedidoServico</span> {
+    <span class="kw">private final</span> List&lt;<span class="cls">ObservadorPedido</span>&gt; observadores = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">public void</span> <span class="fn">adicionarObservador</span>(<span class="cls">ObservadorPedido</span> o) { observadores.add(o); }
+
+    <span class="kw">public void</span> <span class="fn">finalizar</span>(<span class="cls">Pedido</span> p) {
+        <span class="com">// ... lógica de finalização ...</span>
+        <span class="kw">for</span> (<span class="cls">ObservadorPedido</span> o : observadores) o.aoFinalizarPedido(p); <span class="com">// notifica todos, sem saber quem são</span>
+    }
+}</pre>
+
+      <table class="cmp">
+        <tbody><tr><th>Padrão</th><th>No Spring, aparece como</th></tr>
+        <tr><td>Singleton</td><td>Escopo padrão de todo <code>@Bean</code>/<code>@Component</code></td></tr>
+        <tr><td>Factory</td><td>Métodos <code>@Bean</code> dentro de classes <code>@Configuration</code></td></tr>
+        <tr><td>Strategy</td><td>Múltiplas implementações de uma interface, injetadas conforme perfil/qualificador</td></tr>
+        <tr><td>Repository</td><td>Interfaces <code>JpaRepository</code>/<code>CrudRepository</code> do Spring Data</td></tr>
+        <tr><td>Observer</td><td><code>ApplicationEvent</code> + <code>@EventListener</code></td></tr>
+        <tr><td>Dependency Injection</td><td>O próprio núcleo do container (<code>@Autowired</code>)</td></tr>
+      </tbody></table>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 23.1 — Repository em memória</h4><span class="exercise-tag m">médio</span></div>
+        <p>Defina a interface <code>LivroRepositorio</code> mostrada acima. Implemente <code>LivroRepositorioEmMemoria</code>. Escreva um teste JUnit garantindo que <code>salvar</code> seguido de <code>buscarPorId</code> retorna o livro correto, e que <code>buscarPorId</code> para um id inexistente retorna <code>Optional.empty()</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveSalvarEBuscarLivro</span>() {
+    <span class="cls">LivroRepositorio</span> repo = <span class="kw">new</span> <span class="cls">LivroRepositorioEmMemoria</span>();
+    <span class="cls">Livro</span> livro = <span class="kw">new</span> <span class="cls">Livro</span>(1L, <span class="str">"Clean Code"</span>, <span class="str">"Robert Martin"</span>);
+
+    repo.salvar(livro);
+
+    assertTrue(repo.buscarPorId(1L).isPresent());
+    assertEquals(<span class="str">"Clean Code"</span>, repo.buscarPorId(1L).get().getTitulo());
+    assertTrue(repo.buscarPorId(999L).isEmpty());
+}</pre>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,72 @@
+<section class="section tk-spring" id="testcontainers">
+      <div class="section-head"><span class="section-num">54</span><h2 class="section-title">Testcontainers &amp; banco de teste isolado</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-spring">Testes</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#testes">15 · Testes unitários</a>, <a class="prereq-tag" href="#docker-conceitos">30 · Docker conceitos</a>, <a class="prereq-tag" href="#spring-jpa">45 · Spring Data JPA</a></div>
+      </div>
+
+      <p>Os testes do capítulo 15 usavam mocks — rápidos, mas cegos para o comportamento real do banco. Uma query <code>JOIN FETCH</code> mal escrita (capítulo 46) pode passar perfeitamente em um teste com mock e quebrar completamente contra um Postgres real. <strong>Testcontainers</strong> fecha essa lacuna.</p>
+
+      <div class="analogy">Um mock de banco de dados é como treinar direção só no simulador — útil e rápido, mas não prova que você sabe estacionar de verdade. Testcontainers é pegar o carro de verdade para um teste em um estacionamento vazio: ainda controlado e seguro, mas com física real, não simulada. Ao final do teste, o "carro" (container) é descartado — você nunca acumula sujeira de testes anteriores.<p></p>
+      </div>
+
+      <h3>Como funciona: um banco real, descartável, por execução</h3>
+      <pre class="code"><span class="annotation">@SpringBootTest</span>
+<span class="annotation">@Testcontainers</span>
+<span class="kw">class</span> <span class="cls">LivroRepositoryTest</span> {
+
+    <span class="annotation">@Container</span> <span class="com">// sobe um Postgres REAL em Docker, só para esta classe de teste</span>
+    <span class="kw">static</span> PostgreSQLContainer&lt;?&gt; postgres = <span class="kw">new</span> PostgreSQLContainer&lt;&gt;(<span class="str">"postgres:16"</span>);
+
+    <span class="annotation">@DynamicPropertySource</span>
+    <span class="kw">static void</span> <span class="fn">configurarPropriedades</span>(DynamicPropertyRegistry registry) {
+        registry.add(<span class="str">"spring.datasource.url"</span>, postgres::getJdbcUrl);
+        registry.add(<span class="str">"spring.datasource.username"</span>, postgres::getUsername);
+        registry.add(<span class="str">"spring.datasource.password"</span>, postgres::getPassword);
+    }
+
+    <span class="annotation">@Autowired</span>
+    <span class="kw">private</span> <span class="cls">LivroRepository</span> livroRepository;
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveSalvarEBuscarLivro</span>() {
+        <span class="cls">Livro</span> livro = <span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Duna"</span>, 688);
+        livroRepository.save(livro);
+
+        Optional&lt;<span class="cls">Livro</span>&gt; encontrado = livroRepository.findById(livro.getId());
+        assertTrue(encontrado.isPresent());
+    }
+}
+<span class="com">// esse Postgres sobe do zero antes da classe rodar, e é destruído depois --
+// as migrations do Flyway (capítulo 35) rodam automaticamente nele, exatamente
+// como rodariam em produção</span></pre>
+
+      <div class="secret">Repare que a configuração de conexão do banco (<code>spring.datasource.url</code>) é sobrescrita <strong>dinamicamente</strong>, porque o Testcontainers escolhe uma porta aleatória disponível a cada execução — evitando conflito se você tiver outro Postgres rodando na porta padrão 5432 na sua máquina (como o do capítulo 30). Isso também significa que testes com Testcontainers podem rodar em paralelo, cada um com seu próprio banco isolado, sem nunca conflitar entre si.</div>
+
+      <h3>Por que nunca testar contra o banco de dev ou produção</h3>
+      <div class="warn"><b>Nunca aponte testes automatizados para um banco compartilhado.</b> Se dois desenvolvedores rodam a suíte de testes simultaneamente contra o mesmo banco de dev, um teste pode ler dados que outro acabou de inserir/apagar, gerando falhas aleatórias e difíceis de reproduzir — o clássico "passou na minha máquina, falhou no CI". Testcontainers elimina essa classe inteira de problema ao garantir isolamento total por execução.</div>
+
+      <div class="study-tip">Comece rodando Testcontainers localmente antes de configurar no CI/CD (capítulo mais adiante) — a única exigência é ter Docker instalado e rodando na máquina que executa os testes. Se os testes passarem localmente com Testcontainers, eles quase sempre vão passar no pipeline de CI também, desde que o ambiente de CI também tenha Docker disponível (a maioria das plataformas modernas já vem com isso pronto).</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 54.1 — Teste de integração real</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva um teste com Testcontainers para o <code>LivroRepository</code> (capítulo 45), confirmando que <code>findByTituloContainingIgnoreCase</code> encontra um livro mesmo com capitalização diferente do título buscado (ex: buscar "duna" encontra "Duna"). Isso é algo que um mock jamais provaria, porque depende do comportamento real do <code>LIKE ILIKE</code> do Postgres.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveEncontrarPorTituloIgnorandoCapitalizacao</span>() {
+    livroRepository.save(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"Duna"</span>, 688));
+
+    Page&lt;<span class="cls">Livro</span>&gt; resultado = livroRepository
+        .findByTituloContainingIgnoreCase(<span class="str">"duna"</span>, PageRequest.of(0, 10));
+
+    assertEquals(1, resultado.getTotalElements());
+}
+<span class="com">// esse teste só faz sentido de verdade contra um Postgres REAL --
+// um mock simplesmente retornaria o que você programasse, sem validar
+// se a query SQL gerada realmente ignora capitalização</span></pre>
+        </div>
+      </div>
+    </section>

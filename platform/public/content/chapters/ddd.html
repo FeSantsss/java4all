@@ -1,0 +1,59 @@
+<section class="section" id="ddd">
+      <div class="section-head"><span class="section-num">73</span><h2 class="section-title">Domain-Driven Design (DDD)</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-devops">Engenharia</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <b>Multi-Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#arquitetura-software">75 · Arquitetura de Software</a>, <a class="prereq-tag" href="#encapsulamento">04 · Encapsulamento</a></div>
+      </div>
+
+      <p>DDD é uma abordagem para modelar sistemas complexos <strong>a partir da linguagem do próprio negócio</strong>, não a partir da estrutura conveniente de tabelas de banco de dados. É a resposta para quando "CRUD simples" já não descreve mais a complexidade real do domínio.</p>
+
+      <h3>Ubiquitous Language — o vocabulário compartilhado</h3>
+      <div class="analogy">Se o time de negócio chama de "sócio" o que o código chama de <code>Usuario</code> com um campo <code>tipo="premium"</code>, toda conversa entre eles exige tradução mental constante — e traduções acumulam mal-entendidos. DDD prega que o <strong>código deveria usar exatamente os mesmos termos que as pessoas de negócio usam</strong> em conversa: se o negócio fala em "Sócio", o código deveria ter uma classe <code>Socio</code>, não um <code>Usuario</code> genérico disfarçado.</div>
+
+      <h3>Entity vs Value Object — uma distinção que vai além da @Entity JPA</h3>
+      <table class="cmp">
+        <tbody><tr><th></th><th>Entity (no sentido DDD)</th><th>Value Object</th></tr>
+        <tr><td>Identidade</td><td>Tem um ID único que persiste ao longo do tempo</td><td>Não tem identidade — dois com os mesmos valores são <strong>iguais</strong></td></tr>
+        <tr><td>Mutabilidade</td><td>Pode mudar de estado ao longo da vida</td><td>Idealmente imutável (capítulo 04!)</td></tr>
+        <tr><td>Exemplo</td><td><code>Pedido</code> (mesmo pedido, mesmo se todos os itens mudarem)</td><td><code>Dinheiro</code>, <code>Endereco</code>, <code>Cpf</code> (exercício 5.2!) — comparados por valor</td></tr>
+      </tbody></table>
+
+      <div class="secret">Você já implementou um Value Object perfeito no exercício 4.2 (<code>Dinheiro</code>, imutável) e no exercício 5.2 (<code>Cpf</code>, com <code>equals</code>/<code>hashCode</code> baseados em conteúdo) — sem saber que estava praticando DDD. A diferença entre "aprender DDD" e "já ter praticado os padrões que DDD formaliza" é justamente ter um nome e uma justificativa teórica para uma prática que já fazia sentido intuitivamente.</div>
+
+      <h3>Aggregate — a fronteira de consistência</h3>
+      <p>Um <strong>Aggregate</strong> é um grupo de objetos relacionados tratados como uma única unidade para fins de consistência — só o "objeto raiz" (Aggregate Root) pode ser referenciado de fora, e toda mudança passa por ele.</p>
+
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Pedido</span> { <span class="com">// Aggregate Root</span>
+    <span class="kw">private</span> <span class="kw">Long</span> id;
+    <span class="kw">private</span> List&lt;<span class="cls">ItemPedido</span>&gt; itens; <span class="com">// parte do agregado, NUNCA acessado diretamente de fora</span>
+    <span class="kw">private</span> <span class="cls">StatusPedido</span> status;
+
+    <span class="com">// toda mudança passa por um método do Pedido -- nunca "pedido.getItens().add(...)" direto de fora</span>
+    <span class="kw">public void</span> <span class="fn">adicionarItem</span>(<span class="cls">Produto</span> produto, <span class="kw">int</span> qtd) {
+        <span class="kw">if</span> (status != <span class="cls">StatusPedido</span>.ABERTO) {
+            <span class="kw">throw new</span> <span class="cls">PedidoFechadoException</span>(); <span class="com">// a regra de negócio VIVE aqui, não espalhada</span>
+        }
+        itens.add(<span class="kw">new</span> <span class="cls">ItemPedido</span>(produto, qtd));
+    }
+}</pre>
+
+      <div class="analogy">Um Aggregate é como o gerente de uma equipe: você nunca dá uma ordem direto para um funcionário específico de outro departamento — passa pelo gerente responsável, que garante que a ordem faz sentido dentro das regras daquele departamento antes de repassar. Isso é exatamente o mesmo espírito do encapsulamento do capítulo 04, aplicado a um <em>grupo</em> de objetos relacionados, não a um único.</div>
+
+      <h3>Bounded Context — onde os microsserviços do capítulo anterior encontram DDD</h3>
+      <p>Em domínios grandes, a mesma palavra pode significar coisas diferentes em partes diferentes do sistema — um "Cliente" no contexto de Vendas tem atributos diferentes de um "Cliente" no contexto de Suporte. Um <strong>Bounded Context</strong> é a fronteira explícita onde um modelo e sua linguagem fazem sentido — frequentemente, cada Bounded Context vira candidato natural a um microsserviço separado (capítulo 75).</p>
+
+      <div class="study-tip">DDD tem um vocabulário técnico denso (Aggregate, Bounded Context, Ubiquitous Language, Anti-Corruption Layer) que intimida à primeira leitura. A forma mais produtiva de aprender é sempre de trás para frente: pegue um problema real do seu domínio, modele com classes ricas em comportamento (não anêmicas, só com getters/setters) e regras de negócio protegidas dentro delas — e só depois mapeie o que você fez para o vocabulário formal de DDD.</div>
+
+      <div class="warn"><b>DDD não é obrigatório em todo projeto.</b> Para um CRUD simples sem regras de negócio complexas, aplicar todo o aparato de DDD é over-engineering puro — a mesma lição do capítulo anterior sobre arquitetura hexagonal. DDD compensa quando o domínio em si é genuinamente complexo, com muitas regras de negócio interconectadas, não quando a complexidade é só técnica (muitos serviços, muita infraestrutura).</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 76.1 — Identificando Entity vs Value Object</h4><span class="exercise-tag m">médio</span></div>
+        <p>Para o sistema de biblioteca, classifique cada conceito como Entity ou Value Object, justificando: <code>Livro</code>, <code>Isbn</code>, <code>Emprestimo</code>, <code>PeriodoEmprestimo</code> (data início + data fim).</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong><code>Livro</code>: Entity</strong> — tem identidade própria que persiste (o mesmo exemplar físico, mesmo que o título mude numa correção de cadastro). <strong><code>Isbn</code>: Value Object</strong> — dois ISBNs com o mesmo número são o mesmo ISBN, sem identidade própria além do valor. <strong><code>Emprestimo</code>: Entity</strong> — cada empréstimo é um evento distinto, com identidade própria ao longo do tempo (mesmo que o livro seja devolvido e emprestado de novo, é um <em>novo</em> empréstimo). <strong><code>PeriodoEmprestimo</code>: Value Object</strong> — dois períodos com as mesmas datas são iguais, sem identidade própria, e deveria ser imutável (capítulo 04).</p>
+        </div>
+      </div>
+    </section>

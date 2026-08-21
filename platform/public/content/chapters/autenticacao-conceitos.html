@@ -1,0 +1,57 @@
+<section class="section tk-security" id="autenticacao-conceitos">
+      <div class="section-head"><span class="section-num">51</span><h2 class="section-title">Autenticação: sessão vs JWT vs OAuth2</h2></div>
+      <div class="topic-meta">
+        <span class="tech-badge tech-security">Segurança</span>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
+        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
+      </div>
+
+      <p>Antes de configurar Spring Security (próximo capítulo), é essencial entender o que existe para <em>decidir</em> — sem esse pano de fundo, JWT vira "decoreba de configuração" em vez de escolha consciente.</p>
+
+      <p>HTTP, por natureza, é <strong>stateless</strong> — cada requisição chega sem memória de nenhuma requisição anterior. "Fazer login" é, na prática, um jeito de fingir que existe estado, usando um dos padrões abaixo.</p>
+
+      <h3>Sessão tradicional (cookie + estado no servidor)</h3>
+      <div class="analogy">É como pegar uma pulseira em um festival: você mostra documento uma vez na entrada (login), recebe uma pulseira (cookie de sessão), e o staff do evento só precisa checar a pulseira depois — mas quem <em>sabe</em> quem é você continua sendo o sistema de controle do festival (o servidor), não a pulseira em si (que só tem um número).</div>
+      <pre class="code"><span class="com">1. Cliente envia login/senha
+2. Servidor valida, cria uma sessão, guarda em memória/Redis: sessao_abc123 -&gt; usuario_42
+3. Servidor devolve um cookie: Set-Cookie: JSESSIONID=abc123
+4. Toda requisição seguinte, o navegador manda o cookie automaticamente
+5. Servidor consulta "abc123 -&gt; usuario_42" para saber quem está fazendo a requisição</span></pre>
+      <p>O servidor guarda o estado ("quem é abc123") — por isso <strong>não é</strong> verdadeiramente stateless. Escalar isso para múltiplos servidores exige compartilhar essa sessão entre eles (ex: guardando no Redis, capítulo 38).</p>
+
+      <h3>JWT (JSON Web Token) — o token que carrega a própria informação</h3>
+      <div class="analogy">JWT é como um crachá de visitante com foto, nome e validade impressos nele mesmo — quem verifica o crachá não precisa ligar para a recepção perguntando "esse crachá é válido?", porque a própria assinatura no verso (holograma) já garante que ninguém falsificou aquela informação. O servidor não precisa "lembrar" de nada — o próprio token já prova quem é o portador.</div>
+      <pre class="code"><span class="com">1. Cliente envia login/senha
+2. Servidor valida e gera um JWT assinado, contendo: { "sub": "usuario_42", "exp": 1234567890 }
+3. Cliente guarda o token e manda em toda requisição: Authorization: Bearer eyJhbGc...
+4. Servidor apenas VERIFICA A ASSINATURA -- não precisa consultar banco/sessão nenhuma
+   para saber quem é o usuário (a menos que precise revogar o token antes da expiração)</span></pre>
+      <p>Um JWT tem três partes separadas por ponto: <code>header.payload.signature</code>. O <code>payload</code> é só Base64 (legível por qualquer um, <strong>nunca</strong> coloque senha ali!) — a segurança vem inteiramente da <code>signature</code>, que prova que o servidor foi quem gerou aquele token e ninguém alterou o conteúdo no meio do caminho.</p>
+
+      <div class="warn"><b>JWT não é criptografado por padrão, só assinado.</b> Qualquer pessoa pode decodificar o payload de um JWT em jwt.io e ler seu conteúdo — a assinatura só garante que ninguém <em>alterou</em> o conteúdo sem ser detectado, não que o conteúdo seja secreto. Nunca guarde dados sensíveis (senha, número de cartão) dentro do payload de um JWT.</div>
+
+      <table class="cmp">
+        <tbody><tr><th></th><th>Sessão</th><th>JWT</th></tr>
+        <tr><td>Estado</td><td>No servidor (stateful)</td><td>No próprio token (stateless)</td></tr>
+        <tr><td>Escalar múltiplos servidores</td><td>Precisa de sessão compartilhada (Redis)</td><td>Trivial — qualquer servidor com a chave pode validar</td></tr>
+        <tr><td>Revogar antes de expirar</td><td>Fácil — apaga a sessão no servidor</td><td>Difícil — o token continua "válido" até expirar, a menos que mantenha uma lista de revogação</td></tr>
+        <tr><td>Uso comum</td><td>Aplicações web tradicionais, monolito com front renderizado no servidor</td><td>API + front separados (SPA), mobile, microsserviços</td></tr>
+      </tbody></table>
+
+      <h3>OAuth2 — delegando autenticação para terceiros</h3>
+      <p>"Entrar com Google/GitHub" é OAuth2 na prática: sua aplicação nunca vê a senha do usuário — o Google autentica, e devolve para sua aplicação um token comprovando "esse usuário se autenticou com sucesso, aqui está o e-mail dele".</p>
+
+      <div class="secret">Isso é o mesmo princípio de injeção de dependência do capítulo 22, só que aplicado à confiança: em vez da sua aplicação implementar (e ser responsável por) toda a lógica de autenticação, ela <strong>delega</strong> essa responsabilidade para um provedor especializado (Google, GitHub), assim como <code>PedidoServico</code> delegava a criação do <code>Notificador</code> para quem "montava" a aplicação. Você confia na abstração, não precisa reimplementar a parte difícil.</div>
+
+      <div class="study-tip">Para o primeiro projeto real, comece com JWT simples (usuário/senha próprios, sem OAuth2) — é suficiente para entender o fluxo completo de autenticação sem a complexidade extra de configurar um provedor externo. Adicione "login com Google" depois, quando o fluxo básico já estiver sólido.</div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 51.1 — Decodificando um JWT</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Pegue um JWT de exemplo (pode gerar um em jwt.io, usando o payload <code>{"sub":"usuario_42","exp":1999999999}</code>) e identifique as três partes separadas por ponto. Decodifique manualmente a parte do meio (payload) usando Base64 e confirme que consegue ler o conteúdo sem precisar de nenhuma chave secreta — reforçando por que dados sensíveis nunca deveriam ir ali.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Um JWT tem o formato <code>header.payload.signature</code>. Copiando só a parte do meio e decodificando de Base64 (qualquer decodificador online ou <code>echo "..." | base64 -d</code> no terminal), o conteúdo <code>{"sub":"usuario_42","exp":1999999999}</code> aparece em texto legível, sem exigir nenhuma chave — confirmando que JWT é <strong>assinado</strong>, não <strong>criptografado</strong>, e por isso nunca deve carregar informação sensível.</p>
+        </div>
+      </div>
+    </section>

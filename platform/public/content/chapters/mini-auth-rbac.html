@@ -1,0 +1,22 @@
+<section class="section tk-security" id="mini-auth-rbac">
+      <div class="section-head"><span class="section-num">P8</span><h2 class="section-title">Mini-projeto: autenticação e autorização por papéis</h2></div>
+      <div class="topic-meta"><div class="meta-item">Objetivo: <b>Spring Security</b></div><div class="time-est">Tempo: <b>12–20 horas</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#spring-security">Spring Security</a></div></div>
+      <p>Adicione identidade e autorização ao help desk. Papéis mínimos: cliente, técnico e administrador. Autenticação não basta: cada recurso precisa validar propriedade e permissão.</p>
+      <h3>Cenários de ataque e defesa</h3><ul class="checklist"><li><input type="checkbox"><span>Senha armazenada com hash apropriado, nunca reversível.</span></li><li><input type="checkbox"><span>Cliente não acessa chamado de outro cliente alterando o ID.</span></li><li><input type="checkbox"><span>Tokens expirados, ausentes e adulterados retornam respostas coerentes.</span></li><li><input type="checkbox"><span>Segredos ficam fora do repositório e possuem configuração documentada.</span></li><li><input type="checkbox"><span>Testes de autorização negativos para cada endpoint sensível.</span></li></ul>
+      <div class="warn"><b>Proibido declarar segurança concluída porque o login funciona.</b> A maior parte dos erros está na autorização de cada operação e no tratamento do ciclo de credenciais.</div>
+    <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Autenticação por papel é suficiente para proteger um chamado?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">Não; também é preciso verificar propriedade/escopo do recurso.</div><div class="quiz-opt" data-correct="false">Sim; qualquer usuário com papel USER acessa tudo.</div><div class="quiz-opt" data-correct="false">Sim, desde que o JWT seja longo.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
+      <h3>Execução guiada e evidências</h3>
+      <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>
+      <h4 class="sub">Marcos obrigatórios</h4>
+      <ol>
+        <li><strong>Contrato:</strong> escreva regras, entradas, saídas, invariantes e casos-limite antes da implementação.</li>
+        <li><strong>Caminho mínimo:</strong> entregue uma fatia vertical executável com um teste de aceitação.</li>
+        <li><strong>Falhas:</strong> implemente validação, mensagens úteis, cleanup e comportamento após interrupção.</li>
+        <li><strong>Qualidade:</strong> automatize testes, formatação e build; remova segredos e dados pessoais dos logs.</li>
+        <li><strong>Operação:</strong> documente como executar, diagnosticar, atualizar e recuperar o projeto.</li>
+      </ol>
+      <h4 class="sub">Matriz mínima de testes</h4>
+      <table class="cmp"><tbody><tr><th>Categoria</th><th>Evidência</th></tr><tr><td>caminho feliz</td><td>resultado e estado final esperados</td></tr><tr><td>limites</td><td>vazio, mínimo, máximo, duplicado e formato inválido</td></tr><tr><td>falha</td><td>dependência indisponível, timeout ou exceção sem corrupção de estado</td></tr><tr><td>repetição</td><td>retry ou execução duplicada não produz efeito indevido</td></tr><tr><td>regressão</td><td>bug corrigido ganha teste que falhava antes</td></tr></tbody></table>
+      <ul class="checklist"><li><input type="checkbox"><span>README contém requisitos, arquitetura, decisões e comandos reproduzíveis.</span></li><li><input type="checkbox"><span>Build e testes executam do zero sem passos secretos.</span></li><li><input type="checkbox"><span>Casos-limite e falhas foram demonstrados, não apenas descritos.</span></li><li><input type="checkbox"><span>Existe uma retrospectiva com dívida técnica e próximo incremento.</span></li></ul>
+      <div class="warn"><b>Regra de conclusão:</b> captura de tela não prova comportamento. Entregue código, testes, dados de exemplo, comandos e resultados verificáveis. Se uma tecnologia externa for necessária, fixe versões e forneça um ambiente reproduzível.</div>
+      </div></section>
