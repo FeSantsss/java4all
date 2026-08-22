@@ -9,7 +9,6 @@ O endereço mantém o nome histórico do repositório enquanto o produto, o PWA 
 ## O curso
 
 - 151 capítulos distribuídos em 20 módulos ordenados por pré-requisitos.
-- 128 capítulos anteriores preservados por um gerador reproduzível, sem trocar seus IDs.
 - 23 capítulos estruturados para associações em POO, JDBC, HTTP/API, Java além do CRUD, Lanterna, SNS/SQS, EDA, consistência e testes assíncronos.
 - 160 exercícios, 268 verificações interativas atualmente inventariadas e projetos progressivamente menos guiados. A auditoria diferencia existência, compatibilidade e aprovação pedagógica.
 - Os 151 capítulos estão reconstruídos e aprovados no novo contrato pedagógico: Fundamentos, POO, Java Core, I/O/CLI/Process API, Algoritmos, Estruturas de Dados Avançadas, projetos intermediários, HTTP/integração, SQL/JDBC, Design de Aplicação, Spring/API, Segurança/Qualidade de APIs, Containers/Testes/Dados avançados, Concorrência/Redes/TUI, Produção/CI/CD, Integração Síncrona, Resiliência/Observabilidade, Mensageria, SNS/SQS, Kafka, EDA, Consistência Distribuída, Outbox/Inbox, Saga e fechamento profissional.

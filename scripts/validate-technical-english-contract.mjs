@@ -198,10 +198,8 @@ assert(packageJson.scripts.validate.includes('npm run validate:technical-english
 assert(packageJson.scripts.validate.indexOf('npm run validate:english') < packageJson.scripts.validate.indexOf('npm run validate:technical-english'), 'Contrato de inglês técnico deve rodar depois do gate base de inglês.');
 
 for (const marker of [
-  'Atividade contextual de inglês técnico em quatro níveis de autonomia',
-  'evidências em inglês',
-  'npm run validate:technical-english',
-  'phase-29-technical-english-contract.md'
+  'Inglês técnico contextual dentro dos capítulos',
+  'O que você vai estudar'
 ]) {
   assert(readme.includes(marker), `README perdeu documentação de inglês técnico: ${marker}`);
 }

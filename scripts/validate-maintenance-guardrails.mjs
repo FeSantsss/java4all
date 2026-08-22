@@ -76,7 +76,7 @@ for (const file of [
   'phase-21-deployment-readiness.md',
   'phase-22-maintenance-guardrails.md'
 ]) {
-  assert(readme.includes(file), `README não aponta para ${file}.`);
+  assert(progressDoc.includes(file), `Progresso interno não aponta para ${file}.`);
   await access(`docs/internal/master-audit/${file}`);
 }
 
@@ -114,6 +114,6 @@ assert(extraHtml.length === 0, `HTMLs canônicos sem entrada no catálogo: ${ext
 
 assert(!generator.includes("readFile(resolve(root, 'index.html')"), 'Gerador não pode voltar a ler index.html monolítico.');
 assert(!generator.includes("readFile(resolve(root, 'curriculum-v2.js')"), 'Gerador não pode voltar a ler curriculum-v2.js monolítico.');
-assert(readme.includes('generated-course.json` e `course-content.json` são artefatos gerados'), 'README deve avisar que JSONs gerados não são fonte autoral.');
+assert(contentModel.includes('Generated JSON files are never edited directly'), 'Modelo de conteúdo deve avisar que JSONs gerados não são fonte autoral.');
 
 console.log(`OK: guardrails de manutenção ativos — ${phaseContentFiles.length} fontes de fase conectadas, 128 HTMLs canônicos e zero monólitos legados.`);

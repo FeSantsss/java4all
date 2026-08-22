@@ -56,7 +56,7 @@ const requiredPhaseReports = [
 
 for (const file of requiredPhaseReports) {
   await access(`docs/internal/master-audit/${file}`);
-  assert(readme.includes(file), `README não referencia relatório obrigatório: ${file}`);
+  assert(progressDoc.includes(file), `Progresso interno não referencia relatório obrigatório: ${file}`);
   assert(finalReleaseValidator.includes(file), `validate:final-release não exige relatório obrigatório: ${file}`);
 }
 
@@ -125,16 +125,13 @@ for (const [requirement, phase, evidence] of requiredTraceabilityRows) {
 }
 
 for (const marker of [
-  'Contrato de rastreabilidade viva',
-  'npm run validate:traceability',
-  'phase-30-traceability-contract.md',
-  'Contrato de fechamento da especificação mestre',
-  'npm run validate:master-spec',
-  'phase-31-master-spec-closure.md',
-  'README',
-  'matriz de requisitos'
+  '# java4br',
+  '[Acessar o curso]',
+  'Rodando localmente',
+  'npm run validate',
+  'docs/internal/'
 ]) {
-  assert(readme.includes(marker), `README perdeu documentação de rastreabilidade: ${marker}`);
+  assert(readme.includes(marker), `README público perdeu marcador essencial: ${marker}`);
 }
 
 assert(packageJson.scripts.validate.indexOf('npm run validate:final-release') < packageJson.scripts.validate.indexOf('npm run validate:traceability'), 'validate:traceability deve rodar após validate:final-release.');

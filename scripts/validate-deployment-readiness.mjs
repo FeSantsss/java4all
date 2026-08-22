@@ -20,7 +20,8 @@ const [
   serviceWorkerSource,
   builtServiceWorker,
   builtIndex,
-  readme
+  readme,
+  progressDoc
 ] = await Promise.all([
   readJson('package.json'),
   readText('.github/workflows/deploy-pages.yml'),
@@ -29,7 +30,8 @@ const [
   readText('scripts/generate-service-worker.mjs'),
   readText('dist/sw.js'),
   readText('dist/index.html'),
-  readText('README.md')
+  readText('README.md'),
+  readText('docs/internal/implementation-progress.md')
 ]);
 
 assert(packageJson.engines?.node === '>=22.22.2', 'package.json deve fixar o requisito Node >=22.22.2.');
@@ -90,7 +92,8 @@ for (const path of [
   await access(path);
 }
 
-assert(readme.includes('GitHub Pages é publicado pelo workflow em `.github/workflows/deploy-pages.yml`'), 'README deve explicar o workflow de GitHub Pages.');
-assert(readme.includes('npm run validate:deployment'), 'README deve documentar o gate de prontidão de deploy.');
+assert(readme.includes('[Acessar o curso]'), 'README público deve manter link do curso.');
+assert(progressDoc.includes('A Fase 21 adiciona o gate de deploy/PWA'), 'Progresso interno deve documentar o gate de prontidão de deploy.');
+assert(progressDoc.includes('phase-21-deployment-readiness.md'), 'Progresso interno deve apontar para o relatório da Fase 21.');
 
 console.log('OK: deploy GitHub Pages/PWA pronto — workflow, Vite, dist, manifest e service worker coerentes.');

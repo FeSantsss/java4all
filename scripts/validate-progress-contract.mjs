@@ -106,9 +106,9 @@ assert(repositoryTest.includes("new IDBFactory()"), 'Teste de repositório deve 
 
 assert(packageJson.scripts['validate:progress'] === 'node scripts/validate-progress-contract.mjs', 'Script validate:progress ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:progress'), 'npm run validate deve executar o gate de progresso.');
-assert(readme.includes('npm run validate:progress'), 'README deve documentar o gate de progresso.');
-assert(readme.includes('phase-23-progress-contract.md'), 'README deve apontar para o relatório da fase 23.');
+assert(readme.includes('Progresso salvo localmente com IndexedDB'), 'README público deve mencionar persistência local.');
 assert(progressDoc.includes('A Fase 23 adiciona o gate de contrato de progresso'), 'Progresso interno não preserva o registro histórico da Fase 23.');
+assert(progressDoc.includes('phase-23-progress-contract.md'), 'Progresso interno deve apontar para o relatório da fase 23.');
 assert(progressDoc.includes('A Fase 24 adiciona o gate de UI/acessibilidade'), 'Progresso interno não preserva o registro histórico da Fase 24.');
 
 await access('docs/internal/master-audit/phase-23-progress-contract.md');

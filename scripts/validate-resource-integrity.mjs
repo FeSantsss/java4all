@@ -137,8 +137,8 @@ for (const marker of [
 
 assert(packageJson.scripts['validate:resources'] === 'node scripts/validate-resource-integrity.mjs', 'Script validate:resources ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:resources'), 'npm run validate deve executar o gate de recursos.');
-assert(readme.includes('npm run validate:resources'), 'README deve documentar o gate de recursos.');
-assert(readme.includes('phase-28-resource-integrity.md'), 'README deve listar o relatório da Fase 28.');
+assert(readme.includes('recursos') || readme.includes('Recursos'), 'README público deve mencionar recursos da plataforma.');
 assert(progressDoc.includes('Fase 28 de Integridade dos Recursos'), 'Progresso interno não registra a Fase 28.');
+assert(progressDoc.includes('phase-28-resource-integrity.md'), 'Progresso interno deve listar o relatório da Fase 28.');
 
 console.log('OK: recursos protegidos — metadados, relevância, HTTPS, prioridade oficial e anti-link genérico coerentes.');

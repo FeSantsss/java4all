@@ -80,9 +80,9 @@ assert(e2e.includes("Git & fluxo de trabalho") && e2e.includes('toHaveCount(0)')
 
 assert(packageJson.scripts['validate:learning-tools'] === 'node scripts/validate-learning-tools-contract.mjs', 'Script validate:learning-tools ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:learning-tools'), 'npm run validate deve executar o gate de ferramentas de estudo.');
-assert(readme.includes('npm run validate:learning-tools'), 'README deve documentar o gate de ferramentas de estudo.');
-assert(readme.includes('phase-25-learning-tools-contract.md'), 'README deve apontar para o relatório da fase 25.');
+assert(readme.includes('Glossário contextual') && readme.includes('Java Lab local'), 'README público deve listar ferramentas de estudo principais.');
 assert(progressDoc.includes('A Fase 25 adiciona o gate das ferramentas de estudo'), 'Progresso interno não preserva o histórico da Fase 25.');
+assert(progressDoc.includes('phase-25-learning-tools-contract.md'), 'Progresso interno deve apontar para o relatório da fase 25.');
 assert(progressDoc.includes('A Fase 26 adiciona o gate de integridade do catálogo e offline'), 'Progresso interno não preserva o histórico da Fase 26 após a Fase 25.');
 assert(progressDoc.includes('A Fase 27 adiciona o gate de integridade das avaliações'), 'Progresso interno não preserva o histórico da Fase 27 após a Fase 26.');
 assert(progressDoc.includes('Fase 28 de Integridade dos Recursos'), 'Progresso interno não registra a fase atual após a Fase 27.');

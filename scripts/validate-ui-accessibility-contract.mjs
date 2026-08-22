@@ -107,9 +107,9 @@ assert(e2e.includes("link[rel=\"manifest\"]"), 'E2E deve verificar manifesto PWA
 
 assert(packageJson.scripts['validate:ui'] === 'node scripts/validate-ui-accessibility-contract.mjs', 'Script validate:ui ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:ui'), 'npm run validate deve executar o gate de UI/acessibilidade.');
-assert(readme.includes('npm run validate:ui'), 'README deve documentar o gate de UI/acessibilidade.');
-assert(readme.includes('phase-24-ui-accessibility-contract.md'), 'README deve apontar para o relatório da fase 24.');
+assert(readme.includes('Temas claro, alto contraste e sistema.'), 'README público deve mencionar temas disponíveis.');
 assert(progressDoc.includes('A Fase 24 adiciona o gate de UI/acessibilidade'), 'Progresso interno não preserva o registro histórico da Fase 24.');
+assert(progressDoc.includes('phase-24-ui-accessibility-contract.md'), 'Progresso interno deve apontar para o relatório da fase 24.');
 assert(progressDoc.includes('A Fase 25 adiciona o gate das ferramentas de estudo'), 'Progresso interno não preserva o histórico da Fase 25 após a Fase 24.');
 assert(progressDoc.includes('A Fase 26 adiciona o gate de integridade do catálogo e offline'), 'Progresso interno não preserva o histórico da Fase 26 após a Fase 25.');
 assert(progressDoc.includes('A Fase 27 adiciona o gate de integridade das avaliações'), 'Progresso interno não preserva o histórico da Fase 27 após a Fase 26.');

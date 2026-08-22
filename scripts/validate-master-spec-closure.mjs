@@ -124,7 +124,7 @@ for (const file of [
   'phase-31-master-spec-closure.md'
 ]) {
   await access(`docs/internal/master-audit/${file}`);
-  assert(readme.includes(file), `README deve listar ${file}.`);
+  assert(progressDoc.includes(file), `Progresso interno deve listar ${file}.`);
   assert(finalReleaseValidator.includes(file), `validate:final-release deve exigir ${file}.`);
   assert(traceabilityValidator.includes(file), `validate:traceability deve exigir ${file}.`);
 }
@@ -269,7 +269,7 @@ assert(packageJson.scripts.validate.includes('npm run validate:master-spec'), 'n
 assert(packageJson.scripts.validate.indexOf('npm run validate:traceability') < packageJson.scripts.validate.indexOf('npm run validate:master-spec'), 'validate:master-spec deve rodar depois da rastreabilidade.');
 assert(packageJson.scripts.validate.indexOf('npm run validate:master-spec') < packageJson.scripts.validate.indexOf('npm run validate:maintenance'), 'validate:master-spec deve rodar antes dos guardrails finais de manutenção.');
 
-assert(readme.includes('Contrato de fechamento da especificação mestre'), 'README deve documentar o fechamento da especificação mestre.');
-assert(readme.includes('npm run validate:master-spec'), 'README deve documentar validate:master-spec.');
+assert(readme.includes('aprender Java, backend e fundamentos de computação'), 'README público deve explicar o propósito do curso.');
+assert(readme.includes('Validação completa') && readme.includes('npm run validate'), 'README público deve documentar a validação completa sem expor gates internos.');
 
 console.log('OK: especificação mestre fechada — 151 capítulos aprovados, 32 relatórios, matriz completa, eixos obrigatórios cobertos e gates sincronizados.');

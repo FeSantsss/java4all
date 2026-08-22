@@ -171,9 +171,9 @@ for (const path of [
 
 assert(packageJson.scripts['validate:catalog'] === 'node scripts/validate-catalog-integrity.mjs', 'Script validate:catalog ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:catalog'), 'npm run validate deve executar o gate de integridade do catálogo.');
-assert(readme.includes('npm run validate:catalog'), 'README deve documentar o gate de integridade do catálogo.');
-assert(readme.includes('phase-26-catalog-integrity.md'), 'README deve listar o relatório da Fase 26.');
+assert(readme.includes('151 capítulos organizados por pré-requisitos.'), 'README público deve apresentar o catálogo do curso.');
 assert(progressDoc.includes('A Fase 26 adiciona o gate de integridade do catálogo e offline'), 'Progresso interno não preserva o histórico da Fase 26.');
+assert(progressDoc.includes('phase-26-catalog-integrity.md'), 'Progresso interno deve listar o relatório da Fase 26.');
 assert(progressDoc.includes('A Fase 27 adiciona o gate de integridade das avaliações'), 'Progresso interno não preserva o histórico da Fase 27 após a Fase 26.');
 assert(progressDoc.includes('Fase 28 de Integridade dos Recursos'), 'Progresso interno não registra a fase atual após a Fase 27.');
 

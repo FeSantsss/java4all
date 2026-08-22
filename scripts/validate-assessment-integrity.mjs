@@ -153,9 +153,9 @@ for (const marker of [
 
 assert(packageJson.scripts['validate:assessment'] === 'node scripts/validate-assessment-integrity.mjs', 'Script validate:assessment ausente ou divergente.');
 assert(packageJson.scripts.validate.includes('npm run validate:assessment'), 'npm run validate deve executar o gate de avaliação.');
-assert(readme.includes('npm run validate:assessment'), 'README deve documentar o gate de avaliação.');
-assert(readme.includes('phase-27-assessment-integrity.md'), 'README deve listar o relatório da Fase 27.');
+assert(readme.includes('Exercícios, quizzes, checklists e projetos práticos.'), 'README público deve mencionar avaliações e prática.');
 assert(progressDoc.includes('A Fase 27 adiciona o gate de integridade das avaliações'), 'Progresso interno não preserva o histórico da Fase 27.');
+assert(progressDoc.includes('phase-27-assessment-integrity.md'), 'Progresso interno deve listar o relatório da Fase 27.');
 assert(progressDoc.includes('Fase 28 de Integridade dos Recursos'), 'Progresso interno não registra a fase atual após a Fase 27.');
 
 console.log('OK: avaliações protegidas — quizzes, exercícios, projetos, racionais e matrizes de conhecimento coerentes.');
