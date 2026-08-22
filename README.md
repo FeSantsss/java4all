@@ -2,7 +2,7 @@
 
 Plataforma offline-first para aprender Java, backend e fundamentos de computação por uma trilha progressiva. Inglês técnico aparece gradualmente em código, mensagens de erro, documentação, pesquisas, issues e projetos, sempre dentro do contexto técnico.
 
-**[Abrir o java4br](https://fesantsss.github.io/java4all/)**
+**[Abrir o java4br](https://java4br.vercel.app/)**
 
 O endereço mantém o nome histórico do repositório enquanto o produto, o PWA e os dados usam a identidade java4br.
 
