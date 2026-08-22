@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "phase": 19,
+  "concepts": [
+    {"id":"review-intent-risk-check","name":"Code review por intenção e risco","aliases":["code review","review checklist"],"introducedIn":"code-review-adr","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["git-snapshot-index","nome-intencao-codigo"],"commonConfusions":["review é caça a erro pessoal","aprovar porque compilou basta"],"outcomes":["revisar mudança por comportamento, risco, teste, contrato e legibilidade"]},
+    {"id":"adr-context-decision-consequence","name":"ADR: contexto, decisão e consequência","aliases":["ADR","Architecture Decision Record"],"introducedIn":"code-review-adr","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["hexagonal-port-adapter","bounded-context-context-map"],"commonConfusions":["ADR é documentação decorativa","decisão sem trade-off não precisa registro"],"outcomes":["registrar decisão arquitetural curta com alternativas e consequências verificáveis"]},
+    {"id":"scrum-feedback-cadence","name":"Scrum como cadência de feedback","aliases":["Scrum","Sprint"],"introducedIn":"agile","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["project-evidence-readme"],"commonConfusions":["Scrum é reunião diária","sprint serve para esconder atraso até o fim"],"outcomes":["planejar ciclos curtos com objetivo, revisão, retrospectiva e incremento demonstrável"]},
+    {"id":"kanban-wip-flow","name":"Kanban, WIP e fluxo contínuo","aliases":["Kanban","WIP","flow"],"introducedIn":"agile","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["branch-merge-rebase"],"commonConfusions":["Kanban é só quadro com colunas","mais tarefas em progresso acelera entrega"],"outcomes":["limitar trabalho em progresso, medir bloqueio e reduzir troca de contexto"]},
+    {"id":"end-to-end-request-map","name":"Mapa ponta-a-ponta de uma requisição","aliases":["request map","end-to-end"],"introducedIn":"mapa-sistema","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["frontend-backend-contract","spring-security-authorization","trace-span-boundary"],"commonConfusions":["controller é o sistema inteiro","cache/evento/log são detalhes fora do fluxo"],"outcomes":["seguir uma ação da UI até domínio, banco, cache, evento, observabilidade e resposta"]},
+    {"id":"system-knowledge-map","name":"Mapa de conhecimento do sistema","aliases":["system map","knowledge map"],"introducedIn":"mapa-sistema","reinforcedIn":["quiz"],"prerequisiteConceptIds":["project-evidence-readme"],"commonConfusions":["glossário é lista decorada","mapa dispensa pré-requisito"],"outcomes":["relacionar conceitos por dependência e usar o mapa para revisar lacunas"]},
+    {"id":"capstone-reference-architecture","name":"Arquitetura de referência verificável","aliases":["capstone architecture"],"introducedIn":"projeto-integrador","reinforcedIn":["quiz"],"prerequisiteConceptIds":["production-evidence-checklist","event-driven-project-evidence","health-readiness-liveness"],"commonConfusions":["arquitetura final é desenho sem execução","usar todas as tecnologias é obrigatório"],"outcomes":["entregar uma arquitetura ponta-a-ponta com critérios de aceite, evidência e limites"]},
+    {"id":"capstone-operational-evidence","name":"Evidência operacional do projeto final","aliases":["operational evidence","capstone evidence"],"introducedIn":"projeto-integrador","reinforcedIn":["quiz"],"prerequisiteConceptIds":["sli-slo-error-budget","deploy-rollback-strategy","recovery-backup-restore-drill"],"commonConfusions":["deploy funcionando uma vez prova produção","log solto substitui runbook"],"outcomes":["provar build, teste, deploy, rollback, observabilidade, backup e falhas controladas"]},
+    {"id":"final-review-diagnostic-loop","name":"Revisão final como diagnóstico de lacunas","aliases":["final review","diagnostic quiz"],"introducedIn":"quiz","reinforcedIn":["projeto-integrador"],"prerequisiteConceptIds":["system-knowledge-map","project-evidence-readme"],"commonConfusions":["quiz final mede memorização isolada","errar significa voltar ao começo"],"outcomes":["usar erros de revisão para voltar aos capítulos/conceitos certos e fortalecer projeto"]}
+  ],
+  "chapters": {
+    "code-review-adr": {
+      "order": 0,
+      "objectives": ["Revisar código por intenção, risco e contrato", "Separar comentário útil de preferência pessoal", "Registrar decisões arquiteturais em ADR curto", "Conectar ADR a testes, operação e consequências"],
+      "whyItExists": "Depois de Git, Clean Code, arquitetura e projetos, o aluno precisa aprender a trabalhar como parte de um time: explicar mudança, revisar risco e preservar memória técnica. Code review e ADR transformam conhecimento individual em decisão compartilhada.",
+      "prerequisiteChapterIds": ["git", "clean-code", "arquitetura-software"],
+      "introducedConceptIds": ["review-intent-risk-check", "adr-context-decision-consequence"],
+      "usedConceptIds": ["git-snapshot-index", "nome-intencao-codigo", "hexagonal-port-adapter", "bounded-context-context-map"],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {"id":"code-review-adr-intuition","type":"intuition","authorship":"authored","title":"Review bom protege o futuro do código sem virar disputa de gosto","body":"Uma revisão útil pergunta: a mudança faz o que promete? O risco está testado? O contrato público mudou? A decisão ficará compreensível daqui a seis meses? O objetivo não é humilhar nem carimbar PR; é aumentar a chance de o sistema continuar operável.","analogyLimit":"Checklist de piloto ajuda, mas software inclui comportamento, contrato, deploy, dados e manutenção futura."},
+        {"id":"code-review-adr-table","type":"table","authorship":"authored","title":"Checklist de revisão que vale comentário","headers":["Pergunta","Comentário útil","Comentário fraco"],"rows":[["Comportamento","qual caso falha e como reproduzir?","não gostei"],["Contrato","API/payload/status mudou? há compatibilidade?","renomeia porque sim"],["Teste","qual risco não está coberto?","faltou teste genérico"],["Operação","log, métrica, fallback ou migração mudaram?","parece perigoso"],["Decisão","isso merece ADR? quais alternativas foram descartadas?","documenta tudo sempre"]]}
+      ],
+      "appendBlocks": [
+        {"id":"code-review-adr-quiz","type":"quiz","authorship":"authored","conceptId":"adr-context-decision-consequence","prompt":"Quando um ADR é realmente útil?","options":[{"id":"cra-a","label":"Quando uma decisão técnica relevante tem contexto, alternativas, escolha e consequências que o time precisará lembrar.","correct":true,"explanation":"ADR registra raciocínio e trade-off, não só o resultado."},{"id":"cra-b","label":"Quando qualquer variável local é renomeada.","correct":false,"explanation":"Isso é detalhe de implementação; ADR deve focar decisão arquitetural relevante."},{"id":"cra-c","label":"Quando o time quer evitar testes e conversas de review.","correct":false,"explanation":"ADR complementa revisão e evidência, não substitui validação."}]}
+      ],
+      "codeExplanations": {
+        "code-review-adr-code-9": {"explanation":["O ADR usa estrutura curta: status, contexto, decisão e consequências.","A decisão MongoDB/Postgres é justificada por shape de dados, transações e custo operacional, não por preferência solta."],"commonMistakes":["Registrar decisão sem alternativa descartada","Esconder consequência negativa","Transformar ADR em documentação longa que ninguém revisa"]}
+      },
+      "resources": [
+        {"id":"google-eng-practices-review","type":"reference","title":"Google Engineering Practices: Code Review Developer Guide","url":"https://google.github.io/eng-practices/review/","reinforces":"Critérios práticos de revisão, comentários e aprovação de mudanças.","language":"en","publisher":"Google","official":false,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
+        {"id":"adr-github-io","type":"reference","title":"Architecture Decision Records","url":"https://adr.github.io/","reinforces":"Formato, propósito e exemplos de ADRs.","language":"en","publisher":"ADR GitHub organization","official":false,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+      ],
+      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+    },
+    "agile": {
+      "order": 1,
+      "objectives": ["Entender ágil como feedback e adaptação, não cerimônia", "Diferenciar Scrum e Kanban pelo tipo de fluxo", "Usar WIP para reduzir trabalho parado", "Transformar backlog em incremento demonstrável com evidência"],
+      "whyItExists": "Depois de projetos e review, processo entra como ferramenta de aprendizado e entrega. Scrum e Kanban não são religião: são formas de tornar trabalho visível, limitar desperdício e colher feedback antes que uma decisão errada fique cara.",
+      "prerequisiteChapterIds": ["git", "projeto", "code-review-adr"],
+      "introducedConceptIds": ["scrum-feedback-cadence", "kanban-wip-flow"],
+      "usedConceptIds": ["project-evidence-readme", "branch-merge-rebase", "review-intent-risk-check"],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {"id":"agile-intuition","type":"intuition","authorship":"authored","title":"Ágil é reduzir atraso de feedback, não colecionar cerimônia","body":"O problema não é escolher nomes bonitos para reunião. O problema é descobrir cedo se estamos construindo a coisa certa, se o trabalho está bloqueado e se o incremento pode ser demonstrado. Scrum organiza cadência; Kanban organiza fluxo contínuo e WIP.","analogyLimit":"Quadro de tarefas ajuda, mas fluxo real depende de critérios de pronto, revisão, testes e bloqueios visíveis."},
+        {"id":"agile-comparison","type":"comparison","authorship":"authored","title":"Scrum e Kanban por problema resolvido","criteria":["Unidade de planejamento","Sinal principal","Quando ajuda","Risco comum"],"alternatives":[{"name":"Scrum","values":["Sprint/timebox","objetivo do sprint e incremento revisável"],"useWhen":"o time precisa de cadência forte de planejamento, review e retrospectiva","avoidWhen":"a sprint vira teatro sem entrega demonstrável"},{"name":"Kanban","values":["Fluxo contínuo","WIP, tempo de ciclo e bloqueios"],"useWhen":"trabalho chega continuamente e gargalos precisam ficar visíveis","avoidWhen":"o quadro vira depósito infinito de tarefas em progresso"}]}
+      ],
+      "appendBlocks": [
+        {"id":"agile-quiz","type":"quiz","authorship":"authored","conceptId":"kanban-wip-flow","prompt":"Por que limitar WIP em Kanban costuma melhorar fluxo?","options":[{"id":"ag-a","label":"Porque reduz troca de contexto, expõe gargalos e força o time a terminar antes de começar demais.","correct":true,"explanation":"WIP menor torna bloqueios visíveis e aumenta foco em conclusão."},{"id":"ag-b","label":"Porque impede code review e testes para acelerar entrega.","correct":false,"explanation":"Isso só empurra defeito para depois; fluxo bom preserva qualidade."},{"id":"ag-c","label":"Porque Kanban exige sprint de duas semanas sempre.","correct":false,"explanation":"Sprint fixa é característica do Scrum, não do Kanban."}]}
+      ],
+      "codeExplanations": {
+        "agile-code-8": {"explanation":["O quadro mostra estados de fluxo; a informação importante é quantos itens estão parados ou acumulados em cada coluna.","Sem limite de WIP e critério de pronto, o quadro vira decoração e não sistema de gestão."],"commonMistakes":["Mover card para concluído sem evidência","Começar muitas tarefas e terminar poucas","Confundir coluna com valor entregue"]}
+      },
+      "resources": [
+        {"id":"scrum-guide-2020","type":"reference","title":"The Scrum Guide","url":"https://scrumguides.org/scrum-guide.html","reinforces":"Definição oficial de Scrum, papéis, eventos e artefatos.","language":"en","publisher":"Scrum Guides","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},
+        {"id":"kanban-guide","type":"reference","title":"The Kanban Guide","url":"https://kanbanguides.org/english/","reinforces":"Kanban, fluxo, WIP, políticas explícitas e melhoria contínua.","language":"en","publisher":"Kanban Guides","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+      ],
+      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+    },
+    "mapa-sistema": {
+      "order": 2,
+      "objectives": ["Seguir uma requisição ponta-a-ponta no sistema completo", "Relacionar UI, HTTP, segurança, domínio, banco, cache, eventos e observabilidade", "Usar glossário/mapa como ferramenta de revisão ativa", "Identificar lacunas antes do projeto integrador"],
+      "whyItExists": "Antes do projeto final, o aluno precisa enxergar o curso como sistema conectado. O mapa mostra que cada tecnologia estudada participa de uma cadeia de contrato, estado, falha e evidência; ele também ajuda a revisar lacunas sem reler tudo do zero.",
+      "prerequisiteChapterIds": ["mini-pedidos-eventos", "deploy-frontend", "code-review-adr"],
+      "introducedConceptIds": ["end-to-end-request-map", "system-knowledge-map"],
+      "usedConceptIds": ["frontend-backend-contract", "spring-security-authorization", "trace-span-boundary", "event-driven-project-evidence"],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {"id":"mapa-sistema-intuition","type":"intuition","authorship":"authored","title":"Mapa final transforma capítulos soltos em uma cadeia de responsabilidade","body":"Uma ação simples — clicar em emprestar livro — atravessa UI, HTTP, autenticação, controller, domínio, transação, cache, evento, consumer, WebSocket, logs e métricas. O mapa existe para você conseguir explicar essa travessia sem chamar tudo de mágica.","analogyLimit":"Mapa de metrô ajuda a visualizar estações, mas cada estação aqui tem contrato, erro, segurança e evidência operacional."},
+        {"id":"mapa-sistema-exercise","type":"exercise","authorship":"authored","title":"Trace narrado de uma ação","prompt":"Escolha uma ação do projeto final e escreva o caminho completo: entrada do usuário, request, autorização, caso de uso, persistência, evento/cache, resposta, logs/métricas e falhas possíveis.","difficulty":"advanced","criteria":["Cada etapa aponta o capítulo/conceito usado.","Há pelo menos um erro de domínio, um erro técnico e um sinal de observabilidade.","O texto diferencia contrato externo de modelo interno."]}
+      ],
+      "appendBlocks": [
+        {"id":"mapa-sistema-quiz","type":"quiz","authorship":"authored","conceptId":"end-to-end-request-map","prompt":"O que um mapa ponta-a-ponta deve revelar?","options":[{"id":"ms-a","label":"Como uma ação atravessa contratos, estado, segurança, falha e observabilidade até produzir efeito verificável.","correct":true,"explanation":"O mapa conecta responsabilidades; não é só lista de ferramentas."},{"id":"ms-b","label":"Somente qual controller recebe a rota.","correct":false,"explanation":"Controller é uma etapa; o fluxo inclui domínio, persistência, eventos, UI e operação."},{"id":"ms-c","label":"Todas as classes privadas em ordem alfabética.","correct":false,"explanation":"Mapa final deve ajudar raciocínio e revisão, não inventariar detalhes irrelevantes."}]}
+      ],
+      "codeExplanations": {
+        "mapa-sistema-code-5": {"explanation":["O fluxo textual mostra uma requisição atravessando front-end, HTTP, segurança, domínio, banco, cache, evento e notificação.","Use-o como mapa de rastreamento: em cada etapa pergunte qual contrato pode falhar e qual evidência prova o comportamento."],"commonMistakes":["Achar que o controller é o sistema inteiro","Ignorar falha assíncrona depois da resposta HTTP","Misturar DTO público com entidade interna"]}
+      },
+      "resources": [
+        {"id":"spring-boot-observability-phase19-map","type":"official-docs","title":"Spring Boot Actuator: Production-ready Features","url":"https://docs.spring.io/spring-boot/reference/actuator/index.html","reinforces":"Sinais operacionais no mapa final: health, metrics e observabilidade.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},
+        {"id":"opentelemetry-observability-primer-map","type":"official-docs","title":"OpenTelemetry Observability Primer","url":"https://opentelemetry.io/docs/concepts/observability-primer/","reinforces":"Logs, métricas e traces como evidência ponta-a-ponta.","language":"en","publisher":"OpenTelemetry","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+      ],
+      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+    },
+    "projeto-integrador": {
+      "order": 3,
+      "objectives": ["Entregar sistema ponta-a-ponta verificável", "Escolher arquitetura por trade-off e registrar ADRs", "Provar build, teste, deploy, observabilidade e recuperação", "Limitar escopo sem perder evidência profissional"],
+      "whyItExists": "O projeto integrador é a síntese do curso: não é usar todas as tecnologias por exibicionismo, mas escolher uma arquitetura coerente e provar que ela compila, testa, executa, falha de modo operável e pode ser explicada por outra pessoa.",
+      "prerequisiteChapterIds": ["mapa-sistema", "mini-pedidos-eventos", "mini-deploy-observavel", "code-review-adr"],
+      "introducedConceptIds": ["capstone-reference-architecture", "capstone-operational-evidence"],
+      "usedConceptIds": ["production-evidence-checklist", "event-driven-project-evidence", "health-readiness-liveness", "deploy-rollback-strategy", "adr-context-decision-consequence"],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {"id":"projeto-integrador-intuition","type":"intuition","authorship":"authored","title":"Projeto final bom é menor do que sua ambição e mais comprovado do que sua promessa","body":"A tentação é colocar tudo: Spring, Postgres, Kafka, Redis, WebSocket, Docker, CI e deploy. O critério profissional é outro: escolher escopo suficiente, escrever ADRs, provar os fluxos centrais, operar falhas previsíveis e documentar como outra pessoa executa e revisa.","analogyLimit":"Portfólio ajuda como vitrine, mas o avaliador técnico procura evidência: testes, logs, decisões, deploy e limites."}
+      ],
+      "appendBlocks": [
+        {"id":"projeto-integrador-project","type":"project","authorship":"authored","title":"Sistema completo de ponta a ponta","brief":"Construa um sistema pequeno, mas profissionalmente verificável, com front-end, API, domínio, persistência, segurança, observabilidade, entrega e ao menos uma integração assíncrona ou justificativa explícita para não usá-la.","requirements":["Escopo fechado em 2 ou 3 fluxos de negócio centrais","README com setup, decisões, comandos, env vars e limitações","ADRs para decisões arquiteturais relevantes","Testes unitários, integração e pelo menos uma validação end-to-end/manual documentada","Pipeline/build reproduzível e artefato rastreável","Health/logs/métricas ou evidência operacional equivalente","Plano de rollback/restore ou simulação segura documentada"],"guidance":"independent","acceptanceCriteria":["Uma pessoa externa consegue rodar o projeto seguindo o README.","Cada decisão tecnológica importante possui razão e consequência.","Falhas principais têm comportamento observável, não stack trace solto.","O relatório final conecta requisitos aos capítulos/conceitos usados."],"knowledgeMatrix":[{"requirement":"Arquitetura justificada","conceptIds":["capstone-reference-architecture","adr-context-decision-consequence"],"chapterIds":["code-review-adr","mapa-sistema","projeto-integrador"],"expectedEvidence":"ADRs registram contexto, decisão, alternativa e consequência."},{"requirement":"Operação verificável","conceptIds":["capstone-operational-evidence","production-evidence-checklist"],"chapterIds":["mini-deploy-observavel","projeto-integrador"],"expectedEvidence":"Health, logs, build, deploy, rollback/restore ou simulação estão documentados."},{"requirement":"Fluxo distribuído quando necessário","conceptIds":["event-driven-project-evidence","outbox-atomic-publish-intent"],"chapterIds":["mini-pedidos-eventos","projeto-integrador"],"expectedEvidence":"Se assíncrono existir, duplicação/falha são testadas; se não existir, a decisão é justificada."},{"requirement":"Contrato ponta-a-ponta","conceptIds":["end-to-end-request-map","frontend-backend-contract"],"chapterIds":["mapa-sistema","conectando-front-back"],"expectedEvidence":"Fluxo UI/API/domínio/persistência/resposta é demonstrado e testado."}]},
+        {"id":"projeto-integrador-quiz","type":"quiz","authorship":"authored","conceptId":"capstone-operational-evidence","prompt":"O que diferencia projeto final profissional de demo frágil?","options":[{"id":"pi-a","label":"Escopo controlado, decisões registradas, testes, operação observável e instruções reproduzíveis.","correct":true,"explanation":"Profissionalismo aparece na capacidade de executar, revisar, diagnosticar e recuperar."},{"id":"pi-b","label":"Usar o maior número possível de tecnologias mesmo sem necessidade.","correct":false,"explanation":"Tecnologia sem trade-off aumenta risco e reduz clareza."},{"id":"pi-c","label":"Funcionar uma vez na máquina do autor sem README.","correct":false,"explanation":"Isso não é reproduzível nem revisável."}]}
+      ],
+      "codeExplanations": {
+        "projeto-integrador-code-8": {"explanation":["O diagrama textual é arquitetura de referência: camadas, dados, eventos, cache, pipeline e operação aparecem como responsabilidades verificáveis.","Ele não obriga usar tudo; serve para escolher o que cabe no escopo e justificar exclusões."],"commonMistakes":["Copiar a arquitetura inteira sem necessidade","Esquecer ADRs e critérios de aceite","Não provar rollback/health/logs"]}
+      },
+      "resources": [
+        {"id":"twelve-factor-config-capstone","type":"reference","title":"The Twelve-Factor App: Config","url":"https://12factor.net/config","reinforces":"Configuração por ambiente e separação de secrets/config no projeto final.","language":"en","publisher":"12factor.net","official":false,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},
+        {"id":"sre-workbook-monitoring-capstone","type":"reference","title":"Google SRE Workbook: Monitoring Distributed Systems","url":"https://sre.google/workbook/monitoring/","reinforces":"Sinais, alertas e evidência operacional para sistemas em produção.","language":"en","publisher":"Google SRE","official":false,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}
+      ],
+      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+    },
+    "quiz": {
+      "order": 4,
+      "objectives": ["Usar revisão final como diagnóstico de lacunas", "Revisitar fundamentos, POO, Java Core, Spring, segurança, dados, mensageria e produção", "Ligar erro de quiz ao capítulo/conceito correto", "Preparar uma rodada de revisão antes do projeto ou entrevista"],
+      "whyItExists": "O quiz final não existe para decorar respostas isoladas. Ele é uma malha de diagnóstico: cada erro aponta uma lacuna conceitual e sugere onde voltar antes do projeto integrador, revisão técnica ou entrevista.",
+      "prerequisiteChapterIds": ["projeto-integrador", "mapa-sistema"],
+      "introducedConceptIds": ["final-review-diagnostic-loop"],
+      "usedConceptIds": ["system-knowledge-map", "project-evidence-readme", "capstone-reference-architecture"],
+      "generateCompatibilityQuizzes": false,
+      "quizRationales": {
+        "quiz:0": ["Sobrecarga escolhe assinatura em compilação; sobrescrita usa despacho dinâmico em herança.", "Confunde dois mecanismos diferentes de resolução de método.", "Interfaces/classes abstratas não definem essa diferença."],
+        "quiz:1": ["Em Java, atribuição de objeto copia referência, não objeto profundo.", "Esta alternativa inverte a regra: não há cópia completa automática.", "Modificador de acesso não controla cópia de objeto."],
+        "quiz:2": ["equals e hashCode coerentes preservam contratos de HashMap/HashSet.", "equals isolado quebra coleções baseadas em hash.", "final não é requisito do contrato equals/hashCode."],
+        "quiz:3": ["Campos não têm polimorfismo dinâmico como métodos sobrescritos.", "Correto: acesso a campo é resolvido pelo tipo de referência.", "protected muda visibilidade, não despacho dinâmico de campo."],
+        "quiz:4": ["Checked aparece no contrato de compilação; unchecked não obriga declaração.", "Checked não é conceito de teste.", "Unchecked pode ser capturada, apenas não é obrigada."],
+        "quiz:5": ["Type erasure remove informação genérica reificada em runtime na maioria dos usos.", "Tipos não são escolhidos aleatoriamente.", "Classes genéricas podem ter métodos."],
+        "quiz:6": ["Stream é pipeline consumível uma vez por operação terminal.", "Não é promessa de correção futura; é parte do contrato.", "Reusar Stream consumido lança erro."],
+        "quiz:7": ["++ envolve leitura, cálculo e escrita; interleaving causa perda de atualização.", "O operador existe; o problema é atomicidade/visibilidade.", "O problema vale para inteiros também."],
+        "quiz:8": ["AAA significa organizar cenário, ação e verificação.", "Assert três vezes não organiza comportamento.", "API/Application/Assertion não é o padrão estudado."],
+        "quiz:9": ["LSP exige substituição sem quebrar expectativas do cliente.", "Interface não é obrigatória para toda classe.", "static não ser sobrescrito é outro assunto."],
+        "quiz:10": ["LAZY apenas adia carregamento; acessar coleção em loop ainda pode gerar N queries.", "LAZY não piora sempre; depende do acesso.", "LAZY não remove relacionamento."],
+        "quiz:11": ["JWT assinado é legível; não coloque segredo/PII sensível no payload.", "Payload legível é normal.", "Não depende necessariamente de má configuração."],
+        "quiz:12": ["Kafka retém log e permite replay conforme retenção/offset.", "Kafka suporta múltiplos consumidores/grupos.", "Performance depende do caso."],
+        "quiz:13": ["At-least-once aceita duplicação; consumidor protege efeito por idempotência.", "Não é exigência legal genérica.", "Kafka não exige idempotência para aceitar mensagem, mas o domínio precisa dela."],
+        "quiz:14": ["httpOnly reduz roubo via XSS porque JS não lê o cookie.", "Há diferença relevante de superfície de ataque.", "localStorage é acessível por JS e sofre em XSS."],
+        "quiz:15": ["Repository real depende de SQL, driver, transação e dialeto; container valida isso.", "Containers costumam ser mais lentos que mocks, mas mais fiéis.", "Mocks funcionam, só não provam integração real."],
+        "quiz:16": ["Circuit breaker abre e evita pressionar dependência doente por política.", "Retry infinito amplifica falha.", "Ele não reinicia aplicação automaticamente."],
+        "quiz:17": ["Migrations versionadas são auditáveis; ddl-auto=update pode alterar schema sem revisão.", "ddl-auto=update existe, mas delega mudanças de schema ao runtime sem revisão, histórico ou plano confiável de rollback.", "Não tem relação com MongoDB."],
+        "quiz:18": ["Multi-stage separa build pesado do runtime enxuto.", "Docker funciona com Java sem multi-stage, mas pior para imagem final.", "Não é obrigatório por si só; é prática de qualidade."],
+        "quiz:19": ["Entity exposta acopla API ao modelo interno e pode causar problemas de lazy/loading.", "Entidades podem ser serializadas, mas isso não torna boa prática.", "Spring não proíbe em compilação."],
+        "quiz-concept-check-0": ["Revisão final aponta lacunas; não elimina validação de comportamento.", "Correto: é diagnóstico amplo com feedback imediato.", "Conceito deve respeitar objetivo e pré-requisitos, não ser aplicado cegamente."]
+      },
+      "prependBlocks": [
+        {"id":"quiz-intuition","type":"intuition","authorship":"authored","title":"Quiz final é bússola de revisão, não placar de ego","body":"Se você errar uma questão, a pergunta útil é: qual conceito faltou? O quiz fecha o ciclo apontando tópicos que merecem releitura antes de entrevista, projeto integrador ou revisão espaçada.","analogyLimit":"Prova ajuda como metáfora, mas aqui o valor é diagnóstico acionável, não nota final."},
+        {"id":"quiz-review-exercise","type":"exercise","authorship":"authored","title":"Plano de revisão por erro","prompt":"Após responder o quiz, escolha três erros e escreva: conceito envolvido, capítulo para revisar, exemplo mínimo que provaria a resposta correta e como isso aparece no projeto final.","difficulty":"intermediate","criteria":["Cada erro vira ação concreta de revisão.","O plano conecta resposta a capítulo/conceito, não só à alternativa certa.","Pelo menos um exemplo usa código ou cenário operacional."]}
+      ],
+      "appendBlocks": [
+        {"id":"quiz-final-meta","type":"quiz","authorship":"authored","conceptId":"final-review-diagnostic-loop","prompt":"Qual é a atitude correta diante de erro no quiz final?","options":[{"id":"qf-a","label":"Mapear o erro para conceito/capítulo, refazer um exemplo e aplicar a correção no projeto ou revisão.","correct":true,"explanation":"O erro vira diagnóstico e prática deliberada."},{"id":"qf-b","label":"Ignorar porque quiz não tem relação com projeto real.","correct":false,"explanation":"As questões cobrem conceitos que aparecem no projeto e em entrevistas."},{"id":"qf-c","label":"Decorar a alternativa sem entender por quê.","correct":false,"explanation":"Decorar não transfere para código, review ou operação."}]}
+      ],
+      "resources": [
+        {"id":"dev-java-get-started-final-review","type":"official-docs","title":"Dev.java: Getting Started","url":"https://dev.java/learn/getting-started/","reinforces":"Revisão oficial de ambiente, execução e fundamentos Java.","language":"en","publisher":"Oracle/Java","official":true,"expectedLevel":"foundation","verifiedAt":"2026-08-22","auditStatus":"approved"},
+        {"id":"spring-boot-reference-final-review","type":"official-docs","title":"Spring Boot Reference Documentation","url":"https://docs.spring.io/spring-boot/index.html","reinforces":"Mapa de consulta para tópicos Spring usados no curso e no projeto final.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+      ],
+      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+    }
+  }
+}

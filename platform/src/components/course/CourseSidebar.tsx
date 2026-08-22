@@ -24,7 +24,7 @@ interface CourseSidebarProps {
 export function CourseSidebar({ modules, chapters, activeChapterId, completedIds, favoriteIds, searchValue, searchQuery, open, online, practiceOnly, favoritesOnly, onClose, onSearchChange, onSelectChapter, onTogglePractice, onToggleFavorites, onOpenHub }: CourseSidebarProps) {
   const normalizedSearch = searchQuery.trim().toLocaleLowerCase('pt-BR');
   const visibleChapters = chapters.filter(chapter => {
-    const matchesSearch = !normalizedSearch || `${chapter.title} ${chapter.summary}`.toLocaleLowerCase('pt-BR').includes(normalizedSearch);
+    const matchesSearch = !normalizedSearch || chapter.title.toLocaleLowerCase('pt-BR').includes(normalizedSearch);
     const matchesPractice = !practiceOnly || chapter.blocks.some(block => block.type === 'project') || /projeto|prática|lab/i.test(chapter.title);
     return matchesSearch && matchesPractice && (!favoritesOnly || favoriteIds.has(chapter.id));
   });
@@ -43,8 +43,8 @@ export function CourseSidebar({ modules, chapters, activeChapterId, completedIds
 
       <div className="sidebar-progress"><div><span>Progresso real</span><strong>{completion}%</strong></div><div className="progress-track"><i style={{ width: `${completion}%` }} /></div></div>
 
-      <label className="eyebrow" htmlFor="chapter-search">Buscar capítulos</label>
-      <input id="chapter-search" type="search" value={searchValue} onChange={event => onSearchChange(event.target.value)} placeholder="Ex.: HttpClient, JDBC..." className="search-input" />
+      <label className="eyebrow" htmlFor="chapter-search">Buscar pelo título</label>
+      <input id="chapter-search" type="search" value={searchValue} onChange={event => onSearchChange(event.target.value)} placeholder="Ex.: Spring, JDBC..." className="search-input" />
       <p className="sidebar-result-count">{visibleChapters.length} de {chapters.length} capítulos</p>
       <button type="button" className={`practice-filter ${practiceOnly ? 'active' : ''}`} aria-pressed={practiceOnly} onClick={onTogglePractice}>{practiceOnly ? 'Mostrando projetos e prática' : 'Focar somente na prática'}</button>
       <div className="sidebar-tools">

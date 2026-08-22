@@ -14,6 +14,8 @@ const chapter = {
   whyItExists: '',
   prerequisiteChapterIds: [],
   conceptIds: ['term-0'],
+  introducedConceptIds: [],
+  usedConceptIds: [],
   estimatedMinutes: 30,
   englishLevel: 0,
   blocks: [],
@@ -30,7 +32,8 @@ const chapter = {
     documentationTask: 'Find the API behavior.',
     productionTask: 'Write one sentence.',
     successCriterion: 'The action is clear.'
-  }
+  },
+  audit: { status: 'pending', sourceKind: 'structured-typescript' }
 } satisfies Chapter;
 
 const glossary = [{ id: 'term-0', term: 'JDK', definition: 'Kit de desenvolvimento.', chapterId: 'intro', aliases: [] }] satisfies GlossaryEntry[];

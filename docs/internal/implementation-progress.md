@@ -2,26 +2,26 @@
 
 ## Master specification
 
-Status: completed
+Status: reaberto por uma especificação de auditoria pedagógica mais rigorosa
 
-Last updated: 2026-08-20
+Last updated: 2026-08-22
 
-Current phase: Phase 16 - Study OS interface and feature-parity restoration (completed)
+Current phase: Auditoria Mestre — Fase 31 de Fechamento da Especificação Mestre concluída; reconstrução curricular completa, protegida por gates de release/deploy/manutenção/progresso/UI/estudo/catálogo/avaliação/recursos/inglês técnico/rastreabilidade/spec mestre
 
-Overall state: The complete java4br React/Tailwind platform, fully separated curriculum, expanded learning paths, versioned progress system, PWA delivery, and final audit suite are implemented. GitHub Pages builds and publishes `dist/`; the former monolithic runtime has been removed after exact, hash-verified extraction.
+Overall state: A plataforma React/Tailwind, o corpus separado, a persistência e o PWA estão implementados e tecnicamente estáveis. As Fases 0 e 1 fornecem inventário integral, proveniência, schema semântico e um gate contra aprovação falsa. As Fases 2 a 19 reconstruíram Fundamentos, POO, Java Core, I/O/CLI/Process API, Algoritmos/Engenharia inicial, Estruturas de Dados Avançadas, projetos intermediários, HTTP/integração, SQL/JDBC, Design de Aplicação, Spring/API, Segurança/Qualidade de APIs, Containers/Testes/Dados avançados, Concorrência/Redes/TUI, Produção/CI/CD, Integração Síncrona, Resiliência/Observabilidade, Mensageria, SNS/SQS, Kafka, EDA, Consistência Distribuída, Outbox/Inbox, Saga, revisão técnica, ADR, processo ágil, mapa sistêmico, projeto integrador e revisão diagnóstica final. A Fase 20 adiciona um gate final de release para impedir divergência entre auditoria, documentação, artefatos gerados, validação e remoção de Supabase. A Fase 21 adiciona o gate de deploy/PWA para proteger GitHub Pages, Vite, dist, manifest e service worker. A Fase 22 adiciona guardrails de manutenção para impedir fontes autorais soltas, monólitos legados reintroduzidos e artefatos gerados tratados como fonte. A Fase 23 adiciona o gate de contrato de progresso para proteger schema v11, IndexedDB, fallback local, migração legada e backup/importação. A Fase 24 adiciona o gate de UI/acessibilidade para proteger skip link, foco, temas, redução de movimento, Central modal, Markdown, axe e responsividade. A Fase 25 adiciona o gate das ferramentas de estudo para proteger busca por título, revisão, glossário, diagnóstico, caderno de erros, prontidão de projetos e Java Lab. A Fase 26 adiciona o gate de integridade do catálogo e offline para proteger sincronia entre artefatos gerados, catálogo público, glossário, inventário de hashes, HTMLs em `dist/` e precache do service worker. A Fase 27 adiciona o gate de integridade das avaliações para proteger quizzes, exercícios, projetos, racionais de alternativas, critérios de aceite e matrizes de conhecimento. A Fase 28 de Integridade dos Recursos adiciona o gate de integridade dos recursos para proteger metadados, relevância, HTTPS, prioridade oficial/normativa e bloqueio contra links genéricos ou repetidos em massa. A Fase 29 adiciona o gate de contrato de inglês técnico contextual para proteger 128 atividades contextuais de inglês técnico, níveis 0-3, progressão por módulo, pistas de código, leitura sem tradução solta, produção de evidência, persistência e integração com a Central (Fase 29 de Inglês Técnico Contextual). A Fase 30 adiciona o gate de rastreabilidade viva para manter README, progresso interno, matriz de requisitos, relatórios de auditoria, `validate:final-release` e scripts `validate:*` sincronizados (Fase 30 de Rastreabilidade Viva). A Fase 31 adiciona o gate de fechamento da especificação mestre para cruzar os requisitos obrigatórios restantes com conteúdo aprovado, schema, matriz de capítulos, grafo, E2E e gates especializados. São 151 capítulos aprovados, 384 conceitos rastreados e zero capítulos em backlog. Evidências: `docs/internal/master-audit/phase-0-discovery.md`, `phase-1-infrastructure.md`, `phase-2-foundations.md`, `phase-3-oop.md`, `phase-4-java-core.md`, `phase-5-io-cli-process.md`, `phase-6-algorithms-engineering.md`, `phase-7-http-integration.md`, `phase-8-relational-data-jdbc.md`, `phase-9-application-design.md`, `phase-10-spring-api.md`, `phase-11-api-security-quality.md`, `phase-12-containers-integration-data.md`, `phase-13-concurrency-network-tui.md`, `phase-14-production-delivery.md`, `phase-15-sync-resilience.md`, `phase-16-messaging-eda.md`, `phase-17-distributed-consistency.md`, `phase-18-intermediate-projects.md`, `phase-19-professional-final.md`, `phase-20-final-release-hardening.md`, `phase-21-deployment-readiness.md`, `phase-22-maintenance-guardrails.md`, `phase-23-progress-contract.md`, `phase-24-ui-accessibility-contract.md`, `phase-25-learning-tools-contract.md`, `phase-26-catalog-integrity.md`, `phase-27-assessment-integrity.md`, `phase-28-resource-integrity.md`, `phase-29-technical-english-contract.md`, `phase-30-traceability-contract.md` e `phase-31-master-spec-closure.md`.
 
 ---
 
 ## Current project inventory
 
 - Delivery: Vite 8, React 19, TypeScript 6 and Tailwind CSS 4 build the public `dist/`; GitHub Pages CI validates and deploys that artifact.
-- Curriculum: 128 legacy chapters preserved plus 21 structured chapters, totaling 149 chapters across 20 prerequisite-aware modules.
-- Learning content: 493 quizzes, 155 exercises, 13 migrated checklists, cumulative projects, official resources, and one contextual technical-English activity per chapter.
+- Curriculum: 128 legacy chapters preserved plus 23 structured chapters, totaling 151 chapters across 20 prerequisite-aware modules.
+- Learning content: 268 quizzes, 160 exercises, 14 migrated checklists, cumulative projects, official resources, and one contextual technical-English activity per chapter.
 - Learning UI: contextual toolbar, command palette, navigation/search/practice/favorite filters, completion, favorites, Markdown notes, quizzes, checklists, spaced review, retrieval prompts, mastery evidence, error notebook, diagnostics, project readiness, achievements, activity, Pomodoro, local Java Lab, contextual technical English, and reading settings.
 - Persistence: version 11 progress in IndexedDB `java4br-course`, complete validated backup/import, local fallback, and migration from earlier legacy IndexedDB/localStorage data.
 - Delivery quality: system, real-white and restored high-contrast Study OS themes; visible focus; skip navigation; reduced motion; component-level overflow handling; and automated axe accessibility coverage.
 - Offline: generated service worker precaches the application shell, runtime content index, catalog, glossary, and all 128 independent chapter HTML files; cache identity is `java4br-platform-v2`.
-- External resources: 55 unique HTTPS URLs were live-audited after removing two broken references.
+- External resources: 260 unique curated HTTPS URLs inventariadas pela auditoria mestre; o validador online percorre 262 URLs externas renderizadas e é executado novamente ao encerrar cada fase.
 - Canonical legacy corpus: `platform/public/content/chapters` contains exactly 128 independent HTML files; catalog, glossary, per-file hashes, aggregate hashes, and the fidelity validator prove preservation without retaining a second monolithic source.
 
 ## Baseline validation
@@ -425,7 +425,7 @@ Migrate every existing chapter and learning feature into the new architecture wi
 
 #### Result
 
-The one-time migration extracted all 128 legacy templates into independent, canonical HTML files. The current generator reads only those files plus the separated catalog and glossary, producing the typed React model while preserving chapter IDs, prerequisite references, exercises, quizzes, checklists, full solutions, code, and navigation order. The React application renders the complete 149-chapter course and all learning tools against the assembled model.
+The one-time migration extracted all 128 legacy templates into independent, canonical HTML files. The current generator reads only those files plus the separated catalog and glossary, producing the typed React model while preserving chapter IDs, prerequisite references, exercises, quizzes, checklists, full solutions, code, and navigation order. The React application renders the complete 151-chapter course and all learning tools against the assembled model.
 
 #### Validation
 
@@ -583,7 +583,7 @@ Every legacy chapter now has concept-derived checks, at least two complementary 
 
 #### Validation
 
-- Coverage validator reports 493 quizzes and 155 exercises; every migrated chapter has assessment, resources, and English activity, and each of the 80 concepts in the 21 structured chapters has its own quiz.
+- Coverage validator reports 268 quizzes and 160 exercises; every migrated chapter has assessment, resources, and English activity, and each audited phase concept has authored verification.
 - The 20-module graph resolves all chapter and module prerequisite references.
 
 #### Remaining work
@@ -785,7 +785,7 @@ Attach current, concept-specific official documentation and high-quality videos/
 
 #### Result
 
-All 149 chapters expose curated resources and a level 0-3 contextual English activity. Activities progress from recognizing code/documentation terms to search, bug reports, issues, constraints, acceptance criteria, and trade-offs rather than isolated vocabulary lists.
+All 151 chapters expose curated resources and a level 0-3 contextual English activity. Activities progress from recognizing code/documentation terms to search, bug reports, issues, constraints, acceptance criteria, and trade-offs rather than isolated vocabulary lists.
 
 #### Validation
 
@@ -1046,25 +1046,37 @@ Known regressions: none detected.
 | System, real-white and restored high-contrast themes | completed | 7, 16 | Persisted theme settings resolve system preferences; `#ffffff` white mode and original `#050505` amber/green Study OS mode share the reading hierarchy |
 | Responsive/overflow and prerequisite wrapping audit | completed | 7, 17 | Mobile sidebar, flexible controls, browser-verified 360/768/1440 layouts, local code/table overflow and no global clipping |
 | Accessibility and keyboard/focus behavior | completed | 7, 17 | Skip link, labels, landmarks, focus/reduced-motion rules, accessible legacy tabs and passing critical axe browser test |
-| Deep concept-level quizzes and later reviews | completed | 8, 15, 17 | 410 legacy and 21 structured quizzes, with malformed diagram alternatives blocked, plus spaced review, retrieval, mastery, and error notebook |
+| Deep concept-level quizzes and later reviews | completed | 8, 15, 17, 18, 19 | 268 quizzes, with malformed diagram alternatives blocked, plus spaced review, retrieval, mastery, diagnostic final review, and error notebook |
 | Intuitive-first, reasoning-first chapter pedagogy | completed | 8 | Structured intuition, prediction, explanation, exercise, quiz, and project blocks |
-| Deep JDBC, Optional, lambdas, Set/Collections, and functional content | completed | 8 | Dedicated structured chapters plus preserved detailed source material |
+| Deep JDBC, Optional, lambdas, Set/Collections, functional content and advanced data structures | completed | 8, 18 | SQL, PostgreSQL, migrations, JDBC, finance project, `jdbc-under-the-hood` and `estruturas-avancadas` are approved with concept graph, resources and project matrix where applicable |
 | Object associations/cardinality before JPA annotations | completed | 8 | `associacoes-cardinalidade` is placed in the OOP progression |
-| Progressively less-guided cumulative projects | completed | 3, 8, 9, 10, 11 | Module guidance progresses from supported to guided, bounded, and independent |
-| HTTP before Spring MVC | completed | 9 | Wire-level HTTP and pure-Java client chapters precede Spring API modules |
-| Pure-Java `HttpClient`, JSON, and external API consumption | completed | 9 | Dedicated client chapter and `pure-java-api-project` |
+| Progressively less-guided cumulative projects | completed | 3, 8, 9, 10, 11, 18 | Module guidance progresses from supported to guided, bounded, and independent; intermediate reservation/library projects now include evidence matrices |
+| HTTP before Spring MVC | completed | 7, 9 | Wire-level HTTP, curl inspection and pure-Java client chapters precede Spring API modules |
+| Pure-Java `HttpClient`, JSON, and external API consumption | completed | 7, 9 | Dedicated `HttpClient`, unreliable API and `pure-java-api-project` chapters are approved with concept graph and project matrices |
 | Complete API design/integration/testing/contract curriculum | completed | 9 | REST semantics, DTOs, validation, errors, concurrency, OpenAPI, tests, and evolution |
-| Java beyond CRUD curriculum | completed | 10 | CLI, TCP/protocols, concurrency, TUI, and developer-tool paths |
-| Lanterna/TUI curriculum | completed | 10 | `lanterna-tui` covers layers, event loop, state, rendering, testing, and trade-offs |
+| Java beyond CRUD curriculum | completed | 10, 13 | CLI, TCP/protocols, concurrency, TUI, and developer-tool paths |
+| Lanterna/TUI curriculum | completed | 10, 13 | `lanterna-tui` covers layers, event loop, state, rendering, testing, and trade-offs |
 | Testcontainers depth and deterministic async testing | completed | 11 | Kafka, LocalStack, container lifecycle, isolation, and Awaitility chapter |
 | SNS/SQS curriculum | completed | 11 | Fanout, queues, delivery, visibility, retries, DLQ, redrive, security, and project context |
-| Complete EDA progression and failure reasoning | completed | 11 | Synchronous pain through event bus, broker semantics, failure labs, patterns, and operations |
+| Complete EDA progression and failure reasoning | completed | 11, 16, 17 | Synchronous pain through event bus, broker semantics, failure labs, outbox/inbox, saga, consistency patterns, and operations |
 | Required Souza EDA reference video | completed | 11 | Required URL and reinforcement description included |
-| Official documentation and high-quality videos by content | completed | 12 | Every chapter has at least two mapped resources; 55 unique URLs live-audited |
+| Official documentation and high-quality videos by content | completed | 12, 13, 14, 15, 16, 17, 19 | Every chapter has at least two mapped resources; 260 curated URLs inventoried by the master audit and 262 rendered external URLs validated online |
 | Gradual contextual technical English | completed | 12, 16 | Per-chapter levels 0-3, Read/Notice/Use/Prove flow, English Hub, shortcuts and persisted evidence culminate in professional bug reports/issues/trade-offs |
 | Installable complete offline application | completed | 4, 14, 16 | Manifest/install prompt, offline status, cache refresh and generated service worker precache all 137 production assets |
 | Intermediate depth/prerequisite audit | completed | 13 | Target graph, required terms, counts, URLs, identity, persistence, and PWA assertions pass |
 | Final requirement-by-requirement audit | completed | 14, 15 | Repeated `npm run validate`, fidelity hashes, link audit, two-state axe tests, persistence integration, and traceability review |
+| Final release gate and Supabase removal | completed | 20 | `validate:final-release` checks approved counts, docs, generated/public parity, required reports and absence of Supabase client/dependencies |
+| GitHub Pages/PWA deployment readiness | completed | 21 | `validate:deployment` checks Pages workflow, Vite base, `dist/`, manifest and generated service worker precache |
+| Maintenance drift guardrails | completed | 22 | `validate:maintenance` blocks disconnected phase sources, root monolith regressions and manual edits to generated public artifacts |
+| Progress schema, IndexedDB and backup contract | completed | 23 | `validate:progress` protects schema v11, IndexedDB `java4br-course`, fallback, migration, backup and import confirmation |
+| UI/accessibility contract | completed | 24 | `validate:ui` protects skip link, focus, themes, reduced motion, Study Hub, Markdown notes, axe coverage and responsive E2E markers |
+| Study tools contract | completed | 25 | `validate:learning-tools` protects title-only search, multiple-choice review, glossary, diagnostic, error notebook, project readiness and Java Lab |
+| Catalog/offline artifact integrity | completed | 26 | `validate:catalog` checks generated/public course parity, catalog, glossary, source inventory, hashes, dist HTMLs and service worker cache |
+| Assessment integrity | completed | 27 | `validate:assessment` protects quizzes, unique alternatives, exactly one correct answer, rationales, exercises, project criteria and knowledge matrices |
+| External resource integrity | completed | 28 | `validate:resources` protects HTTPS, language, publisher, verification date, relevance approval, official/normative priority and anti-generic links |
+| Contextual technical English contract | completed | 29 | `validate:technical-english` protects 128 activities, level distribution, module progression, code context, saved evidence and anti-translation rules |
+| Living traceability contract | completed | 30 | `validate:traceability` keeps README, progress, requirement matrix, phase reports, final-release gate and validation scripts synchronized |
+| Master specification closure | completed | 31 | `validate:master-spec` cross-checks the master specification axes against approved content, schema, chapter matrix, dependency graph, E2E coverage and specialized gates |
 
 ---
 

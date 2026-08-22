@@ -22,6 +22,24 @@ System.out.println(nomes.contains(<span class="str">"Ana"</span>));
 
       <div class="warn"><b>Pegadinha clássica:</b> <code>lista.remove(1)</code> remove o elemento no <strong>índice</strong> 1 se a lista é <code>List&lt;Integer&gt;</code> — mas para remover o <em>valor</em> <code>1</code>, você precisa de <code>lista.remove(Integer.valueOf(1))</code>, forçando autoboxing. Essa ambiguidade entre <code>remove(int)</code> e <code>remove(Object)</code> já causou bugs sutis em produção.</div>
 
+      <h3>Igualdade e hashing antes de Set e Map</h3>
+      <p><code>List.contains</code>, <code>HashSet</code> e as chaves de <code>HashMap</code> precisam decidir quando dois objetos representam o mesmo valor lógico. O contrato mínimo é: igualdade reflexiva, simétrica, transitiva, consistente e falsa para <code>null</code>. Além disso, objetos iguais por <code>equals</code> devem produzir o mesmo <code>hashCode</code>. Objetos diferentes podem compartilhar um hash; a coleção confirma a igualdade depois.</p>
+      <pre class="code"><span class="kw">public final class</span> <span class="cls">Produto</span> {
+    <span class="kw">private final</span> <span class="cls">String</span> codigo;
+
+    <span class="kw">public</span> <span class="fn">Produto</span>(<span class="cls">String</span> codigo) { <span class="kw">this</span>.codigo = codigo; }
+
+    <span class="annotation">@Override</span> <span class="kw">public boolean</span> <span class="fn">equals</span>(<span class="cls">Object</span> outro) {
+        <span class="kw">if</span> (<span class="kw">this</span> == outro) <span class="kw">return true</span>;
+        <span class="kw">if</span> (!(outro <span class="kw">instanceof</span> <span class="cls">Produto</span>)) <span class="kw">return false</span>;
+        <span class="cls">Produto</span> produto = (<span class="cls">Produto</span>) outro;
+        <span class="kw">return</span> codigo.equals(produto.codigo);
+    }
+
+    <span class="annotation">@Override</span> <span class="kw">public int</span> <span class="fn">hashCode</span>() { <span class="kw">return</span> codigo.hashCode(); }
+}</pre>
+      <div class="warn"><b>Não altere campos usados por <code>equals</code>/<code>hashCode</code> enquanto o objeto for chave ou elemento de coleção baseada em hash.</b> A estrutura escolheu uma região com o hash antigo; depois da mutação, uma busca pode não encontrar o próprio objeto. Prefira uma identidade lógica estável e imutável.</div>
+
       <h3>Set — sem duplicatas</h3>
       <pre class="code">Set&lt;<span class="kw">String</span>&gt; tags = <span class="kw">new</span> HashSet&lt;&gt;();
 tags.add(<span class="str">"java"</span>); tags.add(<span class="str">"java"</span>); <span class="com">// segunda chamada é ignorada</span>
@@ -29,7 +47,7 @@ System.out.println(tags.size()); <span class="com">// 1</span>
 
 Set&lt;<span class="kw">String</span>&gt; ordenado = <span class="kw">new</span> TreeSet&lt;&gt;(tags);   <span class="com">// mantém ordem natural (alfabética)</span>
 Set&lt;<span class="kw">String</span>&gt; insercao = <span class="kw">new</span> LinkedHashSet&lt;&gt;(tags); <span class="com">// mantém ordem de inserção</span></pre>
-      <p>Lembre do capítulo 05: para <code>HashSet</code> reconhecer objetos "iguais" corretamente, <code>equals()</code> e <code>hashCode()</code> precisam estar implementados de forma coerente.</p>
+      <p><code>HashSet</code> usa o contrato de igualdade para impedir duplicatas; <code>TreeSet</code> usa comparação. Se a comparação retornar zero para objetos que <code>equals</code> considera diferentes, os dois conjuntos podem discordar sobre o que é duplicado. Defina conscientemente a noção de identidade de cada estrutura.</p>
 
       <h3>Map — pares chave/valor</h3>
       <pre class="code">Map&lt;<span class="kw">String</span>, <span class="kw">Double</span>&gt; precos = <span class="kw">new</span> HashMap&lt;&gt;();
@@ -45,19 +63,22 @@ System.out.println(precos.getOrDefault(<span class="str">"suco"</span>, 0.0)); <
 }</pre>
 
       <h3>Comparable vs Comparator — dois jeitos de ordenar</h3>
-      <pre class="code"><span class="kw">public class</span> <span class="cls">Produto</span> <span class="kw">implements</span> Comparable&lt;<span class="cls">Produto</span>&gt; {
+      <pre class="code"><span class="kw">public class</span> <span class="cls">ComparableProduct</span> <span class="kw">implements</span> Comparable&lt;<span class="cls">ComparableProduct</span>&gt; {
     <span class="kw">String</span> nome; <span class="kw">double</span> preco;
 
     <span class="annotation">@Override</span>
-    <span class="kw">public int</span> <span class="fn">compareTo</span>(<span class="cls">Produto</span> outro) { <span class="com">// ordenação "natural" -- só existe UMA</span>
+    <span class="kw">public int</span> <span class="fn">compareTo</span>(<span class="cls">ComparableProduct</span> outro) { <span class="com">// natural order of the type</span>
         <span class="kw">return</span> Double.compare(<span class="kw">this</span>.preco, outro.preco);
     }
 }
 Collections.sort(produtos); <span class="com">// usa compareTo</span>
 
-<span class="com">// Comparator: quantas ordenações alternativas você quiser, fora da classe</span>
-produtos.sort(Comparator.comparing(p -&gt; p.nome));
-produtos.sort(Comparator.comparingDouble((<span class="cls">Produto</span> p) -&gt; p.preco).reversed());</pre>
+<span class="com">// Comparator pode declarar uma ordem alternativa fora da classe</span>
+produtos.sort(<span class="kw">new</span> Comparator&lt;<span class="cls">ComparableProduct</span>&gt;() {
+    <span class="annotation">@Override</span> <span class="kw">public int</span> <span class="fn">compare</span>(<span class="cls">ComparableProduct</span> a, <span class="cls">ComparableProduct</span> b) {
+        <span class="kw">return</span> a.nome.compareTo(b.nome);
+    }
+});</pre>
 
       <div class="secret">Use <code>Comparable</code> quando existe uma ordem "óbvia e única" para o tipo (números por valor, datas cronologicamente). Use <code>Comparator</code> quando precisar de várias formas de ordenar o mesmo tipo dependendo do contexto — e prefira <code>Comparator</code> mesmo assim quando a ordenação for uma decisão de "quem está usando a lista", não do objeto em si, para não acoplar a classe a uma única forma de comparação.</div>
 
@@ -70,6 +91,8 @@ produtos.sort(Comparator.comparingDouble((<span class="cls">Produto</span> p) -&
         <tr><td><code>HashMap</code></td><td>Nenhuma garantida</td><td>Chaves não</td><td>Uso geral chave→valor</td></tr>
         <tr><td><code>LinkedHashMap</code></td><td>Inserção</td><td>Chaves não</td><td>Precisa lembrar ordem de inserção</td></tr>
       </tbody></table>
+
+      <div class="callout"><b>Modificável não é o mesmo que profundamente imutável.</b> <code>List.of(...)</code> e <code>List.copyOf(...)</code> não permitem adicionar, remover ou substituir posições, mas os objetos armazenados ainda podem mudar se forem mutáveis. <code>Collections.unmodifiableList(lista)</code> cria uma visão: mudanças feitas na lista original continuam visíveis nela.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 11.1 — Carrinho de compras</h4><span class="exercise-tag f">fácil</span></div>
@@ -89,15 +112,22 @@ System.out.println(carrinho.get(<span class="str">"café"</span>)); <span class=
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 11.2 — Ordenando com Comparator</h4><span class="exercise-tag m">médio</span></div>
-        <p>Usando a classe <code>Livro</code> (título, autor, páginas), crie uma <code>List&lt;Livro&gt;</code> com pelo menos 4 livros e ordene por <code>paginas</code> crescente usando <code>Comparator.comparingInt</code>. Depois ordene por <code>autor</code> e, em caso de empate, por <code>titulo</code> (dica: <code>.thenComparing(...)</code>).</p>
+        <p>Usando a classe <code>Livro</code> (título, autor, páginas), crie uma <code>List&lt;Livro&gt;</code> com pelo menos 4 livros. Escreva um <code>Comparator&lt;Livro&gt;</code> por páginas com classe anônima. Depois escreva outro por autor e, em caso de empate, por título. Lambdas serão apresentadas no capítulo próprio.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-<pre class="code">livros.sort(Comparator.comparingInt(<span class="cls">Livro</span>::getPaginas));
+<pre class="code">Comparator&lt;<span class="cls">Livro</span>&gt; porPaginas = <span class="kw">new</span> Comparator&lt;&gt;() {
+    <span class="annotation">@Override</span> <span class="kw">public int</span> <span class="fn">compare</span>(<span class="cls">Livro</span> a, <span class="cls">Livro</span> b) {
+        <span class="kw">return</span> Integer.compare(a.getPaginas(), b.getPaginas());
+    }
+};
+livros.sort(porPaginas);
 
-livros.sort(
-    Comparator.comparing(<span class="cls">Livro</span>::getAutor)
-              .thenComparing(<span class="cls">Livro</span>::getTitulo)
-);</pre>
+Comparator&lt;<span class="cls">Livro</span>&gt; porAutorETitulo = <span class="kw">new</span> Comparator&lt;&gt;() {
+    <span class="annotation">@Override</span> <span class="kw">public int</span> <span class="fn">compare</span>(<span class="cls">Livro</span> a, <span class="cls">Livro</span> b) {
+        <span class="kw">int</span> autor = a.getAutor().compareTo(b.getAutor());
+        <span class="kw">return</span> autor != 0 ? autor : a.getTitulo().compareTo(b.getTitulo());
+    }
+};</pre>
         </div>
       </div>
 

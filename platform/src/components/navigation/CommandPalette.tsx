@@ -32,7 +32,7 @@ export function CommandPalette({ open, chapters, onClose, onSelectChapter, onOpe
   const normalized = query.trim().toLocaleLowerCase('pt-BR');
   const items = [
     ...actions.filter(action => !normalized || action.title.toLocaleLowerCase('pt-BR').includes(normalized)).map(action => ({ ...action, kind: 'Ação' })),
-    ...chapters.filter(chapter => !normalized || `${chapter.title} ${chapter.summary}`.toLocaleLowerCase('pt-BR').includes(normalized)).slice(0, 30).map(chapter => ({ title: chapter.title, hint: chapter.moduleId.replaceAll('-', ' '), kind: 'Capítulo', action: () => onSelectChapter(chapter.id) }))
+    ...chapters.filter(chapter => !normalized || chapter.title.toLocaleLowerCase('pt-BR').includes(normalized)).slice(0, 30).map(chapter => ({ title: chapter.title, hint: chapter.moduleId.replaceAll('-', ' '), kind: 'Capítulo', action: () => onSelectChapter(chapter.id) }))
   ];
   useEffect(() => {
     if (!open) return;

@@ -4,6 +4,7 @@ import type { Chapter, Course, CourseModule, GlossaryEntry } from '@/content/sch
 export interface GeneratedCourseData {
   modules: CourseModule[];
   chapters: Chapter[];
+  concepts?: Course['concepts'];
   glossary: GlossaryEntry[];
 }
 
@@ -11,7 +12,10 @@ export function assembleCourse(generatedCourse: GeneratedCourseData): Course {
   const chapters = [...generatedCourse.chapters, ...requiredChapters];
   const modules = generatedCourse.modules.map(module => ({
     ...module,
-    chapterIds: chapters.filter(chapter => chapter.moduleId === module.id).map(chapter => chapter.id)
+    chapterIds: chapters
+      .filter(chapter => chapter.moduleId === module.id)
+      .sort((left, right) => left.order - right.order)
+      .map(chapter => chapter.id)
   }));
 
   return {
@@ -21,6 +25,7 @@ export function assembleCourse(generatedCourse: GeneratedCourseData): Course {
     description: 'Java e backend por fundamentos, projetos acumulativos e inglês técnico integrado.',
     modules,
     chapters,
+    concepts: generatedCourse.concepts ?? [],
     glossary: generatedCourse.glossary
   };
 }

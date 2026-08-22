@@ -56,6 +56,8 @@ function CodeExample({ block }: { block: CodeBlock }) {
         <pre className="code-block"><code {...(block.highlightedHtml ? { dangerouslySetInnerHTML: { __html: block.highlightedHtml } } : { children: block.source })} /></pre>
       </div>
       {block.expectedOutput ? <p className="mt-2 font-mono text-sm text-emerald-800">Saída esperada: {block.expectedOutput}</p> : null}
+      {block.explanation?.length ? <section className="code-explanation"><h3>Como o código funciona</h3><ol>{block.explanation.map((step, index) => <li key={`${block.id}-explanation-${index}`}>{step}</li>)}</ol></section> : null}
+      {block.commonMistakes?.length ? <aside className="code-mistakes"><strong>Erros comuns</strong><ul>{block.commonMistakes.map((mistake, index) => <li key={`${block.id}-mistake-${index}`}>{mistake}</li>)}</ul></aside> : null}
     </figure>
   );
 }
@@ -143,6 +145,16 @@ export function ContentBlockView({ block, selectedQuizOption, checklistState, on
       );
     case 'concept':
       return <section className="concept-block"><h2>{block.title}</h2><p>{block.body}</p></section>;
+    case 'mental-model':
+      return <section className="learning-card semantic-mental-model"><p className="eyebrow">Modelo mental</p><h2>{block.title}</h2><p>{block.body}</p>{block.flow?.length ? <><h3>Fluxo</h3><ol className="semantic-flow">{block.flow.map((step, index) => <li key={`${block.id}-flow-${index}`}>{step}</li>)}</ol></> : null}{block.ownership?.length ? <><h3>Responsabilidades e ownership</h3><ul>{block.ownership.map((item, index) => <li key={`${block.id}-owner-${index}`}>{item}</li>)}</ul></> : null}{block.lifecycle?.length ? <><h3>Ciclo de vida</h3><ol>{block.lifecycle.map((item, index) => <li key={`${block.id}-lifecycle-${index}`}>{item}</li>)}</ol></> : null}</section>;
+    case 'comparison':
+      return <section className="learning-card semantic-comparison"><p className="eyebrow">Comparação e decisão</p><h2>{block.title}</h2><div className="responsive-table"><table><thead><tr><th scope="col">Critério</th>{block.alternatives.map(alternative => <th scope="col" key={alternative.name}>{alternative.name}</th>)}</tr></thead><tbody>{block.criteria.map((criterion, index) => <tr key={criterion}><th scope="row">{criterion}</th>{block.alternatives.map(alternative => <td key={alternative.name}>{alternative.values[index] ?? '—'}</td>)}</tr>)}</tbody></table></div><div className="comparison-decisions">{block.alternatives.map(alternative => <article key={alternative.name}><h3>{alternative.name}</h3><p><strong>Use quando:</strong> {alternative.useWhen}</p><p><strong>Evite quando:</strong> {alternative.avoidWhen}</p></article>)}</div></section>;
+    case 'error-case':
+      return <section className="learning-card semantic-error-case"><p className="eyebrow">Falha real e diagnóstico</p><h2>{block.title}</h2><p>{block.scenario}</p><dl><div><dt>Sintoma</dt><dd>{block.symptom}</dd></div><div><dt>Causa</dt><dd>{block.cause}</dd></div><div><dt>Correção</dt><dd>{block.correction}</dd></div>{block.prevention ? <div><dt>Prevenção</dt><dd>{block.prevention}</dd></div> : null}</dl><h3>Como diagnosticar</h3><ol>{block.diagnosis.map((step, index) => <li key={`${block.id}-diagnosis-${index}`}>{step}</li>)}</ol></section>;
+    case 'diagram':
+      return <figure className="learning-card semantic-diagram" aria-labelledby={`${block.id}-title`}><figcaption><span className="eyebrow">Fluxo textual acessível</span><h2 id={`${block.id}-title`}>{block.title}</h2><p>{block.description}</p></figcaption><ol className="semantic-flow">{block.steps.map((step, index) => <li key={`${block.id}-step-${index}`}>{step}</li>)}</ol></figure>;
+    case 'table':
+      return <section className="learning-card semantic-table"><h2>{block.title}</h2><div className="responsive-table"><table><caption>{block.caption ?? block.title}</caption><thead><tr>{block.headers.map(header => <th scope="col" key={header}>{header}</th>)}</tr></thead><tbody>{block.rows.map((row, rowIndex) => <tr key={`${block.id}-${rowIndex}`}>{row.map((cell, cellIndex) => cellIndex === 0 ? <th scope="row" key={`${cell}-${cellIndex}`}>{cell}</th> : <td key={`${cell}-${cellIndex}`}>{cell}</td>)}</tr>)}</tbody></table></div></section>;
     case 'code':
       return <CodeExample block={block} />;
     case 'prediction':
@@ -181,7 +193,7 @@ export function ContentBlockView({ block, selectedQuizOption, checklistState, on
           </div>
           {selected ? (
             <p className={`mt-4 font-bold ${selected.correct ? 'text-emerald-800' : 'text-red-800'}`} role="status">
-              {selected.correct ? 'Correto. Explique também por que as alternativas restantes falham.' : 'Ainda não. Releia o contrato e compare as consequências de cada alternativa.'}
+              {selected.explanation ?? (selected.correct ? 'Correto. Explique também por que as alternativas restantes falham.' : 'Ainda não. Releia o contrato e compare as consequências de cada alternativa.')}
             </p>
           ) : null}
         </section>
@@ -215,6 +227,7 @@ export function ContentBlockView({ block, selectedQuizOption, checklistState, on
           <p>{block.brief}</p>
           <h3>Requisitos</h3><ul>{block.requirements.map(requirement => <li key={requirement}>{requirement}</li>)}</ul>
           <h3>Critérios de aceite</h3><ul>{block.acceptanceCriteria.map(criterion => <li key={criterion}>{criterion}</li>)}</ul>
+          {block.knowledgeMatrix?.length ? <><h3>Matriz de conhecimentos</h3><div className="responsive-table"><table><thead><tr><th scope="col">Requisito</th><th scope="col">Conceitos</th><th scope="col">Capítulos anteriores</th><th scope="col">Evidência</th></tr></thead><tbody>{block.knowledgeMatrix.map(entry => <tr key={entry.requirement}><th scope="row">{entry.requirement}</th><td>{entry.conceptIds.join(', ')}</td><td>{entry.chapterIds.join(', ')}</td><td>{entry.expectedEvidence}</td></tr>)}</tbody></table></div></> : null}
           {block.englishSpecification ? <section className="project-english-spec" lang="en" aria-label="Professional project specification in English">
             <p className="eyebrow">Technical English · project contract</p>
             <h3>{block.englishSpecification.title}</h3>

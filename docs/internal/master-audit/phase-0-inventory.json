@@ -1,0 +1,6084 @@
+{
+  "summary": {
+    "auditVersion": 1,
+    "baselineDate": "2026-08-21",
+    "chapters": 151,
+    "legacyChapters": 128,
+    "structuredChapters": 23,
+    "modules": 20,
+    "projects": 23,
+    "exercises": 160,
+    "quizzes": 268,
+    "uniqueResourceUrls": 260,
+    "concepts": 384,
+    "chaptersTriagedAsFailed": 0,
+    "chaptersApproved": 151,
+    "missingChapterPrerequisites": 0,
+    "futureChapterPrerequisites": 0,
+    "flagCounts": {}
+  },
+  "sourceOfTruth": {
+    "legacyChapterBody": "platform/public/content/chapters/<id>.html",
+    "legacyCatalog": "platform/public/content/catalog.json",
+    "structuredChapters": "platform/src/content/required-chapters.ts",
+    "authoredPedagogyOverrides": "platform/content/pedagogy-overrides.json",
+    "moduleGraph": "docs/internal/pedagogy-plan.js",
+    "glossary": "platform/public/content/glossary.json",
+    "schema": "platform/src/content/schema.ts",
+    "generatedArtifacts": [
+      "platform/src/content/generated-course.json",
+      "platform/public/course-content.json"
+    ],
+    "generator": "scripts/generate-course-content.mjs",
+    "runtimeAssembly": "platform/src/content/course.ts"
+  },
+  "chapters": [
+    {
+      "chapterId": "intro",
+      "title": "Introdução & ambiente",
+      "moduleId": "orientation",
+      "effectiveOrder": 0,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/intro.html",
+      "prerequisiteChapterIds": [],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "jdk-jre-e-jvm-o-que-cada-um-faz",
+        "do-codigo-fonte-ao-programa-rodando",
+        "verifique-o-ambiente-antes-de-programar"
+      ],
+      "wordCount": 868,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 2,
+        "exercise": 1,
+        "diagram": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "primeiro-programa",
+      "title": "Primeiro programa: escrever, compilar e executar",
+      "moduleId": "orientation",
+      "effectiveOrder": 1,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/primeiro-programa.html",
+      "prerequisiteChapterIds": [
+        "intro"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-menor-programa-tradicional",
+        "terminal-sem-magica",
+        "leitura-de-uma-mensagem-do-compilador"
+      ],
+      "wordCount": 499,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "variaveis-tipos",
+      "title": "Variáveis, tipos, memória e conversões",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 2,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/variaveis-tipos.html",
+      "prerequisiteChapterIds": [
+        "primeiro-programa"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "primitivos",
+        "valor-primitivo-versus-referencia",
+        "conversao-e-perda"
+      ],
+      "wordCount": 453,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "operadores-expressoes",
+      "title": "Operadores, expressões e precedência",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 3,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/operadores-expressoes.html",
+      "prerequisiteChapterIds": [
+        "variaveis-tipos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "curto-circuito",
+        "nao-e-igualdade-de-conteudo-para-objetos"
+      ],
+      "wordCount": 396,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "controle-fluxo",
+      "title": "Decisões: if, else e switch",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 4,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/controle-fluxo.html",
+      "prerequisiteChapterIds": [
+        "operadores-expressoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "switch-como-expressao"
+      ],
+      "wordCount": 336,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 5,
+        "code": 2,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "lacos-repeticao",
+      "title": "Repetição: while, for e controle de laços",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 5,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/lacos-repeticao.html",
+      "prerequisiteChapterIds": [
+        "controle-fluxo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "erros-de-fronteira"
+      ],
+      "wordCount": 385,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 5,
+        "code": 1,
+        "exercise": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "arrays-matrizes",
+      "title": "Arrays, matrizes e raciocínio por índice",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 6,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/arrays-matrizes.html",
+      "prerequisiteChapterIds": [
+        "lacos-repeticao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "copia-rasa-e-mutabilidade",
+        "matrizes-sao-arrays-de-arrays"
+      ],
+      "wordCount": 397,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "strings-wrapper",
+      "title": "String, imutabilidade e classes wrapper",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 7,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/strings-wrapper.html",
+      "prerequisiteChapterIds": [
+        "arrays-matrizes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "concatenacao-repetida",
+        "wrappers-e-autoboxing"
+      ],
+      "wordCount": 343,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "metodos-escopo",
+      "title": "Métodos, parâmetros, retorno e escopo",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 8,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/metodos-escopo.html",
+      "prerequisiteChapterIds": [
+        "strings-wrapper"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "java-passa-tudo-por-valor",
+        "escopo-e-tempo-de-vida",
+        "sobrecarga"
+      ],
+      "wordCount": 535,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 1,
+        "exercise": 1,
+        "concept": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "entrada-console",
+      "title": "Entrada pelo console, parsing e validação",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 9,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/entrada-console.html",
+      "prerequisiteChapterIds": [
+        "metodos-escopo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "antes-do-codigo-o-que-e-um-programa-de-console",
+        "camada-1-seu-primeiro-uso-de-scanner",
+        "camada-2-linha-token-e-buffer",
+        "camada-3-ler-normalizar-converter-e-validar",
+        "camada-4-quando-a-entrada-termina",
+        "aprofundamento-dinheiro-e-formato-regional",
+        "depois-do-scanner-arquivos-sockets-e-protocolos",
+        "uma-previa-nao-um-pre-requisito"
+      ],
+      "wordCount": 1634,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 25,
+        "code": 5,
+        "exercise": 1,
+        "diagram": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "logica-programacao",
+      "title": "Lógica de Programação & Pensamento Algorítmico",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 10,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/logica-programacao.html",
+      "prerequisiteChapterIds": [
+        "metodos-escopo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-habito-central-decompor-antes-de-codificar",
+        "estruturas-de-controle-como-blocos-de-raciocinio",
+        "rastreamento-manual-dry-run-depurando-sem-executar"
+      ],
+      "wordCount": 986,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "code": 2,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-caixa-eletronico",
+      "title": "Mini-projeto: caixa eletrônico no terminal",
+      "moduleId": "programming-fundamentals",
+      "effectiveOrder": 11,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-caixa-eletronico.html",
+      "prerequisiteChapterIds": [
+        "entrada-console",
+        "logica-programacao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "requisitos",
+        "casos-de-teste-manuais",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 544,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "checklist": 1,
+        "quiz": 1,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 1,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "classes",
+      "title": "Classes e objetos",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 12,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/classes.html",
+      "prerequisiteChapterIds": [
+        "mini-caixa-eletronico"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "modelo-mental-objeto-referencia-e-memoria"
+      ],
+      "wordCount": 878,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 2,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "atributos",
+      "title": "Atributos e métodos",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 13,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/atributos.html",
+      "prerequisiteChapterIds": [
+        "classes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "passagem-de-parametros-sempre-por-valor",
+        "sobrecarga-de-metodos-overload-e-como-o-compilador-escolhe"
+      ],
+      "wordCount": 959,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 3,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "construtores",
+      "title": "Construtores",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 14,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/construtores.html",
+      "prerequisiteChapterIds": [
+        "atributos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "sobrecarga-de-construtores-e-encadeamento-com-this",
+        "construtor-padrao-quando-ele-existe"
+      ],
+      "wordCount": 798,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 2,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "encapsulamento",
+      "title": "Encapsulamento",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 15,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/encapsulamento.html",
+      "prerequisiteChapterIds": [
+        "construtores"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "os-quatro-niveis-de-acesso-em-java",
+        "encapsulamento-nao-e-so-botar-getters-e-setters",
+        "imutabilidade-o-encapsulamento-levado-ao-extremo"
+      ],
+      "wordCount": 1018,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 3,
+        "exercise": 2,
+        "quiz": 2,
+        "mental-model": 1
+      },
+      "exercises": 2,
+      "quizzes": 2,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "static",
+      "title": "static, final e this",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 16,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/static.html",
+      "prerequisiteChapterIds": [
+        "encapsulamento"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "static-pertence-a-classe-nao-ao-objeto",
+        "final-nao-pode-mudar-depois-de-definido",
+        "this-referencia-ao-proprio-objeto"
+      ],
+      "wordCount": 798,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "heranca",
+      "title": "Herança",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 17,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/heranca.html",
+      "prerequisiteChapterIds": [
+        "static"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "toda-classe-herda-de-object-mesmo-sem-dizer",
+        "heranca-multinivel-e-a-cadeia-de-super"
+      ],
+      "wordCount": 879,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "polimorfismo",
+      "title": "Polimorfismo",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 18,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/polimorfismo.html",
+      "prerequisiteChapterIds": [
+        "heranca"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "binding-estatico-e-dinamico-mecanismos-diferentes",
+        "downcasting-e-instanceof"
+      ],
+      "wordCount": 962,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 2,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "abstracao",
+      "title": "Classes abstratas",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 19,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/abstracao.html",
+      "prerequisiteChapterIds": [
+        "polimorfismo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "uma-classe-abstrata-pode-ter-construtor"
+      ],
+      "wordCount": 807,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "code": 2,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "interfaces",
+      "title": "Interfaces",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 20,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/interfaces.html",
+      "prerequisiteChapterIds": [
+        "abstracao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "metodos-default-static-e-private-java-8",
+        "interface-vs-classe-abstrata-quando-usar-cada-uma"
+      ],
+      "wordCount": 800,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-biblioteca-cli",
+      "title": "Mini-projeto: biblioteca orientada a objetos",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 23,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-biblioteca-cli.html",
+      "prerequisiteChapterIds": [
+        "associacoes-cardinalidade"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "antes-de-programar-escreva-o-contrato",
+        "entregaveis",
+        "sequencia-segura-de-implementacao",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 670,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "checklist": 2,
+        "quiz": 1,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 1,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "pacotes",
+      "title": "Pacotes & organização de projeto",
+      "moduleId": "java-core",
+      "effectiveOrder": 24,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/pacotes.html",
+      "prerequisiteChapterIds": [
+        "mini-biblioteca-cli"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "nome-qualificado-e-import",
+        "compilacao-de-dois-pacotes-sem-ferramenta-de-build",
+        "visibilidade-dentro-do-pacote",
+        "convencao-de-nomes"
+      ],
+      "wordCount": 750,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "excecoes",
+      "title": "Exceções",
+      "moduleId": "java-core",
+      "effectiveOrder": 25,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/excecoes.html",
+      "prerequisiteChapterIds": [
+        "pacotes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "a-hierarquia-completa",
+        "try-catch-finally-try-with-resources",
+        "encadeamento-de-excecoes-exception-chaining"
+      ],
+      "wordCount": 1093,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 4,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "colecoes",
+      "title": "Coleções & ArrayList",
+      "moduleId": "java-core",
+      "effectiveOrder": 26,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/colecoes.html",
+      "prerequisiteChapterIds": [
+        "excecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "list-e-arraylist",
+        "igualdade-e-hashing-antes-de-set-e-map",
+        "set-sem-duplicatas",
+        "map-pares-chave-valor",
+        "comparable-vs-comparator-dois-jeitos-de-ordenar"
+      ],
+      "wordCount": 1322,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 5,
+        "exercise": 3,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 3,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "generics",
+      "title": "Generics",
+      "moduleId": "java-core",
+      "effectiveOrder": 27,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/generics.html",
+      "prerequisiteChapterIds": [
+        "colecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "por-que-generics-existem",
+        "classe-generica-propria",
+        "metodo-generico",
+        "bounded-types-limitando-quais-tipos-sao-aceitos",
+        "wildcards-extends-e-super"
+      ],
+      "wordCount": 927,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 5,
+        "exercise": 2,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "javamoderno",
+      "title": "Java moderno: Optional, var, Date/Time",
+      "moduleId": "java-core",
+      "effectiveOrder": 29,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/javamoderno.html",
+      "prerequisiteChapterIds": [
+        "streams"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "optional-ausencia-explicita-no-retorno",
+        "var-inferencia-de-tipo-local",
+        "java-time-datas-modernas",
+        "records-e-text-blocks"
+      ],
+      "wordCount": 739,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 4,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "java-21-profundo",
+      "title": "Java 21: records, sealed types, pattern matching e virtual threads",
+      "moduleId": "java-core",
+      "effectiveOrder": 32,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/java-21-profundo.html",
+      "prerequisiteChapterIds": [
+        "jvm-profundo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "primeiro-contato-com-os-quatro-recursos",
+        "records-como-portadores-de-dados-imutaveis",
+        "hierarquias-seladas-e-pattern-matching",
+        "virtual-threads-primeiro-o-caso-minimo",
+        "muitas-tarefas-independentes-sem-pool-de-virtual-threads"
+      ],
+      "wordCount": 947,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "code": 4,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "streams",
+      "title": "Lambdas & Streams",
+      "moduleId": "java-core",
+      "effectiveOrder": 28,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/streams.html",
+      "prerequisiteChapterIds": [
+        "generics"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "interfaces-funcionais-e-lambdas",
+        "as-interfaces-funcionais-prontas-do-java-util-function",
+        "method-references-lambdas-ainda-mais-curtas",
+        "streams-pipeline-de-processamento-de-dados",
+        "map-flatmap-e-cardinalidade",
+        "reduce-a-operacao-mais-generica"
+      ],
+      "wordCount": 926,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 15,
+        "code": 4,
+        "exercise": 2,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "java-io",
+      "title": "Arquivos, Paths e Java I/O",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 33,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/java-io.html",
+      "prerequisiteChapterIds": [
+        "java-21-profundo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "path-nao-e-so-uma-string",
+        "bytes-caracteres-e-codificacao",
+        "texto-pequeno-versus-fluxo-de-dados",
+        "falhas-de-i-o-precisam-de-politica",
+        "escrita-segura-de-saida",
+        "pratica"
+      ],
+      "wordCount": 811,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 18,
+        "code": 5,
+        "exercise": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-analisador-vendas",
+      "title": "Mini-projeto: analisador de vendas com Streams",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 34,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-analisador-vendas.html",
+      "prerequisiteChapterIds": [
+        "java-io"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "formato-de-entrada",
+        "sequencia-de-implementacao",
+        "consultas-obrigatorias",
+        "saida-esperada",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 718,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 1,
+        "checklist": 1,
+        "quiz": 2,
+        "table": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "big-o",
+      "title": "Complexidade de Algoritmos (Big O)",
+      "moduleId": "algorithms-data-structures",
+      "effectiveOrder": 39,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/big-o.html",
+      "prerequisiteChapterIds": [
+        "zenith-cli-inicial"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "as-complexidades-mais-comuns-da-melhor-para-a-pior",
+        "complexidade-de-espaco-nao-so-de-tempo"
+      ],
+      "wordCount": 868,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 1,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "recursao",
+      "title": "Recursão",
+      "moduleId": "algorithms-data-structures",
+      "effectiveOrder": 40,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/recursao.html",
+      "prerequisiteChapterIds": [
+        "big-o"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "os-dois-ingredientes-obrigatorios-de-toda-recursao",
+        "visualizando-a-pilha-de-chamadas",
+        "recursao-vs-iteracao-quando-cada-uma-vence"
+      ],
+      "wordCount": 1164,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 2,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "ordenacao-busca",
+      "title": "Algoritmos de Ordenação & Busca",
+      "moduleId": "algorithms-data-structures",
+      "effectiveOrder": 41,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/ordenacao-busca.html",
+      "prerequisiteChapterIds": [
+        "recursao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "busca-binaria-a-aplicacao-direta-da-arvore-do-capitulo-anterior",
+        "merge-sort-dividir-para-conquistar-o-n-log-n"
+      ],
+      "wordCount": 841,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "algoritmos-praticos",
+      "title": "Estruturas e algoritmos essenciais na prática",
+      "moduleId": "algorithms-data-structures",
+      "effectiveOrder": 42,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/algoritmos-praticos.html",
+      "prerequisiteChapterIds": [
+        "ordenacao-busca"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "como-ler-custos-e-estruturas",
+        "busca-em-grafos",
+        "padroes-de-resolucao",
+        "benchmark-sem-autoengano"
+      ],
+      "wordCount": 737,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 1,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "git",
+      "title": "Git & fluxo de trabalho",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 44,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/git.html",
+      "prerequisiteChapterIds": [
+        "zenith-cli-inicial"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-ciclo-basico-working-directory-staging-commit",
+        "branches-trabalhando-em-paralelo-sem-quebrar-o-principal",
+        "pull-request-a-unidade-social-do-trabalho-em-equipe",
+        "merge-vs-rebase"
+      ],
+      "wordCount": 864,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "build",
+      "title": "Maven & Gradle",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 45,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/build.html",
+      "prerequisiteChapterIds": [
+        "git"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "maven-configuracao-declarativa-em-xml",
+        "gradle-configuracao-em-codigo-groovy-kotlin-dsl",
+        "escopos-de-dependencia-maven-e-por-que-importam"
+      ],
+      "wordCount": 629,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 5,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "anotacoes",
+      "title": "Anotações & Reflection",
+      "moduleId": "application-design",
+      "effectiveOrder": 64,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/anotacoes.html",
+      "prerequisiteChapterIds": [
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "criando-sua-propria-anotacao",
+        "reflection-inspecionando-classes-em-tempo-de-execucao",
+        "aprofundando-em-reflection-o-mapa-completo-da-api",
+        "anotacoes-padrao-mais-usadas-fora-do-spring"
+      ],
+      "wordCount": 1581,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 18,
+        "code": 6,
+        "exercise": 2,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "json",
+      "title": "JSON & serialização",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 35,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/json.html",
+      "prerequisiteChapterIds": [
+        "mini-analisador-vendas"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "objeto-java-dto-e-json-nao-sao-a-mesma-coisa",
+        "de-json-para-dto-java-desserializacao",
+        "jackson-com-classes-javabeans",
+        "controlando-o-contrato-com-anotacoes",
+        "records-e-json"
+      ],
+      "wordCount": 786,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 5,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "logging",
+      "title": "Logging & configuração externa",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 47,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/logging.html",
+      "prerequisiteChapterIds": [
+        "debugging"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "por-que-nao-usar-system-out-println-em-producao",
+        "niveis-de-log-do-mais-ao-menos-verboso",
+        "configuracao-externa-por-que-nada-de-senha-hardcoded"
+      ],
+      "wordCount": 708,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 4,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-importador-pedidos",
+      "title": "Mini-projeto: importador de pedidos",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 37,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-importador-pedidos.html",
+      "prerequisiteChapterIds": [
+        "process-api-cli",
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "contrato-de-entrada",
+        "arquitetura-minima",
+        "requisitos",
+        "formato-do-relatorio-json",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 698,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "checklist": 1,
+        "code": 1,
+        "quiz": 2,
+        "diagram": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "solid",
+      "title": "SOLID & boas práticas",
+      "moduleId": "application-design",
+      "effectiveOrder": 65,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/solid.html",
+      "prerequisiteChapterIds": [
+        "interfaces",
+        "abstracao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "composicao-sobre-heranca"
+      ],
+      "wordCount": 1081,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 16,
+        "code": 6,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "di",
+      "title": "Injeção de dependência (na mão)",
+      "moduleId": "application-design",
+      "effectiveOrder": 66,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/di.html",
+      "prerequisiteChapterIds": [
+        "javamoderno",
+        "solid",
+        "anotacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-problema-acoplamento-a-implementacoes-concretas",
+        "a-solucao-inverter-quem-cria-a-dependencia",
+        "um-container-de-di-simples-feito-a-mao",
+        "os-tres-tipos-de-injecao"
+      ],
+      "wordCount": 963,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "diagram": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "padroes",
+      "title": "Padrões de projeto essenciais",
+      "moduleId": "application-design",
+      "effectiveOrder": 67,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/padroes.html",
+      "prerequisiteChapterIds": [
+        "di"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "padroes-de-projeto-essenciais"
+      ],
+      "wordCount": 772,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 5,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "clean-code",
+      "title": "Clean Code & Refatoração",
+      "moduleId": "application-design",
+      "effectiveOrder": 68,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/clean-code.html",
+      "prerequisiteChapterIds": [
+        "solid",
+        "padroes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "nomes-que-contam-a-historia-sozinhos",
+        "funcoes-pequenas-fazendo-uma-coisa-so",
+        "refatoracao-mudando-a-estrutura-sem-mudar-o-comportamento"
+      ],
+      "wordCount": 963,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 1,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "projetospring",
+      "title": "Projeto final — mini-framework pré-Spring",
+      "moduleId": "application-design",
+      "effectiveOrder": 69,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/projetospring.html",
+      "prerequisiteChapterIds": [
+        "anotacoes",
+        "di",
+        "padroes",
+        "clean-code"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "projeto-final-mini-framework-pre-spring"
+      ],
+      "wordCount": 789,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 2,
+        "checklist": 1,
+        "exercise": 1,
+        "project": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "http",
+      "title": "HTTP & APIs REST",
+      "moduleId": "http-api-clients",
+      "effectiveOrder": 52,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/http.html",
+      "prerequisiteChapterIds": [
+        "testes",
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "metodos-http-e-o-que-cada-um-significa",
+        "codigos-de-status-o-vocabulario-de-uma-resposta-http",
+        "anatomia-de-uma-requisicao-e-resposta",
+        "rest-recursos-nao-acoes",
+        "cliente-http-em-java-puro"
+      ],
+      "wordCount": 879,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 3,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "sql",
+      "title": "SQL — fundamentos de banco relacional",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 57,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/sql.html",
+      "prerequisiteChapterIds": [
+        "colecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "criando-tabelas-ddl-data-definition-language",
+        "crud-em-sql-insert-select-update-delete",
+        "join-combinando-tabelas-relacionadas",
+        "agregacoes-group-by-count-sum-avg",
+        "transacoes-tudo-ou-nada",
+        "indices-por-que-consultas-ficam-rapidas-ou-lentas"
+      ],
+      "wordCount": 1580,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 18,
+        "code": 6,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "postgres",
+      "title": "PostgreSQL na prática",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 58,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/postgres.html",
+      "prerequisiteChapterIds": [
+        "sql"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "tipos-de-dados-que-voce-vai-usar-o-tempo-todo",
+        "explain-enxergando-o-que-o-banco-realmente-faz",
+        "conectando-do-java-via-jdbc-revisao-aplicada"
+      ],
+      "wordCount": 998,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "postgres-concorrencia",
+      "title": "PostgreSQL avançado: planos, MVCC, isolamento e locks",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 59,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/postgres-concorrencia.html",
+      "prerequisiteChapterIds": [
+        "postgres",
+        "sql"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "vocabulario-antes-da-disputa",
+        "modelagem-e-constraints-primeiro",
+        "mvcc-e-niveis-de-isolamento",
+        "planos-de-execucao"
+      ],
+      "wordCount": 787,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 3,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "migrations",
+      "title": "Migrations — versionando o schema",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 60,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/migrations.html",
+      "prerequisiteChapterIds": [
+        "postgres",
+        "git"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "flyway-convencao-de-nomes-que-vira-ordem-de-execucao",
+        "flyway-com-spring-boot-quase-zero-configuracao"
+      ],
+      "wordCount": 768,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 4,
+        "exercise": 1,
+        "diagram": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "jdbc",
+      "title": "JDBC & banco de dados",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 61,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/jdbc.html",
+      "prerequisiteChapterIds": [
+        "sql",
+        "excecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "conexao-statement-e-resultset",
+        "insert-update-delete",
+        "connection-pool-por-que-ninguem-abre-conexao-crua-em-producao",
+        "mapeando-resultset-para-objetos-o-embriao-do-orm"
+      ],
+      "wordCount": 980,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "code": 4,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-financas-jdbc",
+      "title": "Mini-projeto: finanças pessoais com PostgreSQL",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 62,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-financas-jdbc.html",
+      "prerequisiteChapterIds": [
+        "jdbc",
+        "postgres",
+        "migrations"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "requisitos",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 565,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-core",
+      "title": "Spring Core — IoC/DI oficial",
+      "moduleId": "spring-api",
+      "effectiveOrder": 73,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-core.html",
+      "prerequisiteChapterIds": [
+        "projetospring",
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "de-componente-injetar-para-as-anotacoes-reais-do-spring",
+        "as-especializacoes-de-component-e-por-que-existem",
+        "escopos-de-bean",
+        "configuration-e-bean-quando-voce-nao-controla-a-classe"
+      ],
+      "wordCount": 868,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-boot-fundamentos",
+      "title": "Spring Boot por dentro: bootstrap, auto-configuração e configuração tipada",
+      "moduleId": "spring-api",
+      "effectiveOrder": 74,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-boot-fundamentos.html",
+      "prerequisiteChapterIds": [
+        "spring-core",
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-que-acontece-quando-a-aplicacao-inicia",
+        "configuracao-tipada",
+        "starters-e-versoes"
+      ],
+      "wordCount": 612,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "devtools",
+      "title": "Spring Boot DevTools",
+      "moduleId": "spring-api",
+      "effectiveOrder": 75,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/devtools.html",
+      "prerequisiteChapterIds": [
+        "spring-boot-fundamentos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "spring-boot-devtools"
+      ],
+      "wordCount": 491,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "lombok",
+      "title": "Lombok — eliminando boilerplate",
+      "moduleId": "spring-api",
+      "effectiveOrder": 76,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/lombok.html",
+      "prerequisiteChapterIds": [
+        "encapsulamento",
+        "anotacoes",
+        "spring-core"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "anotacoes-mais-usadas"
+      ],
+      "wordCount": 657,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-mvc",
+      "title": "Spring Web / MVC — controllers REST",
+      "moduleId": "spring-api",
+      "effectiveOrder": 77,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-mvc.html",
+      "prerequisiteChapterIds": [
+        "spring-boot-fundamentos",
+        "http-wire-contract",
+        "java-httpclient-json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "spring-web-mvc-controllers-rest"
+      ],
+      "wordCount": 604,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 5,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-jpa",
+      "title": "Spring Data JPA — repositories & relacionamentos",
+      "moduleId": "spring-api",
+      "effectiveOrder": 78,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-jpa.html",
+      "prerequisiteChapterIds": [
+        "jdbc",
+        "spring-mvc",
+        "lombok"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "entity-mapeando-classe-java-para-tabela",
+        "jparepository-a-interface-que-se-implementa-sozinha",
+        "relacionamentos-onetomany-manytoone-manytomany"
+      ],
+      "wordCount": 758,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "jpa-transacoes",
+      "title": "JPA profundo e transações Spring",
+      "moduleId": "spring-api",
+      "effectiveOrder": 79,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/jpa-transacoes.html",
+      "prerequisiteChapterIds": [
+        "spring-jpa",
+        "migrations"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-mapa-minimo-entre-objetos-e-banco",
+        "flush-nao-e-commit",
+        "propagacao-isolamento-e-rollback",
+        "o-limite-do-proxy",
+        "relacionamentos-e-igualdade"
+      ],
+      "wordCount": 727,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "dto-mapping",
+      "title": "DTO Mapping — Entity ≠ DTO",
+      "moduleId": "spring-api",
+      "effectiveOrder": 80,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/dto-mapping.html",
+      "prerequisiteChapterIds": [
+        "spring-mvc",
+        "spring-jpa"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "mapeamento-manual-entenda-antes-de-automatizar",
+        "mapstruct-automatizando-o-boilerplate-obvio"
+      ],
+      "wordCount": 776,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "validacao-erros",
+      "title": "Bean Validation & tratamento global de erros",
+      "moduleId": "spring-api",
+      "effectiveOrder": 81,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/validacao-erros.html",
+      "prerequisiteChapterIds": [
+        "dto-mapping",
+        "excecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "bean-validation-seu-naonulo-oficial",
+        "controlleradvice-centralizando-o-tratamento-de-erro"
+      ],
+      "wordCount": 698,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "paginacao-swagger",
+      "title": "Paginação, filtros & documentação com Swagger",
+      "moduleId": "spring-api",
+      "effectiveOrder": 82,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/paginacao-swagger.html",
+      "prerequisiteChapterIds": [
+        "validacao-erros",
+        "spring-jpa"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "swagger-openapi-documentacao-que-se-atualiza-sozinha"
+      ],
+      "wordCount": 591,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "api-design-avancado",
+      "title": "Contratos HTTP: idempotência, concorrência e evolução de APIs",
+      "moduleId": "spring-api",
+      "effectiveOrder": 83,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/api-design-avancado.html",
+      "prerequisiteChapterIds": [
+        "paginacao-swagger",
+        "jpa-transacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "a-requisicao-como-contrato-completo",
+        "problem-details",
+        "idempotencia-e-concorrencia-otimista-http",
+        "paginacao-e-evolucao"
+      ],
+      "wordCount": 581,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "n-mais-1",
+      "title": "O problema N+1",
+      "moduleId": "spring-api",
+      "effectiveOrder": 84,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/n-mais-1.html",
+      "prerequisiteChapterIds": [
+        "spring-jpa",
+        "paginacao-swagger"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "enxergando-o-problema-com-explain-e-logs"
+      ],
+      "wordCount": 823,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "cors-rate-limit",
+      "title": "CORS & rate limiting",
+      "moduleId": "spring-api",
+      "effectiveOrder": 85,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/cors-rate-limit.html",
+      "prerequisiteChapterIds": [
+        "spring-mvc",
+        "api-design-avancado"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "cors-por-que-o-navegador-bloqueia-sua-propria-api",
+        "configurando-cors-no-spring",
+        "rate-limiting-primeira-linha-de-defesa-contra-abuso"
+      ],
+      "wordCount": 758,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-helpdesk-api",
+      "title": "Mini-projeto: API de help desk com Spring",
+      "moduleId": "spring-api",
+      "effectiveOrder": 86,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-helpdesk-api.html",
+      "prerequisiteChapterIds": [
+        "cors-rate-limit",
+        "n-mais-1",
+        "validacao-erros"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "contrato",
+        "regras-minimas",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 626,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "testes",
+      "title": "Testes unitários",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 48,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/testes.html",
+      "prerequisiteChapterIds": [
+        "logging"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "anatomia-de-um-teste-junit-5",
+        "principais-assertions",
+        "beforeeach-aftereach-e-ciclo-de-vida",
+        "testes-parametrizados-um-teste-varios-cenarios",
+        "mocks-isolando-dependencias",
+        "tdd-test-driven-development-em-3-passos"
+      ],
+      "wordCount": 1077,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 5,
+        "exercise": 2,
+        "mental-model": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mockito",
+      "title": "Mockito — Mocks & Dublês de Teste",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 49,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mockito.html",
+      "prerequisiteChapterIds": [
+        "testes",
+        "interfaces"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-vocabulario-completo-de-dubles-de-teste",
+        "mock-injectmocks-e-a-anotacao-que-dispara-tudo",
+        "when-thenreturn-programando-o-comportamento-do-mock",
+        "verify-confirmando-interacoes-nao-so-valores-de-retorno"
+      ],
+      "wordCount": 1000,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-reservas-testadas",
+      "title": "Mini-projeto: motor de reservas guiado por testes",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 50,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-reservas-testadas.html",
+      "prerequisiteChapterIds": [
+        "mockito",
+        "testes",
+        "colecoes",
+        "encapsulamento"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "matriz-minima",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 635,
+      "blockTypes": {
+        "intuition": 1,
+        "table": 1,
+        "html": 6,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "projeto",
+      "title": "Projeto final — sistema de biblioteca",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 51,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/projeto.html",
+      "prerequisiteChapterIds": [
+        "mini-biblioteca-cli",
+        "colecoes",
+        "java-io",
+        "mini-reservas-testadas"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 1041,
+      "blockTypes": {
+        "intuition": 1,
+        "table": 1,
+        "html": 3,
+        "checklist": 1,
+        "exercise": 1,
+        "project": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "autenticacao-conceitos",
+      "title": "Autenticação: sessão vs JWT vs OAuth2",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 88,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/autenticacao-conceitos.html",
+      "prerequisiteChapterIds": [
+        "http",
+        "json",
+        "anotacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "sessao-tradicional-cookie-estado-no-servidor",
+        "jwt-json-web-token-o-token-que-carrega-a-propria-informacao",
+        "oauth2-delegando-autenticacao-para-terceiros"
+      ],
+      "wordCount": 993,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 15,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-security",
+      "title": "Spring Security na prática",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 89,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-security.html",
+      "prerequisiteChapterIds": [
+        "autenticacao-conceitos",
+        "spring-mvc",
+        "anotacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "filter-chain-onde-a-magica-acontece-antes-do-seu-controller",
+        "gerando-e-validando-o-jwt",
+        "autorizacao-com-preauthorize",
+        "codificando-senhas-nunca-em-texto-puro"
+      ],
+      "wordCount": 965,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 4,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "security-oidc",
+      "title": "OAuth 2.0, OpenID Connect e Resource Server seguros",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 90,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/security-oidc.html",
+      "prerequisiteChapterIds": [
+        "spring-security",
+        "http"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "quem-e-quem-no-fluxo-de-identidade",
+        "authorization-code-com-pkce",
+        "protecoes-do-navegador-usadas-no-exemplo",
+        "quatro-mecanismos-que-nao-sao-equivalentes",
+        "cookies-e-tokens-mudam-o-risco",
+        "ameacas-que-o-capitulo-basico-nao-cobre-sozinho"
+      ],
+      "wordCount": 842,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "https",
+      "title": "HTTPS & certificados",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 91,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/https.html",
+      "prerequisiteChapterIds": [
+        "autenticacao-conceitos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "como-funciona-em-conceito",
+        "onde-https-se-conecta-com-o-resto-do-que-voce-ja-aprendeu"
+      ],
+      "wordCount": 673,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-auth-rbac",
+      "title": "Mini-projeto: autenticação e autorização por papéis",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 92,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-auth-rbac.html",
+      "prerequisiteChapterIds": [
+        "spring-security",
+        "security-oidc",
+        "https"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "cenarios-de-ataque-e-defesa",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 587,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "docker-conceitos",
+      "title": "Docker — conceitos & instalação",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 96,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/docker-conceitos.html",
+      "prerequisiteChapterIds": [
+        "git",
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "imagem-vs-container-a-distincao-fundamental",
+        "volumes-persistindo-dados-de-verdade"
+      ],
+      "wordCount": 750,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "dockerfile",
+      "title": "Dockerfile & multi-stage build",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 97,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/dockerfile.html",
+      "prerequisiteChapterIds": [
+        "docker-conceitos",
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "multi-stage-build-a-solucao-real"
+      ],
+      "wordCount": 680,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "compose",
+      "title": "Docker Compose — app + banco juntos",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 98,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/compose.html",
+      "prerequisiteChapterIds": [
+        "dockerfile"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "docker-compose-app-banco-juntos"
+      ],
+      "wordCount": 573,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 4,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "testcontainers",
+      "title": "Testcontainers & banco de teste isolado",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 99,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/testcontainers.html",
+      "prerequisiteChapterIds": [
+        "testes",
+        "docker-conceitos",
+        "spring-jpa"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "como-funciona-um-banco-real-descartavel-por-execucao",
+        "por-que-nunca-testar-contra-o-banco-de-dev-ou-producao"
+      ],
+      "wordCount": 721,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "estrategia-testes",
+      "title": "Estratégia de testes: slices, contratos, concorrência e qualidade",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 100,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/estrategia-testes.html",
+      "prerequisiteChapterIds": [
+        "testcontainers",
+        "mockito",
+        "api-contract-evolution"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "da-unidade-a-jornada-completa",
+        "assincrono-contratos-e-mutacao"
+      ],
+      "wordCount": 512,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "nosql",
+      "title": "NoSQL — conceitos & quando usar",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 101,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/nosql.html",
+      "prerequisiteChapterIds": [
+        "sql",
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "as-quatro-familias-principais",
+        "sql-vs-nosql-a-pergunta-certa-nao-e-qual-e-melhor"
+      ],
+      "wordCount": 735,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mongodb",
+      "title": "MongoDB na prática",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 102,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mongodb.html",
+      "prerequisiteChapterIds": [
+        "nosql",
+        "docker-conceitos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "documentos-a-unidade-basica",
+        "embedding-vs-referencing-a-decisao-central-de-modelagem",
+        "consultas-mais-elaboradas"
+      ],
+      "wordCount": 827,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "redis",
+      "title": "Redis — cache & estruturas em memória",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 103,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/redis.html",
+      "prerequisiteChapterIds": [
+        "nosql",
+        "colecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "as-estruturas-de-dados-do-redis-nao-e-so-chave-valor-simples",
+        "cache-aside-o-padrao-mais-comum-na-pratica"
+      ],
+      "wordCount": 890,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "nosql-operacional",
+      "title": "MongoDB e Redis operacionais: índices, consistência, persistência e escala",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 104,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/nosql-operacional.html",
+      "prerequisiteChapterIds": [
+        "mongodb",
+        "redis"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "do-modelo-a-operacao",
+        "mongodb-modelo-orientado-ao-acesso",
+        "redis-cache-nao-e-banco-descartavel-por-definicao",
+        "locks-e-coordenacao"
+      ],
+      "wordCount": 725,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "hospedagem-db",
+      "title": "Onde hospedar o banco: dev, teste & produção",
+      "moduleId": "containers-integration-data",
+      "effectiveOrder": 105,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/hospedagem-db.html",
+      "prerequisiteChapterIds": [
+        "postgres",
+        "compose",
+        "testcontainers",
+        "nosql-operacional"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "banco-gerenciado-por-que-nao-simplesmente-rodar-postgres-em-um-servidor-"
+      ],
+      "wordCount": 767,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "resilience",
+      "title": "Circuit Breaker com Resilience4j",
+      "moduleId": "resilience-observability",
+      "effectiveOrder": 124,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/resilience.html",
+      "prerequisiteChapterIds": [
+        "coupled-services-lab",
+        "webclient",
+        "anotacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "os-tres-estados-do-circuito"
+      ],
+      "wordCount": 618,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "webclient",
+      "title": "WebClient & RestTemplate — consumindo APIs externas",
+      "moduleId": "synchronous-integration",
+      "effectiveOrder": 120,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/webclient.html",
+      "prerequisiteChapterIds": [
+        "http",
+        "java-httpclient-json",
+        "unreliable-api-client",
+        "spring-mvc"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "webclient-cliente-nao-bloqueante-e-reativo",
+        "resttemplate-o-cliente-classico-ainda-comum-em-codigo-legado"
+      ],
+      "wordCount": 560,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-aop",
+      "title": "Spring AOP — formalizando o dynamic proxy",
+      "moduleId": "resilience-observability",
+      "effectiveOrder": 125,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-aop.html",
+      "prerequisiteChapterIds": [
+        "anotacoes",
+        "spring-security",
+        "resilience",
+        "jpa-transacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "os-tipos-de-advice",
+        "uma-anotacao-customizada-como-o-seu-logexecucao-do-capitulo-20-agora-fun"
+      ],
+      "wordCount": 807,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-cache",
+      "title": "Spring Cache Abstraction",
+      "moduleId": "resilience-observability",
+      "effectiveOrder": 126,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-cache.html",
+      "prerequisiteChapterIds": [
+        "redis",
+        "spring-aop",
+        "nosql-operacional"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "spring-cache-abstraction"
+      ],
+      "wordCount": 538,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 5,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "actuator",
+      "title": "Spring Boot Actuator & health checks",
+      "moduleId": "resilience-observability",
+      "effectiveOrder": 127,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/actuator.html",
+      "prerequisiteChapterIds": [
+        "spring-boot-fundamentos",
+        "compose",
+        "hardening-producao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "outros-endpoints-uteis"
+      ],
+      "wordCount": 543,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 7,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "observabilidade-pratica",
+      "title": "Observabilidade com logs, métricas, traces e SLOs",
+      "moduleId": "resilience-observability",
+      "effectiveOrder": 128,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/observabilidade-pratica.html",
+      "prerequisiteChapterIds": [
+        "actuator",
+        "logging",
+        "resilience",
+        "coupled-services-lab"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "os-tres-sinais-antes-das-ferramentas",
+        "logs-estruturados",
+        "metricas-e-cardinalidade",
+        "sli-slo-e-alertas",
+        "readiness-e-liveness"
+      ],
+      "wordCount": 575,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "secrets",
+      "title": "Variáveis de ambiente & secrets em produção",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 112,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/secrets.html",
+      "prerequisiteChapterIds": [
+        "logging",
+        "git",
+        "spring-security",
+        "unreliable-api-client"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-arquivo-env-nunca-vai-para-o-git",
+        "como-cada-provedor-gerencia-secrets-em-producao",
+        "build-time-vs-runtime-secrets-uma-distincao-que-confunde-muita-gente"
+      ],
+      "wordCount": 744,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "cicd",
+      "title": "CI/CD com GitHub Actions",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 113,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/cicd.html",
+      "prerequisiteChapterIds": [
+        "git",
+        "testcontainers",
+        "dockerfile",
+        "estrategia-testes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "um-pipeline-basico",
+        "adicionando-build-e-push-da-imagem-docker",
+        "o-ciclo-completo-da-branch-ao-deploy"
+      ],
+      "wordCount": 769,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "praticas-producao",
+      "title": "Práticas de produção: parity, backup, feature flags & versionamento",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 114,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/praticas-producao.html",
+      "prerequisiteChapterIds": [
+        "hospedagem-db",
+        "http",
+        "cicd",
+        "compose"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "praticas-de-producao-parity-backup-feature-flags-versionamento"
+      ],
+      "wordCount": 828,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 15,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "hardening-producao",
+      "title": "Hardening, entrega segura e recuperação operacional",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 115,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/hardening-producao.html",
+      "prerequisiteChapterIds": [
+        "dockerfile",
+        "cicd",
+        "praticas-producao",
+        "logging"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "da-imagem-ao-servico-recuperavel",
+        "imagem-minima-e-processo-correto",
+        "deploy-e-rollback",
+        "backup-nao-e-recuperacao"
+      ],
+      "wordCount": 588,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "deploy-backend",
+      "title": "Deploy do back-end em produção",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 116,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/deploy-backend.html",
+      "prerequisiteChapterIds": [
+        "dockerfile",
+        "secrets",
+        "hospedagem-db",
+        "cicd",
+        "hardening-producao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "deploy-via-railway-paas-o-caminho-mais-direto",
+        "deploy-via-vps-com-docker-compose",
+        "configurando-o-dominio-e-https"
+      ],
+      "wordCount": 805,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-profiles",
+      "title": "Spring Profiles avançado",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 117,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-profiles.html",
+      "prerequisiteChapterIds": [
+        "logging",
+        "praticas-producao",
+        "spring-boot-fundamentos",
+        "secrets"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "beans-condicionais-por-profile"
+      ],
+      "wordCount": 568,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-deploy-observavel",
+      "title": "Mini-projeto: deploy reproduzível e observável",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 118,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-deploy-observavel.html",
+      "prerequisiteChapterIds": [
+        "deploy-backend",
+        "spring-profiles",
+        "hardening-producao"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "definition-of-done",
+        "experimento-de-falha",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 591,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "threads",
+      "title": "Threads & concorrência",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 106,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/threads.html",
+      "prerequisiteChapterIds": [
+        "streams"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "criando-threads-duas-formas",
+        "o-problema-race-condition",
+        "synchronized-exclusao-mutua",
+        "a-alternativa-moderna-java-util-concurrent"
+      ],
+      "wordCount": 1028,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 4,
+        "exercise": 2,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mensageria",
+      "title": "Mensageria — conceitos",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 129,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mensageria.html",
+      "prerequisiteChapterIds": [
+        "coupled-services-lab",
+        "http",
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "por-que-nao-simplesmente-chamar-a-outra-api-direto",
+        "fila-queue-vs-publish-subscribe-pub-sub",
+        "garantias-de-entrega-o-que-pode-dar-errado",
+        "idempotencia-a-habilidade-que-salva-sistemas-de-mensageria"
+      ],
+      "wordCount": 967,
+      "blockTypes": {
+        "intuition": 1,
+        "mental-model": 1,
+        "html": 13,
+        "code": 1,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "kafka",
+      "title": "Kafka na prática",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 136,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/kafka.html",
+      "prerequisiteChapterIds": [
+        "messaging-model",
+        "compose"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "topicos-e-particoes-o-vocabulario-do-kafka",
+        "producer-e-consumer-em-java-puro",
+        "consumer-groups-como-kafka-escala-consumidores"
+      ],
+      "wordCount": 909,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 12,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "spring-kafka",
+      "title": "Spring Kafka — integração",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 137,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/spring-kafka.html",
+      "prerequisiteChapterIds": [
+        "kafka",
+        "di",
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "spring-kafka-integracao"
+      ],
+      "wordCount": 446,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 3,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "kafka-confiavel",
+      "title": "Kafka confiável: schemas, retries, DLT, outbox e exactly-once",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 138,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/kafka-confiavel.html",
+      "prerequisiteChapterIds": [
+        "spring-kafka",
+        "jpa-transacoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-caminho-minimo-de-uma-mensagem",
+        "schema-e-evolucao",
+        "retry-e-dead-letter-topic",
+        "idempotent-consumer",
+        "transactional-outbox",
+        "exactly-once-limite-da-garantia"
+      ],
+      "wordCount": 628,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "pilares-profundo",
+      "title": "Os 4 Pilares da POO — Aprofundamento Unificado",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 21,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/pilares-profundo.html",
+      "prerequisiteChapterIds": [
+        "interfaces"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "pilar-1-encapsulamento-a-fronteira-entre-o-que-e-seu-e-o-que-e-do-mundo",
+        "pilar-2-heranca-reaproveitamento-por-especializacao-com-um-custo-de-acop",
+        "pilar-3-polimorfismo-a-mesma-mensagem-respostas-diferentes-decididas-em-",
+        "pilar-4-abstracao-modelando-so-o-que-importa-para-o-problema-em-questao",
+        "como-os-quatro-pilares-se-sustentam-mutuamente"
+      ],
+      "wordCount": 1598,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 17,
+        "code": 5,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "di-ioc-profundo",
+      "title": "Injeção de Dependência, IoC & Ciclo de Vida de Beans — Aprofundamento",
+      "moduleId": "application-design",
+      "effectiveOrder": 70,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/di-ioc-profundo.html",
+      "prerequisiteChapterIds": [
+        "di",
+        "anotacoes",
+        "projetospring"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "inversao-de-controle-ioc-nao-e-a-mesma-coisa-que-injecao-de-dependencia-",
+        "o-ciclo-de-vida-completo-de-um-bean-cada-etapa-em-ordem-exata",
+        "beanfactory-vs-applicationcontext-a-fundacao-por-tras-do-container",
+        "dependencias-circulares-quando-o-grafo-nao-tem-ordem-valida"
+      ],
+      "wordCount": 1618,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 4,
+        "exercise": 1,
+        "error-case": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "jvm-profundo",
+      "title": "JVM, Bytecode e Gerenciamento de Memória — Aprofundamento",
+      "moduleId": "java-core",
+      "effectiveOrder": 31,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/jvm-profundo.html",
+      "prerequisiteChapterIds": [
+        "functional-semantics-lab"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "do-java-ao-processo-rodando-o-caminho-completo-passo-a-passo",
+        "interpretacao-vs-jit-por-que-java-esquenta-com-o-tempo",
+        "a-memoria-da-jvm-um-mapa-completo-nao-so-stack-e-heap",
+        "por-que-o-heap-e-dividido-em-geracoes",
+        "o-garbage-collector-como-a-jvm-decide-o-que-e-lixo",
+        "modelo-de-marcacao-e-recuperacao",
+        "escape-analysis-quando-uma-alocacao-pode-desaparecer"
+      ],
+      "wordCount": 2253,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 23,
+        "code": 4,
+        "exercise": 2,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 2,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "debugging",
+      "title": "Técnicas de Debugging na Prática",
+      "moduleId": "testing-engineering",
+      "effectiveOrder": 46,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/debugging.html",
+      "prerequisiteChapterIds": [
+        "build"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "breakpoints-pausando-a-execucao-exatamente-onde-voce-precisa",
+        "conditional-breakpoints-pausando-so-quando-uma-condicao-especifica-e-ver",
+        "field-watchpoints-pausando-quando-um-campo-muda-de-valor-nao-uma-linha-e",
+        "navegando-a-execucao-pausada-step-over-step-into-step-out",
+        "inspecionando-memoria-variables-watches-e-evaluate-expression"
+      ],
+      "wordCount": 1519,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 17,
+        "code": 4,
+        "exercise": 1,
+        "diagram": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "concorrencia-profunda",
+      "title": "Concorrência, Threads, Race Conditions & Assíncrono — Aprofundamento",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 107,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/concorrencia-profunda.html",
+      "prerequisiteChapterIds": [
+        "threads",
+        "jvm-profundo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "por-que-valor-nao-e-atomico-visualizacao-em-nivel-de-instrucao",
+        "visibilidade-de-memoria-um-problema-diferente-de-race-condition",
+        "deadlock-quando-duas-threads-travam-esperando-uma-pela-outra-para-sempre",
+        "livelock-e-starvation-os-primos-menos-famosos-do-deadlock",
+        "programacao-assincrona-completablefuture"
+      ],
+      "wordCount": 1519,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 17,
+        "code": 5,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "arquitetura-software",
+      "title": "Arquitetura de Software",
+      "moduleId": "application-design",
+      "effectiveOrder": 71,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/arquitetura-software.html",
+      "prerequisiteChapterIds": [
+        "clean-code",
+        "projetospring",
+        "mini-financas-jdbc",
+        "pure-java-api-project"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "monolito-vs-microsservicos-a-decisao-mais-debatida-da-engenharia-moderna",
+        "arquitetura-em-camadas-a-que-voce-ja-construiu",
+        "arquitetura-hexagonal-ports-adapters-indo-um-passo-alem"
+      ],
+      "wordCount": 972,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "code": 2,
+        "exercise": 1,
+        "comparison": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "ddd",
+      "title": "Domain-Driven Design (DDD)",
+      "moduleId": "application-design",
+      "effectiveOrder": 72,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/ddd.html",
+      "prerequisiteChapterIds": [
+        "arquitetura-software",
+        "encapsulamento",
+        "mini-financas-jdbc"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "ubiquitous-language-o-vocabulario-compartilhado",
+        "entity-vs-value-object-uma-distincao-que-vai-alem-da-entity-jpa",
+        "aggregate-a-fronteira-de-consistencia",
+        "bounded-context-onde-os-microsservicos-do-capitulo-anterior-encontram-dd"
+      ],
+      "wordCount": 956,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 14,
+        "code": 1,
+        "exercise": 1,
+        "table": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "ddd-estrategico",
+      "title": "DDD estratégico, context mapping e integração entre domínios",
+      "moduleId": "synchronous-integration",
+      "effectiveOrder": 121,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/ddd-estrategico.html",
+      "prerequisiteChapterIds": [
+        "ddd",
+        "arquitetura-software",
+        "dto-mapping"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "primeiro-modelo-linguagem-e-fronteira",
+        "context-map",
+        "agregados-e-transacoes",
+        "servicos-fabricas-e-repositorios"
+      ],
+      "wordCount": 551,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "sistemas-distribuidos",
+      "title": "Sistemas Distribuídos: CAP & trade-offs de arquitetura sênior",
+      "moduleId": "distributed-consistency",
+      "effectiveOrder": 141,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/sistemas-distribuidos.html",
+      "prerequisiteChapterIds": [
+        "arquitetura-software",
+        "mensageria",
+        "hospedagem-db",
+        "resilience"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-teorema-cap",
+        "consistencia-eventual-a-resposta-pratica-mais-comum",
+        "padrao-saga-transacoes-atraves-de-multiplos-servicos"
+      ],
+      "wordCount": 1114,
+      "blockTypes": {
+        "intuition": 1,
+        "table": 1,
+        "html": 13,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "consistencia-distribuida",
+      "title": "Consistência distribuída: CAP correto, PACELC, tempo e resiliência",
+      "moduleId": "distributed-consistency",
+      "effectiveOrder": 142,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/consistencia-distribuida.html",
+      "prerequisiteChapterIds": [
+        "sistemas-distribuidos",
+        "resilience"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "base-para-falar-de-consistencia",
+        "pacelc-e-modelos-de-consistencia",
+        "tempo-falha-parcial-e-retries",
+        "protecoes-complementares"
+      ],
+      "wordCount": 757,
+      "blockTypes": {
+        "intuition": 1,
+        "comparison": 1,
+        "html": 12,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "event-driven-profundo",
+      "title": "Arquitetura Event-Driven & Internals do Kafka — Aprofundamento",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 139,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/event-driven-profundo.html",
+      "prerequisiteChapterIds": [
+        "kafka",
+        "mensageria",
+        "arquitetura-software"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "event-driven-architecture-uma-mudanca-de-mentalidade-nao-so-de-tecnologi",
+        "anatomia-interna-de-um-topico-kafka",
+        "como-a-chave-da-mensagem-decide-a-particao",
+        "replicacao-como-kafka-sobrevive-a-queda-de-um-servidor",
+        "consumer-offset-como-kafka-lembra-ate-onde-voce-ja-leu"
+      ],
+      "wordCount": 1629,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 16,
+        "code": 5,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "testes-integracao-avancados",
+      "title": "Testes de Integração Avançados: @SpringBootTest, @DataJpaTest & Testcontainers com Kafka",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 140,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/testes-integracao-avancados.html",
+      "prerequisiteChapterIds": [
+        "testcontainers",
+        "mockito",
+        "spring-kafka"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "a-piramide-de-testes-do-spring-boot-do-mais-rapido-ao-mais-completo",
+        "datajpatest-com-testcontainers-testando-o-repository-de-verdade",
+        "testando-kafka-de-verdade-com-testcontainers"
+      ],
+      "wordCount": 842,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mini-pedidos-eventos",
+      "title": "Mini-projeto: pedidos orientados a eventos",
+      "moduleId": "distributed-consistency",
+      "effectiveOrder": 145,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mini-pedidos-eventos.html",
+      "prerequisiteChapterIds": [
+        "saga-schema-ordering",
+        "async-integration-tests",
+        "event-driven-profundo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "provas-exigidas",
+        "checkpoint-antes-de-concluir",
+        "execucao-guiada-e-evidencias"
+      ],
+      "wordCount": 598,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 6,
+        "checklist": 1,
+        "quiz": 2,
+        "project": 1
+      },
+      "exercises": 0,
+      "quizzes": 2,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "estruturas-avancadas",
+      "title": "Estruturas de Dados Avançadas",
+      "moduleId": "algorithms-data-structures",
+      "effectiveOrder": 43,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/estruturas-avancadas.html",
+      "prerequisiteChapterIds": [
+        "big-o",
+        "recursao",
+        "colecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "pilha-stack-ultimo-a-entrar-primeiro-a-sair-lifo",
+        "fila-queue-primeiro-a-entrar-primeiro-a-sair-fifo",
+        "arvore-binaria-a-base-de-indices-de-banco-e-buscas-eficientes",
+        "grafo-modelando-relacionamentos-que-nao-sao-hierarquicos"
+      ],
+      "wordCount": 1013,
+      "blockTypes": {
+        "intuition": 1,
+        "comparison": 1,
+        "html": 12,
+        "code": 4,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "code-review-adr",
+      "title": "Code Review & Architecture Decision Records",
+      "moduleId": "professional-final",
+      "effectiveOrder": 146,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/code-review-adr.html",
+      "prerequisiteChapterIds": [
+        "git",
+        "clean-code",
+        "arquitetura-software"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "code-review-revisando-com-intencao-nao-so-procurando-erro",
+        "architecture-decision-records-adr-a-memoria-da-arquitetura"
+      ],
+      "wordCount": 915,
+      "blockTypes": {
+        "intuition": 1,
+        "table": 1,
+        "html": 10,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "agile",
+      "title": "Metodologias Ágeis: Scrum & Kanban",
+      "moduleId": "professional-final",
+      "effectiveOrder": 147,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/agile.html",
+      "prerequisiteChapterIds": [
+        "git",
+        "projeto",
+        "code-review-adr"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "por-que-agil-existe-o-problema-do-waterfall",
+        "scrum-trabalho-em-ciclos-fixos-sprints",
+        "kanban-fluxo-continuo-sem-ciclos-fixos"
+      ],
+      "wordCount": 800,
+      "blockTypes": {
+        "intuition": 1,
+        "comparison": 1,
+        "html": 11,
+        "code": 1,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "conectando-front-back",
+      "title": "Conectando front-end e back-end",
+      "moduleId": "synchronous-integration",
+      "effectiveOrder": 122,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/conectando-front-back.html",
+      "prerequisiteChapterIds": [
+        "cors-rate-limit",
+        "json",
+        "http",
+        "frontend-aplicacao",
+        "auth-front-ts"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "testando-manualmente-antes-do-front-existir-postman-insomnia",
+        "fetch-requisicao-nativa-do-navegador",
+        "axios-a-alternativa-mais-usada-em-projetos-maiores"
+      ],
+      "wordCount": 751,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 9,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "auth-front-ts",
+      "title": "Autenticação no front & pincelada de TypeScript",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 93,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/auth-front-ts.html",
+      "prerequisiteChapterIds": [
+        "mini-auth-rbac",
+        "autenticacao-conceitos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "localstorage-vs-cookie-httponly",
+        "typescript-por-que-vale-a-pena-mesmo-sem-precisar"
+      ],
+      "wordCount": 699,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 11,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "frontend-aplicacao",
+      "title": "Front-end aplicado: estado, formulários, acessibilidade e testes",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 94,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/frontend-aplicacao.html",
+      "prerequisiteChapterIds": [
+        "auth-front-ts",
+        "api-design-avancado"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "primeiro-contato-com-a-tela-reativa",
+        "camada-1-um-estado-local-simples",
+        "camada-2-estados-remotos-explicitos",
+        "formularios-e-acessibilidade",
+        "autenticacao-no-navegador",
+        "testes"
+      ],
+      "wordCount": 706,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 13,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "websockets",
+      "title": "WebSockets — quando HTTP não basta",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 108,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/websockets.html",
+      "prerequisiteChapterIds": [
+        "frontend-aplicacao",
+        "threads",
+        "spring-mvc"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "quando-usar-e-quando-nao-usar",
+        "spring-websocket-configuracao-basica"
+      ],
+      "wordCount": 690,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 2,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "deploy-frontend",
+      "title": "Deploy do front-end & monorepo vs poli-repo",
+      "moduleId": "production-delivery",
+      "effectiveOrder": 119,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/deploy-frontend.html",
+      "prerequisiteChapterIds": [
+        "deploy-backend",
+        "git",
+        "cicd",
+        "auth-front-ts"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "vercel-netlify-feitos-sob-medida-para-isso",
+        "monorepo-vs-poli-repo-onde-colocar-tudo"
+      ],
+      "wordCount": 640,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 8,
+        "code": 3,
+        "exercise": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "mapa-sistema",
+      "title": "Glossário & mapa do sistema completo",
+      "moduleId": "professional-final",
+      "effectiveOrder": 148,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/mapa-sistema.html",
+      "prerequisiteChapterIds": [
+        "mini-pedidos-eventos",
+        "deploy-frontend",
+        "code-review-adr"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "o-caminho-de-uma-requisicao-ponta-a-ponta",
+        "glossario-de-termos-chave-tambem-disponivel-no-botao-flutuante"
+      ],
+      "wordCount": 679,
+      "blockTypes": {
+        "intuition": 1,
+        "exercise": 1,
+        "html": 8,
+        "code": 1,
+        "quiz": 1
+      },
+      "exercises": 1,
+      "quizzes": 1,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "projeto-integrador",
+      "title": "Projeto final — sistema completo de ponta a ponta",
+      "moduleId": "professional-final",
+      "effectiveOrder": 149,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/projeto-integrador.html",
+      "prerequisiteChapterIds": [
+        "mapa-sistema",
+        "mini-pedidos-eventos",
+        "mini-deploy-observavel",
+        "code-review-adr"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "execucao-guiada-e-evidencias",
+        "arquitetura-de-referencia-verificavel"
+      ],
+      "wordCount": 1001,
+      "blockTypes": {
+        "intuition": 1,
+        "html": 10,
+        "checklist": 1,
+        "code": 1,
+        "project": 1,
+        "quiz": 1
+      },
+      "exercises": 0,
+      "quizzes": 1,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "quiz",
+      "title": "Quiz de revisão",
+      "moduleId": "professional-final",
+      "effectiveOrder": 150,
+      "sourceKind": "legacy-html-generated-metadata",
+      "sourcePath": "platform/public/content/chapters/quiz.html",
+      "prerequisiteChapterIds": [
+        "projeto-integrador",
+        "mapa-sistema"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "quiz-de-revisao"
+      ],
+      "wordCount": 1466,
+      "blockTypes": {
+        "intuition": 1,
+        "exercise": 1,
+        "html": 2,
+        "quiz": 21
+      },
+      "exercises": 1,
+      "quizzes": 21,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "associacoes-cardinalidade",
+      "title": "Associações, cardinalidade e invariantes entre objetos",
+      "moduleId": "oop-modeling",
+      "effectiveOrder": 22,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "pilares-profundo"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "associacao-e-direcao",
+        "cardinalidade",
+        "agregacao-composicao-e-ciclo-de-vida",
+        "consistencia-dos-dois-lados"
+      ],
+      "wordCount": 920,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "mental-model": 1,
+        "table": 1,
+        "quiz": 5,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "functional-semantics-lab",
+      "title": "Optional, lambdas, Set e Streams por semântica",
+      "moduleId": "java-core",
+      "effectiveOrder": 30,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "javamoderno"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "optional",
+        "lambda-e-captura",
+        "set-e-igualdade",
+        "map-versus-flatmap"
+      ],
+      "wordCount": 860,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "table": 1,
+        "error-case": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "process-api-cli",
+      "title": "Process API: executando programas externos com segurança",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 36,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "processo-filho",
+        "stdout-stderr-e-exit-code",
+        "shell-e-argumentos",
+        "timeout-e-encerramento"
+      ],
+      "wordCount": 1154,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 2,
+        "diagram": 1,
+        "error-case": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "zenith-cli-inicial",
+      "title": "Projeto Zenith inicial: assistente CLI determinístico",
+      "moduleId": "io-cli-serialization",
+      "effectiveOrder": 38,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "mini-importador-pedidos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "comandos-permitidos",
+        "camadas-do-zenith",
+        "evidencia-reproduzivel",
+        "limite-consciente"
+      ],
+      "wordCount": 1003,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "mental-model": 1,
+        "table": 1,
+        "project": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "jdbc-under-the-hood",
+      "title": "JDBC por baixo do CRUD",
+      "moduleId": "relational-data-jdbc",
+      "effectiveOrder": 63,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "jdbc",
+        "mini-financas-jdbc"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "driver-e-conexao",
+        "preparedstatement",
+        "resultset-e-ownership",
+        "transacao-e-erro"
+      ],
+      "wordCount": 776,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "http-wire-contract",
+      "title": "HTTP no fio: request, response e semântica",
+      "moduleId": "http-api-clients",
+      "effectiveOrder": 53,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "http"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "request",
+        "response",
+        "metodos-e-idempotencia",
+        "cache-e-negociacao"
+      ],
+      "wordCount": 722,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "java-httpclient-json",
+      "title": "Java HttpClient e JSON sem framework web",
+      "moduleId": "http-api-clients",
+      "effectiveOrder": 54,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "http-wire-contract",
+        "json",
+        "excecoes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "cliente-reutilizavel",
+        "request-e-timeout",
+        "response-e-bodyhandler",
+        "json-de-fronteira"
+      ],
+      "wordCount": 821,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "unreliable-api-client",
+      "title": "APIs externas falham: timeout, retry, limites e secrets",
+      "moduleId": "http-api-clients",
+      "effectiveOrder": 55,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "java-httpclient-json"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "timeout-deadline-e-cancelamento",
+        "retry-com-backoff-e-jitter",
+        "rate-limiting-e-paginacao",
+        "autenticacao-e-secrets"
+      ],
+      "wordCount": 720,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "pure-java-api-project",
+      "title": "Projeto: integração entre APIs em Java puro",
+      "moduleId": "http-api-clients",
+      "effectiveOrder": 56,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "unreliable-api-client",
+        "testes"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "portas-e-adapters",
+        "composicao-de-resultados",
+        "testes-deterministicos"
+      ],
+      "wordCount": 569,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 3,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 4,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 4,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "rest-resource-contracts",
+      "title": "REST: recursos, DTOs, validação e erros",
+      "moduleId": "spring-api",
+      "effectiveOrder": 87,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "pure-java-api-project",
+        "spring-mvc"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "modelagem-de-recurso",
+        "request-e-response-dto",
+        "erro-tecnico-e-de-dominio",
+        "concorrencia-e-idempotencia"
+      ],
+      "wordCount": 665,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "api-contract-evolution",
+      "title": "OpenAPI, testes e evolução de contratos",
+      "moduleId": "api-security-quality",
+      "effectiveOrder": 95,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "rest-resource-contracts",
+        "paginacao-swagger"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "api-first",
+        "evolucao-compativel",
+        "camadas-de-teste",
+        "versionamento"
+      ],
+      "wordCount": 629,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "tcp-protocol-design",
+      "title": "Sockets TCP e desenho de protocolo",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 109,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "java-io",
+        "threads"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "socket-e-endpoint",
+        "framing",
+        "concorrencia-e-backpressure",
+        "timeout-e-shutdown"
+      ],
+      "wordCount": 649,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "lanterna-tui",
+      "title": "Lanterna: uma TUI real em Java",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 110,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "java-io",
+        "interfaces",
+        "threads"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "terminal",
+        "screen",
+        "gui2",
+        "event-loop-e-estado"
+      ],
+      "wordCount": 682,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "developer-tools-java",
+      "title": "Ferramentas para desenvolvedores em Java",
+      "moduleId": "concurrency-network-tui",
+      "effectiveOrder": 111,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "java-io",
+        "build",
+        "logging"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "processbuilder",
+        "watchservice",
+        "jfr-e-jcmd"
+      ],
+      "wordCount": 531,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 3,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 4,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 4,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "coupled-services-lab",
+      "title": "Do monólito aos serviços síncronos acoplados",
+      "moduleId": "synchronous-integration",
+      "effectiveOrder": 123,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "rest-resource-contracts",
+        "webclient",
+        "ddd-estrategico"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "monolito-modular",
+        "acoplamento-temporal",
+        "falha-parcial"
+      ],
+      "wordCount": 513,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 3,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 4,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 4,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "in-memory-event-bus",
+      "title": "Event Bus em Java puro",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 130,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "coupled-services-lab",
+        "interfaces",
+        "generics"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "event-command-e-message",
+        "dispatch",
+        "sincronia-escondida"
+      ],
+      "wordCount": 536,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 3,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 4,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 4,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "messaging-model",
+      "title": "Messaging: queue, pub/sub, broker e entrega",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 131,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "in-memory-event-bus"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "queue",
+        "publish-subscribe",
+        "broker-e-backpressure",
+        "delivery-semantics"
+      ],
+      "wordCount": 590,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "aws-sns-sqs",
+      "title": "AWS SNS + SQS: fan-out durável",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 132,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "messaging-model",
+        "docker-conceitos"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "sns-topic",
+        "sqs-queue",
+        "fan-out-e-policy",
+        "standard-e-fifo"
+      ],
+      "wordCount": 743,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "delivery-failure-lab",
+      "title": "Falhas em EDA: retry, DLQ, redrive e visibility timeout",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 133,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "aws-sns-sqs"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "idempotent-consumer",
+        "retry-e-backoff",
+        "dlq-e-redrive",
+        "visibility-timeout"
+      ],
+      "wordCount": 656,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "outbox-inbox",
+      "title": "Transactional Outbox e Inbox",
+      "moduleId": "distributed-consistency",
+      "effectiveOrder": 143,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "consistencia-distribuida",
+        "delivery-failure-lab",
+        "jdbc-under-the-hood"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "outbox",
+        "relay-e-duplicacao",
+        "inbox",
+        "retencao-e-ordenacao"
+      ],
+      "wordCount": 676,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "saga-schema-ordering",
+      "title": "Saga, evolução de eventos e ordering",
+      "moduleId": "distributed-consistency",
+      "effectiveOrder": 144,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "outbox-inbox",
+        "ddd-estrategico"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "saga-choreography",
+        "saga-orchestration",
+        "compensacao",
+        "schema-e-ordering"
+      ],
+      "wordCount": 648,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "eda-observability-security",
+      "title": "Observabilidade e segurança em EDA",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 134,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "delivery-failure-lab",
+        "observabilidade-pratica"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "correlacao-e-causalidade",
+        "metricas",
+        "tracing-assincrono",
+        "seguranca"
+      ],
+      "wordCount": 621,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 0,
+      "resources": 2,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    },
+    {
+      "chapterId": "async-integration-tests",
+      "title": "Testcontainers e testes assíncronos determinísticos",
+      "moduleId": "messaging-eda",
+      "effectiveOrder": 135,
+      "sourceKind": "structured-typescript",
+      "sourcePath": "platform/src/content/required-chapters.ts",
+      "prerequisiteChapterIds": [
+        "testcontainers",
+        "aws-sns-sqs",
+        "delivery-failure-lab"
+      ],
+      "missingPrerequisites": [],
+      "futurePrerequisites": [],
+      "conceptIds": [
+        "testcontainers",
+        "kafka-container",
+        "localstack",
+        "awaitility"
+      ],
+      "wordCount": 707,
+      "blockTypes": {
+        "intuition": 1,
+        "concept": 4,
+        "callout": 1,
+        "code": 1,
+        "prediction": 1,
+        "exercise": 1,
+        "quiz": 5,
+        "project": 1
+      },
+      "exercises": 1,
+      "quizzes": 5,
+      "projects": 1,
+      "resources": 3,
+      "genericResources": [],
+      "flags": [],
+      "generatedCompatibilityBlocks": 0,
+      "declaredAuditStatus": "approved",
+      "depthReviewed": true,
+      "resourcesAuditedForRelevance": true,
+      "dependenciesValidated": true,
+      "status": "aprovado"
+    }
+  ],
+  "conceptGraphIssues": []
+}

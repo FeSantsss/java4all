@@ -11,6 +11,25 @@ const pedagogy = require(resolve(root, 'docs/internal/pedagogy-plan.js'));
 const contentRoot = resolve(root, 'platform/public/content');
 const catalog = JSON.parse(await readFile(resolve(contentRoot, 'catalog.json'), 'utf8'));
 const glossary = JSON.parse(await readFile(resolve(contentRoot, 'glossary.json'), 'utf8'));
+const pedagogyOverrides = JSON.parse(await readFile(resolve(root, 'platform/content/pedagogy-overrides.json'), 'utf8'));
+const foundationsPhase2 = JSON.parse(await readFile(resolve(root, 'platform/content/foundations-phase-2.json'), 'utf8'));
+const oopPhase3 = JSON.parse(await readFile(resolve(root, 'platform/content/oop-phase-3.json'), 'utf8'));
+const javaCorePhase4 = JSON.parse(await readFile(resolve(root, 'platform/content/java-core-phase-4.json'), 'utf8'));
+const ioCliPhase5 = JSON.parse(await readFile(resolve(root, 'platform/content/io-cli-phase-5.json'), 'utf8'));
+const algorithmsEngineeringPhase6 = JSON.parse(await readFile(resolve(root, 'platform/content/algorithms-engineering-phase-6.json'), 'utf8'));
+const httpIntegrationPhase7 = JSON.parse(await readFile(resolve(root, 'platform/content/http-integration-phase-7.json'), 'utf8'));
+const relationalDataPhase8 = JSON.parse(await readFile(resolve(root, 'platform/content/relational-data-phase-8.json'), 'utf8'));
+const applicationDesignPhase9 = JSON.parse(await readFile(resolve(root, 'platform/content/application-design-phase-9.json'), 'utf8'));
+const springApiPhase10 = JSON.parse(await readFile(resolve(root, 'platform/content/spring-api-phase-10.json'), 'utf8'));
+const apiSecurityQualityPhase11 = JSON.parse(await readFile(resolve(root, 'platform/content/api-security-quality-phase-11.json'), 'utf8'));
+const containersIntegrationDataPhase12 = JSON.parse(await readFile(resolve(root, 'platform/content/containers-integration-data-phase-12.json'), 'utf8'));
+const concurrencyNetworkTuiPhase13 = JSON.parse(await readFile(resolve(root, 'platform/content/concurrency-network-tui-phase-13.json'), 'utf8'));
+const productionDeliveryPhase14 = JSON.parse(await readFile(resolve(root, 'platform/content/production-delivery-phase-14.json'), 'utf8'));
+const syncResiliencePhase15 = JSON.parse(await readFile(resolve(root, 'platform/content/sync-resilience-phase-15.json'), 'utf8'));
+const messagingEdaPhase16 = JSON.parse(await readFile(resolve(root, 'platform/content/messaging-eda-phase-16.json'), 'utf8'));
+const distributedConsistencyPhase17 = JSON.parse(await readFile(resolve(root, 'platform/content/distributed-consistency-phase-17.json'), 'utf8'));
+const intermediateProjectsPhase18 = JSON.parse(await readFile(resolve(root, 'platform/content/intermediate-projects-phase-18.json'), 'utf8'));
+const professionalFinalPhase19 = JSON.parse(await readFile(resolve(root, 'platform/content/professional-final-phase-19.json'), 'utf8'));
 const legacyChapters = catalog.chapters;
 const dom = new JSDOM('<!doctype html><html><body></body></html>');
 const { document } = dom.window;
@@ -145,16 +164,19 @@ function conceptFact(heading) {
   return `O capítulo apresenta “${title}” como um contrato que deve ser compreendido pelos seus efeitos, limites e exemplos observáveis.`;
 }
 
-function quizBlock(element, chapterId, quizIndex) {
+function quizBlock(element, chapterId, quizIndex, authored) {
   const quizId = `${chapterId}:${quizIndex}`;
+  const rationales = authored.quizRationales?.[quizId] ?? [];
   const options = [...element.querySelectorAll('.quiz-opt')].map((option, optionIndex) => ({
     id: `${quizId}:option:${optionIndex}`,
     label: text(option),
-    correct: option.dataset.correct === 'true'
+    correct: option.dataset.correct === 'true',
+    ...(rationales[optionIndex] ? { explanation: rationales[optionIndex] } : {})
   }));
   return {
     id: quizId,
     type: 'quiz',
+    authorship: 'legacy-preserved',
     conceptId: slug(text(element.querySelector('.q')) || chapterId),
     prompt: text(element.querySelector('.q')),
     options
@@ -163,7 +185,13 @@ function quizBlock(element, chapterId, quizIndex) {
 
 function exerciseBlock(element, chapterId, index) {
   const title = text(element.querySelector('h4')) || 'Exercício de raciocínio';
-  const criteria = [...element.querySelectorAll('.solution li')].map(text).filter(Boolean);
+  const extractedCriteria = [...element.querySelectorAll('.solution li')].map(text).filter(Boolean);
+  const criteria = extractedCriteria.length
+    ? extractedCriteria
+    : ['A solução explica decisões, casos-limite e como foi validada.'];
+  if (criteria.length === 1) {
+    criteria.push('A entrega registra entrada, resultado esperado e evidência reproduzível da validação.');
+  }
   const promptNode = [...element.children].find(child => child.tagName === 'P');
   const difficultyText = text(element.querySelector('.exercise-tag')).toLowerCase();
   const difficulty = difficultyText.includes('dif') || difficultyText.includes('avanç')
@@ -174,16 +202,17 @@ function exerciseBlock(element, chapterId, index) {
   return {
     id: `${chapterId}-exercise-${index}`,
     type: 'exercise',
+    authorship: 'legacy-preserved',
     title,
     prompt: text(promptNode) || text(element),
     difficulty,
-    criteria: criteria.length ? criteria : ['A solução explica decisões, casos-limite e como foi validada.'],
+    criteria,
     fidelityText: text(element),
     sourceHtml: cleanHtml(element)
   };
 }
 
-function blocksFrom(section, chapterId) {
+function blocksFrom(section, chapterId, authored) {
   const blocks = [];
   let legacyQuizIndex = 0;
   let legacyChecklistIndex = 0;
@@ -216,7 +245,7 @@ function blocksFrom(section, chapterId) {
       return;
     }
     if (child.matches('.quiz')) {
-      const block = quizBlock(child, chapterId, legacyQuizIndex++);
+      const block = quizBlock(child, chapterId, legacyQuizIndex++, authored);
       block.sourceIndex = index;
       blocks.push(block);
       return;
@@ -232,24 +261,28 @@ function blocksFrom(section, chapterId) {
         label: text(item)
       })).filter(item => item.label);
       legacyChecklistIndex += items.length;
-      blocks.push({ id: `${chapterId}-checklist-${index}`, type: 'checklist', title: 'Checklist de prática', items });
+      blocks.push({ id: `${chapterId}-checklist-${index}`, type: 'checklist', authorship: 'legacy-preserved', title: 'Checklist de prática', items });
       return;
     }
     if (child.matches('pre.code')) {
+      const id = `${chapterId}-code-${index}`;
+      const explanation = authored.codeExplanations?.[id];
       blocks.push({
-        id: `${chapterId}-code-${index}`,
+        id,
         type: 'code',
+        authorship: 'legacy-preserved',
         language: 'java',
         source: translateCodeText(codeText(child)),
         fidelityText: text(child),
         highlightedHtml: cleanInnerHtml(child),
-        caption: `Exemplo executável de ${chapterId}.`
+        caption: `Exemplo executável de ${chapterId}.`,
+        ...(explanation ?? {})
       });
       return;
     }
-    blocks.push({ id: `${chapterId}-content-${index}`, type: 'html', html: cleanHtml(child), fidelityText: text(child) });
+    blocks.push({ id: `${chapterId}-content-${index}`, type: 'html', authorship: 'legacy-preserved', html: cleanHtml(child), fidelityText: text(child) });
   });
-  conceptFacts.forEach((concept, conceptIndex) => {
+  if (authored.generateCompatibilityQuizzes !== false) conceptFacts.forEach((concept, conceptIndex) => {
     const alternatives = [
       concept.fact,
       conceptFacts[(conceptIndex + 1) % conceptFacts.length]?.fact,
@@ -264,6 +297,7 @@ function blocksFrom(section, chapterId) {
     blocks.push({
       id: `${chapterId}-concept-check-${conceptIndex}`,
       type: 'quiz',
+      authorship: 'generated-compatibility',
       conceptId: slug(concept.title),
       prompt: `Em “${conciseText(concept.title, 110)}”, qual afirmação descreve corretamente o conceito?`,
       options: rotated.map((label, optionIndex) => ({
@@ -273,7 +307,11 @@ function blocksFrom(section, chapterId) {
       }))
     });
   });
-  return blocks;
+  return [
+    ...(authored.prependBlocks ?? []),
+    ...blocks,
+    ...(authored.appendBlocks ?? [])
+  ];
 }
 
 const resourceProfiles = {
@@ -308,7 +346,8 @@ function resourcesFor(chapter, moduleId) {
       title: `Documentação de referência: ${chapter.title}`,
       url: documentation,
       reinforces: `Confirme contratos, termos e APIs usados em “${chapter.title}”.`,
-      language: 'en'
+      language: 'en',
+      auditStatus: 'pending'
     },
     {
       id: `${chapter.id}-video`,
@@ -316,7 +355,8 @@ function resourcesFor(chapter, moduleId) {
       title: `Aula complementar: ${chapter.title}`,
       url: video,
       reinforces: `Revise o modelo mental e compare os exemplos do capítulo com uma explicação audiovisual.`,
-      language: video.includes('youtu') ? 'en' : 'en'
+      language: video.includes('youtu') ? 'en' : 'en',
+      auditStatus: 'pending'
     }
   ];
 }
@@ -426,21 +466,45 @@ const chapters = legacyChapters.map((chapter, order) => {
   const headings = [...section.querySelectorAll('h3')].map(text).filter(Boolean);
   const firstParagraph = [...section.children].find(child => child.tagName === 'P');
   const conceptIds = headings.slice(0, 12).map(slug).filter(Boolean);
+  const authored = {
+    ...(pedagogyOverrides.chapters[chapter.id] ?? {}),
+    ...(foundationsPhase2.chapters?.[chapter.id] ?? {}),
+    ...(oopPhase3.chapters?.[chapter.id] ?? {}),
+    ...(javaCorePhase4.chapters?.[chapter.id] ?? {}),
+    ...(ioCliPhase5.chapters?.[chapter.id] ?? {}),
+    ...(algorithmsEngineeringPhase6.chapters?.[chapter.id] ?? {}),
+    ...(httpIntegrationPhase7.chapters?.[chapter.id] ?? {}),
+    ...(relationalDataPhase8.chapters?.[chapter.id] ?? {}),
+    ...(applicationDesignPhase9.chapters?.[chapter.id] ?? {}),
+    ...(springApiPhase10.chapters?.[chapter.id] ?? {}),
+    ...(apiSecurityQualityPhase11.chapters?.[chapter.id] ?? {}),
+    ...(containersIntegrationDataPhase12.chapters?.[chapter.id] ?? {}),
+    ...(concurrencyNetworkTuiPhase13.chapters?.[chapter.id] ?? {}),
+    ...(productionDeliveryPhase14.chapters?.[chapter.id] ?? {}),
+    ...(syncResiliencePhase15.chapters?.[chapter.id] ?? {}),
+    ...(messagingEdaPhase16.chapters?.[chapter.id] ?? {}),
+    ...(distributedConsistencyPhase17.chapters?.[chapter.id] ?? {}),
+    ...(intermediateProjectsPhase18.chapters?.[chapter.id] ?? {}),
+    ...(professionalFinalPhase19.chapters?.[chapter.id] ?? {})
+  };
   return {
     id: chapter.id,
     moduleId,
-    order,
+    order: authored.order ?? order,
     title: chapter.title,
     summary: text(firstParagraph) || `Estudo progressivo de ${chapter.title}.`,
-    objectives: headings.slice(0, 4).map(heading => `Compreender e aplicar: ${heading}`),
-    whyItExists: `Este capítulo introduz ${chapter.title} quando seus pré-requisitos já permitem discutir decisões, limites e uso real.`,
-    prerequisiteChapterIds: [...new Set(prerequisites)],
+    objectives: authored.objectives ?? headings.slice(0, 4).map(heading => `Compreender e aplicar: ${heading}`),
+    whyItExists: authored.whyItExists ?? `Este capítulo introduz ${chapter.title} quando seus pré-requisitos já permitem discutir decisões, limites e uso real.`,
+    prerequisiteChapterIds: authored.prerequisiteChapterIds ?? [...new Set(prerequisites)],
     conceptIds: conceptIds.length ? conceptIds : [slug(chapter.title)],
+    introducedConceptIds: authored.introducedConceptIds ?? [],
+    usedConceptIds: authored.usedConceptIds ?? [],
     estimatedMinutes: Math.max(30, Number.parseInt(text(section.querySelector('.time-est')), 10) * 60 || 60),
     englishLevel: module.englishLevel,
-    blocks: blocksFrom(section, chapter.id),
-    resources: resourcesFor(chapter, moduleId),
-    englishActivity: englishActivity(chapter, section, module.englishLevel)
+    blocks: blocksFrom(section, chapter.id, authored),
+    resources: authored.resources ?? resourcesFor(chapter, moduleId),
+    englishActivity: englishActivity(chapter, section, module.englishLevel),
+    audit: authored.audit ?? { status: 'pending', sourceKind: 'legacy-html' }
   };
 });
 
@@ -450,13 +514,36 @@ const modules = pedagogy.modules.map((module, order) => ({
   summary: `Constrói a base necessária para ${module.title.toLowerCase()} sem antecipar abstrações.`,
   order,
   prerequisiteModuleIds: module.prerequisites,
-  chapterIds: chapters.filter(chapter => chapter.moduleId === module.id).map(chapter => chapter.id),
+  chapterIds: chapters
+    .filter(chapter => chapter.moduleId === module.id)
+    .sort((left, right) => left.order - right.order)
+    .map(chapter => chapter.id),
   englishLevel: module.englishLevel,
   projectGuidance: module.projectGuidance
 }));
 
 const output = {
   source: { chapters: legacyChapters.length },
+  concepts: [
+    ...(foundationsPhase2.concepts ?? []),
+    ...(oopPhase3.concepts ?? []),
+    ...(javaCorePhase4.concepts ?? []),
+    ...(ioCliPhase5.concepts ?? []),
+    ...(algorithmsEngineeringPhase6.concepts ?? []),
+    ...(httpIntegrationPhase7.concepts ?? []),
+    ...(relationalDataPhase8.concepts ?? []),
+    ...(applicationDesignPhase9.concepts ?? []),
+    ...(springApiPhase10.concepts ?? []),
+    ...(apiSecurityQualityPhase11.concepts ?? []),
+    ...(containersIntegrationDataPhase12.concepts ?? []),
+    ...(concurrencyNetworkTuiPhase13.concepts ?? []),
+    ...(productionDeliveryPhase14.concepts ?? []),
+    ...(syncResiliencePhase15.concepts ?? []),
+    ...(messagingEdaPhase16.concepts ?? []),
+    ...(distributedConsistencyPhase17.concepts ?? []),
+    ...(intermediateProjectsPhase18.concepts ?? []),
+    ...(professionalFinalPhase19.concepts ?? [])
+  ],
   glossary,
   modules,
   chapters

@@ -1,9 +1,25 @@
 <section class="section tk-java" id="mini-analisador-vendas">
       <div class="section-head"><span class="section-num">P4</span><h2 class="section-title">Mini-projeto: analisador de vendas com Streams</h2></div>
       <div class="topic-meta"><div class="meta-item">Objetivo: <b>transformação de dados</b></div><div class="time-est">Tempo: <b>6–10 horas</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#streams">Streams</a></div></div>
-      <p>Partindo de uma coleção de vendas, gere rankings, agrupamentos e métricas. Implemente primeiro com laços e depois com Streams; compare legibilidade e custo.</p>
-      <h3>Consultas obrigatórias</h3><ul class="checklist"><li><input type="checkbox"><span>Faturamento por mês e por categoria.</span></li><li><input type="checkbox"><span>Três produtos com maior receita, com desempate definido.</span></li><li><input type="checkbox"><span>Clientes inativos em um intervalo.</span></li><li><input type="checkbox"><span>Ticket médio sem divisão por zero.</span></li><li><input type="checkbox"><span>Versões sequencial e paralela medidas com dataset grande.</span></li></ul>
-      <div class="secret"><b>Não presuma que paralelo é mais rápido.</b> Registre tamanho do conjunto, aquecimento e tempos; explique por que um microteste ingênuo engana.</div>
+      <p>Partindo de um arquivo pequeno de vendas, gere rankings, agrupamentos e métricas. O objetivo não é decorar <code>Collectors</code>: é transformar dados de entrada em relatório reprodutível, com ordem, desempate, ausências e erros de formato tratados por contrato.</p>
+      <h3>Formato de entrada</h3>
+      <p>Use CSV simples e documentado. Nesta fase, não tente aceitar todos os dialetos possíveis de CSV. Defina uma versão mínima: uma venda por linha, colunas em ordem fixa, UTF-8, cabeçalho obrigatório e valores monetários com ponto decimal.</p>
+      <pre class="code">id,data,cliente,produto,categoria,valor
+v001,2026-08-01,Ana,Mouse,Perifericos,89.90
+v002,2026-08-01,Bia,Teclado,Perifericos,199.90</pre>
+      <div class="warn"><b>Não use <code>split(",")</code> como solução universal de CSV.</b> Para este projeto didático ele funciona apenas porque o contrato proíbe vírgula dentro dos campos. Se o contrato aceitar aspas, escapes e separador dentro de texto, use uma biblioteca de CSV ou implemente um parser próprio com testes claros.</div>
+      <h3>Sequência de implementação</h3>
+      <ol>
+        <li><strong>Modelo:</strong> crie <code>Venda</code> com <code>LocalDate</code>, <code>BigDecimal</code> e campos obrigatórios.</li>
+        <li><strong>Parser:</strong> transforme uma linha em sucesso ou rejeição com número da linha e motivo.</li>
+        <li><strong>Consultas com laços:</strong> implemente primeiro de modo explícito para validar semântica.</li>
+        <li><strong>Consultas com Streams:</strong> refatore uma consulta por vez e compare clareza, não só tamanho do código.</li>
+        <li><strong>Relatório:</strong> gere saída ordenada e reproduzível.</li>
+      </ol>
+      <h3>Consultas obrigatórias</h3><ul class="checklist"><li><input type="checkbox"><span>Faturamento por mês e por categoria.</span></li><li><input type="checkbox"><span>Três produtos com maior receita, com desempate definido.</span></li><li><input type="checkbox"><span>Clientes inativos em um intervalo.</span></li><li><input type="checkbox"><span>Ticket médio sem divisão por zero.</span></li><li><input type="checkbox"><span>Relatório de linhas rejeitadas com número, campo e motivo.</span></li><li><input type="checkbox"><span>Versões sequencial e paralela medidas somente depois de existir dataset grande o bastante.</span></li></ul>
+      <div class="secret"><b>Não presuma que paralelo é mais rápido.</b> Registre tamanho do conjunto, aquecimento e tempos; explique por que um microteste ingênuo engana. Para dataset pequeno, a versão paralela normalmente só adiciona custo e risco de efeito compartilhado.</div>
+      <h3>Saída esperada</h3>
+      <p>O relatório deve declarar a origem, quantidade de vendas aceitas, quantidade de rejeições, período coberto e critérios de ordenação. Se dois produtos empatam, o desempate precisa estar no código e no README.</p>
     <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Qual uso de Stream é seguro?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">Operações sem efeitos colaterais compartilhados e coleta explícita do resultado.</div><div class="quiz-opt" data-correct="false">Alterar uma ArrayList externa dentro de parallelStream.</div><div class="quiz-opt" data-correct="false">Reutilizar o mesmo Stream depois de uma operação terminal.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
       <h3>Execução guiada e evidências</h3>
       <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>

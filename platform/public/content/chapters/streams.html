@@ -6,7 +6,7 @@
       </div>
 
       <h3>Interfaces funcionais e lambdas</h3>
-      <p>Uma <strong>interface funcional</strong> tem exatamente <strong>um</strong> método abstrato (pode ter vários <code>default</code>/<code>static</code>). É esse formato que permite escrever <strong>lambdas</strong> — funções anônimas curtas.</p>
+      <p>Uma <strong>interface funcional</strong> possui um único método abstrato, embora possa herdar métodos de <code>Object</code> e declarar métodos <code>default</code>/<code>static</code>. Uma lambda é uma expressão cujo tipo vem do contrato funcional esperado: os parâmetros e o retorno precisam ser compatíveis com esse método. Ela não existe sem um tipo-alvo.</p>
 
       <pre class="code"><span class="annotation">@FunctionalInterface</span>
 <span class="kw">public interface</span> <span class="cls">Operacao</span> {
@@ -62,11 +62,17 @@ Map&lt;<span class="kw">String</span>, List&lt;<span class="cls">Livro</span>&gt
 
       <div class="warn"><b>Streams não substituem loops sempre:</b> para lógica simples e sequencial, um <code>for</code> tradicional costuma ser mais legível e até mais rápido (sem overhead de boxing/lambdas). Streams brilham quando há uma cadeia real de transformações (filtrar → mapear → agrupar → coletar) que ficaria confusa em loops aninhados.</div>
 
+      <h3>map, flatMap e cardinalidade</h3>
+      <p><code>map</code> produz um resultado para cada elemento recebido. Se a função já devolve vários elementos ou outro contexto, <code>map</code> cria uma camada aninhada; <code>flatMap</code> transforma e achata uma camada. Antes de escolher, escreva a cardinalidade: um-para-um, um-para-zero-ou-um, ou um-para-muitos.</p>
+      <div class="warn"><b>Pipeline não é lugar para mutação escondida.</b> Não altere a fonte nem estado externo dentro de <code>map</code>/<code>filter</code>. Além de dificultar testes, interferência pode produzir resultado não especificado. Crie e consuma o stream no mesmo fluxo; depois de uma operação terminal ele não pode ser reutilizado.</div>
+
       <h3>reduce — a operação mais genérica</h3>
       <pre class="code"><span class="kw">int</span> total = List.of(1,2,3,4).stream()
     .reduce(0, (acumulado, atual) -&gt; acumulado + atual); <span class="com">// 10</span>
 
-<span class="com">// map/filter/collect nada mais são que casos especiais de reduce por baixo dos panos</span></pre>
+<span class="com">// a identidade 0 e a soma são associativas para este resultado sequencial</span></pre>
+
+      <p><code>reduce</code> combina elementos num único valor. A identidade precisa ser neutra e a operação precisa respeitar o contrato, especialmente se um dia o pipeline for paralelo. Para acumular em um contêiner mutável, como <code>List</code> ou <code>Map</code>, prefira <code>collect</code> e um coletor adequado em vez de mutar uma lista externa dentro de <code>reduce</code>.</p>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 13.1 — Pipeline básico</h4><span class="exercise-tag m">médio</span></div>

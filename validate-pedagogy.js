@@ -68,5 +68,5 @@ for (const chapterId of Object.keys(plan.splitRequirements)) {
 const targetCounts = new Map(moduleIds.map(id => [id, 0]));
 for (const chapter of mappedChapters) targetCounts.set(chapter.targetModule, targetCounts.get(chapter.targetModule) + 1);
 
-console.log(`OK: ${chapters.length} capitulos mapeados em ${plan.modules.length} modulos sem ciclos ou pre-requisitos futuros.`);
+console.log(`OK: ${chapters.length} capitulos mapeados em ${plan.modules.length} modulos sem ciclos ou pre-requisitos futuros entre modulos.`);
 console.log([...targetCounts].map(([id, count]) => `${id}:${count}`).join(', '));

@@ -1,19 +1,69 @@
 <section class="section tk-java" id="java-io">
-      <div class="section-head"><span class="section-num">—</span><h2 class="section-title">Arquivos, Paths e Java I/O</h2></div>
-      <div class="topic-meta"><div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#excecoes">Exceções</a>, <a class="prereq-tag" href="#colecoes">Coleções</a></div></div>
-      <p>Aplicações reais precisam atravessar a fronteira entre memória e recursos externos. Em Java moderno, <code>Path</code> representa caminhos e <code>Files</code> concentra operações comuns de leitura, escrita, cópia, movimentação e inspeção.</p>
-      <h3>Texto pequeno versus fluxo de dados</h3>
-      <pre class="code">Path arquivo = Path.of(<span class="str">"dados"</span>, <span class="str">"pedidos.csv"</span>);
+  <div class="section-head"><span class="section-num">—</span><h2 class="section-title">Arquivos, Paths e Java I/O</h2></div>
+  <div class="topic-meta">
+    <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+    <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#java-21-profundo">Java Core aprovado</a></div>
+  </div>
+  <p>Aplicações reais atravessam uma fronteira que não pertence à memória do programa: o sistema de arquivos. Um arquivo pode não existir, estar sem permissão, usar outra codificação, mudar durante a leitura ou ser grande demais para carregar inteiro. Por isso Java I/O começa com contrato, não com receita.</p>
+
+  <h3>Path não é só uma String</h3>
+  <p><code>Path</code> representa um caminho no filesystem. Ele pode ser relativo ao diretório atual ou absoluto. Use <code>Path.of</code> para montar partes do caminho sem fixar <code>/</code> ou <code>\</code> manualmente. O caminho apenas aponta para uma localização; ele não garante que o arquivo exista.</p>
+  <pre class="code">Path entrada = Path.of(<span class="str">"dados"</span>, <span class="str">"pedidos.csv"</span>);
+Path saida = Path.of(<span class="str">"relatorios"</span>, <span class="str">"resumo.txt"</span>);
+
+<span class="kw">if</span> (!Files.exists(entrada)) {
+    <span class="kw">throw new</span> IllegalArgumentException(<span class="str">"arquivo de entrada não encontrado: "</span> + entrada);
+}</pre>
+  <p>Evite gravar caminhos absolutos da sua máquina em exemplos e projetos. Um colega, servidor de CI ou GitHub Pages não terá a mesma pasta local.</p>
+
+  <h3>Bytes, caracteres e codificação</h3>
+  <p>Arquivo armazena bytes. Texto surge quando esses bytes são interpretados por um <code>Charset</code>. Se um CSV foi salvo em UTF-8 e você lê com outro charset, acentos e símbolos podem quebrar. Declare o charset quando o formato exigir comportamento reproduzível.</p>
+  <pre class="code">String texto = Files.readString(entrada, StandardCharsets.UTF_8);
+Files.writeString(saida, texto.strip(), StandardCharsets.UTF_8);</pre>
+  <div class="warn"><b>Não confie no charset padrão da máquina.</b> Ele pode variar por sistema operacional, configuração e versão do Java. Curso, teste e projeto profissional devem deixar essa decisão explícita.</div>
+
+  <h3>Texto pequeno versus fluxo de dados</h3>
+  <p><code>readString</code> e <code>readAllLines</code> carregam tudo na memória e são bons para arquivos pequenos e conhecidos. Para arquivo grande, processe gradualmente. <code>Files.lines</code> devolve um <code>Stream&lt;String&gt;</code>, mas esse stream mantém um arquivo aberto e precisa ser fechado.</p>
+  <pre class="code">Path arquivo = Path.of(<span class="str">"dados"</span>, <span class="str">"pedidos.csv"</span>);
 List&lt;String&gt; linhas = Files.readAllLines(arquivo, StandardCharsets.UTF_8);
 
 <span class="kw">try</span> (Stream&lt;String&gt; stream = Files.lines(arquivo, StandardCharsets.UTF_8)) {
-    <span class="kw">long</span> validas = stream.filter(linha -&gt; !linha.isBlank()).count();
+    <span class="kw">long</span> validas = stream
+        .filter(linha -&gt; !linha.isBlank())
+        .count();
 }</pre>
-      <p><code>readAllLines</code> carrega tudo na memória e serve para arquivos pequenos. <code>Files.lines</code> permite processamento gradual, mas mantém um recurso aberto e exige fechamento. O <code>try-with-resources</code> garante isso mesmo quando ocorre uma exceção.</p>
-      <h3>Bytes, caracteres e codificação</h3>
-      <p>Bytes são dados brutos; texto depende de uma codificação que converte bytes em caracteres. Declare UTF-8 explicitamente quando o formato exigir. Confiar no padrão da máquina torna o comportamento diferente entre ambientes.</p>
-      <div class="warn"><b>Não capture <code>IOException</code> e continue como se nada tivesse ocorrido.</b> Decida se a operação pode ser repetida, convertida em erro de domínio ou propagada com contexto.</div>
-      <h3>Prática</h3>
-      <div class="exercise"><div class="exercise-head"><h4>Leitor de log</h4><span class="exercise-tag m">Obrigatório</span></div><p>Leia um arquivo grande linha a linha, conte ocorrências por nível e grave um resumo em outro arquivo. Prove que arquivos inexistentes, linhas malformadas e diretório de saída ausente recebem tratamentos diferentes.</p></div>
-      <div class="rules-box"><h4>Critério de domínio</h4><ul><li>Distingue caminho, arquivo, byte e caractere.</li><li>Escolhe entre carregar tudo e processar por fluxo.</li><li>Fecha recursos automaticamente.</li><li>Não perde a causa original ao tratar uma falha de I/O.</li></ul></div>
-    </section>
+  <p>O <code>try-with-resources</code> fecha o recurso mesmo quando ocorre exceção dentro do bloco. Isso não é detalhe cosmético: arquivo aberto consome recurso do sistema operacional.</p>
+
+  <h3>Falhas de I/O precisam de política</h3>
+  <p><code>IOException</code> representa falha externa: permissão, arquivo ausente, disco, caminho inválido, encerramento inesperado, entre outras. Não capture e continue como se nada tivesse acontecido. Decida se a falha vira mensagem para o usuário, exceção de aplicação com causa preservada ou tentativa controlada.</p>
+  <pre class="code"><span class="kw">static</span> List&lt;String&gt; lerLinhas(Path arquivo) {
+    <span class="kw">try</span> {
+        <span class="kw">return</span> Files.readAllLines(arquivo, StandardCharsets.UTF_8);
+    } <span class="kw">catch</span> (IOException e) {
+        <span class="kw">throw new</span> IllegalStateException(<span class="str">"não foi possível ler "</span> + arquivo, e);
+    }
+}</pre>
+  <div class="good"><b>Regra prática:</b> falha esperada do domínio vira resultado de validação; falha do ambiente permanece visível com contexto e causa.</div>
+
+  <h3>Escrita segura de saída</h3>
+  <p>Gravar relatório também pode falhar. Crie diretórios necessários, use charset declarado e pense se o arquivo final pode ficar parcial. Para projetos pequenos, escrever em arquivo temporário e mover para o destino reduz a chance de deixar um resultado quebrado visível.</p>
+  <pre class="code">Path diretorio = Path.of(<span class="str">"relatorios"</span>);
+Files.createDirectories(diretorio);
+
+Path temporario = Files.createTempFile(diretorio, <span class="str">"resumo-"</span>, <span class="str">".tmp"</span>);
+Files.writeString(temporario, resumo, StandardCharsets.UTF_8);
+Files.move(temporario, diretorio.resolve(<span class="str">"resumo.txt"</span>), StandardCopyOption.REPLACE_EXISTING);</pre>
+
+  <h3>Prática</h3>
+  <div class="exercise">
+    <div class="exercise-head"><h4>Leitor de log</h4><span class="exercise-tag m">Obrigatório</span></div>
+    <p>Leia um arquivo grande linha a linha, conte ocorrências por nível e grave um resumo em outro arquivo. Prove que arquivo inexistente, linha malformada e diretório de saída ausente recebem tratamentos diferentes.</p>
+  </div>
+  <div class="rules-box"><h4>Critério de domínio</h4><ul>
+    <li>Distingue caminho, arquivo, byte, caractere e charset.</li>
+    <li>Escolhe entre carregar tudo e processar por fluxo.</li>
+    <li>Fecha recursos automaticamente.</li>
+    <li>Não perde a causa original ao tratar falha de I/O.</li>
+    <li>Produz saída reproduzível, sem depender de caminho local secreto.</li>
+  </ul></div>
+</section>

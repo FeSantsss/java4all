@@ -17,7 +17,7 @@
 
       <p>Isso é <strong>upcasting</strong>: uma variável <code>Funcionario</code> guarda referência para um objeto <code>Gerente</code>. O tipo da <em>variável</em> é <code>Funcionario</code>, mas o tipo do <em>objeto</em> continua <code>Gerente</code> — é o objeto real, não a variável, quem decide qual versão do método rodar (<strong>ligação dinâmica</strong>, dynamic binding).</p>
 
-      <h3>Binding estático vs dinâmico — a distinção que separa júnior de pleno</h3>
+      <h3>Binding estático e dinâmico — mecanismos diferentes</h3>
       <p>Nem tudo em Java é resolvido em tempo de execução. Métodos <code>static</code>, <code>private</code> e <code>final</code>, além de <strong>atributos</strong>, usam <strong>binding estático</strong> — resolvido em tempo de compilação, pelo tipo da <em>variável</em>, não do objeto.</p>
 
       <pre class="code"><span class="kw">class</span> <span class="cls">Animal</span> {
@@ -54,7 +54,7 @@ a.classificar();               <span class="com">// "reino Animalia" -- static p
 
       <div class="warn"><b>ClassCastException:</b> um downcast para um tipo incompatível com o objeto real compila normalmente, mas <strong>lança exceção em tempo de execução</strong>. Sempre proteja um downcast com <code>instanceof</code> antes, a menos que tenha certeza absoluta do tipo.</div>
 
-      <div class="callout"><b>Sobrecarga vs sobrescrita, de novo:</b> <em>sobrecarga</em> (capítulo 02) é resolvida em compilação pelo tipo dos <em>argumentos</em>; <em>sobrescrita</em> é resolvida em execução pelo tipo do <em>objeto</em>. São mecanismos completamente diferentes que só compartilham o fato de "reaproveitar um nome de método".</div>
+      <div class="callout"><b>Sobrecarga versus sobrescrita:</b> <em>sobrecarga</em>, já vista em métodos, é resolvida em compilação a partir das assinaturas aplicáveis; <em>sobrescrita</em> seleciona em execução a implementação de instância pela classe real do objeto. São mecanismos diferentes que apenas reutilizam nomes de método.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 6.1 — Formas geométricas polimórficas</h4><span class="exercise-tag d">difícil</span></div>

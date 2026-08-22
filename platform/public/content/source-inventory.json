@@ -8,27 +8,27 @@
   "counts": {
     "chapters": 128,
     "glossaryTerms": 111,
-    "htmlBytes": 923898,
-    "headings": 707,
-    "paragraphs": 595,
-    "codeBlocks": 407,
+    "htmlBytes": 929773,
+    "headings": 722,
+    "paragraphs": 613,
+    "codeBlocks": 414,
     "tables": 79,
     "exercises": 135,
     "quizzes": 31,
-    "checklists": 25,
-    "links": 231
+    "checklists": 26,
+    "links": 222
   },
-  "aggregateHtmlSha256": "e9f788436c2b94ad3c8816b95169beca83bba6ab299f17331ac6a0bca3d9ea3e",
-  "aggregateTextSha256": "a09a1c76865b6437eab9833f632a4e328a792ce1d8a584c6050555a472d456ea",
+  "aggregateHtmlSha256": "a0087b75f4e3b589050fe0a66c1831b91e96b1783cd63ecfc3721f0b5df5fab2",
+  "aggregateTextSha256": "98bcf64c2667c7655f0354ca834c3762403b7b84d0cc338ddef898c21e76b846",
   "chapters": [
     {
       "id": "intro",
-      "bytes": 5987,
-      "htmlSha256": "2c7282aa13471c7ed7684145356810e3e289c6b7e814e382f8ea753376bc2886",
-      "textSha256": "fe4bc4f716363004edd80cc862684947bbf0767d8133c7a4fc34749b821c77e9",
+      "bytes": 5349,
+      "htmlSha256": "1e7813f468c28459269b71611c94822c67beb50e7ced60a3013dd5561ff10abf",
+      "textSha256": "2fb5a4fb6813ee38dcf4b0f796897360e5930b52dee25a7aa995def1cd18eb29",
       "elements": {
         "headings": 6,
-        "paragraphs": 3,
+        "paragraphs": 4,
         "codeBlocks": 2,
         "tables": 1,
         "exercises": 1,
@@ -199,9 +199,9 @@
     },
     {
       "id": "mini-caixa-eletronico",
-      "bytes": 4702,
-      "htmlSha256": "0bb05b6d33b93377a895d4339064c6fa3fe1788946d1841dc2b03a95c043bbc5",
-      "textSha256": "dbe72680afeb59ab18d0bfa0d7c6a1e085d07b023231565b0368255fee8a340e",
+      "bytes": 4686,
+      "htmlSha256": "4d9d97ce0f38e6e47874f6c951ef8f61443395272e74060f21ff955eab85787f",
+      "textSha256": "df4b291c519ea3ad9ea62b341417aa710b68a0b6774cf16fccea59742bd86426",
       "elements": {
         "headings": 8,
         "paragraphs": 4,
@@ -215,9 +215,9 @@
     },
     {
       "id": "classes",
-      "bytes": 6696,
-      "htmlSha256": "da5b39c15122a680f55402e9976cd745df77d27df4c5ec0acebf29fefbe4c87e",
-      "textSha256": "d11074fb8d30156c7c0c7a14b3d1a22f3d38aa96e9862e2d1d9f20820db8a0e0",
+      "bytes": 6601,
+      "htmlSha256": "68c1abf442673a3c04f5f15152f21755252a85097bab939f8d75ceb7c39476fd",
+      "textSha256": "503190dde5f25e5a2dcf8da73e3c30abfb3dac4244da17583a9a560037593ee1",
       "elements": {
         "headings": 4,
         "paragraphs": 5,
@@ -231,9 +231,9 @@
     },
     {
       "id": "atributos",
-      "bytes": 8392,
-      "htmlSha256": "460ae360beb7de2b3de7f7752a19dba412c01b8db22f4606ce7a4bc99e76ed98",
-      "textSha256": "275e4e2ca06238d276243ddc42b5a1855541333e174ae5fa8505724bc92278a7",
+      "bytes": 7894,
+      "htmlSha256": "5abf81b45b78439c556122297ef65ff1dade7b0070dae1919e27390ff002da07",
+      "textSha256": "1704358656fcb8a41f848a03fcef0d9f937e3463ff9c599f2f61a21800732158",
       "elements": {
         "headings": 5,
         "paragraphs": 5,
@@ -247,9 +247,9 @@
     },
     {
       "id": "construtores",
-      "bytes": 7218,
-      "htmlSha256": "a646e717208c14761f2a2d1e0eb541d65796cbe2ce1bc843d21c6de2f8d669d9",
-      "textSha256": "8b21830f443d48d7932ad3c1c316c544456c7ce99d74fe14f9d87bbae9bdba3a",
+      "bytes": 6274,
+      "htmlSha256": "a9d397fd89f41e6e2e8bfde506984fbfe41d02f2d85893e6225bbc898729630a",
+      "textSha256": "7b2945e9395628552c580bd0f97bede63dd93a851614d41086d5d76c25027440",
       "elements": {
         "headings": 5,
         "paragraphs": 6,
@@ -263,9 +263,9 @@
     },
     {
       "id": "encapsulamento",
-      "bytes": 9831,
-      "htmlSha256": "d3c35006a5e30acf647e7a9801237ef2b2390631cc817e9ee42e2fe6f92f2bb6",
-      "textSha256": "ae9bd38ef934c65a34f3658b8ae8d06915afd1b2d86fc22e2627e57183fc426f",
+      "bytes": 9353,
+      "htmlSha256": "80df9c2851cc586a4038805aebade2467680f69aaf5bea5238f8a632744f0d6d",
+      "textSha256": "abc42e40b3663d5f88f8a32cdadb7912da654cf544b7f09ca79f7264b63433db",
       "elements": {
         "headings": 6,
         "paragraphs": 6,
@@ -279,9 +279,9 @@
     },
     {
       "id": "static",
-      "bytes": 8252,
-      "htmlSha256": "d34d2f3945b04d2f6cc8bd424d3d41e6bfc3d7e50f716116a7d34b0c253be4b7",
-      "textSha256": "5ac2e1572ee83dc61d686acce4df7e344730b006ade560252564d20228c27898",
+      "bytes": 7087,
+      "htmlSha256": "9fb354621919a2d36870abdb324388441a492368aa83e348a72cc663cb2048fb",
+      "textSha256": "374d93ed2a2164fa9534ffbdc2983b2cbbf2feab8c4ca935393a246ab1790480",
       "elements": {
         "headings": 6,
         "paragraphs": 5,
@@ -295,9 +295,9 @@
     },
     {
       "id": "heranca",
-      "bytes": 10909,
-      "htmlSha256": "5f93f30678f22bf82b14b2b9d776727b9e33c73766d9dae43dd8f6d5ec3274ac",
-      "textSha256": "74e07bb864c260a6b820a1173f9189a9c2a925e933d4ad3ce1741e429bd8b62d",
+      "bytes": 10017,
+      "htmlSha256": "9e513a160821d6c7f3795c7b32e88af20dbd91ae6b6895b84a453187b39e4983",
+      "textSha256": "2414726ad20bc656d92d1383220da9e361ab720f422ab5edbfb535aafda40183",
       "elements": {
         "headings": 5,
         "paragraphs": 5,
@@ -311,9 +311,9 @@
     },
     {
       "id": "polimorfismo",
-      "bytes": 8728,
-      "htmlSha256": "5569116f46f5972ff5613c724b61048f23a0eea32385e32cfae19952f54ba993",
-      "textSha256": "7dcef23e96fd141d65715e71b304fe52f1547e3ba43287519de8aa24d8f0fe2f",
+      "bytes": 8701,
+      "htmlSha256": "4f0cf53918ad1fcb1a4563a4422bb0a83ab08f2720c5070e3f8acf80531c3439",
+      "textSha256": "822227df4cd41f580ef3f62648eba6697f477b02938e342bba075388df45b0d9",
       "elements": {
         "headings": 5,
         "paragraphs": 6,
@@ -327,9 +327,9 @@
     },
     {
       "id": "abstracao",
-      "bytes": 7083,
-      "htmlSha256": "105b413d4384846aab9c9a372d8e1d6348c3a8e024a4359cafa02f6d80d1f0b2",
-      "textSha256": "9d58d4d4422d7d7025befa485efb20f85f345ced88e3ac5586a287f7d94447d9",
+      "bytes": 7262,
+      "htmlSha256": "30050e6f388d2274ad6a017ddb7235b95b931005c647b596a1ae974cc892f317",
+      "textSha256": "066c0eb3da35f0cd39e20075ce4bcd7f1ca23726351bb93af359b5fc4c252ea0",
       "elements": {
         "headings": 4,
         "paragraphs": 4,
@@ -343,9 +343,9 @@
     },
     {
       "id": "interfaces",
-      "bytes": 7925,
-      "htmlSha256": "e9973e65255e5e63873a3ac73708137e01103b131aa4f8c3e0ffa3a839218b30",
-      "textSha256": "7183fbaa72b3e943cb34a2c49b0a2589f6bb3934caf1d78289ba7c312d525d04",
+      "bytes": 7911,
+      "htmlSha256": "196153787f9dde9a856416a67099e9592a03b943058f8a9c44d484cfb9688b3a",
+      "textSha256": "e097d6174f2031934e295b13849e78bb71f9c53d96416960bbf53354214624b6",
       "elements": {
         "headings": 5,
         "paragraphs": 4,
@@ -359,29 +359,29 @@
     },
     {
       "id": "mini-biblioteca-cli",
-      "bytes": 4480,
-      "htmlSha256": "ad2c49c706086b56f38a5d7e63db79554caaac8a38026b44388a12cd5a69766f",
-      "textSha256": "3f5ba5182bf89a81069be449b50375bbfef8f22a2a295073f0fd7afcc0795f24",
+      "bytes": 5748,
+      "htmlSha256": "b15c929102df2ce50248113beb4ca54c60baddb50caba5efe7b09868746e4f10",
+      "textSha256": "9db2ea6103c8cc763c3a6e825253c240e2797353c1deffa4c5452f071f24be98",
       "elements": {
-        "headings": 7,
+        "headings": 8,
         "paragraphs": 3,
         "codeBlocks": 0,
         "tables": 1,
         "exercises": 0,
         "quizzes": 1,
-        "checklists": 2,
+        "checklists": 3,
         "links": 1
       }
     },
     {
       "id": "pacotes",
-      "bytes": 6415,
-      "htmlSha256": "0c8bc991e308e04bad470a4f22df54b0ffd61e4f5f94c4bf04dbc26322d4486c",
-      "textSha256": "1cd9e16ccc5e5346c387f9817491fbb4537199a4fe02c03a508cf380e8bcd0e4",
+      "bytes": 5646,
+      "htmlSha256": "d9763eaa7bce2ef9c4f7882db2f9d9d527aceb674d1a4553098c169133ee2f17",
+      "textSha256": "465e9f57e0c5d1b514e4a162b00f19211ffc664c9fb423fac53c4718bdd059cc",
       "elements": {
-        "headings": 4,
-        "paragraphs": 5,
-        "codeBlocks": 4,
+        "headings": 6,
+        "paragraphs": 7,
+        "codeBlocks": 3,
         "tables": 0,
         "exercises": 1,
         "quizzes": 0,
@@ -391,12 +391,12 @@
     },
     {
       "id": "excecoes",
-      "bytes": 10831,
-      "htmlSha256": "0e47192e6b039f4c0fc4fc5ff974a5a2a38674809741cc7e721e4011e4e31faf",
-      "textSha256": "d6225f2c6d8e8032c2f738527e8ffeb62b269a51836081c07c455256e4d3a7b4",
+      "bytes": 11401,
+      "htmlSha256": "d77e21a62db5cf014130b315351b32369f59f598a74fc78b26a588ce149502ad",
+      "textSha256": "37f81638db8f0d4b2d4f22f3631ef3e69b279100ee27fe486d665efbc297813e",
       "elements": {
         "headings": 6,
-        "paragraphs": 6,
+        "paragraphs": 7,
         "codeBlocks": 6,
         "tables": 1,
         "exercises": 2,
@@ -407,13 +407,13 @@
     },
     {
       "id": "colecoes",
-      "bytes": 10361,
-      "htmlSha256": "106e1c77ec0c0d6c1303bfd77e5ccf079be343aee5049211eb9929809732ed9d",
-      "textSha256": "b2867b1045a434f807d509f84f123690b10e5417e5ed2896115eb2f538ed1e8d",
+      "bytes": 13792,
+      "htmlSha256": "d998a08e7c8d6efc66a6d3ad9b43a09e947eadf66a374920491bc3e5b9f23b3e",
+      "textSha256": "357a06da23d2691f4cfaf8d76ad31a6aa9e66b023cb23d0a152863b86c458a0d",
       "elements": {
-        "headings": 8,
-        "paragraphs": 6,
-        "codeBlocks": 7,
+        "headings": 9,
+        "paragraphs": 7,
+        "codeBlocks": 8,
         "tables": 1,
         "exercises": 3,
         "quizzes": 0,
@@ -423,9 +423,9 @@
     },
     {
       "id": "generics",
-      "bytes": 8706,
-      "htmlSha256": "27659fc6fec3cbed1d6c6972c60a893f12a4840cae6141a67bbcbfb735fcc07b",
-      "textSha256": "72a85b83201c2bcca15ec8f80dd52849bf00d312e6fefacf41e3fcc6b33e8249",
+      "bytes": 8715,
+      "htmlSha256": "99e06349747df73eec5da67e31864a88687f0d579ed3cc56d3945c1a810b8c9c",
+      "textSha256": "2ad724cca45edba1ff336eb52d63ce2184d3f8462afc5bf99b0b16956b7a77bb",
       "elements": {
         "headings": 8,
         "paragraphs": 3,
@@ -439,9 +439,9 @@
     },
     {
       "id": "javamoderno",
-      "bytes": 6454,
-      "htmlSha256": "e6cbfd3d42206dc5c05f1389a65f720ce2ca8e20e1cf266c1196cac4591ee05a",
-      "textSha256": "94e17b1257c9537b727ae7f9d2d021804b09b62170fdae1505acb6dd9bad7426",
+      "bytes": 6982,
+      "htmlSha256": "80c14ccdc8e0f099b64714317b2dc96e3b727bf01c7bb60b3b68ceb5c5623fb8",
+      "textSha256": "271cd577a573ea712343a861a9eadb7d2b9265ee5c2817d62f3b5684dc30188f",
       "elements": {
         "headings": 6,
         "paragraphs": 3,
@@ -455,9 +455,9 @@
     },
     {
       "id": "java-21-profundo",
-      "bytes": 7699,
-      "htmlSha256": "240a678ba19b865db5bf1c176530de4a5f276905f470a84b5b047557e293dd85",
-      "textSha256": "21a1a0e4d108f1e35c5e17679408f2a72ed1b4e12efbf120f2c8daf45a1bd4f2",
+      "bytes": 7707,
+      "htmlSha256": "0c411e86a42588b4c8b1a389a8a4026ddf8281c148d7c4f6cc31f1b979902903",
+      "textSha256": "fa09936da9046ad853b661dec0fc4bc55882ff884b3e399077af1337040fdbc3",
       "elements": {
         "headings": 7,
         "paragraphs": 8,
@@ -466,17 +466,17 @@
         "exercises": 1,
         "quizzes": 0,
         "checklists": 0,
-        "links": 4
+        "links": 1
       }
     },
     {
       "id": "streams",
-      "bytes": 7629,
-      "htmlSha256": "c37b90d9b0845f1089ed349e19dcf7b153fe76887c49b2c771f049eb68d0d54b",
-      "textSha256": "0c170625e0adce3fc4c07d5c6558d8b28a7ba8ca8d9a04f1932d29ed5084db22",
+      "bytes": 8879,
+      "htmlSha256": "8d400752a0ce67b929750c6be8c86985446f7d6ee1208ef0ee9a3d31098a1b81",
+      "textSha256": "ba726b2e6bb16afdd57d8bfead5abb16d5874f4e73e4e7e676e9df094c2973e7",
       "elements": {
-        "headings": 8,
-        "paragraphs": 4,
+        "headings": 9,
+        "paragraphs": 6,
         "codeBlocks": 6,
         "tables": 1,
         "exercises": 2,
@@ -487,29 +487,29 @@
     },
     {
       "id": "java-io",
-      "bytes": 2717,
-      "htmlSha256": "d1ca01e76c0a2293f6557992f52076c10ad24cb34675b1ffc4c4f97d645556f4",
-      "textSha256": "dcbcc709267af28a0d1d6fd880e16376200b4b9f25c1948e127bc3b5bd19f869",
+      "bytes": 5932,
+      "htmlSha256": "f6ac16056f3e98e04227f069d464617f94263cee91e3d529d18567406acacac4",
+      "textSha256": "a614788fa00350969a336a71a78ec161636f1d78f6792a9e2125d10d0d7609e5",
       "elements": {
-        "headings": 6,
-        "paragraphs": 4,
-        "codeBlocks": 1,
+        "headings": 9,
+        "paragraphs": 9,
+        "codeBlocks": 5,
         "tables": 0,
         "exercises": 1,
         "quizzes": 0,
         "checklists": 0,
-        "links": 2
+        "links": 1
       }
     },
     {
       "id": "mini-analisador-vendas",
-      "bytes": 4207,
-      "htmlSha256": "d87ae88b152e5665aa783932aa9497bf920ea0426cccbc0a63440902275a2ec6",
-      "textSha256": "7323ed3464ec0176e608455d030df079100cf1f4ecfc4b4d61686998f13a6109",
+      "bytes": 6288,
+      "htmlSha256": "7451a26e483c8acbc1901b01ce515de05003c2e1d65b27961c892f799fdbb28a",
+      "textSha256": "cb70c2d40fa85b165bd03e767c2aa07abe1034e90b03f7a10abd91fc6abaab41",
       "elements": {
-        "headings": 6,
-        "paragraphs": 3,
-        "codeBlocks": 0,
+        "headings": 9,
+        "paragraphs": 5,
+        "codeBlocks": 1,
         "tables": 1,
         "exercises": 0,
         "quizzes": 1,
@@ -631,13 +631,13 @@
     },
     {
       "id": "json",
-      "bytes": 6417,
-      "htmlSha256": "dc340f36a3b94a0258a50f4496fe6072595d366c9753ec3e99e479e1fd2ee8a9",
-      "textSha256": "f1ead04cfc1b8c7361d2d8a3af4c52ecea22ea3aded80dd75b35b7d63b207a1d",
+      "bytes": 6526,
+      "htmlSha256": "ffc56b22fea036ef377550ab939e358b515c254221d57790bb355a769ed9aaa2",
+      "textSha256": "63e7db646b27eae2cc12a11a2da3e11cf7ace9090a2fbea7b379a96d7b9db940",
       "elements": {
-        "headings": 6,
-        "paragraphs": 2,
-        "codeBlocks": 5,
+        "headings": 7,
+        "paragraphs": 5,
+        "codeBlocks": 6,
         "tables": 0,
         "exercises": 1,
         "quizzes": 0,
@@ -663,13 +663,13 @@
     },
     {
       "id": "mini-importador-pedidos",
-      "bytes": 4279,
-      "htmlSha256": "e5834212016c67bb391fd55efb3d5bcc31f3500c09d555101938c38097082f24",
-      "textSha256": "4ae739ae4d88bb49a4d67c6745b244525adf3c794e06f2f059bc8c3260aa8f39",
+      "bytes": 6055,
+      "htmlSha256": "14720995f2dcbbd95245c397f296fefc51ea08c8c9bac2cc744335f32844964b",
+      "textSha256": "38b176d766542a5e6d8b981f98932e6477b5df133addb97dc4a4101276a1b698",
       "elements": {
-        "headings": 6,
-        "paragraphs": 3,
-        "codeBlocks": 0,
+        "headings": 9,
+        "paragraphs": 4,
+        "codeBlocks": 1,
         "tables": 1,
         "exercises": 0,
         "quizzes": 1,
@@ -1687,9 +1687,9 @@
     },
     {
       "id": "pilares-profundo",
-      "bytes": 14655,
-      "htmlSha256": "f82d55a4b4ad9887e0f974fbd45abfe7759cc621747effc9d4977c0357ee9dc2",
-      "textSha256": "181950ac76dfd712b52cab949cd875a9e48c3fc5f036ba2ad95360cb1914d13e",
+      "bytes": 13311,
+      "htmlSha256": "7de83b9765b4887933f9d34fc5e95502f23111632a8271ddaedb324407cf14a5",
+      "textSha256": "ccb5dce2164670ae519984bca972418cd979d02cf3b4a9aaf9ede2020f29b519",
       "elements": {
         "headings": 7,
         "paragraphs": 8,
@@ -1698,7 +1698,7 @@
         "exercises": 1,
         "quizzes": 0,
         "checklists": 0,
-        "links": 4
+        "links": 1
       }
     },
     {
@@ -1719,9 +1719,9 @@
     },
     {
       "id": "jvm-profundo",
-      "bytes": 21134,
-      "htmlSha256": "3613407224eb6d7b6c7abcaa6c58c6a270fcedbcac55ed0fc2e9e71f148ab99e",
-      "textSha256": "48f750016b3d4ae9e9df1d708168b342c7b128b74ee5b3f91e5ca7c223d25d19",
+      "bytes": 19465,
+      "htmlSha256": "4fd0b393d401a75aad5625cfda60c25dd6bd77d8780f04185dba7eda718c902b",
+      "textSha256": "a303461a631a36cb00b98a5b0d7df3fc4f59e82b289bc3224d77a27957b0c04e",
       "elements": {
         "headings": 10,
         "paragraphs": 13,
@@ -1730,7 +1730,7 @@
         "exercises": 2,
         "quizzes": 0,
         "checklists": 0,
-        "links": 3
+        "links": 1
       }
     },
     {

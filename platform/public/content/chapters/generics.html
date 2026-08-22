@@ -48,7 +48,7 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
 }</pre>
 
       <h3>Wildcards: ? extends e ? super</h3>
-      <pre class="code"><span class="com">// ? extends Numero: aceita listas de Numero OU QUALQUER SUBTIPO -- só leitura segura</span>
+      <pre class="code"><span class="com">// ? extends Number: o tipo exato é desconhecido, mas produz valores como Number</span>
 <span class="kw">static double</span> <span class="fn">somarTodos</span>(List&lt;? <span class="kw">extends</span> Number&gt; numeros) {
     <span class="kw">double</span> soma = 0;
     <span class="kw">for</span> (Number n : numeros) soma += n.doubleValue();
@@ -56,13 +56,13 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
 }
 <span class="com">// funciona com List&lt;Integer&gt;, List&lt;Double&gt;, List&lt;Number&gt;...</span>
 
-<span class="com">// ? super Integer: aceita listas de Integer OU QUALQUER SUPERTIPO -- seguro para ESCRITA</span>
+<span class="com">// ? super Integer: aceita receber Integer; ao ler, o tipo garantido é apenas Object</span>
 <span class="kw">static void</span> <span class="fn">adicionarInteiros</span>(List&lt;? <span class="kw">super</span> <span class="kw">Integer</span>&gt; lista) {
     lista.add(1);
     lista.add(2);
 }</pre>
 
-      <div class="secret">O mnemônico consagrado é <b>PECS — Producer Extends, Consumer Super</b>. Se a coleção só vai <em>fornecer</em> dados para você ler (produtora), use <code>? extends</code>. Se a coleção vai <em>receber</em> dados que você insere (consumidora), use <code>? super</code>. Isso não é regra decorada à toa: é literalmente como as próprias APIs de <code>Collections.copy()</code> e <code>Stream</code> do JDK são declaradas.</div>
+      <div class="secret">O mnemônico <b>PECS — Producer Extends, Consumer Super</b> ajuda a escolher limites. Em <code>List&lt;? extends Number&gt;</code>, você pode obter <code>Number</code>, mas não inserir um número arbitrário porque o tipo capturado pode ser <code>Integer</code> ou <code>Double</code>. Em <code>List&lt;? super Integer&gt;</code>, pode inserir <code>Integer</code>, mas ao ler só há garantia de <code>Object</code>. Se precisa ler e escrever o mesmo <code>T</code>, declare um parâmetro de tipo em vez de wildcard.</div>
 
       <div class="warn"><b>Type erasure:</b> instâncias de tipos genéricos normalmente não carregam seus argumentos de tipo de forma reificada: em runtime, <code>new ArrayList&lt;String&gt;()</code> e <code>new ArrayList&lt;Integer&gt;()</code> pertencem à mesma classe <code>ArrayList</code>. O compilador insere casts e preserva algumas assinaturas genéricas como metadados do arquivo <code>.class</code>, que reflection pode consultar em campos e métodos. A ausência de um tipo <code>T</code> reificado explica por que não se pode usar diretamente <code>new T()</code>, <code>new T[10]</code> ou <code>obj instanceof List&lt;String&gt;</code>.</div>
 
@@ -90,7 +90,7 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 12.2 — Repositório genérico</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Crie uma classe <code>Repositorio&lt;T&gt;</code> com uma <code>List&lt;T&gt;</code> interna e métodos <code>salvar(T item)</code>, <code>listar()</code> (retorna cópia imutável, dica: <code>List.copyOf(...)</code>) e <code>buscar(Predicate&lt;T&gt; filtro)</code> retornando <code>List&lt;T&gt;</code> com os itens que satisfazem o filtro (pode usar um <code>for</code> manual se ainda não viu streams — veremos no próximo capítulo).</p>
+        <p>Crie uma classe <code>Repositorio&lt;T&gt;</code> com uma <code>List&lt;T&gt;</code> interna e métodos <code>salvar(T item)</code>, <code>listar()</code> (retorna uma cópia não modificável com <code>List.copyOf(...)</code>) e <code>buscarIguais(T procurado)</code>. Implemente a busca com <code>for</code> e <code>equals</code>; comportamentos passados como dados serão estudados em lambdas.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
 <pre class="code"><span class="kw">public class</span> <span class="cls">Repositorio</span>&lt;T&gt; {
@@ -100,15 +100,15 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
 
     <span class="kw">public</span> List&lt;T&gt; <span class="fn">listar</span>() { <span class="kw">return</span> List.copyOf(itens); }
 
-    <span class="kw">public</span> List&lt;T&gt; <span class="fn">buscar</span>(java.util.function.Predicate&lt;T&gt; filtro) {
+    <span class="kw">public</span> List&lt;T&gt; <span class="fn">buscarIguais</span>(T procurado) {
         List&lt;T&gt; resultado = <span class="kw">new</span> ArrayList&lt;&gt;();
         <span class="kw">for</span> (T item : itens) {
-            <span class="kw">if</span> (filtro.test(item)) resultado.add(item);
+            <span class="kw">if</span> (java.util.Objects.equals(item, procurado)) resultado.add(item);
         }
         <span class="kw">return</span> resultado;
     }
 }
-<span class="com">// uso: repo.buscar(livro -&gt; livro.getPaginas() &gt; 300);</span></pre>
+<span class="com">// uso: repo.buscarIguais(livroProcurado);</span></pre>
         </div>
       </div>
     </section>

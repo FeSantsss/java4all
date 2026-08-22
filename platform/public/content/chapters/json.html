@@ -2,40 +2,51 @@
       <div class="section-head"><span class="section-num">25</span><h2 class="section-title">JSON &amp; serialização</h2></div>
       <div class="topic-meta">
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
-        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#mini-analisador-vendas">Mini-projeto com arquivos e relatórios</a></div>
       </div>
 
-      <p>Toda API REST (próximo capítulo) troca dados em <strong>JSON</strong>. O Spring Boot usa a biblioteca <strong>Jackson</strong> para converter automaticamente objetos Java em JSON (serialização) e vice-versa (desserialização) — e isso é feito, mais uma vez, via reflection.</p>
+      <p><strong>JSON</strong> é um formato textual para trocar dados estruturados. Ele aparece em APIs, arquivos de configuração, relatórios e integrações. Neste ponto do curso, ele entra sem Spring: você vai entender primeiro o contrato entre texto JSON, DTO Java, validação e falhas de conversão.</p>
 
-      <h3>De objeto Java para JSON (serialização)</h3>
-      <pre class="code"><span class="kw">public class</span> <span class="cls">Livro</span> {
-    <span class="kw">private</span> <span class="kw">String</span> titulo;
-    <span class="kw">private</span> <span class="kw">String</span> autor;
-    <span class="kw">private int</span> paginas;
-    <span class="com">// getters obrigatórios -- é assim que o Jackson DESCOBRE os campos a serializar</span>
-    <span class="kw">public String</span> <span class="fn">getTitulo</span>() { <span class="kw">return</span> titulo; }
-    <span class="kw">public String</span> <span class="fn">getAutor</span>() { <span class="kw">return</span> autor; }
-    <span class="kw">public int</span> <span class="fn">getPaginas</span>() { <span class="kw">return</span> paginas; }
-}
+      <h3>Objeto Java, DTO e JSON não são a mesma coisa</h3>
+      <p>O objeto Java pode ter métodos, invariantes, tipos ricos e identidade em memória. JSON tem objetos, arrays, strings, números, booleanos e null. O DTO é a classe ou record que representa a forma permitida na fronteira. Não exponha o domínio inteiro só porque a biblioteca consegue serializar.</p>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(String titulo, String autor, <span class="kw">int</span> paginas) {}
 
 ObjectMapper mapper = <span class="kw">new</span> ObjectMapper();
-<span class="kw">String</span> json = mapper.writeValueAsString(<span class="kw">new</span> <span class="cls">Livro</span>(<span class="str">"1984"</span>, <span class="str">"Orwell"</span>, 328));
+LivroDTO dto = <span class="kw">new</span> LivroDTO(<span class="str">"1984"</span>, <span class="str">"Orwell"</span>, 328);
+
+String json = mapper.writeValueAsString(dto);
 <span class="com">// {"titulo":"1984","autor":"Orwell","paginas":328}</span></pre>
 
-      <div class="secret">O Jackson não lê os campos <code>private</code> diretamente — por padrão, ele usa <strong>introspecção via getters/setters</strong> (o padrão JavaBeans: qualquer <code>getX()</code> vira a propriedade JSON <code>"x"</code>). É por isso que uma classe sem getters é serializada como <code>{}</code> vazio, mesmo tendo campos preenchidos — um erro clássico de quem está começando com Spring e não entende por que o JSON de resposta veio vazio.</div>
+      <div class="secret">Serializar é transformar um valor Java em representação textual. Isso não prova que o JSON publicado é uma boa API, nem que todos os campos deveriam sair. O contrato externo precisa ser desenhado.</div>
 
-      <h3>De JSON para objeto Java (desserialização)</h3>
+      <h3>De JSON para DTO Java (desserialização)</h3>
       <pre class="code"><span class="kw">String</span> json = <span class="str">"""
     {"titulo": "Dom Casmurro", "autor": "Machado de Assis", "paginas": 256}
     """</span>;
 
-<span class="cls">Livro</span> livro = mapper.readValue(json, <span class="cls">Livro</span>.<span class="kw">class</span>);
-<span class="com">// Jackson usa reflection para: 1) criar o objeto via construtor sem args,
-// 2) chamar os setters correspondentes a cada campo do JSON</span></pre>
+LivroDTO livro = mapper.readValue(json, LivroDTO.<span class="kw">class</span>);
+System.out.println(livro.titulo());</pre>
 
-      <div class="warn"><b>Por isso o Jackson exige um construtor sem argumentos</b> (implícito ou explícito) na maioria dos cenários: ele cria o objeto "vazio" primeiro e preenche os campos depois via setters/reflection. Classes totalmente imutáveis (capítulo 04, só com construtor cheio e sem setters) exigem anotações extras como <code>@JsonCreator</code> para funcionar.</div>
+      <div class="warn"><b>Desserialização não é validação de domínio.</b> O texto pode caber no DTO e ainda assim violar regras: páginas negativas, título vazio, estado impossível ou campo ausente que seu caso de uso exige.</div>
 
-      <h3>Controlando a serialização com anotações</h3>
+      <h3>Jackson com classes JavaBeans</h3>
+      <p>Quando você usa classes comuns, Jackson costuma mapear propriedades por construtor, campos visíveis, getters, setters e configuração do <code>ObjectMapper</code>. Em muitos cenários JavaBeans, getters como <code>getTitulo()</code> expõem uma propriedade chamada <code>titulo</code>. Isso é introspecção de propriedades, não leitura mágica de regra de negócio.</p>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">UsuarioDTO</span> {
+    <span class="kw">private</span> String nome;
+
+    <span class="kw">public</span> UsuarioDTO() {
+    }
+
+    <span class="kw">public</span> String getNome() {
+        <span class="kw">return</span> nome;
+    }
+
+    <span class="kw">public void</span> setNome(String nome) {
+        <span class="kw">this</span>.nome = nome;
+    }
+}</pre>
+
+      <h3>Controlando o contrato com anotações</h3>
       <pre class="code"><span class="kw">public class</span> <span class="cls">Usuario</span> {
     <span class="kw">private</span> <span class="kw">String</span> nome;
 
@@ -45,13 +56,14 @@ ObjectMapper mapper = <span class="kw">new</span> ObjectMapper();
     <span class="annotation">@JsonProperty</span>(<span class="str">"nome_completo"</span>) <span class="com">// renomeia o campo no JSON</span>
     <span class="kw">public String</span> <span class="fn">getNome</span>() { <span class="kw">return</span> nome; }
 }</pre>
+      <p>Anotações ajudam a declarar nomes, ignorar propriedades e ajustar formato. Elas não substituem separar DTO de domínio, revisar compatibilidade e impedir que segredos apareçam em log, resposta ou arquivo.</p>
 
-      <h3>Records e JSON — a combinação favorita do Spring moderno</h3>
+      <h3>Records e JSON</h3>
       <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(<span class="kw">String</span> titulo, <span class="kw">String</span> autor, <span class="kw">int</span> paginas) {}
 <span class="com">// Jackson serializa/desserializa records automaticamente desde a versão 2.12+ --
 // sem precisar de getters "get*" (usa os métodos de acesso do record: titulo(), autor()...)</span></pre>
 
-      <div class="callout"><b>DTO (Data Transfer Object):</b> em uma API real, você raramente serializa suas entidades de domínio diretamente — cria classes específicas (ou records) só para representar o formato de entrada/saída da API, desacoplando o "formato de rede" do "modelo interno". Isso vai aparecer o tempo todo em controllers Spring.</div>
+      <div class="callout"><b>DTO (Data Transfer Object):</b> em uma aplicação real, você raramente serializa entidades de domínio diretamente. Crie classes ou records específicos para representar entrada e saída, desacoplando formato externo do modelo interno.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 25.1 — Serializando e desserializando</h4><span class="exercise-tag m">médio</span></div>

@@ -82,26 +82,23 @@ System.out.println(r.perimetro()); <span class="com">// 18.0</span></pre>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 2.2 — Prevendo o comportamento de referência</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Escreva um método <code>esvaziar(ArrayList&lt;String&gt; lista)</code> que tenta esvaziar a lista recebida de duas formas: (a) usando <code>lista.clear()</code>, (b) usando <code>lista = new ArrayList&lt;&gt;()</code>. No <code>main</code>, chame os dois e imprima a lista original depois de cada chamada. Explique a diferença de resultado usando o que você aprendeu sobre passagem por valor de referências. (Não se preocupe se ainda não viu <code>ArrayList</code> em detalhes — veremos no capítulo 11; o objetivo aqui é só o conceito de referência.)</p>
+        <p>Crie um método <code>renomear(Cafe cafe, String novoTipo)</code> que altera <code>cafe.tipo</code> e outro método <code>substituir(Cafe cafe)</code> que apenas executa <code>cafe = new Cafe()</code>. Preveja o estado do objeto original depois de cada chamada e explique a diferença entre mutar o objeto e reatribuir a cópia local da referência.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-<pre class="code"><span class="kw">static void</span> <span class="fn">esvaziarComClear</span>(<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; lista) {
-    lista.clear(); <span class="com">// muda o OBJETO apontado -&gt; visível fora</span>
+<pre class="code"><span class="kw">static void</span> <span class="fn">renomear</span>(<span class="cls">Cafe</span> cafe, <span class="kw">String</span> novoTipo) {
+    cafe.tipo = novoTipo; <span class="com">// muta o objeto alcançado</span>
 }
 
-<span class="kw">static void</span> <span class="fn">esvaziarComNovaLista</span>(<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; lista) {
-    lista = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;(); <span class="com">// só troca a referência LOCAL -&gt; invisível fora</span>
+<span class="kw">static void</span> <span class="fn">substituir</span>(<span class="cls">Cafe</span> cafe) {
+    cafe = <span class="kw">new</span> <span class="cls">Cafe</span>(); <span class="com">// reatribui só o parâmetro local</span>
 }
 
-<span class="com">// main:</span>
-<span class="cls">ArrayList</span>&lt;<span class="kw">String</span>&gt; nomes = <span class="kw">new</span> <span class="cls">ArrayList</span>&lt;&gt;();
-nomes.add(<span class="str">"Ana"</span>);
-esvaziarComClear(nomes);
-System.out.println(nomes); <span class="com">// [] -- clear() alterou o objeto real</span>
-
-nomes.add(<span class="str">"Bruno"</span>);
-esvaziarComNovaLista(nomes);
-System.out.println(nomes); <span class="com">// [Bruno] -- a reatribuição local não afetou "nomes" fora do método</span></pre>
+<span class="cls">Cafe</span> original = <span class="kw">new</span> <span class="cls">Cafe</span>();
+original.tipo = <span class="str">"coado"</span>;
+renomear(original, <span class="str">"latte"</span>);
+System.out.println(original.tipo); <span class="com">// latte</span>
+substituir(original);
+System.out.println(original.tipo); <span class="com">// ainda latte</span></pre>
         </div>
       </div>
     </section>

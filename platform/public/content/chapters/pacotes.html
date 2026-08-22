@@ -1,79 +1,60 @@
 <section class="section" id="pacotes">
-      <div class="section-head"><span class="section-num">18</span><h2 class="section-title">Pacotes &amp; organização de projeto</h2></div>
-      <div class="topic-meta">
-        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
-        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#interfaces">Interfaces</a></div>
-      </div>
+  <div class="section-head"><span class="section-num">18</span><h2 class="section-title">Pacotes &amp; organização de projeto</h2></div>
+  <div class="topic-meta">
+    <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante–Intermediário</b></div>
+    <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#mini-biblioteca-cli">Mini-projeto: biblioteca orientada a objetos</a></div>
+  </div>
 
-      <p>Até aqui, todo exemplo do curso viveu implicitamente em um único "pacote padrão". Em qualquer projeto real — e em <strong>todo</strong> projeto Spring Boot — o código é organizado em <strong>pacotes</strong>, que são pastas que refletem a estrutura de nomes totalmente qualificados das classes.</p>
+  <p>Quando duas classes possuem o mesmo nome ou dezenas de arquivos precisam colaborar, um único espaço de nomes deixa de ser suficiente. Um <strong>pacote</strong> agrupa tipos relacionados e participa do nome completo de cada classe. Assim, <code>com.exemplo.biblioteca.modelo.Livro</code> e <code>com.exemplo.loja.modelo.Livro</code> são tipos diferentes.</p>
 
-      <pre class="code"><span class="com">// arquivo: src/main/java/com/felipy/biblioteca/modelo/Livro.java</span>
-<span class="kw">package</span> com.felipy.biblioteca.modelo;
+  <pre class="code"><span class="com">// source file: src/com/example/library/model/Book.java</span>
+<span class="kw">package</span> com.example.library.model;
 
-<span class="kw">public class</span> <span class="cls">Livro</span> { ... }</pre>
-
-      <p>A declaração <code>package</code> precisa ser a <strong>primeira linha não-comentário</strong> do arquivo, e o caminho de pastas no disco precisa espelhar exatamente o nome do pacote. Para usar essa classe de outro pacote, você importa:</p>
-
-      <pre class="code"><span class="kw">package</span> com.felipy.biblioteca.servico;
-
-<span class="kw">import</span> com.felipy.biblioteca.modelo.Livro; <span class="com">// import explícito</span>
-<span class="kw">import</span> com.felipy.biblioteca.modelo.*;      <span class="com">// import de tudo do pacote (evite em projetos grandes)</span>
-
-<span class="kw">public class</span> <span class="cls">LivroServico</span> {
-    <span class="kw">void</span> <span class="fn">processar</span>(<span class="cls">Livro</span> livro) { ... }
+<span class="kw">public class</span> <span class="cls">Book</span> {
+    <span class="kw">private final</span> <span class="cls">String</span> title;
+    <span class="kw">public</span> <span class="fn">Book</span>(<span class="cls">String</span> title) { <span class="kw">this</span>.title = title; }
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">title</span>() { <span class="kw">return</span> title; }
 }</pre>
 
-      <h3>A estrutura de pastas padrão do Maven (que o Spring Boot usa)</h3>
-      <pre class="code">meu-projeto/
-├── pom.xml                          <span class="com">// configuração do Maven (capítulo 19)</span>
+  <p>A declaração <code>package</code>, quando existe, aparece antes das declarações de tipos e depois apenas de comentários e espaços. O nome do pacote não é “a pasta” por definição da linguagem; ele pertence ao código-fonte. Na prática, compiladores e ferramentas mapeiam esse nome para diretórios, e manter <code>com.exemplo.biblioteca.modelo</code> em <code>com/exemplo/biblioteca/modelo</code> torna a compilação e a localização previsíveis.</p>
+
+  <h3>Nome qualificado e import</h3>
+  <pre class="code"><span class="kw">package</span> com.example.library.app;
+
+<span class="kw">import</span> com.example.library.model.Book;
+
+<span class="kw">public class</span> <span class="cls">Principal</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Book</span> book = <span class="kw">new</span> <span class="cls">Book</span>(<span class="str">"Dune"</span>);
+        System.out.println(book.title());
+    }
+}</pre>
+
+  <p><code>import</code> permite escrever o nome simples <code>Livro</code>; ele não copia código, não carrega a classe e não inclui subpacotes. <code>import com.exemplo.biblioteca.*</code> importa tipos diretamente daquele pacote, não tipos de <code>modelo</code> ou outros subpacotes. Se dois imports fornecerem o mesmo nome simples, use ao menos um nome totalmente qualificado no código.</p>
+
+  <h3>Compilação de dois pacotes sem ferramenta de build</h3>
+  <pre class="code">projeto/
 └── src/
-    ├── main/
-    │   ├── java/
-    │   │   └── com/felipy/app/
-    │   │       ├── Application.java
-    │   │       ├── modelo/
-    │   │       ├── servico/
-    │   │       ├── repositorio/
-    │   │       └── controlador/
-    │   └── resources/
-    │       └── application.properties
-    └── test/
-        └── java/
-            └── com/felipy/app/     <span class="com">// mesma estrutura de pacotes, para os testes</span></pre>
+    └── com/example/library/
+        ├── app/Principal.java
+        └── modelo/Livro.java
 
-      <div class="callout"><b>Por que isso importa para o Spring:</b> o Spring Boot organiza aplicações inteiras em pacotes por <em>responsabilidade</em> (<code>modelo</code>/<code>domain</code>, <code>servico</code>/<code>service</code>, <code>repositorio</code>/<code>repository</code>, <code>controlador</code>/<code>controller</code>) — uma aplicação prática do <strong>SRP</strong> (capítulo 16) em nível de projeto, não só de classe. Entender essa convenção agora evita estranhar a estrutura de qualquer projeto Spring Boot no primeiro contato.</div>
+<span class="com"># execute dentro de projeto</span>
+javac -d out src/com/example/library/model/Book.java src/com/example/library/app/Principal.java
+java -cp out com.example.library.app.Principal</pre>
 
-      <h3>Convenção de nomes de pacote</h3>
-      <p>Por convenção (não exigência do compilador), pacotes usam domínio invertido em minúsculas: <code>com.empresa.projeto.modulo</code>. Isso evita colisão de nomes entre bibliotecas de fornecedores diferentes — é por isso que classes do JDK ficam em <code>java.util</code>, <code>java.io</code> etc.</p>
+  <p><code>-d out</code> pede ao compilador que escreva os arquivos <code>.class</code> na árvore de pacotes dentro de <code>out</code>. <code>-cp out</code> define o <em>classpath</em>: as raízes nas quais o launcher procura nomes de classe. O argumento de <code>java</code> é o nome qualificado da classe, sem <code>.class</code>.</p>
 
-      <div class="secret">O modificador de acesso "default" (sem palavra-chave, capítulo 04) — também chamado de <em>package-private</em> — só faz sentido quando você organiza código em pacotes de verdade. Ele é a ferramenta certa para esconder classes auxiliares de implementação que não devem vazar para fora do módulo (ex: uma classe <code>ValidadorInterno</code> usada só dentro do pacote <code>servico</code>), sem precisar deixá-las totalmente <code>public</code>.<p></p>
-      </div>
+  <h3>Visibilidade dentro do pacote</h3>
+  <p>Um tipo ou membro sem modificador de acesso explícito possui acesso <em>package-private</em>: pode ser usado por código do mesmo pacote, mas não por código de outro pacote. Isso permite ocultar auxiliares de implementação sem torná-los <code>private</code> dentro de outra classe nem expô-los como <code>public</code>. Pacote organiza e controla acesso; ele não substitui a modelagem por responsabilidades.</p>
 
-      <div class="exercise">
-        <div class="exercise-head"><h4>Exercício 18.1 — Reorganizando o projeto da biblioteca</h4><span class="exercise-tag m">médio</span></div>
-        <p>Pegue as classes do projeto final do capítulo 17 (<code>ItemAcervo</code>, <code>Livro</code>, <code>Revista</code>, <code>Emprestavel</code>, <code>Biblioteca</code>, <code>ItemIndisponivelException</code>) e distribua em pacotes: <code>com.felipy.biblioteca.modelo</code> (entidades), <code>com.felipy.biblioteca.excecao</code> (exceções) e <code>com.felipy.biblioteca.servico</code> (a classe <code>Biblioteca</code>). Escreva as declarações <code>package</code> e <code>import</code> necessárias em cada arquivo.</p>
-        <button class="reveal-btn">Ver solução</button>
-        <div class="solution">
-<pre class="code"><span class="com">// com/felipy/biblioteca/modelo/ItemAcervo.java</span>
-<span class="kw">package</span> com.felipy.biblioteca.modelo;
-<span class="kw">import</span> com.felipy.biblioteca.excecao.ItemIndisponivelException;
-<span class="kw">public abstract class</span> <span class="cls">ItemAcervo</span> <span class="kw">implements</span> <span class="cls">Emprestavel</span> { ... }
+  <h3>Convenção de nomes</h3>
+  <p>Pacotes costumam usar componentes minúsculos e um domínio invertido, como <code>br.com.empresa.produto</code>, para reduzir colisões. Depois do prefixo estável, escolha nomes pelo domínio ou pela funcionalidade que permanece coesa. Evite criar uma árvore profunda apenas para classificar cada classe individualmente.</p>
 
-<span class="com">// com/felipy/biblioteca/modelo/Livro.java</span>
-<span class="kw">package</span> com.felipy.biblioteca.modelo;
-<span class="kw">public class</span> <span class="cls">Livro</span> <span class="kw">extends</span> <span class="cls">ItemAcervo</span> { ... }
-
-<span class="com">// com/felipy/biblioteca/excecao/ItemIndisponivelException.java</span>
-<span class="kw">package</span> com.felipy.biblioteca.excecao;
-<span class="kw">public class</span> <span class="cls">ItemIndisponivelException</span> <span class="kw">extends</span> <span class="cls">Exception</span> { ... }
-
-<span class="com">// com/felipy/biblioteca/servico/Biblioteca.java</span>
-<span class="kw">package</span> com.felipy.biblioteca.servico;
-<span class="kw">import</span> com.felipy.biblioteca.modelo.ItemAcervo;
-<span class="kw">import</span> com.felipy.biblioteca.excecao.ItemIndisponivelException;
-<span class="kw">import</span> java.util.List;
-<span class="kw">import</span> java.util.ArrayList;
-<span class="kw">public class</span> <span class="cls">Biblioteca</span> { ... }</pre>
-        </div>
-      </div>
-    </section>
+  <div class="exercise">
+    <div class="exercise-head"><h4>Exercício 18.1 — Separando a biblioteca em pacotes</h4><span class="exercise-tag m">médio</span></div>
+    <p>Separe o projeto anterior em <code>com.exemplo.biblioteca.modelo</code> para <code>Livro</code>, <code>Revista</code>, <code>Usuario</code> e <code>Emprestimo</code>; <code>com.exemplo.biblioteca.servico</code> para <code>Biblioteca</code>; e <code>com.exemplo.biblioteca.app</code> para <code>Principal</code>. Não crie ainda pacote de exceções. Compile com <code>javac -d out</code>, execute pelo nome qualificado e prove que uma classe package-private de <code>servico</code> não pode ser instanciada por <code>app</code>.</p>
+    <button class="reveal-btn">Ver critérios</button>
+    <div class="solution"><ul><li>Cada arquivo declara o pacote correspondente.</li><li>Imports são explícitos e não há wildcard desnecessário.</li><li>A saída contém a árvore de pacotes gerada pelo compilador.</li><li>A tentativa de acessar o auxiliar package-private falha em compilação e o diagnóstico é registrado.</li></ul></div>
+  </div>
+</section>

@@ -1,5 +1,14 @@
 export type EnglishLevel = 0 | 1 | 2 | 3;
 export type ProjectGuidance = 'supported' | 'guided' | 'bounded' | 'independent';
+export type PedagogicalStatus = 'pending' | 'in-review' | 'needs-revision' | 'approved';
+export type Authorship = 'authored' | 'legacy-preserved' | 'generated-compatibility';
+
+export interface PedagogicalAudit {
+  status: PedagogicalStatus;
+  sourceKind: 'legacy-html' | 'structured-typescript';
+  reviewedAt?: string;
+  notes?: string[];
+}
 
 export interface Course {
   id: string;
@@ -8,7 +17,19 @@ export interface Course {
   description: string;
   modules: CourseModule[];
   chapters: Chapter[];
+  concepts: Concept[];
   glossary: GlossaryEntry[];
+}
+
+export interface Concept {
+  id: string;
+  name: string;
+  aliases: string[];
+  introducedIn: string;
+  reinforcedIn: string[];
+  prerequisiteConceptIds: string[];
+  commonConfusions: string[];
+  outcomes: string[];
 }
 
 export interface GlossaryEntry {
@@ -39,17 +60,26 @@ export interface Chapter {
   objectives: string[];
   whyItExists: string;
   prerequisiteChapterIds: string[];
+  /** Candidatos herdados; não significam conceitos pedagogicamente auditados. */
   conceptIds: string[];
+  introducedConceptIds: string[];
+  usedConceptIds: string[];
   estimatedMinutes: number;
   englishLevel: EnglishLevel;
   blocks: ContentBlock[];
   resources: Resource[];
   englishActivity: EnglishActivity;
+  audit: PedagogicalAudit;
 }
 
 export type ContentBlock =
   | IntuitionBlock
   | ConceptBlock
+  | MentalModelBlock
+  | ComparisonBlock
+  | ErrorCaseBlock
+  | DiagramBlock
+  | TableBlock
   | CodeBlock
   | PredictionBlock
   | CalloutBlock
@@ -61,6 +91,7 @@ export type ContentBlock =
 
 interface BaseBlock {
   id: string;
+  authorship?: Authorship;
   sourceIndex?: number;
   sourceIndexes?: number[];
   fidelityText?: string;
@@ -79,6 +110,53 @@ export interface ConceptBlock extends BaseBlock {
   body: string;
 }
 
+export interface MentalModelBlock extends BaseBlock {
+  type: 'mental-model';
+  title: string;
+  body: string;
+  flow?: string[];
+  ownership?: string[];
+  lifecycle?: string[];
+}
+
+export interface ComparisonBlock extends BaseBlock {
+  type: 'comparison';
+  title: string;
+  criteria: string[];
+  alternatives: Array<{
+    name: string;
+    values: string[];
+    useWhen: string;
+    avoidWhen: string;
+  }>;
+}
+
+export interface ErrorCaseBlock extends BaseBlock {
+  type: 'error-case';
+  title: string;
+  scenario: string;
+  symptom: string;
+  cause: string;
+  diagnosis: string[];
+  correction: string;
+  prevention?: string;
+}
+
+export interface DiagramBlock extends BaseBlock {
+  type: 'diagram';
+  title: string;
+  description: string;
+  steps: string[];
+}
+
+export interface TableBlock extends BaseBlock {
+  type: 'table';
+  title: string;
+  headers: string[];
+  rows: string[][];
+  caption?: string;
+}
+
 export interface CodeBlock extends BaseBlock {
   type: 'code';
   language: string;
@@ -86,6 +164,8 @@ export interface CodeBlock extends BaseBlock {
   highlightedHtml?: string;
   caption: string;
   expectedOutput?: string;
+  explanation?: string[];
+  commonMistakes?: string[];
 }
 
 export interface PredictionBlock extends BaseBlock {
@@ -142,6 +222,12 @@ export interface ProjectBlock extends BaseBlock {
   requirements: string[];
   guidance: ProjectGuidance;
   acceptanceCriteria: string[];
+  knowledgeMatrix?: Array<{
+    requirement: string;
+    conceptIds: string[];
+    chapterIds: string[];
+    expectedEvidence: string;
+  }>;
   englishSpecification?: {
     title: string;
     brief: string;
@@ -157,6 +243,11 @@ export interface Resource {
   url: string;
   reinforces: string;
   language: 'pt-BR' | 'en';
+  publisher?: string;
+  official?: boolean;
+  expectedLevel?: 'beginner' | 'intermediate' | 'advanced';
+  verifiedAt?: string;
+  auditStatus?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface EnglishActivity {

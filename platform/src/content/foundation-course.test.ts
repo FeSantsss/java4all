@@ -7,7 +7,7 @@ describe('complete course content', () => {
   it('preserves every legacy chapter and resolves all references', () => {
     const chapterIds = new Set(course.chapters.map(chapter => chapter.id));
 
-    expect(course.chapters).toHaveLength(149);
+    expect(course.chapters).toHaveLength(151);
     expect(chapterIds.size).toBe(course.chapters.length);
     expect(course.modules).toHaveLength(20);
     for (const chapter of course.chapters) {
@@ -21,8 +21,9 @@ describe('complete course content', () => {
   it('contains the mandatory API, beyond-CRUD and EDA learning paths', () => {
     const requiredIds = [
       'associacoes-cardinalidade', 'jdbc-under-the-hood', 'java-httpclient-json',
-      'pure-java-api-project', 'tcp-protocol-design', 'lanterna-tui', 'aws-sns-sqs',
-      'delivery-failure-lab', 'outbox-inbox', 'saga-schema-ordering', 'async-integration-tests'
+      'pure-java-api-project', 'process-api-cli', 'zenith-cli-inicial',
+      'tcp-protocol-design', 'lanterna-tui', 'aws-sns-sqs', 'delivery-failure-lab',
+      'outbox-inbox', 'saga-schema-ordering', 'async-integration-tests'
     ];
 
     for (const id of requiredIds) expect(course.chapters.find(chapter => chapter.id === id)).toBeDefined();

@@ -29,7 +29,7 @@
 }</pre>
       <p><code>final</code> em uma classe (<code>public final class Foo</code>) impede que ela seja estendida. <code>String</code> é <code>final</code> por esse motivo, entre outros ligados a segurança e imutabilidade.</p>
 
-      <div class="warn"><b>final em objeto ≠ imutável:</b> <code>final List&lt;String&gt; lista = new ArrayList&lt;&gt;();</code> impede reatribuir a variável <code>lista</code> a outro objeto — mas você ainda pode chamar <code>lista.add("x")</code> normalmente. <code>final</code> trava a <em>referência</em>, não o conteúdo do objeto apontado.</div>
+      <div class="warn"><b>final em referência ≠ objeto imutável:</b> <code>final int[] notas = {7, 8};</code> impede fazer <code>notas = outroArray</code>, mas ainda permite <code>notas[0] = 10</code>. <code>final</code> restringe a reatribuição da variável; o array referenciado continua mutável.</div>
 
       <h3>this — referência ao próprio objeto</h3>
       <p>Já vimos <code>this</code> para diferenciar parâmetro de atributo e para encadear construtores. Ele também habilita <strong>method chaining</strong>, retornando o próprio objeto:</p>
@@ -62,29 +62,24 @@ System.out.println(p1.getId() + <span class="str">" "</span> + p2.getId() + <spa
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 9.2 — Builder encadeável</h4><span class="exercise-tag m">médio</span></div>
-        <p>Crie uma classe <code>Pizza</code> com atributos <code>tamanho</code>, <code>borda</code> e uma <code>List&lt;String&gt; ingredientes</code>. Crie um <code>PizzaBuilder</code> com métodos encadeáveis <code>tamanho(String)</code>, <code>borda(String)</code> e <code>adicionar(String ingrediente)</code>, todos retornando <code>this</code>, e um método final <code>construir()</code> que retorna a <code>Pizza</code> pronta.</p>
+        <p>Crie <code>ConfiguracaoPedido</code> com campos <code>entrega</code> e <code>observacao</code>. Crie métodos encadeáveis <code>entrega(String)</code> e <code>observacao(String)</code>, ambos retornando <code>this</code>. No final, consulte os valores e confirme que todas as chamadas atuaram na mesma instância.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-<pre class="code"><span class="kw">public class</span> <span class="cls">Pizza</span> {
-    <span class="kw">private final String</span> tamanho, borda;
-    <span class="kw">private final</span> java.util.List&lt;<span class="kw">String</span>&gt; ingredientes;
-    <span class="kw">public</span> <span class="fn">Pizza</span>(<span class="kw">String</span> tamanho, <span class="kw">String</span> borda, java.util.List&lt;<span class="kw">String</span>&gt; ingredientes) {
-        <span class="kw">this</span>.tamanho = tamanho; <span class="kw">this</span>.borda = borda; <span class="kw">this</span>.ingredientes = ingredientes;
+<pre class="code"><span class="kw">public class</span> <span class="cls">ConfiguracaoPedido</span> {
+    <span class="kw">private String</span> entrega = <span class="str">"retirada"</span>;
+    <span class="kw">private String</span> observacao = <span class="str">""</span>;
+
+    <span class="kw">public</span> <span class="cls">ConfiguracaoPedido</span> <span class="fn">entrega</span>(<span class="kw">String</span> valor) {
+        <span class="kw">this</span>.entrega = valor; <span class="kw">return this</span>;
+    }
+    <span class="kw">public</span> <span class="cls">ConfiguracaoPedido</span> <span class="fn">observacao</span>(<span class="kw">String</span> valor) {
+        <span class="kw">this</span>.observacao = valor; <span class="kw">return this</span>;
     }
 }
 
-<span class="kw">public class</span> <span class="cls">PizzaBuilder</span> {
-    <span class="kw">private String</span> tamanho = <span class="str">"média"</span>, borda = <span class="str">"tradicional"</span>;
-    <span class="kw">private</span> java.util.List&lt;<span class="kw">String</span>&gt; ingredientes = <span class="kw">new</span> java.util.ArrayList&lt;&gt;();
-
-    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">tamanho</span>(<span class="kw">String</span> t) { <span class="kw">this</span>.tamanho = t; <span class="kw">return this</span>; }
-    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">borda</span>(<span class="kw">String</span> b) { <span class="kw">this</span>.borda = b; <span class="kw">return this</span>; }
-    <span class="kw">public</span> <span class="cls">PizzaBuilder</span> <span class="fn">adicionar</span>(<span class="kw">String</span> ing) { ingredientes.add(ing); <span class="kw">return this</span>; }
-    <span class="kw">public</span> <span class="cls">Pizza</span> <span class="fn">construir</span>() { <span class="kw">return new</span> <span class="cls">Pizza</span>(tamanho, borda, ingredientes); }
-}
-
-<span class="com">// uso:
-// Pizza p = new PizzaBuilder().tamanho("grande").adicionar("mussarela").adicionar("manjericão").construir();</span></pre>
+<span class="cls">ConfiguracaoPedido</span> c = <span class="kw">new</span> <span class="cls">ConfiguracaoPedido</span>()
+    .entrega(<span class="str">"delivery"</span>)
+    .observacao(<span class="str">"sem cebola"</span>);</pre>
         </div>
       </div>
     </section>

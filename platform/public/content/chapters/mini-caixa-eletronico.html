@@ -8,17 +8,17 @@
       <div class="rules-box"><h4>Pronto quando</h4><ul><li>O programa não encerra por entrada inválida.</li><li>Você explica cada variável e cada condição.</li><li>Nenhum método mistura leitura, regra e impressão sem justificativa.</li></ul></div>
     <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Qual separação deixa o caixa eletrônico mais testável?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">A regra de saque recebe valores e retorna um resultado, sem ler Scanner nem imprimir.</div><div class="quiz-opt" data-correct="false">Colocar Scanner, saldo e impressão no mesmo método.</div><div class="quiz-opt" data-correct="false">Usar campos globais para qualquer operação.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
       <h3>Execução guiada e evidências</h3>
-      <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>
+      <p>Este projeto usa somente o que já foi ensinado. Construa em incrementos pequenos, compile e execute a cada etapa e registre evidências manuais que outra pessoa consiga repetir.</p>
       <h4 class="sub">Marcos obrigatórios</h4>
       <ol>
-        <li><strong>Contrato:</strong> escreva regras, entradas, saídas, invariantes e casos-limite antes da implementação.</li>
-        <li><strong>Caminho mínimo:</strong> entregue uma fatia vertical executável com um teste de aceitação.</li>
-        <li><strong>Falhas:</strong> implemente validação, mensagens úteis, cleanup e comportamento após interrupção.</li>
-        <li><strong>Qualidade:</strong> automatize testes, formatação e build; remova segredos e dados pessoais dos logs.</li>
-        <li><strong>Operação:</strong> documente como executar, diagnosticar, atualizar e recuperar o projeto.</li>
+        <li><strong>Menu:</strong> mostre opções, leia uma linha e encerre ao escolher sair.</li>
+        <li><strong>Depósito:</strong> converta e valide um valor positivo antes de alterar o saldo.</li>
+        <li><strong>Saque:</strong> recuse zero, negativos e valores acima do saldo.</li>
+        <li><strong>Extrato:</strong> registre operações em um array e trate sua capacidade máxima.</li>
+        <li><strong>Resistência:</strong> repita a pergunta após formato inválido e encerre conscientemente em EOF.</li>
       </ol>
-      <h4 class="sub">Matriz mínima de testes</h4>
-      <table class="cmp"><tbody><tr><th>Categoria</th><th>Evidência</th></tr><tr><td>caminho feliz</td><td>resultado e estado final esperados</td></tr><tr><td>limites</td><td>vazio, mínimo, máximo, duplicado e formato inválido</td></tr><tr><td>falha</td><td>dependência indisponível, timeout ou exceção sem corrupção de estado</td></tr><tr><td>repetição</td><td>retry ou execução duplicada não produz efeito indevido</td></tr><tr><td>regressão</td><td>bug corrigido ganha teste que falhava antes</td></tr></tbody></table>
-      <ul class="checklist"><li><input type="checkbox"><span>README contém requisitos, arquitetura, decisões e comandos reproduzíveis.</span></li><li><input type="checkbox"><span>Build e testes executam do zero sem passos secretos.</span></li><li><input type="checkbox"><span>Casos-limite e falhas foram demonstrados, não apenas descritos.</span></li><li><input type="checkbox"><span>Existe uma retrospectiva com dívida técnica e próximo incremento.</span></li></ul>
-      <div class="warn"><b>Regra de conclusão:</b> captura de tela não prova comportamento. Entregue código, testes, dados de exemplo, comandos e resultados verificáveis. Se uma tecnologia externa for necessária, fixe versões e forneça um ambiente reproduzível.</div>
+      <h4 class="sub">Roteiro mínimo de verificação manual</h4>
+      <table class="cmp"><tbody><tr><th>Caso</th><th>Entrada</th><th>Resultado esperado</th></tr><tr><td>depósito válido</td><td>100.00</td><td>saldo aumenta em 100.00</td></tr><tr><td>saque válido</td><td>30.00 após depósito</td><td>saldo 70.00 e operação no extrato</td></tr><tr><td>saldo insuficiente</td><td>saque 100.00</td><td>mensagem clara e saldo preservado</td></tr><tr><td>formato inválido</td><td>"dez"</td><td>nova tentativa, sem stack trace</td></tr><tr><td>array cheio</td><td>uma operação além da capacidade</td><td>aviso, sem acessar índice inválido</td></tr><tr><td>fim da entrada</td><td>EOF</td><td>encerramento consciente</td></tr></tbody></table>
+      <ul class="checklist"><li><input type="checkbox"><span>O arquivo compila com <code>javac</code> e executa com <code>java</code>.</span></li><li><input type="checkbox"><span>Cada caso registra entrada, resultado esperado e resultado observado.</span></li><li><input type="checkbox"><span>Casos-limite foram executados, não apenas descritos.</span></li><li><input type="checkbox"><span>Você consegue explicar por que o saldo nunca fica negativo.</span></li></ul>
+      <div class="warn"><b>Limite pedagógico:</b> não use banco de dados, framework, coleção, testes automatizados, rede, retry ou timeout nesta etapa. Essas ferramentas serão ensinadas antes de serem exigidas.</div>
       </div></section>

@@ -2,7 +2,7 @@
       <div class="section-head"><span class="section-num">01</span><h2 class="section-title">Classes e objetos</h2></div>
       <div class="topic-meta">
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div>
-        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#intro">00 · Introdução</a></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#mini-caixa-eletronico">Mini-projeto: caixa eletrônico</a></div>
       </div>
 
       <p>Uma <strong>classe</strong> é um molde — define quais atributos e métodos os objetos criados a partir dela terão. Um <strong>objeto</strong> é uma instância concreta desse molde, vivendo na memória com seus próprios valores.</p>
@@ -21,11 +21,11 @@ expresso.tipo = <span class="str">"expresso"</span>;
 expresso.comAcucar = <span class="kw">false</span>;
 expresso.descrever(); <span class="com">// Um expresso puro</span></pre>
 
-      <h3>Onde os objetos vivem: stack e heap</h3>
-      <p>Este é o ponto que separa quem "decora sintaxe" de quem realmente entende Java. Existem duas regiões de memória relevantes para o seu programa:</p>
+      <h3>Modelo mental: objeto, referência e memória</h3>
+      <p>Para raciocinar sobre o comportamento do programa, separe a instância da variável que permite alcançá-la. É comum desenhar variáveis locais em uma <em>stack</em> e objetos em um <em>heap</em>, mas esse é um modelo didático: a especificação da linguagem não promete a localização física de cada valor, e a JVM pode otimizar a execução.</p>
       <ul style="color:var(--ink-dim)">
-        <li><strong>Stack</strong> — guarda variáveis locais e parâmetros de método. Para tipos primitivos (<code>int</code>, <code>double</code>, <code>boolean</code>...), o <em>valor</em> em si fica na stack.</li>
-        <li><strong>Heap</strong> — é onde todo objeto criado com <code>new</code> realmente existe. A variável que você declara na stack não guarda o objeto — guarda uma <strong>referência</strong> (um endereço) apontando para o objeto no heap.</li>
+        <li><strong>Variável de referência</strong> — contém <code>null</code> ou um valor que permite alcançar um objeto; não contém uma cópia automática de todos os campos.</li>
+        <li><strong>Objeto</strong> — possui identidade e campos próprios. Cada expressão <code>new Cafe()</code> cria uma nova instância antes de devolver sua referência.</li>
       </ul>
 
       <pre class="code"><span class="cls">Cafe</span> a = <span class="kw">new</span> <span class="cls">Cafe</span>();
@@ -36,9 +36,9 @@ b.tipo = <span class="str">"latte"</span>;
 
 System.out.println(a.tipo); <span class="com">// "latte" -- a e b são a mesma referência!</span></pre>
 
-      <div class="secret">Esse comportamento surpreende quem vem de linguagens que copiam objetos por valor. Em Java, atribuir um objeto a outra variável (<code>b = a</code>) <strong>não</strong> cria uma cópia — copia apenas a referência. Os dois nomes de variável agora apontam para o mesmo espaço no heap. Se quiser um objeto realmente independente, você precisa criar um novo com <code>new</code> e copiar os campos manualmente (ou implementar um método <code>clone()</code> ou um construtor de cópia).</div>
+      <div class="secret">Em Java, <code>b = a</code> copia o valor da referência e não cria uma instância. Para obter outro objeto independente, execute outro <code>new</code> e defina conscientemente quais valores precisam ser copiados. Estratégias gerais de cópia possuem contratos próprios e não são necessárias neste capítulo.</div>
 
-      <div class="callout"><b>Garbage Collector:</b> diferente de C/C++, você nunca chama <code>delete</code> ou <code>free</code> em Java. Quando nenhuma variável mais referencia um objeto no heap, o <strong>Garbage Collector</strong> (GC) identifica isso automaticamente em segundo plano e libera a memória. Isso é ótimo para produtividade, mas significa que você não controla exatamente <em>quando</em> um objeto é destruído.</div>
+      <div class="callout"><b>Garbage Collector:</b> quando um objeto deixa de ser alcançável a partir das referências vivas do programa, ele fica elegível à coleta. Não existe garantia de quando a coleta ocorrerá. GC administra memória; não substitui o fechamento explícito de arquivos, conexões ou outros recursos externos, ensinados depois.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 1.1 — Sua primeira classe</h4><span class="exercise-tag f">fácil</span></div>
@@ -71,7 +71,7 @@ System.out.println(a.tipo); <span class="com">// "latte" -- a e b são a mesma r
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 1.2 — Referência compartilhada</h4><span class="exercise-tag m">médio</span></div>
-        <p>Sem rodar em uma IDE, preveja no papel a saída deste código, depois explique o porquê usando o conceito de stack/heap:</p>
+        <p>Sem executar, preveja a saída e explique o resultado usando identidade de objeto e cópia de referências:</p>
         <pre class="code"><span class="cls">Cafe</span> x = <span class="kw">new</span> <span class="cls">Cafe</span>();
 x.tipo = <span class="str">"coado"</span>;
 <span class="cls">Cafe</span> y = <span class="kw">new</span> <span class="cls">Cafe</span>();
@@ -81,7 +81,7 @@ y = x;
 System.out.println(x == y);</pre>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-          <p><strong>Saída: <code>false</code> depois <code>true</code>.</strong> No primeiro <code>==</code>, <code>x</code> e <code>y</code> são referências para dois objetos <em>diferentes</em> no heap (mesmo com o mesmo valor de <code>tipo</code>) — <code>==</code> em objetos compara <em>referência</em>, não conteúdo. Depois de <code>y = x</code>, ambas as variáveis passam a apontar para o mesmo objeto, então <code>==</code> retorna <code>true</code>. (Para comparar conteúdo, usa-se <code>equals()</code> — capítulo 05.)</p>
+          <p><strong>Saída: <code>false</code> depois <code>true</code>.</strong> No primeiro <code>==</code>, <code>x</code> e <code>y</code> guardam referências para dois objetos <em>diferentes</em>, mesmo com o mesmo valor de <code>tipo</code>; <code>==</code> compara a identidade referenciada, não o conteúdo. Depois de <code>y = x</code>, ambas as variáveis passam a apontar para o mesmo objeto, então <code>==</code> retorna <code>true</code>. A comparação de conteúdo por <code>equals()</code> será aprofundada depois do contrato básico herdado de <code>Object</code>.</p>
         </div>
       </div>
     </section>

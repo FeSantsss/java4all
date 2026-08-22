@@ -5,26 +5,23 @@
         <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#abstracao">07 · Classes abstratas</a></div>
       </div>
 
-      <p>Uma <strong>interface</strong> define um contrato puro: métodos que qualquer classe implementadora promete ter. Diferente de herança, uma classe pode implementar <strong>várias</strong> interfaces — é como Java contorna a ausência de herança múltipla.</p>
+      <p>Uma <strong>interface</strong> declara um contrato de tipo: operações que uma classe implementadora promete oferecer. Ela pode conter métodos abstratos e, sob regras específicas, métodos <code>default</code>, <code>static</code> e <code>private</code>. Uma classe possui uma única superclasse direta, mas pode implementar várias interfaces.</p>
 
-      <pre class="code"><span class="kw">public interface</span> <span class="cls">Comparavel</span> { <span class="kw">int</span> <span class="fn">comparar</span>(<span class="kw">Object</span> outro); }
-<span class="kw">public interface</span> <span class="cls">Imprimivel</span> { <span class="kw">void</span> <span class="fn">imprimir</span>(); }
+      <pre class="code"><span class="kw">public interface</span> <span class="cls">Precificavel</span> { <span class="kw">double</span> <span class="fn">precoFinal</span>(); }
+<span class="kw">public interface</span> <span class="cls">Imprimivel</span> { <span class="kw">String</span> <span class="fn">texto</span>(); }
 
-<span class="kw">public class</span> <span class="cls">Produto</span> <span class="kw">implements</span> <span class="cls">Comparavel</span>, <span class="cls">Imprimivel</span> {
+<span class="kw">public class</span> <span class="cls">Produto</span> <span class="kw">implements</span> <span class="cls">Precificavel</span>, <span class="cls">Imprimivel</span> {
     <span class="kw">private double</span> preco;
 
     <span class="annotation">@Override</span>
-    <span class="kw">public int</span> <span class="fn">comparar</span>(<span class="kw">Object</span> outro) {
-        <span class="cls">Produto</span> p = (<span class="cls">Produto</span>) outro;
-        <span class="kw">return</span> Double.compare(<span class="kw">this</span>.preco, p.preco);
-    }
+    <span class="kw">public double</span> <span class="fn">precoFinal</span>() { <span class="kw">return</span> preco; }
 
     <span class="annotation">@Override</span>
-    <span class="kw">public void</span> <span class="fn">imprimir</span>() { System.out.println(<span class="str">"Produto: R$"</span> + preco); }
+    <span class="kw">public String</span> <span class="fn">texto</span>() { <span class="kw">return</span> <span class="str">"Produto: R$"</span> + preco; }
 }</pre>
 
       <h3>Métodos default, static e private (Java 8+)</h3>
-      <p>Desde o Java 8, interfaces deixaram de ser 100% abstratas. Isso foi introduzido principalmente para permitir evoluir a API de <code>Collection</code>/<code>List</code> sem quebrar todo código já escrito.</p>
+      <p>Desde o Java 8, interfaces também podem fornecer métodos <code>default</code>. Isso permite acrescentar um comportamento reutilizável a um contrato existente sem obrigar imediatamente todas as implementações a escrever o mesmo corpo. O método continua fazendo parte do contrato e conflitos entre dois <code>default</code> precisam ser resolvidos explicitamente.</p>
 
       <pre class="code"><span class="kw">public interface</span> <span class="cls">Notificador</span> {
     <span class="kw">void</span> <span class="fn">enviar</span>(<span class="kw">String</span> mensagem); <span class="com">// abstrato -- cada implementação define</span>
@@ -34,9 +31,9 @@
         enviar(<span class="str">"[URGENTE] "</span> + mensagem);
     }
 
-    <span class="com">// static: pertence à interface, chamado como Notificador.padrao()</span>
-    <span class="kw">static</span> <span class="cls">Notificador</span> <span class="fn">padrao</span>() {
-        <span class="kw">return</span> msg -&gt; System.out.println(<span class="str">"Log: "</span> + msg); <span class="com">// lambda -- capítulo 13</span>
+    <span class="com">// static: utilidade ligada ao contrato, chamada na interface</span>
+    <span class="kw">static String</span> <span class="fn">marcarUrgente</span>(<span class="kw">String</span> mensagem) {
+        <span class="kw">return</span> <span class="str">"[URGENTE] "</span> + mensagem;
     }
 }</pre>
 

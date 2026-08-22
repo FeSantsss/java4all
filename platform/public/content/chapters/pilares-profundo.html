@@ -3,11 +3,11 @@
       <div class="topic-meta">
         <span class="tech-badge tech-java">Java Interno</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~3h</b> de estudo — o capítulo mais importante para revisar antes de qualquer entrevista técnica</div>
-        <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#encapsulamento">04 · Encapsulamento</a>, <a class="prereq-tag" href="#heranca">05 · Herança</a>, <a class="prereq-tag" href="#polimorfismo">06 · Polimorfismo</a>, <a class="prereq-tag" href="#abstracao">07 · Classes abstratas</a></div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo e prática integrada</div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#interfaces">08 · Interfaces</a></div>
       </div>
 
-      <p>Os capítulos 04 a 08 ensinaram cada pilar isoladamente, com exemplos práticos. Este capítulo volta a todos os quatro <strong>juntos</strong>, com o nível de profundidade teórica que se espera de alguém explicando esses conceitos em uma entrevista técnica sênior — cada um com diagrama, analogia adicional e a pergunta "o que realmente está acontecendo por dentro".</p>
+      <p>Os capítulos anteriores apresentaram os mecanismos separadamente. Agora você vai conectá-los como decisões de modelagem: qual estado proteger, quando existe uma relação real de subtipo, quando objetos apenas colaboram e como um contrato permite trocar implementações. O objetivo não é encaixar quatro palavras-chave em todo programa, mas justificar cada escolha pelos efeitos que ela produz.</p>
 
       <h3>Pilar 1 — Encapsulamento: a fronteira entre o que é seu e o que é do mundo</h3>
 
@@ -58,7 +58,7 @@
 
       <p>Herança modela relações <strong>"é um"</strong> (is-a): um <code>Gerente</code> é um <code>Funcionario</code>. A palavra-chave <code>extends</code> não copia código magicamente — ela estabelece que toda instância de <code>Gerente</code> <strong>também é, simultaneamente</strong>, uma instância válida de <code>Funcionario</code>, herdando sua estrutura de memória e comportamento, podendo especializar partes dele.</p>
 
-      <div class="warn"><b>O custo escondido da herança: acoplamento forte.</b> Toda mudança na superclasse potencialmente afeta <strong>todas</strong> as subclasses, mesmo as que você nem sabe que existem em outras partes de um sistema grande — é o chamado "problema da classe base frágil" (fragile base class problem). É por isso que o capítulo 16 (SOLID) e o capítulo 75 (Arquitetura) recomendam preferir <strong>composição</strong> quando a relação não é uma verdadeira especialização — herança deveria ser reservada para hierarquias genuinamente estáveis e bem entendidas.</div>
+      <div class="warn"><b>Herança cria acoplamento.</b> Uma mudança na superclasse pode afetar todas as subclasses. Use <code>extends</code> quando o subtipo realmente precisa cumprir o contrato do tipo geral. Quando um objeto apenas usa outro para realizar seu trabalho — um <code>Carro</code> tem um <code>Motor</code>, por exemplo — modele colaboração por campos e métodos. A decisão nasce da relação do domínio, não do desejo de reutilizar linhas.</div>
 
       <h3>Pilar 3 — Polimorfismo: a mesma mensagem, respostas diferentes, decididas em runtime</h3>
 
@@ -82,13 +82,13 @@ para cada "f" em equipe:
  (uma      (uma lógica
   lógica)   diferente)</pre>
 
-      <p>Tecnicamente, por trás dos panos, a JVM implementa isso através de uma estrutura chamada <strong>vtable</strong> (virtual method table): cada classe tem uma tabela associando nomes de métodos aos endereços de código real que devem ser executados. Quando você chama <code>f.calcularSalario()</code>, a JVM não decide em tempo de compilação qual código rodar — ela consulta a vtable do objeto <em>real</em> apontado por <code>f</code> em tempo de execução, e salta para o endereço correto ali registrado. É essa indireção, uma consulta extra a uma tabela, que torna polimorfismo possível — e também por que métodos <code>final</code>/<code>private</code>/<code>static</code> (capítulo 06) não precisam dessa consulta: o compilador já sabe exatamente qual código rodar, sem ambiguidade nenhuma.</p>
+      <p>A regra observável é esta: o compilador verifica se o método pode ser chamado pelo tipo da expressão; durante a execução, a classe real do objeto determina qual implementação sobrescrita responde. A especificação da linguagem exige esse comportamento, mas não obriga a JVM a usar uma estrutura interna específica. Uma implementação pode empregar tabelas, caches e otimizações diferentes sem alterar o resultado do programa. Portanto, <strong>despacho dinâmico</strong> faz parte do modelo da linguagem; “vtable obrigatória” não.</p>
 
-      <div class="analogy">Pense em apertar o botão "tocar" em um controle remoto universal. O mesmo comando físico (a "mensagem" — o método chamado) produz um comportamento diferente dependendo de qual aparelho está realmente conectado naquele momento — uma TV toca um canal, um som toca uma música. O controle remoto não precisa saber os detalhes internos de cada aparelho; ele só emite o mesmo sinal, e cada aparelho reage à sua própria maneira. A "vtable" é, nessa analogia, a própria lista de aparelhos compatíveis que sabe traduzir aquele sinal genérico em uma ação específica.</div>
+      <div class="analogy">Pense em apertar “tocar” em um controle universal. O comando disponível é conhecido pelo controle, mas a reação pertence ao aparelho conectado. Da mesma forma, o tipo da variável define quais chamadas são permitidas e o objeto real fornece a implementação sobrescrita.</div>
 
       <h3>Pilar 4 — Abstração: modelando só o que importa para o problema em questão</h3>
 
-      <p>Este é o pilar mais frequentemente mal-entendido — muita gente confunde "abstração" com "classe abstrata" (capítulo 07), quando na verdade classe abstrata é só <strong>uma ferramenta</strong> de linguagem para expressar abstração, não o conceito em si.</p>
+      <p>Este é o pilar mais frequentemente mal-entendido — muita gente confunde "abstração" com "classe abstrata", quando na verdade classe abstrata é só <strong>uma ferramenta</strong> de linguagem para expressar abstração, não o conceito em si.</p>
 
       <pre class="code">MUNDO REAL: um carro tem milhares de detalhes --
 motor de combustão interna com centenas de peças, sistema elétrico
@@ -104,7 +104,7 @@ MODELAGEM PARA UM SISTEMA DE ALUGUEL DE CARROS:
 │  + devolver()                │    IRRELEVANTE aqui, e por isso
 └───────────────────────────┘    corretamente OMITIDO</pre>
 
-      <p>Abstração é o processo de <strong>decidir o que ignorar</strong>. Um sistema de aluguel de carros não precisa modelar a pressão dos pneus; um sistema de manutenção automotiva provavelmente precisaria. A "abstração certa" não é universal — depende inteiramente do problema que o software está resolvendo. Uma classe <code>abstract</code> (capítulo 07) e uma <code>interface</code> (capítulo 08) são as <strong>ferramentas sintáticas</strong> que Java oferece para expressar essa decisão de design no código, mas a decisão em si — o que incluir, o que descartar — acontece na sua cabeça antes de escrever qualquer palavra-chave.</p>
+      <p>Abstração é o processo de <strong>decidir o que ignorar</strong>. Um sistema de aluguel de carros não precisa modelar a pressão dos pneus; um sistema de manutenção automotiva provavelmente precisaria. A "abstração certa" não é universal — depende inteiramente do problema que o software está resolvendo. Uma classe <code>abstract</code> e uma <code>interface</code> são <strong>ferramentas sintáticas</strong> para expressar partes dessa decisão no código, mas escolher o que incluir ou descartar acontece antes de escrever qualquer palavra-chave.</p>
 
       <div class="analogy">Um mapa de metrô é uma abstração poderosa: ele deliberadamente <strong>distorce</strong> a geografia real (distâncias e curvas exatas das linhas) para destacar só o que importa para quem vai usar o metrô — em qual estação trocar de linha, quantas paradas faltam. Um mapa "perfeitamente preciso" geograficamente seria, paradoxalmente, pior para esse propósito específico — cheio de detalhes irrelevantes que dificultam encontrar a informação que realmente importa. Boa abstração de software segue exatamente esse princípio: omitir informação verdadeira mas irrelevante, para destacar a informação que resolve o problema em questão.</div>
 
@@ -131,10 +131,10 @@ MODELAGEM PARA UM SISTEMA DE ALUGUEL DE CARROS:
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 86.1 — Identificando os quatro pilares em um sistema</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Para o sistema de biblioteca construído ao longo do curso (capítulos 17, 22, 66), identifique explicitamente uma manifestação de cada um dos quatro pilares, citando a classe/interface específica e explicando por que ela representa aquele pilar.</p>
+        <p>Modele um sistema pequeno de notificações sem usar coleções. Crie uma interface <code>Canal</code> com <code>enviar(String mensagem)</code>, duas implementações (<code>Email</code> e <code>Sms</code>) e uma classe <code>CentralNotificacoes</code> que recebe um <code>Canal</code> pelo construtor. Proteja os dados obrigatórios de cada canal. Depois explique onde há abstração, encapsulamento e polimorfismo. Só use herança de classes se conseguir demonstrar uma relação “é um” que preserve o contrato.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-          <p><strong>Abstração:</strong> a classe abstrata <code>ItemAcervo</code> (capítulo 17) modela só o que é relevante para o empréstimo de itens de uma biblioteca (título, código, disponibilidade), ignorando deliberadamente detalhes irrelevantes como o material físico da capa ou o fornecedor de impressão. <strong>Encapsulamento:</strong> os campos de <code>ItemAcervo</code> são <code>private</code>, e o estado de "emprestado" só muda através dos métodos <code>emprestar()</code>/<code>devolver()</code>, nunca por atribuição direta externa — garantindo que o invariante "um item emprestado não pode ser emprestado de novo" seja sempre respeitado. <strong>Herança:</strong> <code>Livro</code> e <code>Revista</code> estendem <code>ItemAcervo</code>, reaproveitando toda a estrutura comum (título, código, contador estático de itens) e especializando só <code>descricaoCompleta()</code>. <strong>Polimorfismo:</strong> o método <code>Biblioteca.buscarPorTitulo(...)</code> (capítulo 17) trabalha com <code>List&lt;ItemAcervo&gt;</code>, tratando <code>Livro</code>s e <code>Revista</code>s de forma uniforme, sem nunca precisar saber qual subtipo exato está processando em cada iteração.</p>
+          <p><strong>Abstração:</strong> <code>Canal</code> mantém apenas a operação relevante para quem envia. <strong>Encapsulamento:</strong> cada implementação valida e protege seus próprios dados, como endereço ou número. <strong>Polimorfismo:</strong> <code>CentralNotificacoes</code> chama <code>enviar</code> pelo contrato e recebe comportamentos diferentes de <code>Email</code> e <code>Sms</code>. <strong>Herança:</strong> não é obrigatória; implementar a interface já expressa os subtipos necessários. Criar uma superclasse apenas para “usar os quatro pilares” adicionaria acoplamento sem resolver um problema real.</p>
         </div>
       </div>
     </section>

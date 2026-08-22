@@ -1,23 +1,61 @@
 <section class="section tk-java" id="mini-biblioteca-cli">
-      <div class="section-head"><span class="section-num">P2</span><h2 class="section-title">Mini-projeto: biblioteca orientada a objetos</h2></div>
-      <div class="topic-meta"><div class="meta-item">Objetivo: <b>modelagem e POO</b></div><div class="time-est">Tempo: <b>7–12 horas</b></div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#interfaces">Interfaces</a></div></div>
-      <p>Modele livros, usuários e empréstimos. A regra central é impedir empréstimo simultâneo do mesmo exemplar e registrar devolução.</p>
-      <h3>Entregáveis</h3><ul class="checklist"><li><input type="checkbox"><span>Diagrama simples com entidades, responsabilidades e relações.</span></li><li><input type="checkbox"><span>Estado privado e mudanças feitas por comportamentos, não setters indiscriminados.</span></li><li><input type="checkbox"><span>Interface para itens emprestáveis e ao menos dois tipos de item.</span></li><li><input type="checkbox"><span>Exceções específicas para regras violadas.</span></li><li><input type="checkbox"><span>Aplicação CLI demonstrando cadastro, empréstimo, devolução e busca.</span></li></ul>
-      <div class="secret"><b>Pergunta de revisão:</b> quem deve decidir se um item está disponível: o menu, o serviço ou o próprio objeto? Defenda sua escolha com invariantes.</div>
-      <div class="rules-box"><h4>Critérios</h4><ul><li>Objetos não entram em estado impossível.</li><li>Herança só existe onde há relação “é um”.</li><li>A regra funciona sem depender do terminal.</li></ul></div>
-    <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Onde deve ficar a regra que impede emprestar exemplar indisponível?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">No modelo/caso de uso que protege a invariante, não apenas no menu.</div><div class="quiz-opt" data-correct="false">Somente na mensagem impressa pelo menu.</div><div class="quiz-opt" data-correct="false">Em um getter que altera o estado.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
-      <h3>Execução guiada e evidências</h3>
-      <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>
-      <h4 class="sub">Marcos obrigatórios</h4>
-      <ol>
-        <li><strong>Contrato:</strong> escreva regras, entradas, saídas, invariantes e casos-limite antes da implementação.</li>
-        <li><strong>Caminho mínimo:</strong> entregue uma fatia vertical executável com um teste de aceitação.</li>
-        <li><strong>Falhas:</strong> implemente validação, mensagens úteis, cleanup e comportamento após interrupção.</li>
-        <li><strong>Qualidade:</strong> automatize testes, formatação e build; remova segredos e dados pessoais dos logs.</li>
-        <li><strong>Operação:</strong> documente como executar, diagnosticar, atualizar e recuperar o projeto.</li>
-      </ol>
-      <h4 class="sub">Matriz mínima de testes</h4>
-      <table class="cmp"><tbody><tr><th>Categoria</th><th>Evidência</th></tr><tr><td>caminho feliz</td><td>resultado e estado final esperados</td></tr><tr><td>limites</td><td>vazio, mínimo, máximo, duplicado e formato inválido</td></tr><tr><td>falha</td><td>dependência indisponível, timeout ou exceção sem corrupção de estado</td></tr><tr><td>repetição</td><td>retry ou execução duplicada não produz efeito indevido</td></tr><tr><td>regressão</td><td>bug corrigido ganha teste que falhava antes</td></tr></tbody></table>
-      <ul class="checklist"><li><input type="checkbox"><span>README contém requisitos, arquitetura, decisões e comandos reproduzíveis.</span></li><li><input type="checkbox"><span>Build e testes executam do zero sem passos secretos.</span></li><li><input type="checkbox"><span>Casos-limite e falhas foram demonstrados, não apenas descritos.</span></li><li><input type="checkbox"><span>Existe uma retrospectiva com dívida técnica e próximo incremento.</span></li></ul>
-      <div class="warn"><b>Regra de conclusão:</b> captura de tela não prova comportamento. Entregue código, testes, dados de exemplo, comandos e resultados verificáveis. Se uma tecnologia externa for necessária, fixe versões e forneça um ambiente reproduzível.</div>
-      </div></section>
+  <div class="section-head"><span class="section-num">P2</span><h2 class="section-title">Mini-projeto: biblioteca orientada a objetos</h2></div>
+  <div class="topic-meta">
+    <div class="meta-item">Objetivo: <b>integrar modelagem e POO</b></div>
+    <div class="time-est">Tempo: <b>7–12 horas</b></div>
+    <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#associacoes-cardinalidade">Associações e cardinalidade</a></div>
+  </div>
+  <p>Construa uma biblioteca em memória com livros, revistas, usuários e empréstimos. O desafio não é produzir um menu grande: é fazer os objetos impedirem estados inválidos, independentemente de a operação ser chamada pelo console ou diretamente por outro código.</p>
+  <h3>Antes de programar: escreva o contrato</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"><span>Todo item tem identificador, título e disponibilidade coerentes.</span></li>
+    <li><input type="checkbox"><span>Um empréstimo associa exatamente um usuário e um item.</span></li>
+    <li><input type="checkbox"><span>Um item indisponível não pode ser emprestado novamente.</span></li>
+    <li><input type="checkbox"><span>Devolver um item disponível é recusado sem alterar o estado.</span></li>
+    <li><input type="checkbox"><span>Arrays possuem capacidade definida e nunca são acessados além do limite.</span></li>
+  </ul>
+  <div class="secret"><b>Pergunta de modelagem:</b> quem conhece a disponibilidade do item e consegue preservar essa regra em qualquer interface? Se a validação existir somente no menu, chamadas diretas ao objeto poderão ignorá-la.</div>
+  <h3>Entregáveis</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"><span>Esboço com classes, responsabilidades, direção e cardinalidade das relações.</span></li>
+    <li><input type="checkbox"><span>Campos privados, construtores válidos e mudanças feitas por comportamentos.</span></li>
+    <li><input type="checkbox"><span>Interface <code>ItemEmprestavel</code> e ao menos duas implementações.</span></li>
+    <li><input type="checkbox"><span>Biblioteca armazena itens e empréstimos em arrays com contadores.</span></li>
+    <li><input type="checkbox"><span>Aplicação CLI demonstra cadastro, busca, empréstimo, devolução e saída por opção ou EOF.</span></li>
+  </ul>
+  <h3>Sequência segura de implementação</h3>
+  <ol>
+    <li><strong>Domínio mínimo:</strong> crie um item e prove sua mudança entre disponível e emprestado sem usar <code>Scanner</code>.</li>
+    <li><strong>Variações:</strong> adicione <code>Livro</code> e <code>Revista</code> pelo mesmo contrato e percorra um array de <code>ItemEmprestavel</code>.</li>
+    <li><strong>Relações:</strong> associe usuário, item e empréstimo; centralize a transição que precisa manter os objetos coerentes.</li>
+    <li><strong>Catálogo:</strong> adicione arrays, contadores, busca e tratamento explícito de capacidade cheia.</li>
+    <li><strong>Fronteira CLI:</strong> só então leia texto, converta entradas e chame operações do domínio. O menu não decide regras de empréstimo.</li>
+  </ol>
+  <div class="rules-box"><h4>Critérios de conclusão</h4><ul>
+    <li>Objetos não nascem nem permanecem em estado impossível.</li>
+    <li>Herança só existe onde há relação “é um”; colaboração representa “tem um” ou “usa um”.</li>
+    <li>A regra funciona por chamadas diretas, sem depender do terminal.</li>
+    <li>Entrada inválida e EOF não corrompem o estado.</li>
+  </ul></div>
+  <h3>Checkpoint antes de concluir</h3>
+  <div class="quiz"><p class="q">Onde deve ficar a regra que impede emprestar exemplar indisponível?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">No modelo/caso de uso que protege a invariante, não apenas no menu.</div><div class="quiz-opt" data-correct="false">Somente na mensagem impressa pelo menu.</div><div class="quiz-opt" data-correct="false">Em um getter que altera o estado.</div></div><div class="quiz-feedback"></div></div>
+  <div class="project-quality-gate">
+    <h3>Execução guiada e evidências</h3>
+    <p>Conclua um incremento de cada vez e mantenha o programa compilável. Nesta etapa do curso, a evidência é um roteiro manual reproduzível; testes automatizados serão introduzidos no capítulo próprio.</p>
+    <h4 class="sub">Matriz de verificação manual</h4>
+    <table class="cmp"><tbody>
+      <tr><th>Caso</th><th>Entrada e preparação</th><th>Resultado esperado</th></tr>
+      <tr><td>empréstimo válido</td><td>usuário e item disponível</td><td>empréstimo registrado e item indisponível</td></tr>
+      <tr><td>empréstimo repetido</td><td>mesmo item ainda emprestado</td><td>operação recusada e estado anterior preservado</td></tr>
+      <tr><td>devolução</td><td>item emprestado</td><td>empréstimo encerrado e item disponível</td></tr>
+      <tr><td>capacidade</td><td>array preenchido até a última posição</td><td>próxima inclusão recusada sem acesso inválido</td></tr>
+      <tr><td>entrada inválida ou EOF</td><td>texto inesperado, vazio ou fim da entrada</td><td>mensagem clara ou encerramento limpo, sem mudar o domínio</td></tr>
+    </tbody></table>
+    <ul class="checklist">
+      <li><input type="checkbox"><span>Para cada caso, registrei preparação, ação, esperado e observado.</span></li>
+      <li><input type="checkbox"><span>Compilei e executei após cada incremento.</span></li>
+      <li><input type="checkbox"><span>Consigo demonstrar a regra sem iniciar a CLI.</span></li>
+      <li><input type="checkbox"><span>Anotei uma limitação consciente e o próximo incremento.</span></li>
+    </ul>
+  </div>
+</section>

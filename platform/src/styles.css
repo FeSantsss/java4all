@@ -849,6 +849,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   gap: 1.15rem;
 }
 
+.chapter-blocks > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .chapter-blocks > :is(.learning-card, .project-card, .concept-block) {
   margin-block: .65rem;
 }
@@ -962,6 +967,36 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .code-block .num, .legacy-content .num { color: var(--syntax-number); }
 .code-block .annotation, .legacy-content .annotation { color: var(--violet); }
 .code-block .meta, .legacy-content .meta { color: var(--info); }
+
+.code-explanation,
+.code-mistakes {
+  margin-top: .75rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: var(--bg-card);
+  padding: .9rem 1rem;
+  color: var(--ink-dim);
+}
+.code-explanation h3 { margin: 0 0 .45rem; color: var(--ink); font-size: .95rem; }
+.code-explanation ol,
+.code-mistakes ul { margin: .35rem 0 0; padding-left: 1.2rem; }
+.code-mistakes { border-left: 3px solid var(--danger); background: var(--danger-soft); }
+
+.responsive-table { width: 100%; max-width: 100%; margin-block: 1rem; overflow-x: auto; }
+.responsive-table table { width: 100%; border-collapse: collapse; background: var(--bg-card); }
+.responsive-table caption { padding: .6rem; color: var(--ink-dim); text-align: left; font-size: .8rem; }
+.responsive-table th,
+.responsive-table td { min-width: 10rem; border: 1px solid var(--line); padding: .7rem .8rem; text-align: left; vertical-align: top; }
+.responsive-table th { background: var(--bg-alt); color: var(--ink); }
+.semantic-flow { display: grid; gap: .5rem; padding-left: 1.35rem; }
+.comparison-decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: .75rem; }
+.comparison-decisions article { border: 1px solid var(--line); border-radius: .7rem; background: var(--bg-alt); padding: .85rem; }
+.semantic-error-case { border-left: 3px solid var(--danger); background: var(--danger-soft); }
+.semantic-error-case dl { display: grid; gap: .55rem; margin-block: 1rem; }
+.semantic-error-case dl div { display: grid; grid-template-columns: minmax(5rem, 7rem) 1fr; gap: .75rem; }
+.semantic-error-case dt { color: var(--ink); font-weight: 800; }
+.semantic-error-case dd { margin: 0; }
+.semantic-diagram { border-left: 3px solid var(--info); background: var(--info-soft); }
 
 .legacy-content table,
 .legacy-content .cmp {

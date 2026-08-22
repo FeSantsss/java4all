@@ -2,72 +2,77 @@
       <div class="section-head"><span class="section-num">10</span><h2 class="section-title">Exceções</h2></div>
       <div class="topic-meta">
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#static">09 · static, final &amp; this</a></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#pacotes">Pacotes e organização</a></div>
       </div>
 
       <p>Exceções em Java também são <strong>objetos</strong> — instâncias de classes que herdam de <code>Throwable</code>. Você pode criar suas próprias exceções especializando <code>Exception</code>, exatamente como especializaria qualquer outra classe.</p>
 
       <h3>A hierarquia completa</h3>
       <pre class="code">Throwable
-├── Error                    <span class="com">// problemas graves da JVM (OutOfMemoryError...) -- não trate</span>
+├── Error                    <span class="com">// falhas que aplicações comuns normalmente não recuperam</span>
 └── Exception
-    ├── RuntimeException      <span class="com">// UNCHECKED -- erro de programação (NullPointerException...)</span>
+    ├── RuntimeException      <span class="com">// UNCHECKED -- não exige declaração ou captura</span>
     │   ├── NullPointerException
     │   ├── ArrayIndexOutOfBoundsException
     │   ├── ArithmeticException
     │   ├── ClassCastException
     │   └── IllegalArgumentException
-    └── (demais)              <span class="com">// CHECKED -- condição esperada (IOException, SQLException...)</span></pre>
+    └── (demais)              <span class="com">// CHECKED -- participa da verificação do compilador</span></pre>
 
       <table class="cmp">
         <tbody><tr><th>Tipo</th><th>Compilador obriga tratar?</th><th>Quando usar</th></tr>
-        <tr><td><strong>Checked</strong> (estende <code>Exception</code> direto)</td><td>Sim — <code>try/catch</code> ou <code>throws</code></td><td>Condições externas previsíveis: arquivo não encontrado, rede indisponível</td></tr>
-        <tr><td><strong>Unchecked</strong> (estende <code>RuntimeException</code>)</td><td>Não</td><td>Erros de programação que idealmente não deveriam acontecer: argumento inválido, índice fora do array</td></tr>
+        <tr><td><strong>Checked</strong> (subclasse de <code>Exception</code>, exceto <code>RuntimeException</code>)</td><td>Sim — capturar ou declarar com <code>throws</code></td><td>O contrato quer obrigar o chamador a considerar a falha</td></tr>
+        <tr><td><strong>Unchecked</strong> (<code>RuntimeException</code> e subclasses)</td><td>Não</td><td>O compilador não obriga tratamento; ainda precisa haver significado, contexto e política coerentes</td></tr>
       </tbody></table>
 
       <h3>try / catch / finally / try-with-resources</h3>
-      <pre class="code"><span class="kw">public class</span> <span class="cls">SaldoInsuficienteException</span> <span class="kw">extends</span> <span class="cls">Exception</span> {
-    <span class="kw">public</span> <span class="fn">SaldoInsuficienteException</span>(<span class="kw">String</span> mensagem) { <span class="kw">super</span>(mensagem); }
+      <pre class="code"><span class="kw">public class</span> <span class="cls">InsufficientBalanceException</span> <span class="kw">extends</span> <span class="cls">Exception</span> {
+    <span class="kw">public</span> <span class="fn">InsufficientBalanceException</span>(<span class="kw">String</span> message) { <span class="kw">super</span>(message); }
 }
 
 <span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
-    <span class="kw">private double</span> saldo;
+    <span class="kw">private double</span> balance;
 
-    <span class="kw">public void</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) <span class="kw">throws</span> <span class="cls">SaldoInsuficienteException</span> {
-        <span class="kw">if</span> (valor &gt; saldo) {
-            <span class="kw">throw new</span> <span class="cls">SaldoInsuficienteException</span>(<span class="str">"Saldo insuficiente para sacar R$"</span> + valor);
+    <span class="kw">public void</span> <span class="fn">withdraw</span>(<span class="kw">double</span> amount) <span class="kw">throws</span> <span class="cls">InsufficientBalanceException</span> {
+        <span class="kw">if</span> (amount &gt; balance) {
+            <span class="kw">throw new</span> <span class="cls">InsufficientBalanceException</span>(<span class="str">"Insufficient balance: "</span> + amount);
         }
-        saldo -= valor;
+        balance -= amount;
     }
 }
 
 <span class="kw">try</span> {
-    conta.sacar(500);
-} <span class="kw">catch</span> (<span class="cls">SaldoInsuficienteException</span> e) {
-    System.out.println(<span class="str">"Erro: "</span> + e.getMessage());
+    account.withdraw(500);
+} <span class="kw">catch</span> (<span class="cls">InsufficientBalanceException</span> exception) {
+    System.out.println(<span class="str">"Error: "</span> + exception.getMessage());
 } <span class="kw">finally</span> {
-    System.out.println(<span class="str">"Operação finalizada"</span>); <span class="com">// SEMPRE roda, com ou sem exceção</span>
+    System.out.println(<span class="str">"Operation finished"</span>); <span class="com">// runs on normal or abrupt completion of this try</span>
 }</pre>
 
-      <p>Desde o Java 7, recursos que precisam ser fechados (arquivos, conexões) usam <strong>try-with-resources</strong>, que chama <code>close()</code> automaticamente, mesmo se uma exceção ocorrer:</p>
-      <pre class="code"><span class="kw">try</span> (<span class="cls">BufferedReader</span> br = <span class="kw">new</span> <span class="cls">BufferedReader</span>(<span class="kw">new</span> <span class="cls">FileReader</span>(<span class="str">"dados.txt"</span>))) {
-    System.out.println(br.readLine());
-} <span class="kw">catch</span> (<span class="cls">IOException</span> e) {
-    System.out.println(<span class="str">"Falha ao ler arquivo: "</span> + e.getMessage());
-} <span class="com">// br.close() é chamado automaticamente aqui, sem precisar de finally</span></pre>
+      <p><code>throw</code> cria uma conclusão abrupta e transfere o controle; <code>throws</code> declara parte do contrato de um método. <code>finally</code> normalmente executa ao sair do <code>try</code>/<code>catch</code>, inclusive com <code>return</code> ou nova exceção, mas não é uma garantia contra término da JVM ou falha do processo. Não coloque em <code>finally</code> um <code>return</code> que esconda o resultado ou a exceção original.</p>
+
+      <p>Um objeto que implementa <code>AutoCloseable</code> representa um recurso cujo ciclo de vida precisa terminar. O <strong>try-with-resources</strong> chama <code>close()</code> em ordem inversa à abertura, inclusive quando o corpo falha:</p>
+      <pre class="code"><span class="kw">final class</span> <span class="cls">Session</span> <span class="kw">implements</span> <span class="cls">AutoCloseable</span> {
+    <span class="kw">void</span> <span class="fn">execute</span>() { System.out.println(<span class="str">"using"</span>); }
+    <span class="annotation">@Override</span> <span class="kw">public void</span> <span class="fn">close</span>() { System.out.println(<span class="str">"closing"</span>); }
+}
+
+<span class="kw">try</span> (<span class="cls">Session</span> session = <span class="kw">new</span> <span class="cls">Session</span>()) {
+    session.execute();
+} <span class="com">// close() is called automatically</span></pre>
 
       <h3>Encadeamento de exceções (exception chaining)</h3>
       <p>Ao relançar uma exceção como outro tipo, preserve a causa original — perder a stack trace original é um dos erros mais frustrantes de depurar em produção.</p>
       <pre class="code"><span class="kw">try</span> {
-    conectarBanco();
-} <span class="kw">catch</span> (<span class="cls">SQLException</span> e) {
-    <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Falha ao processar pedido"</span>, e); <span class="com">// "e" vira a "cause"</span>
+    <span class="kw">int</span> age = Integer.parseInt(text);
+} <span class="kw">catch</span> (<span class="cls">NumberFormatException</span> cause) {
+    <span class="kw">throw new</span> <span class="cls">IllegalArgumentException</span>(<span class="str">"age must be an integer"</span>, cause);
 }
-<span class="com">// e.getCause() no catch externo recupera a SQLException original</span></pre>
+<span class="com">// getCause() preserves the original conversion failure</span></pre>
 
-      <div class="secret">Nunca faça <code>catch (Exception e) {}</code> vazio — isso é conhecido como "engolir exceção" e é uma das piores práticas em Java: o erro simplesmente desaparece, sem log, sem rastro, e o sistema segue rodando em um estado inconsistente até quebrar em outro lugar completamente diferente, tornando a causa raiz quase impossível de achar depois.</div>
+      <div class="secret">Um <code>catch (Exception e) {}</code> vazio engole a falha: o chamador recebe aparência de sucesso sem resultado válido nem diagnóstico. Quando a política for ignorar uma condição específica, capture o tipo específico e documente por que a ausência de ação é correta.</div>
 
-      <div class="warn"><b>Nunca capture <code>Exception</code> ou <code>Throwable</code> genericamente</b> a menos que seja em uma borda muito específica do sistema (ex: um handler global de erros de uma API). Capturar o tipo mais específico possível deixa claro qual falha você realmente está tratando, e evita mascarar bugs inesperados como se fossem esperados.</div>
+      <div class="warn"><b>Capture somente o que consegue tratar.</b> Um <code>catch</code> amplo pode ser legítimo numa fronteira que transforma falhas em um resultado final, mas não deve fingir recuperação nem capturar <code>Throwable</code> indiscriminadamente. Dentro da regra de negócio, tipos específicos deixam explícita a falha considerada.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 10.1 — Idade inválida</h4><span class="exercise-tag m">médio</span></div>

@@ -56,8 +56,8 @@
       </div>
 
       <div class="exercise">
-        <div class="exercise-head"><h4>Exercício 7.2 — Template Method</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Implemente o padrão <em>Template Method</em>: crie uma classe abstrata <code>ProcessadorPedido</code> com um método <strong>final</strong> <code>processar()</code> que chama, em ordem fixa, três métodos abstratos: <code>validar()</code>, <code>cobrar()</code> e <code>notificar()</code>. Crie uma subclasse <code>ProcessadorPedidoPix</code> implementando os três passos à sua maneira. A ideia: o "esqueleto" do algoritmo é fixo na superclasse, só os passos individuais variam.</p>
+        <div class="exercise-head"><h4>Exercício 7.2 — Fluxo comum com etapas obrigatórias</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Crie uma classe abstrata <code>ProcessadorPedido</code>. O método <strong>final</strong> <code>processar()</code> deve chamar, nessa ordem, três operações abstratas: <code>validar()</code>, <code>cobrar()</code> e <code>notificar()</code>. Depois crie <code>ProcessadorPedidoPix</code> e implemente cada operação. Antes de programar, responda: qual parte precisa ser igual para todo pedido e quais partes cada forma de pagamento precisa fornecer? O objetivo é praticar método concreto, método abstrato, sobrescrita e <code>final</code>; o nome formal desse arranjo será estudado apenas quando padrões de projeto forem apresentados.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
 <pre class="code"><span class="kw">public abstract class</span> <span class="cls">ProcessadorPedido</span> {

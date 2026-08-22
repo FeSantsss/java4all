@@ -1,8 +1,8 @@
 <section class="section tk-java" id="java-21-profundo">
       <div class="section-head"><span class="section-num">+</span><h2 class="section-title">Java 21: records, sealed types, pattern matching e virtual threads</h2></div>
-      <div class="topic-meta"><span class="tech-badge tech-java">Java</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~3h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#javamoderno">Java moderno</a>, <a class="prereq-tag" href="#interfaces">Interfaces</a></div></div>
+      <div class="topic-meta"><span class="tech-badge tech-java">Java</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~3h</b> de estudo e prática</div><div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#jvm-profundo">JVM, bytecode e memória</a></div></div>
       
-      <p>Java 21 é uma versão LTS e reúne recursos que mudam a forma de modelar dados, representar hierarquias fechadas e escrever concorrência orientada a tarefas. O objetivo não é usar sintaxe nova por moda, mas tornar estados inválidos menos representáveis e o fluxo mais explícito.</p>
+      <p>Java 21 reúne recursos finalizados em versões diferentes: records tornaram-se permanentes no Java 16, sealed classes no 17, e record patterns e pattern matching para <code>switch</code> no 21. JDKs de diversos fornecedores oferecem suporte prolongado à versão 21; “LTS” descreve a política de suporte da distribuição, não uma regra da linguagem. O objetivo é escolher cada recurso pelo problema que resolve.</p>
       <aside class="concept-foundation">
     <div class="concept-foundation-head"><span class="concept-level">base antes do aprofundamento</span><h3>Primeiro contato com os quatro recursos</h3></div>
     <p>Veja o problema que cada recurso resolve antes de estudar suas restrições e APIs avançadas.</p>
@@ -17,7 +17,7 @@
         valor = valor.setScale(moeda.getDefaultFractionDigits(), RoundingMode.HALF_EVEN);
     }
 }</pre>
-      <p>Um record gera acessores, construtor canônico, <code>equals</code>, <code>hashCode</code> e <code>toString</code> a partir dos componentes. Isso não o torna profundamente imutável: se um componente referencia uma lista mutável, a mutabilidade continua existindo. Faça cópias defensivas no construtor.</p>
+      <p>Um record declara acessores, construtor canônico, <code>equals</code>, <code>hashCode</code> e <code>toString</code> a partir dos componentes. Isso não o torna profundamente imutável: se um componente referencia uma lista mutável, a mutabilidade continua existindo. Quando o contrato exigir isolamento, normalize no construtor com uma cópia defensiva, como <code>List.copyOf(itens)</code>.</p>
       <h3>Hierarquias seladas e pattern matching</h3>
       <pre class="code"><span class="kw">sealed interface</span> Pagamento <span class="kw">permits</span> Pix, Cartao, Boleto {}
 <span class="kw">record</span> Pix(String chave) <span class="kw">implements</span> Pagamento {}
@@ -31,24 +31,25 @@
         <span class="kw">case</span> Boleto(LocalDate vencimento) -&gt; <span class="str">"vence em "</span> + vencimento;
     };
 }</pre>
-      <p>Como a hierarquia é fechada, o compilador verifica exaustividade. Quando um novo subtipo é permitido, pontos de decisão incompletos deixam de compilar. Use isso para resultados, comandos e estados finitos; não sele hierarquias que precisam ser extensíveis por plugins.</p>
+      <p>Como a hierarquia é fechada, o compilador consegue verificar a exaustividade desse <code>switch</code>. Quando um novo subtipo permitido é adicionado, decisões incompletas deixam de compilar. Use sealed types para um universo deliberadamente fechado; não sele hierarquias cujo requisito é aceitar implementações externas. <code>null</code> continua sendo um caso separado e precisa de política explícita.</p>
       <h3>Virtual threads: primeiro o caso mínimo</h3>
       <pre class="code">Thread tarefa = Thread.startVirtualThread(() -&gt;
     System.out.println(<span class="str">"Executando em outra thread"</span>)
 );
 tarefa.join(); <span class="com">// aguarda a tarefa terminar</span></pre>
-      <p>Concorrência significa que tarefas podem progredir em períodos sobrepostos; não significa necessariamente executar no mesmo instante. <strong>I/O</strong>, ou entrada e saída, inclui esperar rede, arquivo e banco. Enquanto uma virtual thread espera I/O bloqueante, a JVM pode liberar a thread do sistema operacional que a executava para atender outra tarefa. O capítulo <a href="#threads">Threads e concorrência</a> constrói sincronização e visibilidade de memória; <a href="#concorrencia-profunda">Concorrência profunda</a> trata cancelamento, limites e medição.</p>
-      <h3>Aprofundamento — executor, resultado, timeout e cancelamento</h3>
-      <pre class="code"><span class="kw">try</span> (<span class="kw">var</span> executor = Executors.newVirtualThreadPerTaskExecutor()) {
-    List&lt;Future&lt;Resposta&gt;&gt; tarefas = ids.stream()
-        .map(id -&gt; executor.submit(() -&gt; cliente.buscar(id)))
-        .toList();
-    <span class="kw">for</span> (<span class="kw">var</span> tarefa : tarefas) {
-        <span class="kw">try</span> { processar(tarefa.get(2, TimeUnit.SECONDS)); }
-        <span class="kw">catch</span> (TimeoutException e) { tarefa.cancel(<span class="kw">true</span>); }
-    }
-}</pre>
-      <p><code>Executor</code> recebe tarefas; <code>Future</code> representa um resultado que pode chegar depois; timeout limita a espera e cancelamento solicita a interrupção. Virtual threads não tornam CPU mais rápida nem eliminam <strong>race conditions</strong> — resultados que dependem da ordem imprevisível de acessos compartilhados. Não crie um pool pequeno de virtual threads para limitar concorrência: limite o recurso escasso com <code>Semaphore</code>, pool de conexões ou rate limiter. Bloqueios longos dentro de <code>synchronized</code> e algumas chamadas nativas podem prender uma thread de plataforma; <strong>JFR</strong>, Java Flight Recorder, ajuda a observar esse comportamento.</p>
+      <p>Concorrência significa que tarefas podem progredir em períodos sobrepostos; não significa necessariamente executar no mesmo instante. Enquanto uma virtual thread espera uma operação bloqueante de entrada ou saída, o runtime pode liberar a thread de sistema operacional que a carregava. Isso permite representar muitas tarefas de espera com uma thread por tarefa. Virtual threads aumentam capacidade para esse perfil; não tornam uma tarefa CPU-bound mais rápida e não reduzem automaticamente a latência.</p>
+      <h3>Muitas tarefas independentes, sem pool de virtual threads</h3>
+      <pre class="code">List&lt;Thread&gt; tarefas = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+<span class="kw">for</span> (<span class="kw">int</span> id = 0; id &lt; 100; id++) {
+    <span class="kw">int</span> tarefaId = id;
+    tarefas.add(Thread.ofVirtual().start(() -&gt;
+        System.out.println(<span class="str">"tarefa "</span> + tarefaId)
+    ));
+}
+
+<span class="kw">for</span> (Thread tarefa : tarefas) tarefa.join();</pre>
+      <p>Cada virtual thread representa uma tarefa, não um trabalhador reutilizado de um pool pequeno. Este exemplo só demonstra criação e espera; ele não ensina compartilhamento de estado, sincronização, interrupção, cancelamento ou limitação de recursos. Esses contratos precisam do módulo de concorrência. Até lá, mantenha as tarefas independentes e não use este exemplo como benchmark.</p>
       <div class="warn"><b>Versões e previews:</b> o curso usa apenas recursos finalizados no Java 21 neste capítulo. Recursos preview exigem flags de compilação e execução e não devem aparecer silenciosamente em código de produção.</div>
-      <div class="exercise"><div class="exercise-head"><h4>Laboratório — processador concorrente</h4><span class="exercise-tag d">difícil</span></div><p>Consuma 1.000 URLs simuladas com virtual threads. Adicione timeout, cancelamento, limite de 30 chamadas simultâneas por <code>Semaphore</code>, contagem de falhas e encerramento correto. Compare com um pool fixo e registre a metodologia, não apenas o tempo final.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>A solução deve sempre liberar o semáforo em <code>finally</code>, preservar interrupção, distinguir timeout de erro funcional e não criar um pool de virtual threads.</p></div></div>
+      <div class="exercise"><div class="exercise-head"><h4>Laboratório — modelagem moderna sem moda</h4><span class="exercise-tag d">difícil</span></div><p>Modele o resultado de uma importação como uma hierarquia selada com <code>Sucesso</code> e <code>Falha</code>, ambos records. Use record pattern em um <code>switch</code> exaustivo para produzir a mensagem final. Em separado, execute três tarefas independentes de impressão em virtual threads e aguarde todas com <code>join</code>. Não compartilhe estado mutável.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>A hierarquia representa todos os estados permitidos, records validam componentes no construtor compacto, o switch não usa <code>default</code> para esconder subtipo e a demonstração de threads não afirma ganho de velocidade nem antecipa sincronização.</p></div></div>
     </section>

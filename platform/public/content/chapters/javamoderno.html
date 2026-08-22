@@ -2,12 +2,12 @@
       <div class="section-head"><span class="section-num">21</span><h2 class="section-title">Java moderno: Optional, var, Date/Time</h2></div>
       <div class="topic-meta">
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
-        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#generics">Generics</a></div>
+        <div class="meta-item">Pré-requisito: <a class="prereq-tag" href="#streams">Lambdas e Streams</a></div>
       </div>
 
-      <p>Código Spring moderno (e Java moderno em geral) usa fartamente alguns recursos que vale dominar antes de mergulhar no framework.</p>
+      <p>Versões modernas de Java acrescentaram formas mais explícitas de representar ausência, inferir tipos locais, trabalhar com tempo e declarar portadores de dados. Cada recurso resolve um problema diferente; “moderno” não significa substituir automaticamente o código claro que você já sabe escrever.</p>
 
-      <h3>Optional — dizendo adeus a NullPointerException por omissão</h3>
+      <h3>Optional — ausência explícita no retorno</h3>
       <pre class="code"><span class="com">// ❌ o chamador precisa "adivinhar" que pode vir null:</span>
 <span class="kw">public</span> <span class="cls">Usuario</span> <span class="fn">buscarPorId</span>(<span class="kw">int</span> id) {
     <span class="kw">return</span> encontrado ? usuario : <span class="kw">null</span>;
@@ -24,9 +24,9 @@ resultado.ifPresent(u -&gt; System.out.println(u.getNome()));
 <span class="cls">Usuario</span> u = resultado.orElse(<span class="cls">Usuario</span>.ANONIMO);
 <span class="cls">Usuario</span> u2 = resultado.orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">UsuarioNaoEncontradoException</span>(id));</pre>
 
-      <div class="secret">É exatamente esse padrão — retornar <code>Optional&lt;T&gt;</code> em vez de <code>T</code> possivelmente nulo — que os métodos <code>findById(...)</code> do Spring Data JPA usam. Quando você vir <code>Optional&lt;Usuario&gt; findById(Long id)</code> em um repositório Spring, você já vai saber exatamente o que fazer com o retorno.</div>
+      <div class="secret"><code>Optional&lt;T&gt;</code> representa zero ou um resultado. Antes de escolher entre <code>orElse</code>, <code>orElseGet</code>, <code>map</code> e <code>orElseThrow</code>, decida o contrato do chamador: usar um padrão, transformar o valor, propagar ausência ou considerar a ausência uma falha.</div>
 
-      <div class="warn"><b>Optional não é para tudo:</b> nunca use <code>Optional</code> como tipo de campo de classe, parâmetro de método, ou dentro de coleções (<code>List&lt;Optional&lt;T&gt;&gt;</code>). Ele foi desenhado especificamente como tipo de <strong>retorno</strong>, para deixar explícito "isso pode não existir" na assinatura do método.</div>
+      <div class="warn"><b>Optional não é substituto universal de <code>null</code>.</b> Seu uso principal é o retorno que pode não produzir valor. Em campos, parâmetros ou coleções, costuma aumentar estados e camadas sem esclarecer o contrato. Uma coleção vazia já representa “nenhum elemento”; <code>List&lt;Optional&lt;T&gt;&gt;</code> normalmente mistura duas ausências diferentes sem necessidade.</div>
 
       <h3>var — inferência de tipo local</h3>
       <pre class="code">var lista = <span class="kw">new</span> ArrayList&lt;<span class="cls">Livro</span>&gt;(); <span class="com">// o compilador infere: List&lt;Livro&gt;... na verdade ArrayList&lt;Livro&gt;</span>
@@ -49,9 +49,11 @@ System.out.println(hoje.format(formato));</pre>
 
       <div class="callout"><b>Prefira a API moderna:</b> <code>java.util.Date</code> e <code>java.util.Calendar</code> ainda existem por compatibilidade, mas são mutáveis e possuem APIs propensas a erro. Em código novo, prefira <code>LocalDate</code>, <code>LocalDateTime</code>, <code>Instant</code>, <code>OffsetDateTime</code> e <code>ZonedDateTime</code>. Em integrações legadas, converta explicitamente na fronteira e mantenha o domínio em <code>java.time</code>.</div>
 
-      <h3>Records (revisitando o capítulo 04) e text blocks</h3>
+      <div class="warn"><b>Escolha o tipo pela pergunta.</b> <code>LocalDate</code> é uma data civil sem horário; <code>LocalDateTime</code> não identifica um instante global; <code>Instant</code> representa um ponto na linha do tempo; <code>ZonedDateTime</code> aplica regras de fuso, inclusive mudanças de horário. Não converta automaticamente todo horário para <code>LocalDateTime</code>.</div>
+
+      <h3>Records e text blocks</h3>
       <pre class="code"><span class="kw">public record</span> <span class="cls">Coordenada</span>(<span class="kw">double</span> latitude, <span class="kw">double</span> longitude) {}
-<span class="com">// gera automaticamente: construtor, getters (latitude(), longitude()), equals, hashCode, toString</span>
+<span class="com">// declara construtor canônico, acessores latitude()/longitude(), equals, hashCode e toString</span>
 
 <span class="kw">String</span> json = <span class="str">"""
     {
@@ -62,7 +64,7 @@ System.out.println(hoje.format(formato));</pre>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 21.1 — Repositório com Optional</h4><span class="exercise-tag m">médio</span></div>
-        <p>Reescreva o método <code>buscarPorTitulo</code> da classe <code>Biblioteca</code> (capítulo 17) criando um novo método <code>buscarPorCodigo(String codigo)</code> que retorna <code>Optional&lt;ItemAcervo&gt;</code> em vez de lançar exceção quando não encontra. Teste os três caminhos: <code>orElseThrow</code>, <code>orElse</code> e <code>ifPresent</code>.</p>
+        <p>Reescreva a busca da biblioteca criando <code>buscarPorCodigo(String codigo)</code>, que retorna <code>Optional&lt;ItemEmprestavel&gt;</code> quando o código pode não existir. Teste os caminhos <code>orElseThrow</code>, <code>orElse</code>, <code>ifPresent</code> e <code>map</code>. Explique em qual caso cada política faz sentido.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
 <pre class="code"><span class="kw">public</span> Optional&lt;<span class="cls">ItemAcervo</span>&gt; <span class="fn">buscarPorCodigo</span>(<span class="kw">String</span> codigo) {

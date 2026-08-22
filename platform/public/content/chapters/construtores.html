@@ -35,34 +35,33 @@
     }
 }</pre>
 
-      <h3>Ordem exata de inicialização de um objeto</h3>
-      <p>Esse é o tipo de detalhe que raramente é ensinado, mas explica bugs sutis. Quando você chama <code>new Filho(...)</code>, a JVM executa, nesta ordem:</p>
+      <h3>Construtor padrão: quando ele existe</h3>
+      <p>Se uma classe não declara construtor algum, o compilador declara um construtor sem argumentos. Assim que você declara qualquer construtor, esse padrão deixa de ser criado. Portanto, adicionar <code>Produto(String nome)</code> faz uma chamada antiga a <code>new Produto()</code> deixar de compilar, a menos que você também declare conscientemente essa opção.</p>
       <ol style="color:var(--ink-dim)">
-        <li>Blocos e atributos <code>static</code> da hierarquia inteira (só na <strong>primeira vez</strong> que a classe é carregada, uma única vez no programa).</li>
-        <li>O construtor da superclasse é chamado primeiro (<code>super(...)</code> implícito ou explícito, sempre a primeira linha).</li>
-        <li>Atributos de instância da superclasse são inicializados com seus valores declarados / blocos de inicialização de instância.</li>
-        <li>O corpo do construtor da superclasse roda.</li>
-        <li>Atributos de instância da subclasse são inicializados.</li>
-        <li>O corpo do construtor da subclasse roda.</li>
+        <li><code>class Produto { }</code> recebe um construtor sem argumentos implícito.</li>
+        <li><code>class Produto { Produto(String nome) { ... } }</code> possui apenas o construtor declarado.</li>
+        <li>Construtores podem ser sobrecarregados por listas de parâmetros diferentes.</li>
+        <li>Eles não são métodos, não declaram retorno e não são herdados.</li>
       </ol>
 
-      <pre class="code"><span class="kw">public class</span> <span class="cls">A</span> {
-    <span class="kw">static</span> { System.out.println(<span class="str">"1. static de A"</span>); }
-    { System.out.println(<span class="str">"3. bloco de instância de A"</span>); }
-    <span class="kw">public</span> <span class="fn">A</span>() { System.out.println(<span class="str">"4. construtor de A"</span>); }
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Produto</span> {
+    <span class="kw">String</span> nome;
+
+    <span class="fn">Produto</span>(<span class="kw">String</span> nome) {
+        <span class="kw">this</span>.nome = nome;
+    }
+
+    <span class="fn">Produto</span>() {
+        <span class="kw">this</span>(<span class="str">"Sem nome"</span>);
+    }
 }
 
-<span class="kw">public class</span> <span class="cls">B</span> <span class="kw">extends</span> <span class="cls">A</span> {
-    <span class="kw">static</span> { System.out.println(<span class="str">"2. static de B"</span>); }
-    { System.out.println(<span class="str">"5. bloco de instância de B"</span>); }
-    <span class="kw">public</span> <span class="fn">B</span>() { System.out.println(<span class="str">"6. construtor de B"</span>); }
-}
+<span class="cls">Produto</span> a = <span class="kw">new</span> <span class="cls">Produto</span>(<span class="str">"Caderno"</span>);
+<span class="cls">Produto</span> b = <span class="kw">new</span> <span class="cls">Produto</span>();</pre>
 
-<span class="com">// new B(); imprime exatamente na ordem 1,2,3,4,5,6</span></pre>
+      <div class="secret">Não confunda “sem argumentos” com “padrão”. Um construtor <code>Produto()</code> escrito por você é explícito; o construtor padrão é o que o compilador declara somente quando não existe nenhum construtor no código-fonte.</div>
 
-      <div class="secret">Blocos <code>static { ... }</code> rodam uma única vez, quando a classe é carregada pela JVM — não a cada <code>new</code>. Já blocos de instância <code>{ ... }</code> (sem <code>static</code>) rodam <strong>toda vez</strong> que um objeto é criado, logo antes do corpo do construtor. Poucos devs usam blocos de instância no dia a dia, mas eles aparecem em bibliotecas e em provas de concurso/certificação.</div>
-
-      <div class="warn"><b>Erro clássico:</b> chamar um método sobrescrevível (não <code>final</code>, não <code>private</code>) de dentro do construtor da superclasse. Como o construtor da subclasse ainda não rodou nesse ponto, os atributos da subclasse ainda estarão com valor padrão (<code>null</code>/<code>0</code>/<code>false</code>), o que costuma causar <code>NullPointerException</code> silenciosos. Regra prática: evite chamar métodos "overridable" dentro de construtores.</div>
+      <div class="warn"><b>Evite trabalho com efeito externo no construtor.</b> Ler teclado, imprimir, alterar outros objetos ou depender de recursos externos torna a criação imprevisível. Nesta etapa, use o construtor para receber, validar com regras já conhecidas e atribuir o estado inicial.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 3.1 — Construtor com validação</h4><span class="exercise-tag m">médio</span></div>
@@ -82,11 +81,11 @@
       </div>
 
       <div class="exercise">
-        <div class="exercise-head"><h4>Exercício 3.2 — Ordem de inicialização</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Crie duas classes <code>Pai</code> e <code>Filho</code> (<code>Filho extends Pai</code>), cada uma com um bloco <code>static</code>, um bloco de instância e um construtor, cada um imprimindo uma mensagem própria. Antes de rodar, escreva no papel a ordem exata em que as mensagens vão aparecer ao criar <code>new Filho()</code> duas vezes seguidas. Depois confira sua previsão.</p>
+        <div class="exercise-head"><h4>Exercício 3.2 — Contratos de construção</h4><span class="exercise-tag m">médio</span></div>
+        <p>Crie <code>Produto</code> com um construtor que exige nome e preço positivo e outro que recebe somente nome e delega usando preço 1. Antes de executar, indique quais chamadas compilam: <code>new Produto("Caderno", 12)</code>, <code>new Produto("Caderno")</code> e <code>new Produto()</code>.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
-          <p>Na <strong>primeira</strong> criação: static de Pai → static de Filho → instância de Pai → construtor de Pai → instância de Filho → construtor de Filho. Na <strong>segunda</strong> criação de <code>new Filho()</code>, os blocos <code>static</code> <strong>não</strong> rodam de novo (a classe já foi carregada) — só a sequência de instância se repete: instância de Pai → construtor de Pai → instância de Filho → construtor de Filho.</p>
+          <p>As duas primeiras chamadas compilam quando os dois construtores foram declarados. <code>new Produto()</code> não compila: como a classe declarou construtores, o compilador não acrescenta uma terceira opção sem argumentos. A versão de um argumento deve começar com <code>this(nome, 1)</code> para concentrar a atribuição e a validação.</p>
         </div>
       </div>
     </section>

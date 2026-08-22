@@ -1,9 +1,35 @@
 <section class="section tk-java" id="mini-importador-pedidos">
       <div class="section-head"><span class="section-num">P3</span><h2 class="section-title">Mini-projeto: importador de pedidos</h2></div>
       <div class="topic-meta"><div class="meta-item">Objetivo: <b>coleções, arquivos e erros</b></div><div class="time-est">Tempo: <b>8–14 horas</b></div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#java-io">Java I/O</a>, <a class="prereq-tag" href="#json">JSON</a></div></div>
-      <p>Leia pedidos de CSV, valide cada linha, converta para objetos e produza relatório JSON. Linhas inválidas não podem impedir o processamento das demais.</p>
-      <h3>Requisitos</h3><ul class="checklist"><li><input type="checkbox"><span>Separar leitura, parsing, validação, agregação e escrita.</span></li><li><input type="checkbox"><span>Identificar número da linha e motivo de cada rejeição.</span></li><li><input type="checkbox"><span>Detectar IDs duplicados e datas inválidas.</span></li><li><input type="checkbox"><span>Usar <code>BigDecimal</code> para dinheiro e <code>java.time</code> para datas.</span></li><li><input type="checkbox"><span>Gerar resumo de aceitos, rejeitados e valor total.</span></li></ul>
-      <div class="warn"><b>Não engula exceções.</b> Transforme falhas esperadas em resultados de validação; deixe falhas inesperadas visíveis com contexto.</div>
+      <p>Leia pedidos de CSV, valide cada linha, converta para objetos e produza relatório JSON. Este projeto aprofunda o analisador de vendas: agora o sucesso parcial é parte do contrato. Linhas inválidas não podem impedir o processamento das demais, mas falhas fatais do ambiente não podem ser escondidas.</p>
+      <h3>Contrato de entrada</h3>
+      <p>Defina o arquivo antes de codar. Um contrato mínimo aceitável para esta fase:</p>
+      <ul>
+        <li>UTF-8, cabeçalho obrigatório e uma linha por pedido.</li>
+        <li>Colunas: <code>id</code>, <code>data</code>, <code>cliente</code>, <code>sku</code>, <code>quantidade</code>, <code>valorUnitario</code>.</li>
+        <li><code>data</code> em ISO-8601, quantidade positiva e dinheiro como <code>BigDecimal</code>.</li>
+        <li>ID duplicado é rejeição de registro, não crash da aplicação.</li>
+      </ul>
+      <h3>Arquitetura mínima</h3>
+      <ol>
+        <li><strong>Reader:</strong> abre arquivo, declara charset e fornece linhas numeradas.</li>
+        <li><strong>Parser:</strong> transforma texto em DTO bruto ou rejeição de formato.</li>
+        <li><strong>Validador:</strong> aplica regras de domínio e detecta duplicidade.</li>
+        <li><strong>Agregador:</strong> calcula aceitos, rejeitados, total e estatísticas.</li>
+        <li><strong>Writer:</strong> grava JSON em arquivo de saída com falha visível.</li>
+      </ol>
+      <h3>Requisitos</h3><ul class="checklist"><li><input type="checkbox"><span>Separar leitura, parsing, validação, agregação e escrita.</span></li><li><input type="checkbox"><span>Identificar número da linha, campo e motivo de cada rejeição.</span></li><li><input type="checkbox"><span>Detectar IDs duplicados, datas inválidas, quantidade inválida e dinheiro malformado.</span></li><li><input type="checkbox"><span>Usar <code>BigDecimal</code> para dinheiro e <code>java.time</code> para datas.</span></li><li><input type="checkbox"><span>Gerar JSON com aceitos, rejeitados, valor total e metadados da importação.</span></li><li><input type="checkbox"><span>Abortar com causa preservada quando entrada não existe ou saída não pode ser gravada.</span></li></ul>
+      <h3>Formato do relatório JSON</h3>
+      <pre class="code">{
+  "arquivo": "pedidos.csv",
+  "aceitos": 42,
+  "rejeitados": 3,
+  "valorTotal": "10591.80",
+  "erros": [
+    {"linha": 7, "campo": "data", "motivo": "data inválida"}
+  ]
+}</pre>
+      <div class="warn"><b>Não engula exceções.</b> Transforme falhas esperadas em resultados de validação; deixe falhas inesperadas visíveis com contexto. Rejeição de linha e falha fatal são coisas diferentes.</div>
     <h3>Checkpoint antes de concluir</h3><div class="quiz"><p class="q">Como tratar uma linha inválida do arquivo?</p><div class="quiz-opts"><div class="quiz-opt" data-correct="true">Registrar contexto seguro, separar o erro e continuar ou abortar conforme contrato explícito.</div><div class="quiz-opt" data-correct="false">Ignorar silenciosamente toda exceção.</div><div class="quiz-opt" data-correct="false">Importar metade da linha para não perder dados.</div></div><div class="quiz-feedback"></div></div><div class="project-quality-gate">
       <h3>Execução guiada e evidências</h3>
       <p>Este projeto não termina quando o caminho feliz funciona. Construa em incrementos pequenos, mantenha o sistema executável a cada etapa e produza evidências que outra pessoa consiga reproduzir.</p>

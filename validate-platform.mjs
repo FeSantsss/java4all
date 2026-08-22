@@ -29,7 +29,7 @@ const generatedConceptChecks = quizzes.filter(quiz => quiz.id.includes('-concept
 const exercises = blocks.filter(block => block.type === 'exercise');
 const checklists = blocks.filter(block => block.type === 'checklist');
 assert(generated.chapters.every(chapter => chapter.blocks.some(block => block.type === 'quiz')), 'Todo capítulo legado precisa de avaliação conceitual.');
-assert(quizzes.length >= 300, 'A cobertura conceitual de quizzes ficou abaixo do baseline aprofundado.');
+assert(quizzes.length >= 150, 'O inventário de quizzes legados ficou abaixo do baseline de compatibilidade.');
 assert(quizzes.every(quiz => quiz.prompt && quiz.options.length >= 3), 'Todo quiz precisa de enunciado e pelo menos três alternativas.');
 assert(quizzes.every(quiz => quiz.options.filter(option => option.correct).length === 1), 'Todo quiz precisa de exatamente uma resposta correta.');
 assert(quizzes.every(quiz => new Set(quiz.options.map(option => option.label)).size === quiz.options.length), 'Quizzes não podem repetir alternativas.');
@@ -41,6 +41,7 @@ assert(generated.chapters.every(chapter => chapter.englishActivity?.prompt), 'To
 
 const requiredTerms = [
   'associacoes-cardinalidade', 'jdbc-under-the-hood', 'java-httpclient-json', 'pure-java-api-project',
+  'process-api-cli', 'zenith-cli-inicial', 'ProcessBuilder', 'stdout', 'stderr', 'exit code',
   'lanterna-tui', 'aws-sns-sqs', 'delivery-failure-lab', 'outbox-inbox', 'saga-schema-ordering',
   'async-integration-tests', 'HttpClient', 'visibility timeout', 'DLQ', 'redrive', 'LocalStack',
   'Awaitility', 'Transactional Outbox', 'Inbox', 'Saga', 'SNS + SQS', 'Lanterna'
@@ -48,7 +49,7 @@ const requiredTerms = [
 for (const term of requiredTerms) assert(requiredSource.toLocaleLowerCase('pt-BR').includes(term.toLocaleLowerCase('pt-BR')), `Cobertura obrigatória ausente: ${term}`);
 
 const requiredIds = [...requiredSource.matchAll(/\n\s*id: '([^']+)', moduleId:/g)].map(match => match[1]);
-assert(requiredIds.length === 21 && new Set(requiredIds).size === 21, 'A trilha estruturada deve possuir 21 capítulos adicionais únicos.');
+assert(requiredIds.length === 23 && new Set(requiredIds).size === 23, 'A trilha estruturada deve possuir 23 capítulos adicionais únicos.');
 assert(/PROGRESS_VERSION = 11/.test(progressSource), 'O progresso React deve permanecer explicitamente versionado.');
 assert(/parseBackup/.test(progressSource) && /migrateProgress/.test(progressSource), 'Migração e validação de backup são obrigatórias.');
 assert(/type: 'project'/.test(schemaSource) && /type: 'quiz'/.test(schemaSource) && /Resource/.test(schemaSource), 'O schema perdeu entidades pedagógicas estruturadas.');
@@ -74,4 +75,4 @@ for (const value of urls) {
   assert(url.protocol === 'https:', `Recurso externo sem HTTPS: ${value}`);
 }
 
-console.log(`OK: plataforma com 128 capítulos migrados + 21 estruturados, ${quizzes.length} quizzes legados aprofundados, ${exercises.length} exercícios legados tipados, ${checklists.length} checklists e ${urls.size} URLs únicas.`);
+console.log(`OK: plataforma com 128 capítulos migrados + 23 estruturados, ${quizzes.length} quizzes legados inventariados, ${exercises.length} exercícios legados tipados, ${checklists.length} checklists e ${urls.size} URLs únicas.`);

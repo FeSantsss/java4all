@@ -1,0 +1,2950 @@
+{
+  "modules": [
+    {
+      "id": "orientation",
+      "order": 0,
+      "prerequisites": []
+    },
+    {
+      "id": "programming-fundamentals",
+      "order": 1,
+      "prerequisites": [
+        "orientation"
+      ]
+    },
+    {
+      "id": "oop-modeling",
+      "order": 2,
+      "prerequisites": [
+        "programming-fundamentals"
+      ]
+    },
+    {
+      "id": "java-core",
+      "order": 3,
+      "prerequisites": [
+        "oop-modeling"
+      ]
+    },
+    {
+      "id": "io-cli-serialization",
+      "order": 4,
+      "prerequisites": [
+        "java-core"
+      ]
+    },
+    {
+      "id": "algorithms-data-structures",
+      "order": 5,
+      "prerequisites": [
+        "java-core"
+      ]
+    },
+    {
+      "id": "testing-engineering",
+      "order": 6,
+      "prerequisites": [
+        "java-core"
+      ]
+    },
+    {
+      "id": "http-api-clients",
+      "order": 7,
+      "prerequisites": [
+        "io-cli-serialization",
+        "testing-engineering"
+      ]
+    },
+    {
+      "id": "relational-data-jdbc",
+      "order": 8,
+      "prerequisites": [
+        "io-cli-serialization",
+        "testing-engineering"
+      ]
+    },
+    {
+      "id": "application-design",
+      "order": 9,
+      "prerequisites": [
+        "oop-modeling",
+        "testing-engineering"
+      ]
+    },
+    {
+      "id": "spring-api",
+      "order": 10,
+      "prerequisites": [
+        "http-api-clients",
+        "relational-data-jdbc",
+        "application-design"
+      ]
+    },
+    {
+      "id": "api-security-quality",
+      "order": 11,
+      "prerequisites": [
+        "spring-api"
+      ]
+    },
+    {
+      "id": "containers-integration-data",
+      "order": 12,
+      "prerequisites": [
+        "spring-api",
+        "testing-engineering"
+      ]
+    },
+    {
+      "id": "concurrency-network-tui",
+      "order": 13,
+      "prerequisites": [
+        "io-cli-serialization",
+        "testing-engineering"
+      ]
+    },
+    {
+      "id": "production-delivery",
+      "order": 14,
+      "prerequisites": [
+        "api-security-quality",
+        "containers-integration-data"
+      ]
+    },
+    {
+      "id": "synchronous-integration",
+      "order": 15,
+      "prerequisites": [
+        "api-security-quality",
+        "concurrency-network-tui"
+      ]
+    },
+    {
+      "id": "resilience-observability",
+      "order": 16,
+      "prerequisites": [
+        "synchronous-integration",
+        "production-delivery"
+      ]
+    },
+    {
+      "id": "messaging-eda",
+      "order": 17,
+      "prerequisites": [
+        "synchronous-integration",
+        "relational-data-jdbc",
+        "containers-integration-data",
+        "concurrency-network-tui"
+      ]
+    },
+    {
+      "id": "distributed-consistency",
+      "order": 18,
+      "prerequisites": [
+        "messaging-eda",
+        "resilience-observability"
+      ]
+    },
+    {
+      "id": "professional-final",
+      "order": 19,
+      "prerequisites": [
+        "distributed-consistency",
+        "production-delivery"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "intro",
+      "moduleId": "orientation",
+      "order": 0
+    },
+    {
+      "id": "primeiro-programa",
+      "moduleId": "orientation",
+      "order": 1
+    },
+    {
+      "id": "variaveis-tipos",
+      "moduleId": "programming-fundamentals",
+      "order": 2
+    },
+    {
+      "id": "operadores-expressoes",
+      "moduleId": "programming-fundamentals",
+      "order": 3
+    },
+    {
+      "id": "controle-fluxo",
+      "moduleId": "programming-fundamentals",
+      "order": 4
+    },
+    {
+      "id": "lacos-repeticao",
+      "moduleId": "programming-fundamentals",
+      "order": 5
+    },
+    {
+      "id": "arrays-matrizes",
+      "moduleId": "programming-fundamentals",
+      "order": 6
+    },
+    {
+      "id": "strings-wrapper",
+      "moduleId": "programming-fundamentals",
+      "order": 7
+    },
+    {
+      "id": "metodos-escopo",
+      "moduleId": "programming-fundamentals",
+      "order": 8
+    },
+    {
+      "id": "entrada-console",
+      "moduleId": "programming-fundamentals",
+      "order": 9
+    },
+    {
+      "id": "logica-programacao",
+      "moduleId": "programming-fundamentals",
+      "order": 10
+    },
+    {
+      "id": "mini-caixa-eletronico",
+      "moduleId": "programming-fundamentals",
+      "order": 11
+    },
+    {
+      "id": "classes",
+      "moduleId": "oop-modeling",
+      "order": 12
+    },
+    {
+      "id": "atributos",
+      "moduleId": "oop-modeling",
+      "order": 13
+    },
+    {
+      "id": "construtores",
+      "moduleId": "oop-modeling",
+      "order": 14
+    },
+    {
+      "id": "encapsulamento",
+      "moduleId": "oop-modeling",
+      "order": 15
+    },
+    {
+      "id": "static",
+      "moduleId": "oop-modeling",
+      "order": 16
+    },
+    {
+      "id": "heranca",
+      "moduleId": "oop-modeling",
+      "order": 17
+    },
+    {
+      "id": "polimorfismo",
+      "moduleId": "oop-modeling",
+      "order": 18
+    },
+    {
+      "id": "abstracao",
+      "moduleId": "oop-modeling",
+      "order": 19
+    },
+    {
+      "id": "interfaces",
+      "moduleId": "oop-modeling",
+      "order": 20
+    },
+    {
+      "id": "mini-biblioteca-cli",
+      "moduleId": "oop-modeling",
+      "order": 23
+    },
+    {
+      "id": "pacotes",
+      "moduleId": "java-core",
+      "order": 24
+    },
+    {
+      "id": "excecoes",
+      "moduleId": "java-core",
+      "order": 25
+    },
+    {
+      "id": "colecoes",
+      "moduleId": "java-core",
+      "order": 26
+    },
+    {
+      "id": "generics",
+      "moduleId": "java-core",
+      "order": 27
+    },
+    {
+      "id": "javamoderno",
+      "moduleId": "java-core",
+      "order": 29
+    },
+    {
+      "id": "java-21-profundo",
+      "moduleId": "java-core",
+      "order": 32
+    },
+    {
+      "id": "streams",
+      "moduleId": "java-core",
+      "order": 28
+    },
+    {
+      "id": "java-io",
+      "moduleId": "io-cli-serialization",
+      "order": 33
+    },
+    {
+      "id": "mini-analisador-vendas",
+      "moduleId": "io-cli-serialization",
+      "order": 34
+    },
+    {
+      "id": "big-o",
+      "moduleId": "algorithms-data-structures",
+      "order": 39
+    },
+    {
+      "id": "recursao",
+      "moduleId": "algorithms-data-structures",
+      "order": 40
+    },
+    {
+      "id": "ordenacao-busca",
+      "moduleId": "algorithms-data-structures",
+      "order": 41
+    },
+    {
+      "id": "algoritmos-praticos",
+      "moduleId": "algorithms-data-structures",
+      "order": 42
+    },
+    {
+      "id": "git",
+      "moduleId": "testing-engineering",
+      "order": 44
+    },
+    {
+      "id": "build",
+      "moduleId": "testing-engineering",
+      "order": 45
+    },
+    {
+      "id": "anotacoes",
+      "moduleId": "application-design",
+      "order": 64
+    },
+    {
+      "id": "json",
+      "moduleId": "io-cli-serialization",
+      "order": 35
+    },
+    {
+      "id": "logging",
+      "moduleId": "testing-engineering",
+      "order": 47
+    },
+    {
+      "id": "mini-importador-pedidos",
+      "moduleId": "io-cli-serialization",
+      "order": 37
+    },
+    {
+      "id": "solid",
+      "moduleId": "application-design",
+      "order": 65
+    },
+    {
+      "id": "di",
+      "moduleId": "application-design",
+      "order": 66
+    },
+    {
+      "id": "padroes",
+      "moduleId": "application-design",
+      "order": 67
+    },
+    {
+      "id": "clean-code",
+      "moduleId": "application-design",
+      "order": 68
+    },
+    {
+      "id": "projetospring",
+      "moduleId": "application-design",
+      "order": 69
+    },
+    {
+      "id": "http",
+      "moduleId": "http-api-clients",
+      "order": 52
+    },
+    {
+      "id": "sql",
+      "moduleId": "relational-data-jdbc",
+      "order": 57
+    },
+    {
+      "id": "postgres",
+      "moduleId": "relational-data-jdbc",
+      "order": 58
+    },
+    {
+      "id": "postgres-concorrencia",
+      "moduleId": "relational-data-jdbc",
+      "order": 59
+    },
+    {
+      "id": "migrations",
+      "moduleId": "relational-data-jdbc",
+      "order": 60
+    },
+    {
+      "id": "jdbc",
+      "moduleId": "relational-data-jdbc",
+      "order": 61
+    },
+    {
+      "id": "mini-financas-jdbc",
+      "moduleId": "relational-data-jdbc",
+      "order": 62
+    },
+    {
+      "id": "spring-core",
+      "moduleId": "spring-api",
+      "order": 73
+    },
+    {
+      "id": "spring-boot-fundamentos",
+      "moduleId": "spring-api",
+      "order": 74
+    },
+    {
+      "id": "devtools",
+      "moduleId": "spring-api",
+      "order": 75
+    },
+    {
+      "id": "lombok",
+      "moduleId": "spring-api",
+      "order": 76
+    },
+    {
+      "id": "spring-mvc",
+      "moduleId": "spring-api",
+      "order": 77
+    },
+    {
+      "id": "spring-jpa",
+      "moduleId": "spring-api",
+      "order": 78
+    },
+    {
+      "id": "jpa-transacoes",
+      "moduleId": "spring-api",
+      "order": 79
+    },
+    {
+      "id": "dto-mapping",
+      "moduleId": "spring-api",
+      "order": 80
+    },
+    {
+      "id": "validacao-erros",
+      "moduleId": "spring-api",
+      "order": 81
+    },
+    {
+      "id": "paginacao-swagger",
+      "moduleId": "spring-api",
+      "order": 82
+    },
+    {
+      "id": "api-design-avancado",
+      "moduleId": "spring-api",
+      "order": 83
+    },
+    {
+      "id": "n-mais-1",
+      "moduleId": "spring-api",
+      "order": 84
+    },
+    {
+      "id": "cors-rate-limit",
+      "moduleId": "spring-api",
+      "order": 85
+    },
+    {
+      "id": "mini-helpdesk-api",
+      "moduleId": "spring-api",
+      "order": 86
+    },
+    {
+      "id": "testes",
+      "moduleId": "testing-engineering",
+      "order": 48
+    },
+    {
+      "id": "mockito",
+      "moduleId": "testing-engineering",
+      "order": 49
+    },
+    {
+      "id": "mini-reservas-testadas",
+      "moduleId": "testing-engineering",
+      "order": 50
+    },
+    {
+      "id": "projeto",
+      "moduleId": "testing-engineering",
+      "order": 51
+    },
+    {
+      "id": "autenticacao-conceitos",
+      "moduleId": "api-security-quality",
+      "order": 88
+    },
+    {
+      "id": "spring-security",
+      "moduleId": "api-security-quality",
+      "order": 89
+    },
+    {
+      "id": "security-oidc",
+      "moduleId": "api-security-quality",
+      "order": 90
+    },
+    {
+      "id": "https",
+      "moduleId": "api-security-quality",
+      "order": 91
+    },
+    {
+      "id": "mini-auth-rbac",
+      "moduleId": "api-security-quality",
+      "order": 92
+    },
+    {
+      "id": "docker-conceitos",
+      "moduleId": "containers-integration-data",
+      "order": 96
+    },
+    {
+      "id": "dockerfile",
+      "moduleId": "containers-integration-data",
+      "order": 97
+    },
+    {
+      "id": "compose",
+      "moduleId": "containers-integration-data",
+      "order": 98
+    },
+    {
+      "id": "testcontainers",
+      "moduleId": "containers-integration-data",
+      "order": 99
+    },
+    {
+      "id": "estrategia-testes",
+      "moduleId": "containers-integration-data",
+      "order": 100
+    },
+    {
+      "id": "nosql",
+      "moduleId": "containers-integration-data",
+      "order": 101
+    },
+    {
+      "id": "mongodb",
+      "moduleId": "containers-integration-data",
+      "order": 102
+    },
+    {
+      "id": "redis",
+      "moduleId": "containers-integration-data",
+      "order": 103
+    },
+    {
+      "id": "nosql-operacional",
+      "moduleId": "containers-integration-data",
+      "order": 104
+    },
+    {
+      "id": "hospedagem-db",
+      "moduleId": "containers-integration-data",
+      "order": 105
+    },
+    {
+      "id": "resilience",
+      "moduleId": "resilience-observability",
+      "order": 124
+    },
+    {
+      "id": "webclient",
+      "moduleId": "synchronous-integration",
+      "order": 120
+    },
+    {
+      "id": "spring-aop",
+      "moduleId": "resilience-observability",
+      "order": 125
+    },
+    {
+      "id": "spring-cache",
+      "moduleId": "resilience-observability",
+      "order": 126
+    },
+    {
+      "id": "actuator",
+      "moduleId": "resilience-observability",
+      "order": 127
+    },
+    {
+      "id": "observabilidade-pratica",
+      "moduleId": "resilience-observability",
+      "order": 128
+    },
+    {
+      "id": "secrets",
+      "moduleId": "production-delivery",
+      "order": 112
+    },
+    {
+      "id": "cicd",
+      "moduleId": "production-delivery",
+      "order": 113
+    },
+    {
+      "id": "praticas-producao",
+      "moduleId": "production-delivery",
+      "order": 114
+    },
+    {
+      "id": "hardening-producao",
+      "moduleId": "production-delivery",
+      "order": 115
+    },
+    {
+      "id": "deploy-backend",
+      "moduleId": "production-delivery",
+      "order": 116
+    },
+    {
+      "id": "spring-profiles",
+      "moduleId": "production-delivery",
+      "order": 117
+    },
+    {
+      "id": "mini-deploy-observavel",
+      "moduleId": "production-delivery",
+      "order": 118
+    },
+    {
+      "id": "threads",
+      "moduleId": "concurrency-network-tui",
+      "order": 106
+    },
+    {
+      "id": "mensageria",
+      "moduleId": "messaging-eda",
+      "order": 129
+    },
+    {
+      "id": "kafka",
+      "moduleId": "messaging-eda",
+      "order": 136
+    },
+    {
+      "id": "spring-kafka",
+      "moduleId": "messaging-eda",
+      "order": 137
+    },
+    {
+      "id": "kafka-confiavel",
+      "moduleId": "messaging-eda",
+      "order": 138
+    },
+    {
+      "id": "pilares-profundo",
+      "moduleId": "oop-modeling",
+      "order": 21
+    },
+    {
+      "id": "di-ioc-profundo",
+      "moduleId": "application-design",
+      "order": 70
+    },
+    {
+      "id": "jvm-profundo",
+      "moduleId": "java-core",
+      "order": 31
+    },
+    {
+      "id": "debugging",
+      "moduleId": "testing-engineering",
+      "order": 46
+    },
+    {
+      "id": "concorrencia-profunda",
+      "moduleId": "concurrency-network-tui",
+      "order": 107
+    },
+    {
+      "id": "arquitetura-software",
+      "moduleId": "application-design",
+      "order": 71
+    },
+    {
+      "id": "ddd",
+      "moduleId": "application-design",
+      "order": 72
+    },
+    {
+      "id": "ddd-estrategico",
+      "moduleId": "synchronous-integration",
+      "order": 121
+    },
+    {
+      "id": "sistemas-distribuidos",
+      "moduleId": "distributed-consistency",
+      "order": 141
+    },
+    {
+      "id": "consistencia-distribuida",
+      "moduleId": "distributed-consistency",
+      "order": 142
+    },
+    {
+      "id": "event-driven-profundo",
+      "moduleId": "messaging-eda",
+      "order": 139
+    },
+    {
+      "id": "testes-integracao-avancados",
+      "moduleId": "messaging-eda",
+      "order": 140
+    },
+    {
+      "id": "mini-pedidos-eventos",
+      "moduleId": "distributed-consistency",
+      "order": 145
+    },
+    {
+      "id": "estruturas-avancadas",
+      "moduleId": "algorithms-data-structures",
+      "order": 43
+    },
+    {
+      "id": "code-review-adr",
+      "moduleId": "professional-final",
+      "order": 146
+    },
+    {
+      "id": "agile",
+      "moduleId": "professional-final",
+      "order": 147
+    },
+    {
+      "id": "conectando-front-back",
+      "moduleId": "synchronous-integration",
+      "order": 122
+    },
+    {
+      "id": "auth-front-ts",
+      "moduleId": "api-security-quality",
+      "order": 93
+    },
+    {
+      "id": "frontend-aplicacao",
+      "moduleId": "api-security-quality",
+      "order": 94
+    },
+    {
+      "id": "websockets",
+      "moduleId": "concurrency-network-tui",
+      "order": 108
+    },
+    {
+      "id": "deploy-frontend",
+      "moduleId": "production-delivery",
+      "order": 119
+    },
+    {
+      "id": "mapa-sistema",
+      "moduleId": "professional-final",
+      "order": 148
+    },
+    {
+      "id": "projeto-integrador",
+      "moduleId": "professional-final",
+      "order": 149
+    },
+    {
+      "id": "quiz",
+      "moduleId": "professional-final",
+      "order": 150
+    },
+    {
+      "id": "associacoes-cardinalidade",
+      "moduleId": "oop-modeling",
+      "order": 22
+    },
+    {
+      "id": "functional-semantics-lab",
+      "moduleId": "java-core",
+      "order": 30
+    },
+    {
+      "id": "process-api-cli",
+      "moduleId": "io-cli-serialization",
+      "order": 36
+    },
+    {
+      "id": "zenith-cli-inicial",
+      "moduleId": "io-cli-serialization",
+      "order": 38
+    },
+    {
+      "id": "jdbc-under-the-hood",
+      "moduleId": "relational-data-jdbc",
+      "order": 63
+    },
+    {
+      "id": "http-wire-contract",
+      "moduleId": "http-api-clients",
+      "order": 53
+    },
+    {
+      "id": "java-httpclient-json",
+      "moduleId": "http-api-clients",
+      "order": 54
+    },
+    {
+      "id": "unreliable-api-client",
+      "moduleId": "http-api-clients",
+      "order": 55
+    },
+    {
+      "id": "pure-java-api-project",
+      "moduleId": "http-api-clients",
+      "order": 56
+    },
+    {
+      "id": "rest-resource-contracts",
+      "moduleId": "spring-api",
+      "order": 87
+    },
+    {
+      "id": "api-contract-evolution",
+      "moduleId": "api-security-quality",
+      "order": 95
+    },
+    {
+      "id": "tcp-protocol-design",
+      "moduleId": "concurrency-network-tui",
+      "order": 109
+    },
+    {
+      "id": "lanterna-tui",
+      "moduleId": "concurrency-network-tui",
+      "order": 110
+    },
+    {
+      "id": "developer-tools-java",
+      "moduleId": "concurrency-network-tui",
+      "order": 111
+    },
+    {
+      "id": "coupled-services-lab",
+      "moduleId": "synchronous-integration",
+      "order": 123
+    },
+    {
+      "id": "in-memory-event-bus",
+      "moduleId": "messaging-eda",
+      "order": 130
+    },
+    {
+      "id": "messaging-model",
+      "moduleId": "messaging-eda",
+      "order": 131
+    },
+    {
+      "id": "aws-sns-sqs",
+      "moduleId": "messaging-eda",
+      "order": 132
+    },
+    {
+      "id": "delivery-failure-lab",
+      "moduleId": "messaging-eda",
+      "order": 133
+    },
+    {
+      "id": "outbox-inbox",
+      "moduleId": "distributed-consistency",
+      "order": 143
+    },
+    {
+      "id": "saga-schema-ordering",
+      "moduleId": "distributed-consistency",
+      "order": 144
+    },
+    {
+      "id": "eda-observability-security",
+      "moduleId": "messaging-eda",
+      "order": 134
+    },
+    {
+      "id": "async-integration-tests",
+      "moduleId": "messaging-eda",
+      "order": 135
+    }
+  ],
+  "moduleEdges": [
+    {
+      "from": "orientation",
+      "to": "programming-fundamentals"
+    },
+    {
+      "from": "programming-fundamentals",
+      "to": "oop-modeling"
+    },
+    {
+      "from": "oop-modeling",
+      "to": "java-core"
+    },
+    {
+      "from": "java-core",
+      "to": "io-cli-serialization"
+    },
+    {
+      "from": "java-core",
+      "to": "algorithms-data-structures"
+    },
+    {
+      "from": "java-core",
+      "to": "testing-engineering"
+    },
+    {
+      "from": "io-cli-serialization",
+      "to": "http-api-clients"
+    },
+    {
+      "from": "testing-engineering",
+      "to": "http-api-clients"
+    },
+    {
+      "from": "io-cli-serialization",
+      "to": "relational-data-jdbc"
+    },
+    {
+      "from": "testing-engineering",
+      "to": "relational-data-jdbc"
+    },
+    {
+      "from": "oop-modeling",
+      "to": "application-design"
+    },
+    {
+      "from": "testing-engineering",
+      "to": "application-design"
+    },
+    {
+      "from": "http-api-clients",
+      "to": "spring-api"
+    },
+    {
+      "from": "relational-data-jdbc",
+      "to": "spring-api"
+    },
+    {
+      "from": "application-design",
+      "to": "spring-api"
+    },
+    {
+      "from": "spring-api",
+      "to": "api-security-quality"
+    },
+    {
+      "from": "spring-api",
+      "to": "containers-integration-data"
+    },
+    {
+      "from": "testing-engineering",
+      "to": "containers-integration-data"
+    },
+    {
+      "from": "io-cli-serialization",
+      "to": "concurrency-network-tui"
+    },
+    {
+      "from": "testing-engineering",
+      "to": "concurrency-network-tui"
+    },
+    {
+      "from": "api-security-quality",
+      "to": "production-delivery"
+    },
+    {
+      "from": "containers-integration-data",
+      "to": "production-delivery"
+    },
+    {
+      "from": "api-security-quality",
+      "to": "synchronous-integration"
+    },
+    {
+      "from": "concurrency-network-tui",
+      "to": "synchronous-integration"
+    },
+    {
+      "from": "synchronous-integration",
+      "to": "resilience-observability"
+    },
+    {
+      "from": "production-delivery",
+      "to": "resilience-observability"
+    },
+    {
+      "from": "synchronous-integration",
+      "to": "messaging-eda"
+    },
+    {
+      "from": "relational-data-jdbc",
+      "to": "messaging-eda"
+    },
+    {
+      "from": "containers-integration-data",
+      "to": "messaging-eda"
+    },
+    {
+      "from": "concurrency-network-tui",
+      "to": "messaging-eda"
+    },
+    {
+      "from": "messaging-eda",
+      "to": "distributed-consistency"
+    },
+    {
+      "from": "resilience-observability",
+      "to": "distributed-consistency"
+    },
+    {
+      "from": "distributed-consistency",
+      "to": "professional-final"
+    },
+    {
+      "from": "production-delivery",
+      "to": "professional-final"
+    }
+  ],
+  "chapterEdges": [
+    {
+      "from": "intro",
+      "to": "primeiro-programa",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "primeiro-programa",
+      "to": "variaveis-tipos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "variaveis-tipos",
+      "to": "operadores-expressoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "operadores-expressoes",
+      "to": "controle-fluxo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "controle-fluxo",
+      "to": "lacos-repeticao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "lacos-repeticao",
+      "to": "arrays-matrizes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arrays-matrizes",
+      "to": "strings-wrapper",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "strings-wrapper",
+      "to": "metodos-escopo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "metodos-escopo",
+      "to": "entrada-console",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "metodos-escopo",
+      "to": "logica-programacao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "entrada-console",
+      "to": "mini-caixa-eletronico",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logica-programacao",
+      "to": "mini-caixa-eletronico",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-caixa-eletronico",
+      "to": "classes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "classes",
+      "to": "atributos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "atributos",
+      "to": "construtores",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "construtores",
+      "to": "encapsulamento",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "encapsulamento",
+      "to": "static",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "static",
+      "to": "heranca",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "heranca",
+      "to": "polimorfismo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "polimorfismo",
+      "to": "abstracao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "abstracao",
+      "to": "interfaces",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "associacoes-cardinalidade",
+      "to": "mini-biblioteca-cli",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-biblioteca-cli",
+      "to": "pacotes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "pacotes",
+      "to": "excecoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "excecoes",
+      "to": "colecoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "generics",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "streams",
+      "to": "javamoderno",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jvm-profundo",
+      "to": "java-21-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "generics",
+      "to": "streams",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-21-profundo",
+      "to": "java-io",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-io",
+      "to": "mini-analisador-vendas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "zenith-cli-inicial",
+      "to": "big-o",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "big-o",
+      "to": "recursao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "recursao",
+      "to": "ordenacao-busca",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "ordenacao-busca",
+      "to": "algoritmos-praticos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "zenith-cli-inicial",
+      "to": "git",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "build",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "anotacoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-analisador-vendas",
+      "to": "json",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "debugging",
+      "to": "logging",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "process-api-cli",
+      "to": "mini-importador-pedidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "mini-importador-pedidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "interfaces",
+      "to": "solid",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "abstracao",
+      "to": "solid",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "javamoderno",
+      "to": "di",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "solid",
+      "to": "di",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "di",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "di",
+      "to": "padroes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "solid",
+      "to": "clean-code",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "padroes",
+      "to": "clean-code",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "projetospring",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "di",
+      "to": "projetospring",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "padroes",
+      "to": "projetospring",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "clean-code",
+      "to": "projetospring",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testes",
+      "to": "http",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "http",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "sql",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "sql",
+      "to": "postgres",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "postgres",
+      "to": "postgres-concorrencia",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "sql",
+      "to": "postgres-concorrencia",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "postgres",
+      "to": "migrations",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "migrations",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "sql",
+      "to": "jdbc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "excecoes",
+      "to": "jdbc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jdbc",
+      "to": "mini-financas-jdbc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "postgres",
+      "to": "mini-financas-jdbc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "migrations",
+      "to": "mini-financas-jdbc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "projetospring",
+      "to": "spring-core",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "spring-core",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-core",
+      "to": "spring-boot-fundamentos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "spring-boot-fundamentos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-boot-fundamentos",
+      "to": "devtools",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "encapsulamento",
+      "to": "lombok",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "lombok",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-core",
+      "to": "lombok",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-boot-fundamentos",
+      "to": "spring-mvc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http-wire-contract",
+      "to": "spring-mvc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-httpclient-json",
+      "to": "spring-mvc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jdbc",
+      "to": "spring-jpa",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "spring-jpa",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "lombok",
+      "to": "spring-jpa",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-jpa",
+      "to": "jpa-transacoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "migrations",
+      "to": "jpa-transacoes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "dto-mapping",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-jpa",
+      "to": "dto-mapping",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dto-mapping",
+      "to": "validacao-erros",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "excecoes",
+      "to": "validacao-erros",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "validacao-erros",
+      "to": "paginacao-swagger",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-jpa",
+      "to": "paginacao-swagger",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "paginacao-swagger",
+      "to": "api-design-avancado",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jpa-transacoes",
+      "to": "api-design-avancado",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-jpa",
+      "to": "n-mais-1",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "paginacao-swagger",
+      "to": "n-mais-1",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "cors-rate-limit",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "api-design-avancado",
+      "to": "cors-rate-limit",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cors-rate-limit",
+      "to": "mini-helpdesk-api",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "n-mais-1",
+      "to": "mini-helpdesk-api",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "validacao-erros",
+      "to": "mini-helpdesk-api",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "testes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testes",
+      "to": "mockito",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "interfaces",
+      "to": "mockito",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mockito",
+      "to": "mini-reservas-testadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testes",
+      "to": "mini-reservas-testadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "mini-reservas-testadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "encapsulamento",
+      "to": "mini-reservas-testadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-biblioteca-cli",
+      "to": "projeto",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "projeto",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-io",
+      "to": "projeto",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-reservas-testadas",
+      "to": "projeto",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "autenticacao-conceitos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "autenticacao-conceitos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "autenticacao-conceitos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "autenticacao-conceitos",
+      "to": "spring-security",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "spring-security",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "spring-security",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-security",
+      "to": "security-oidc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "security-oidc",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "autenticacao-conceitos",
+      "to": "https",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-security",
+      "to": "mini-auth-rbac",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "security-oidc",
+      "to": "mini-auth-rbac",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "https",
+      "to": "mini-auth-rbac",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "docker-conceitos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "docker-conceitos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "docker-conceitos",
+      "to": "dockerfile",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "dockerfile",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dockerfile",
+      "to": "compose",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testes",
+      "to": "testcontainers",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "docker-conceitos",
+      "to": "testcontainers",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-jpa",
+      "to": "testcontainers",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testcontainers",
+      "to": "estrategia-testes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mockito",
+      "to": "estrategia-testes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "api-contract-evolution",
+      "to": "estrategia-testes",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "sql",
+      "to": "nosql",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "nosql",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "nosql",
+      "to": "mongodb",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "docker-conceitos",
+      "to": "mongodb",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "nosql",
+      "to": "redis",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "redis",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mongodb",
+      "to": "nosql-operacional",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "redis",
+      "to": "nosql-operacional",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "postgres",
+      "to": "hospedagem-db",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "compose",
+      "to": "hospedagem-db",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testcontainers",
+      "to": "hospedagem-db",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "nosql-operacional",
+      "to": "hospedagem-db",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "coupled-services-lab",
+      "to": "resilience",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "webclient",
+      "to": "resilience",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "resilience",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "webclient",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-httpclient-json",
+      "to": "webclient",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "unreliable-api-client",
+      "to": "webclient",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "webclient",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "spring-aop",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-security",
+      "to": "spring-aop",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "resilience",
+      "to": "spring-aop",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jpa-transacoes",
+      "to": "spring-aop",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "redis",
+      "to": "spring-cache",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-aop",
+      "to": "spring-cache",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "nosql-operacional",
+      "to": "spring-cache",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-boot-fundamentos",
+      "to": "actuator",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "compose",
+      "to": "actuator",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hardening-producao",
+      "to": "actuator",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "actuator",
+      "to": "observabilidade-pratica",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "observabilidade-pratica",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "resilience",
+      "to": "observabilidade-pratica",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "coupled-services-lab",
+      "to": "observabilidade-pratica",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "secrets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "secrets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-security",
+      "to": "secrets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "unreliable-api-client",
+      "to": "secrets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "cicd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testcontainers",
+      "to": "cicd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dockerfile",
+      "to": "cicd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "estrategia-testes",
+      "to": "cicd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hospedagem-db",
+      "to": "praticas-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "praticas-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cicd",
+      "to": "praticas-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "compose",
+      "to": "praticas-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dockerfile",
+      "to": "hardening-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cicd",
+      "to": "hardening-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "praticas-producao",
+      "to": "hardening-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "hardening-producao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dockerfile",
+      "to": "deploy-backend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "secrets",
+      "to": "deploy-backend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hospedagem-db",
+      "to": "deploy-backend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cicd",
+      "to": "deploy-backend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hardening-producao",
+      "to": "deploy-backend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "spring-profiles",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "praticas-producao",
+      "to": "spring-profiles",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-boot-fundamentos",
+      "to": "spring-profiles",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "secrets",
+      "to": "spring-profiles",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "deploy-backend",
+      "to": "mini-deploy-observavel",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-profiles",
+      "to": "mini-deploy-observavel",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hardening-producao",
+      "to": "mini-deploy-observavel",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "streams",
+      "to": "threads",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "coupled-services-lab",
+      "to": "mensageria",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "mensageria",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "mensageria",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "messaging-model",
+      "to": "kafka",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "compose",
+      "to": "kafka",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "kafka",
+      "to": "spring-kafka",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "di",
+      "to": "spring-kafka",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "spring-kafka",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-kafka",
+      "to": "kafka-confiavel",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jpa-transacoes",
+      "to": "kafka-confiavel",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "interfaces",
+      "to": "pilares-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "di",
+      "to": "di-ioc-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "anotacoes",
+      "to": "di-ioc-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "projetospring",
+      "to": "di-ioc-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "functional-semantics-lab",
+      "to": "jvm-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "debugging",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "threads",
+      "to": "concorrencia-profunda",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jvm-profundo",
+      "to": "concorrencia-profunda",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "clean-code",
+      "to": "arquitetura-software",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "projetospring",
+      "to": "arquitetura-software",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-financas-jdbc",
+      "to": "arquitetura-software",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "pure-java-api-project",
+      "to": "arquitetura-software",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arquitetura-software",
+      "to": "ddd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "encapsulamento",
+      "to": "ddd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-financas-jdbc",
+      "to": "ddd",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "ddd",
+      "to": "ddd-estrategico",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arquitetura-software",
+      "to": "ddd-estrategico",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "dto-mapping",
+      "to": "ddd-estrategico",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arquitetura-software",
+      "to": "sistemas-distribuidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mensageria",
+      "to": "sistemas-distribuidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "hospedagem-db",
+      "to": "sistemas-distribuidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "resilience",
+      "to": "sistemas-distribuidos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "sistemas-distribuidos",
+      "to": "consistencia-distribuida",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "resilience",
+      "to": "consistencia-distribuida",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "kafka",
+      "to": "event-driven-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mensageria",
+      "to": "event-driven-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arquitetura-software",
+      "to": "event-driven-profundo",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testcontainers",
+      "to": "testes-integracao-avancados",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mockito",
+      "to": "testes-integracao-avancados",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-kafka",
+      "to": "testes-integracao-avancados",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "saga-schema-ordering",
+      "to": "mini-pedidos-eventos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "async-integration-tests",
+      "to": "mini-pedidos-eventos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "event-driven-profundo",
+      "to": "mini-pedidos-eventos",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "big-o",
+      "to": "estruturas-avancadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "recursao",
+      "to": "estruturas-avancadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "colecoes",
+      "to": "estruturas-avancadas",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "code-review-adr",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "clean-code",
+      "to": "code-review-adr",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "arquitetura-software",
+      "to": "code-review-adr",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "agile",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "projeto",
+      "to": "agile",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "code-review-adr",
+      "to": "agile",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cors-rate-limit",
+      "to": "conectando-front-back",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "conectando-front-back",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "conectando-front-back",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "frontend-aplicacao",
+      "to": "conectando-front-back",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "auth-front-ts",
+      "to": "conectando-front-back",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-auth-rbac",
+      "to": "auth-front-ts",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "autenticacao-conceitos",
+      "to": "auth-front-ts",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "auth-front-ts",
+      "to": "frontend-aplicacao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "api-design-avancado",
+      "to": "frontend-aplicacao",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "frontend-aplicacao",
+      "to": "websockets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "threads",
+      "to": "websockets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "websockets",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "deploy-backend",
+      "to": "deploy-frontend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "git",
+      "to": "deploy-frontend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "cicd",
+      "to": "deploy-frontend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "auth-front-ts",
+      "to": "deploy-frontend",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-pedidos-eventos",
+      "to": "mapa-sistema",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "deploy-frontend",
+      "to": "mapa-sistema",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "code-review-adr",
+      "to": "mapa-sistema",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mapa-sistema",
+      "to": "projeto-integrador",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-pedidos-eventos",
+      "to": "projeto-integrador",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-deploy-observavel",
+      "to": "projeto-integrador",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "code-review-adr",
+      "to": "projeto-integrador",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "projeto-integrador",
+      "to": "quiz",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mapa-sistema",
+      "to": "quiz",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "pilares-profundo",
+      "to": "associacoes-cardinalidade",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "javamoderno",
+      "to": "functional-semantics-lab",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "process-api-cli",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-importador-pedidos",
+      "to": "zenith-cli-inicial",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jdbc",
+      "to": "jdbc-under-the-hood",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "mini-financas-jdbc",
+      "to": "jdbc-under-the-hood",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http",
+      "to": "http-wire-contract",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "http-wire-contract",
+      "to": "java-httpclient-json",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "json",
+      "to": "java-httpclient-json",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "excecoes",
+      "to": "java-httpclient-json",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-httpclient-json",
+      "to": "unreliable-api-client",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "unreliable-api-client",
+      "to": "pure-java-api-project",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testes",
+      "to": "pure-java-api-project",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "pure-java-api-project",
+      "to": "rest-resource-contracts",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "spring-mvc",
+      "to": "rest-resource-contracts",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "rest-resource-contracts",
+      "to": "api-contract-evolution",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "paginacao-swagger",
+      "to": "api-contract-evolution",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-io",
+      "to": "tcp-protocol-design",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "threads",
+      "to": "tcp-protocol-design",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-io",
+      "to": "lanterna-tui",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "interfaces",
+      "to": "lanterna-tui",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "threads",
+      "to": "lanterna-tui",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "java-io",
+      "to": "developer-tools-java",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "build",
+      "to": "developer-tools-java",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "logging",
+      "to": "developer-tools-java",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "rest-resource-contracts",
+      "to": "coupled-services-lab",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "webclient",
+      "to": "coupled-services-lab",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "ddd-estrategico",
+      "to": "coupled-services-lab",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "coupled-services-lab",
+      "to": "in-memory-event-bus",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "interfaces",
+      "to": "in-memory-event-bus",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "generics",
+      "to": "in-memory-event-bus",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "in-memory-event-bus",
+      "to": "messaging-model",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "messaging-model",
+      "to": "aws-sns-sqs",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "docker-conceitos",
+      "to": "aws-sns-sqs",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "aws-sns-sqs",
+      "to": "delivery-failure-lab",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "consistencia-distribuida",
+      "to": "outbox-inbox",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "delivery-failure-lab",
+      "to": "outbox-inbox",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "jdbc-under-the-hood",
+      "to": "outbox-inbox",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "outbox-inbox",
+      "to": "saga-schema-ordering",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "ddd-estrategico",
+      "to": "saga-schema-ordering",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "delivery-failure-lab",
+      "to": "eda-observability-security",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "observabilidade-pratica",
+      "to": "eda-observability-security",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "testcontainers",
+      "to": "async-integration-tests",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "aws-sns-sqs",
+      "to": "async-integration-tests",
+      "missing": false,
+      "future": false
+    },
+    {
+      "from": "delivery-failure-lab",
+      "to": "async-integration-tests",
+      "missing": false,
+      "future": false
+    }
+  ]
+}
