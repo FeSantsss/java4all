@@ -16,6 +16,33 @@
     <span class="kw">case</span> <span class="num">400</span>, <span class="num">404</span> -&gt; <span class="str">"erro do cliente"</span>;
     <span class="kw">default</span> -&gt; <span class="str">"outro"</span>;
 };</pre>
+      <p>O <code>switch</code> em forma de <strong>expressão</strong> (com <code>-&gt;</code>) produz um valor diretamente e é <em>exhaustive</em>: o compilador exige que todo caso possível seja coberto — se você omitir o <code>default</code> e o tipo não garantir cobertura total (como um <code>enum</code> com todos os valores listados), o código não compila. Isso elimina uma classe inteira de bugs de "esqueci um caso".</p>
+      <h3>Switch statement clássico e o perigo do fall-through</h3>
+      <pre class="code"><span class="kw">switch</span> (diaDaSemana) {
+    <span class="kw">case</span> <span class="num">6</span>:
+    <span class="kw">case</span> <span class="num">7</span>:
+        System.out.println(<span class="str">"Fim de semana"</span>);
+        <span class="kw">break</span>; <span class="com">// sem o break, a execução "cai" para o próximo case</span>
+    <span class="kw">default</span>:
+        System.out.println(<span class="str">"Dia útil"</span>);
+}</pre>
+      <div class="warn"><b>Fall-through é legado, não um recurso a explorar.</b> No <code>switch</code> statement clássico (com <code>:</code> e não <code>-&gt;</code>), esquecer um <code>break</code> faz a execução continuar para o próximo <code>case</code> silenciosamente — um dos bugs mais clássicos e difíceis de enxergar em revisão de código de Java antigo. O <code>switch</code> em forma de expressão com <code>-&gt;</code> não tem esse problema: cada braço executa isoladamente, sem cair para o próximo. Prefira a forma de expressão sempre que o objetivo for produzir um valor; use <code>yield</code> quando um braço precisar de um bloco com lógica antes de produzir o valor.</div>
+      <h3>Guard clauses: reduzindo pirâmides de if</h3>
+      <pre class="code"><span class="com">// difícil de ler: aninhamento profundo</span>
+<span class="kw">if</span> (pedido != <span class="kw">null</span>) {
+    <span class="kw">if</span> (pedido.getItens().size() &gt; <span class="num">0</span>) {
+        <span class="kw">if</span> (pedido.getTotal() &gt; <span class="num">0</span>) {
+            processar(pedido);
+        }
+    }
+}
+
+<span class="com">// guard clauses: retorno antecipado separa casos inválidos do caminho principal</span>
+<span class="kw">if</span> (pedido == <span class="kw">null</span>) <span class="kw">return</span>;
+<span class="kw">if</span> (pedido.getItens().isEmpty()) <span class="kw">return</span>;
+<span class="kw">if</span> (pedido.getTotal() &lt;= <span class="num">0</span>) <span class="kw">return</span>;
+processar(pedido);</pre>
+      <p>Guard clauses tratam casos inválidos/de saída antecipada primeiro, deixando o caminho principal do método sem aninhamento — o leitor não precisa manter três níveis de contexto na cabeça para entender o que acontece no caso normal.</p>
       <div class="secret"><b>Modele regras, não acidentes.</b> Se uma decisão cresce continuamente, talvez o problema peça enum, polimorfismo, tabela de decisão ou objeto de regra — não mais um <code>else if</code>.</div>
-      <div class="exercise"><div class="exercise-head"><h4>Frete por regra</h4><span class="exercise-tag m">Prática</span></div><p>Calcule frete considerando região, peso e gratuidade acima de um valor. Liste primeiro casos-limite e só então escreva o código.</p></div>
+      <div class="exercise"><div class="exercise-head"><h4>Frete por regra</h4><span class="exercise-tag m">Prática</span></div><p>Calcule frete considerando região, peso e gratuidade acima de um valor. Liste primeiro casos-limite e só então escreva o código. Reescreva a mesma lógica duas vezes: uma com <code>if</code>/<code>else</code> aninhado e outra com guard clauses — compare qual comunica melhor a intenção.</p></div>
     </section>

@@ -11,11 +11,32 @@
       <p>O nome do arquivo deve ser <code>Main.java</code> porque a classe pública se chama <code>Main</code>. <code>main</code> é o ponto de entrada. <code>String[] args</code> recebe argumentos da linha de comando. <code>System.out</code> é a saída padrão e <code>println</code> imprime uma linha.</p>
       <h3>Terminal sem mágica</h3>
       <pre class="code">javac Main.java   <span class="com"># compila e cria Main.class</span>
-java Main         <span class="com"># pede à JVM para executar Main</span>
-java Main.java    <span class="com"># execução direta de arquivo-fonte em Java moderno</span></pre>
-      <div class="warn"><b>Erro não é uma categoria única.</b> Erro de compilação impede gerar bytecode; exceção ocorre durante a execução; erro lógico permite rodar, mas produz resultado incorreto. Aprenda a classificá-los antes de tentar corrigi-los.</div>
+java Main         <span class="com"># pede à JVM para executar Main (não leva a extensão .class)</span>
+java Main.java    <span class="com"># source-file mode: compila em memória e executa numa única etapa</span></pre>
+      <p>O nome do arquivo <strong>precisa</strong> coincidir com o nome da classe pública que ele contém — <code>Main.java</code> para uma classe <code>public class Main</code>. Isso não é convenção, é regra do compilador: <code>javac</code> recusa um arquivo em que o nome não bate com a classe pública. O <strong>source-file mode</strong> (<code>java Main.java</code>) existe para reduzir fricção em scripts pequenos e no primeiro contato com a linguagem: ele compila o arquivo internamente e roda o resultado numa única chamada, sem deixar um <code>.class</code> no disco — mas continua sendo os mesmos dois passos (compilar, depois executar), só que escondidos. Em projetos reais, com múltiplas classes, você volta a usar o par explícito <code>javac</code>/<code>java</code>.</p>
+      <div class="warn"><b>Erro não é uma categoria única.</b> Erro de compilação impede gerar bytecode (o programa nunca chega a rodar); exceção ocorre durante a execução (o programa rodou até um ponto e parou); erro lógico permite rodar do início ao fim, mas produz um resultado incorreto silenciosamente — o mais perigoso dos três, porque nada avisa que algo deu errado. Aprenda a classificar antes de tentar corrigir: a estratégia de correção é diferente para cada categoria.</div>
       <h3>Leitura de uma mensagem do compilador</h3>
-      <p>Leia de cima para baixo: arquivo, linha, símbolo indicado por <code>^</code> e descrição. Conserte o primeiro erro e compile outra vez. Um caractere ausente pode gerar vários erros em cascata.</p>
-      <div class="exercise"><div class="exercise-head"><h4>Prática obrigatória</h4><span class="exercise-tag f">Fundamento</span></div><p>Crie o arquivo manualmente, compile pelo terminal e execute. Depois remova um ponto e vírgula, observe o diagnóstico e explique por que o problema pertence à compilação.</p></div>
-      <div class="rules-box"><h4>Critério de domínio</h4><ul><li>Você explica a diferença entre JDK, compilador, bytecode e JVM.</li><li>Consegue compilar sem depender do botão da IDE.</li><li>Distingue erro de compilação, exceção e erro lógico.</li></ul></div>
+      <p>Leia de cima para baixo: arquivo, linha, símbolo indicado por <code>^</code> e descrição. Conserte <strong>o primeiro</strong> erro e compile outra vez — um caractere ausente (uma chave, um ponto e vírgula) pode gerar vários erros em cascata nas linhas seguintes, porque o compilador perde a referência de onde uma instrução termina e a próxima começa. Corrigir o quinto erro listado antes do primeiro geralmente não resolve nada, porque ele pode ser só um efeito colateral do primeiro.</p>
+      <h3>Um exemplo de cada categoria de erro</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+        <span class="kw">int</span> total = <span class="num">10</span> / <span class="num">0</span>; <span class="com">// compila normalmente -- divisão por zero é um erro de EXECUÇÃO em int</span>
+        System.out.println(total);
+    }
+}</pre>
+      <p>Esse programa compila sem nenhum aviso: para o compilador, <code>10 / 0</code> é uma expressão válida sintaticamente. É só ao executar que a JVM lança <code>ArithmeticException: / by zero</code> — uma exceção, não um erro de compilação. Já um exemplo de erro lógico: <code>if (idade = 18)</code> em vez de <code>if (idade == 18)</code> às vezes nem compila (dependendo do tipo), mas trocar <code>&gt;</code> por <code>&gt;=</code> numa condição de aprovação compila, roda e produz nota de corte errada sem avisar nada — só um teste com o valor de fronteira (exatamente 18) revela o problema.</p>
+      <h3>Argumentos de linha de comando</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {
+        <span class="kw">if</span> (args.length == <span class="num">0</span>) {
+            System.out.println(<span class="str">"Uso: java Main &lt;nome&gt;"</span>);
+            <span class="kw">return</span>;
+        }
+        System.out.println(<span class="str">"Olá, "</span> + args[<span class="num">0</span>] + <span class="str">"!"</span>);
+    }
+}</pre>
+      <pre class="code">java Main Ana   <span class="com"># args = ["Ana"] -- Ana não faz parte do comando "java", é um argumento do PROGRAMA</span></pre>
+      <p><code>args</code> é o mesmo conceito de argumento que você já viu no capítulo de terminal — só que aqui quem recebe é o método <code>main</code> do seu programa Java, não um comando de shell.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Prática obrigatória</h4><span class="exercise-tag f">Fundamento</span></div><p>Crie o arquivo manualmente, compile pelo terminal e execute. Depois remova um ponto e vírgula, observe o diagnóstico e explique por que o problema pertence à compilação. Em seguida, escreva um programa que divide dois números lidos como argumentos (<code>args[0]</code>, <code>args[1]</code>) e rode sem argumentos, com um argumento e com o segundo argumento igual a "0" — classifique o que acontece em cada caso.</p></div>
+      <div class="rules-box"><h4>Critério de domínio</h4><ul><li>Você explica a diferença entre JDK, compilador, bytecode e JVM.</li><li>Consegue compilar sem depender do botão da IDE.</li><li>Distingue erro de compilação, exceção e erro lógico com um exemplo de cada.</li><li>Sabe por que o nome do arquivo precisa coincidir com o nome da classe pública.</li></ul></div>
     </section>

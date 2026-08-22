@@ -57,7 +57,7 @@ const wordMap = new Map(Object.entries({
   lista: 'list', listas: 'lists', logexecucao: 'executionLog', logica: 'logic', meio: 'middle',
   mesclar: 'merge', motor: 'engine', observadores: 'observers', ordenado: 'sorted', ordenacao: 'sorting',
   pacote: 'package', pacotes: 'packages', par: 'pair', pequeno: 'small', ponto: 'point',
-  quadrado: 'square', qtd: 'quantity', raio: 'radius', retangulo: 'rectangle', resumo: 'summary',
+  quadrado: 'square', qtd: 'quantity', raio: 'radius', retangulo: 'rectangle', resumo: 'summary', resumos: 'summaries',
   robo: 'robot', somar: 'sum', somadigitos: 'sumDigits', suco: 'juice', tarefa: 'task', tarefas: 'tasks',
   texto: 'text', tipo: 'type', tipos: 'types', totalcriados: 'totalCreated', validacao: 'validation',
   variavel: 'variable', variaveis: 'variables', voador: 'flyer', volume: 'volume',
@@ -69,12 +69,24 @@ const wordMap = new Map(Object.entries({
   boleto: 'bankSlip', bolsa: 'grant', cabecalho: 'header', calculadora: 'calculator',
   camada: 'layer', canal: 'channel', carregar: 'load', cartao: 'card', catalogo: 'catalog',
   categoria: 'category', categorias: 'categories', celula: 'cell', celulas: 'cells', cidade: 'city',
+  circuito: 'circuit', aberto: 'open',
   classificar: 'classify', cliques: 'clicks', cobra: 'snake', coletas: 'collections', combustao: 'combustion',
   comer: 'eat', comparar: 'compare', comparavel: 'comparable', compensacao: 'compensation',
   composicao: 'composition', condicao: 'condition', conectar: 'connect', consulta: 'query', consultas: 'queries',
   consumidor: 'consumer', consumidores: 'consumers', contador: 'counter', contexto: 'context',
   controlador: 'controller', converter: 'convert', coordenada: 'coordinate', copia: 'copy',
-  criacao: 'creation', critica: 'critical', dado: 'data', daqui: 'fromNow', degradavel: 'degradable',
+  capitulo: 'chapter', criacao: 'creation', critica: 'critical', dado: 'data', daqui: 'fromNow', degradavel: 'degradable',
+  auxiliar: 'helper', consistente: 'consistent', consistentes: 'consistent', desatualizado: 'outdated',
+  agrupa: 'groups', auditoria: 'audit', colunas: 'columns', commitado: 'committed', concorrente: 'concurrent',
+  conflito: 'conflict', detectar: 'detect', dois: 'two', dono: 'owner', entidade: 'entity', entidades: 'entities',
+  escolhidos: 'chosen', exatamente: 'exactly', fica: 'stays', forca: 'forces', implementacao: 'implementation',
+  instante: 'instant', inteira: 'entire', interno: 'internal', invalidos: 'invalid', lados: 'sides',
+  longo: 'long', longos: 'long', nunca: 'never', pendentes: 'pending', positiva: 'positive', positivo: 'positive',
+  define: 'defines', definem: 'define', esperado: 'expected', explicita: 'explicit', filtro: 'filter',
+  leve: 'lightweight', projecao: 'projection', rapida: 'fast', registro: 'record', remover: 'remove',
+  reverte: 'reverts', ser: 'be', sobrevive: 'survives', suspensa: 'suspended', suspeito: 'suspicious',
+  traz: 'brings', vale: 'worth',
+  vence: 'wins',
   desacoplamento: 'decoupling', descricao: 'description', desserializar: 'deserialize', detalhes: 'details',
   dinheiro: 'cash', dolar: 'dollar', dominio: 'domain', dobro: 'double', dobrar: 'double',
   duracao: 'duration', eletrico: 'electric', emailcontato: 'publisherContactEmail', encerrar: 'close',
@@ -251,11 +263,47 @@ const identifierOverrides = new Map(Object.entries({
   LivroNaoEncontradoException: 'BookNotFoundException', UsuarioNaoEncontradoException: 'UserNotFoundException',
   LivroRepositoryEmMemoria: 'InMemoryBookRepository', LivroRepositoryDataJpaTest: 'BookRepositoryDataJpaTest',
   FalhaIntegracao: 'IntegrationFailure', RelatorioTemporario: 'TemporaryReport',
-  ConexaoExternaService: 'ExternalConnectionService', conexaoPersistente: 'persistentConnection'
+  ConexaoExternaService: 'ExternalConnectionService', conexaoPersistente: 'persistentConnection',
+  // "Data" colide com a palavra portuguesa "data" (date) -- estes já são nomes
+  // de classe padrão do Java/Spring em inglês e nunca deveriam ser traduzidos.
+  DataSource: 'DataSource', DataSourceProperties: 'DataSourceProperties',
+  DataSourceAutoConfiguration: 'DataSourceAutoConfiguration', DataSourceBuilder: 'DataSourceBuilder',
+  dataSource: 'dataSource', initializeDataSourceBuilder: 'initializeDataSourceBuilder',
+  // "Converter" colide com o verbo português "converter" -- estes são nomes reais
+  // de classe/método do Spring Security (OAuth2 Resource Server) e nunca deveriam
+  // virar "Convert" (perderiam o nome real da API).
+  JwtAuthenticationConverter: 'JwtAuthenticationConverter', jwtAuthenticationConverter: 'jwtAuthenticationConverter',
+  JwtGrantedAuthoritiesConverter: 'JwtGrantedAuthoritiesConverter', authoritiesConverter: 'authoritiesConverter',
+  converter: 'converter', setJwtGrantedAuthoritiesConverter: 'setJwtGrantedAuthoritiesConverter',
+  // "Media" colide com a palavra portuguesa "média" (sem acento -> "media", average) --
+  // MediaType é uma classe real e onipresente do Spring Web (negociação de conteúdo).
+  MediaType: 'MediaType',
+  // Mesma família do bug do "Converter": "Resolver" é o infinitivo do verbo português
+  // "resolver" -- HttpMessageConverter e HandlerExceptionResolver são nomes reais do
+  // Spring MVC e nunca deveriam virar "...Convert"/"...Resolve".
+  HttpMessageConverter: 'HttpMessageConverter', HandlerExceptionResolver: 'HandlerExceptionResolver',
+  // "DATA" (maiúsculo, dentro de uma constante) colide com "data" (português: date) --
+  // mesma família do bug já corrigido em DataSource, mas em uma constante de outra classe.
+  MULTIPART_FORM_DATA_VALUE: 'MULTIPART_FORM_DATA_VALUE',
+  // "no" (preposição portuguesa "em o") colide com o "no" do método real noContent().
+  noContent: 'noContent',
+  // "cliente" normalmente vira "customer" (cliente de negócio), mas aqui é o cliente
+  // HTTP (um HttpClient/RestClient) -- traduzir para "customer" muda o sentido técnico.
+  clienteHttp: 'httpClient'
 }));
 
 const codeLineOverrides = new Map([
-  ['as duas leram "5", as duas calcularam "6",', 'both read "5", and both calculated "6",']
+  ['as duas leram "5", as duas calcularam "6",', 'both read "5", and both calculated "6",'],
+  // "data" isolado (spring.DATA.redis...) colide com o wordMap (data -> date, português "data" = date) --
+  // essas são propriedades reais do Spring Boot e nunca deveriam virar "spring.date...".
+  ['spring.data.redis.host=localhost', 'spring.data.redis.host=localhost'],
+  ['spring.data.redis.port=6379', 'spring.data.redis.port=6379'],
+  // "banco" (forma curta e comum de "banco de dados") colide com o wordMap (banco -> bank, financeiro).
+  ['System.out.println("Buscando no banco -- só aparece no CACHE MISS");',
+    'System.out.println("Fetching from the database -- only appears on CACHE MISS");'],
+  // a flag de shell "-O" (maiúscula, wget) colide com o artigo português "o" -> "the".
+  ['test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health/readiness || exit 1"]',
+    'test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health/readiness || exit 1"]']
 ]);
 
 function normalized(value) {
@@ -337,7 +385,10 @@ function translateStringText(value) {
   const content = quote?.[2] ?? value;
   if (!/[\p{L}]/u.test(content)) return value;
 
-  const pathLike = /^(?:https?:\/\/)?[\w@./:-]+$/u.test(content);
+  // {}  fazem parte do char class para cobrir URI templates como "/ws/{cep}/json" --
+  // sem isso, "com" dentro do domínio (ex.: "https://viacep.com.br/ws/{cep}/json")
+  // cai no caminho de prosa e vira "with", corrompendo a URL.
+  const pathLike = /^(?:https?:\/\/)?[\w@./:{}-]+$/u.test(content);
   const properName = /^(?:[A-Z][\p{L}'-]+)(?:\s+(?:d[aeo]s?|[A-Z][\p{L}'-]+))+$/u.test(content)
     && !(content.match(/[\p{L}]+/gu) ?? []).some(token => wordMap.has(normalized(token)) && !connectorWords.has(normalized(token)));
   let translated = content;
@@ -357,8 +408,42 @@ function translateCodeSegment(value) {
   ).join('');
 }
 
+// Acha o início de comentário (//, # , -- , /*) ignorando ocorrências dentro
+// de uma string literal -- sem isso, uma URL como "https://viacep.com.br"
+// tem o "//" confundido com início de comentário, e o restante da linha
+// (incluindo o final da própria string) vira "comentário" traduzido palavra
+// por palavra, corrompendo a URL (ex.: "com" -> "with").
+function scanLineForComment(line, startsInTextBlock) {
+  let quote = null;
+  let inTextBlock = startsInTextBlock;
+  let i = 0;
+  while (i < line.length) {
+    if (inTextBlock) {
+      if (line.startsWith('"""', i)) { inTextBlock = false; i += 3; continue; }
+      i += 1;
+      continue;
+    }
+    if (quote) {
+      if (line[i] === '\\') { i += 2; continue; }
+      if (line[i] === quote) quote = null;
+      i += 1;
+      continue;
+    }
+    if (line.startsWith('"""', i)) { inTextBlock = true; i += 3; continue; }
+    const ch = line[i];
+    if (ch === '"' || ch === "'" || ch === '`') { quote = ch; i += 1; continue; }
+    if (ch === '/' && line[i + 1] === '/') return { commentIndex: i, endsInTextBlock: inTextBlock };
+    if (ch === '#' && line[i + 1] === ' ') return { commentIndex: i, endsInTextBlock: inTextBlock };
+    if (ch === '-' && line[i + 1] === '-' && line[i + 2] === ' ') return { commentIndex: i, endsInTextBlock: inTextBlock };
+    if (ch === '/' && line[i + 1] === '*') return { commentIndex: i, endsInTextBlock: inTextBlock };
+    i += 1;
+  }
+  return { commentIndex: undefined, endsInTextBlock: inTextBlock };
+}
+
 export function translateCodeText(value) {
   let inBlockComment = false;
+  let inTextBlock = false;
   return value.split('\n').map(line => {
     const lineOverride = codeLineOverrides.get(line.trim());
     if (lineOverride) return `${line.match(/^\s*/)?.[0] ?? ''}${lineOverride}`;
@@ -366,13 +451,14 @@ export function translateCodeText(value) {
       inBlockComment = !line.includes('*/');
       return translateProseText(line);
     }
-    const commentIndex = [line.indexOf('//'), line.indexOf('# '), line.indexOf('-- '), line.indexOf('/*')]
-      .filter(index => index >= 0)
-      .sort((left, right) => left - right)[0];
+    const wasInTextBlock = inTextBlock;
+    const { commentIndex, endsInTextBlock } = scanLineForComment(line, inTextBlock);
+    inTextBlock = endsInTextBlock;
+    if (wasInTextBlock && commentIndex === undefined) return translateCodeSegment(line);
     const code = commentIndex === undefined ? line : line.slice(0, commentIndex);
     const comment = commentIndex === undefined ? '' : line.slice(commentIndex);
     if (comment.startsWith('/*') && !comment.includes('*/')) inBlockComment = true;
-    const translatedCode = translateCodeSegment(code);
+    const translatedCode = wasInTextBlock ? code : translateCodeSegment(code);
     return translatedCode + (comment ? translateProseText(comment) : '');
   }).join('\n').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }

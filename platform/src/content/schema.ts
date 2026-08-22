@@ -10,6 +10,42 @@ export interface PedagogicalAudit {
   notes?: string[];
 }
 
+/**
+ * Camada de evidência editorial, INDEPENDENTE de `PedagogicalAudit.status`.
+ *
+ * `audit.status === 'approved'` é autodeclarado pelo autor do capítulo; a
+ * auditoria automática (scripts/audit-master-course.mjs) só o invalida se
+ * encontrar flags estruturais (falta quiz, pré-requisito futuro etc.), nunca
+ * avalia se o conteúdo de fato ensina os tópicos que promete. Isso cria risco
+ * de autoaprovação circular: um capítulo raso pode se declarar "approved" e
+ * passar sem que ninguém tenha comparado o corpo do texto ao que o título e o
+ * tempo estimado prometem.
+ *
+ * `EditorialReview` existe para registrar essa comparação explicitamente:
+ * quais subtemas o capítulo PRECISA ensinar (`requiredTopics`), e para cada um,
+ * quais blocos de conteúdo (`ContentBlock.id`) de fato o ensinam
+ * (`evidenceBlocks`). Ver docs/internal/content-rewrite/editorial-contract.md.
+ *
+ * IMPORTANTE: esta estrutura dá RASTREABILIDADE, não QUALIDADE. Um gate pode
+ * confirmar que todo `requiredTopics` aponta para algum bloco real (evita
+ * "tópico fantasma"), mas não pode confirmar que a explicação está correta,
+ * profunda ou pedagogicamente boa — isso continua exigindo revisão humana.
+ */
+export interface EditorialReview {
+  /** Subtemas que este capítulo se compromete a ensinar (não só mencionar). */
+  requiredTopics: string[];
+  /** Para cada tópico obrigatório, os IDs de ContentBlock que o ensinam de fato. */
+  evidenceBlocks: Record<string, string[]>;
+  /** Fontes primárias consultadas para verificar as afirmações técnicas do capítulo. */
+  primarySources: string[];
+  /** ISO date da última revisão factual (afirmações técnicas conferidas contra fonte primária). */
+  factualReviewedAt?: string;
+  /** ISO date da última revisão pedagógica (progressão, densidade, exemplos, exercícios). */
+  pedagogicalReviewedAt?: string;
+  /** Pendências reais e conhecidas -- um array vazio é a única condição que conta como "sem pendências". */
+  openIssues: string[];
+}
+
 export interface Course {
   id: string;
   contentVersion: number;
@@ -70,6 +106,8 @@ export interface Chapter {
   resources: Resource[];
   englishActivity: EnglishActivity;
   audit: PedagogicalAudit;
+  /** Opcional durante a transição -- capítulos sem isso ainda não passaram pela reconstrução editorial. */
+  editorialReview?: EditorialReview;
 }
 
 export type ContentBlock =

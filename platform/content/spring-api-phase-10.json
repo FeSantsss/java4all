@@ -2,45 +2,2479 @@
   "version": 1,
   "phase": 10,
   "concepts": [
-    {"id":"spring-component-scan-bean","name":"Spring bean, component scan e injeção oficial","aliases":["@Component","@Service","@Autowired"],"introducedIn":"spring-core","reinforcedIn":["spring-boot-fundamentos","spring-mvc"],"prerequisiteConceptIds":["ioc-lifecycle-bean","annotation-metadata-contract"],"commonConfusions":["achar que anotação cria objeto sozinha","usar campo estático para fugir de DI"],"outcomes":["registrar e injetar componentes entendendo quem controla lifecycle"]},
-    {"id":"spring-bean-scope-configuration","name":"Escopo de bean e configuração explícita","aliases":["singleton","prototype","@Configuration","@Bean"],"introducedIn":"spring-core","reinforcedIn":["spring-boot-fundamentos"],"prerequisiteConceptIds":["spring-component-scan-bean"],"commonConfusions":["singleton Spring igual singleton GoF global","usar @Bean para regra de negócio comum"],"outcomes":["decidir quando componente é descoberto ou declarado manualmente"]},
-    {"id":"boot-bootstrap-autoconfig","name":"Spring Boot bootstrap e auto-configuração","aliases":["@SpringBootApplication","auto-configuration"],"introducedIn":"spring-boot-fundamentos","reinforcedIn":["devtools","mini-helpdesk-api"],"prerequisiteConceptIds":["spring-component-scan-bean","build-lifecycle"],"commonConfusions":["achar que starter é código mágico sem condição","não ler relatório de auto-configuração"],"outcomes":["explicar inicialização e condições de configuração automática"]},
-    {"id":"boot-config-properties","name":"Configuração tipada no Spring Boot","aliases":["@ConfigurationProperties","application.yml"],"introducedIn":"spring-boot-fundamentos","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["configuracao-externa"],"commonConfusions":["espalhar @Value por toda regra","commitar secret em yml"],"outcomes":["carregar configuração externa validável sem vazar segredo"]},
-    {"id":"devtools-restart-boundary","name":"DevTools e limite de restart de desenvolvimento","aliases":["DevTools","restart"],"introducedIn":"devtools","reinforcedIn":["spring-boot-fundamentos"],"prerequisiteConceptIds":["boot-bootstrap-autoconfig"],"commonConfusions":["depender de devtools em produção","confundir restart com hot swap total"],"outcomes":["usar feedback rápido sem esconder build/teste reproduzível"]},
-    {"id":"lombok-generated-code-contract","name":"Lombok como geração em compilação","aliases":["@Getter","@Builder","@RequiredArgsConstructor"],"introducedIn":"lombok","reinforcedIn":["spring-jpa"],"prerequisiteConceptIds":["annotation-metadata-contract","encapsulamento-invariante"],"commonConfusions":["achar que Lombok muda o runtime","gerar setter que quebra invariante"],"outcomes":["usar ou evitar Lombok preservando contrato de domínio"]},
-    {"id":"mvc-controller-binding","name":"Controller MVC, binding e serialização","aliases":["@RestController","@RequestBody","@PathVariable"],"introducedIn":"spring-mvc","reinforcedIn":["validacao-erros","rest-resource-contracts"],"prerequisiteConceptIds":["http-mensagem-recurso","json-formato-contrato","spring-component-scan-bean"],"commonConfusions":["controller conter regra de negócio","confundir binding com validação de domínio"],"outcomes":["mapear HTTP para DTO/caso de uso sem vazar framework"]},
-    {"id":"mvc-response-status-contract","name":"Resposta HTTP explícita no Spring MVC","aliases":["ResponseEntity","@ResponseStatus"],"introducedIn":"spring-mvc","reinforcedIn":["api-design-avancado"],"prerequisiteConceptIds":["http-status-classe"],"commonConfusions":["retornar 200 para todo erro","expor stack trace"],"outcomes":["devolver status, headers e body por contrato"]},
-    {"id":"jpa-entity-identity","name":"JPA Entity e identidade persistente","aliases":["@Entity","@Id"],"introducedIn":"spring-jpa","reinforcedIn":["jpa-transacoes","dto-mapping"],"prerequisiteConceptIds":["entidade-value-object","modelo-relacional-tabela-chave"],"commonConfusions":["Entity JPA igual entidade de domínio sempre","usar setter público em todo campo"],"outcomes":["mapear classe para tabela preservando identidade e invariantes"]},
-    {"id":"springdata-repository-contract","name":"Spring Data repository como porta persistente","aliases":["JpaRepository","repository"],"introducedIn":"spring-jpa","reinforcedIn":["n-mais-1"],"prerequisiteConceptIds":["jdbc-driver-connection","adapter-fronteira-externa"],"commonConfusions":["achar que repository elimina SQL","consultas derivadas sem índice/semântica"],"outcomes":["usar repository entendendo query, transação e custo"]},
-    {"id":"jpa-relationship-loading","name":"Relacionamentos JPA e carregamento","aliases":["@OneToMany","LAZY","EAGER"],"introducedIn":"spring-jpa","reinforcedIn":["n-mais-1","jpa-transacoes"],"prerequisiteConceptIds":["join-cardinalidade-sql","agregado-consistencia"],"commonConfusions":["mapear todo relacionamento bidirecional","usar EAGER para esconder LazyInitializationException"],"outcomes":["modelar relação considerando cardinalidade, consulta e aggregate"]},
-    {"id":"jpa-flush-dirty-checking","name":"Flush, dirty checking e persistence context","aliases":["flush","dirty checking"],"introducedIn":"jpa-transacoes","reinforcedIn":["n-mais-1"],"prerequisiteConceptIds":["jpa-entity-identity","sql-transacao-atomicidade"],"commonConfusions":["flush é commit","entidade detachada continua sincronizando"],"outcomes":["separar estado em memória, SQL enviado e commit confirmado"]},
-    {"id":"transaction-proxy-boundary","name":"@Transactional e limite de proxy","aliases":["@Transactional","proxy"],"introducedIn":"jpa-transacoes","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["jdbc-transacao-rollback","ioc-lifecycle-bean"],"commonConfusions":["self-invocation abre transação","rollback automático para toda exceção checada"],"outcomes":["posicionar transação no caso de uso correto"]},
-    {"id":"dto-entity-boundary-spring","name":"DTO, Entity e boundary no Spring","aliases":["DTO mapping","MapStruct"],"introducedIn":"dto-mapping","reinforcedIn":["rest-resource-contracts","mini-helpdesk-api"],"prerequisiteConceptIds":["dto-mapping-fronteira","jpa-entity-identity"],"commonConfusions":["expor entity como response","usar mapper para esconder regra"],"outcomes":["separar contrato HTTP, entidade persistente e domínio"]},
-    {"id":"bean-validation-boundary","name":"Bean Validation na fronteira","aliases":["@Valid","@NotNull"],"introducedIn":"validacao-erros","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["annotation-metadata-contract","mvc-controller-binding"],"commonConfusions":["@NotNull substitui regra de domínio","validar entity JPA como request público"],"outcomes":["validar formato/entrada e traduzir violações com clareza"]},
-    {"id":"controller-advice-problem-details","name":"ControllerAdvice e Problem Details","aliases":["@ControllerAdvice","ProblemDetail"],"introducedIn":"validacao-erros","reinforcedIn":["api-design-avancado","rest-resource-contracts"],"prerequisiteConceptIds":["mvc-response-status-contract","causa-excecao"],"commonConfusions":["tratar erro com string solta","vazar stack trace para cliente"],"outcomes":["centralizar tradução de exceções para erro HTTP estável"]},
-    {"id":"pagination-sorting-contract","name":"Paginação, filtro e ordenação como contrato","aliases":["Pageable","sort","cursor"],"introducedIn":"paginacao-swagger","reinforcedIn":["api-design-avancado"],"prerequisiteConceptIds":["rate-limit-paginacao","springdata-repository-contract"],"commonConfusions":["página sem ordenação estável","permitir sort por qualquer coluna"],"outcomes":["publicar paginação previsível e limitada"]},
-    {"id":"openapi-documentation-contract","name":"OpenAPI como contrato documentado","aliases":["Swagger","OpenAPI"],"introducedIn":"paginacao-swagger","reinforcedIn":["api-design-avancado"],"prerequisiteConceptIds":["http-header-body-negociacao","mvc-controller-binding"],"commonConfusions":["documentação substitui teste","gerar contrato que não reflete erro real"],"outcomes":["documentar exemplos, schemas e erros verificáveis"]},
-    {"id":"http-optimistic-concurrency","name":"Concorrência otimista HTTP","aliases":["ETag","If-Match","409"],"introducedIn":"api-design-avancado","reinforcedIn":["rest-resource-contracts"],"prerequisiteConceptIds":["http-idempotencia-seguranca","mvcc-isolamento-lock"],"commonConfusions":["última escrita vence sempre","ETag como cache apenas"],"outcomes":["evitar lost update com precondition ou versão"]},
-    {"id":"api-compatible-evolution","name":"Evolução compatível de API","aliases":["backward compatibility","versioning"],"introducedIn":"api-design-avancado","reinforcedIn":["rest-resource-contracts"],"prerequisiteConceptIds":["migration-expand-contract","openapi-documentation-contract"],"commonConfusions":["campo opcional sempre compatível","versionar por mudança interna"],"outcomes":["classificar breaking changes e planejar depreciação"]},
-    {"id":"cors-browser-policy","name":"CORS como política do navegador","aliases":["CORS","preflight"],"introducedIn":"cors-rate-limit","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["http-header-body-negociacao","mvc-controller-binding"],"commonConfusions":["CORS é autenticação","liberar * com credenciais"],"outcomes":["configurar origem, método e header por fronteira real"]},
-    {"id":"api-rate-limit-boundary","name":"Rate limiting na borda da API","aliases":["429","rate limit"],"introducedIn":"cors-rate-limit","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["rate-limit-paginacao","http-status-classe"],"commonConfusions":["rate limit resolve autorização","não retornar Retry-After"],"outcomes":["limitar abuso e comunicar capacidade com status adequado"]},
-    {"id":"nplusone-query-shape","name":"N+1 e forma da consulta","aliases":["N+1","fetch join"],"introducedIn":"n-mais-1","reinforcedIn":["mini-helpdesk-api"],"prerequisiteConceptIds":["jpa-relationship-loading","postgres-explain-analyze"],"commonConfusions":["resolver com EAGER global","não olhar SQL gerado"],"outcomes":["detectar consultas repetidas e escolher fetch/projeção adequada"]},
-    {"id":"helpdesk-api-vertical-slice","name":"API vertical slice com Spring","aliases":["vertical slice","help desk"],"introducedIn":"mini-helpdesk-api","reinforcedIn":["rest-resource-contracts"],"prerequisiteConceptIds":["mvc-controller-binding","springdata-repository-contract","controller-advice-problem-details"],"commonConfusions":["montar todas as camadas sem caso funcionando","projeto sem falhas demonstradas"],"outcomes":["entregar uma fatia API -> caso de uso -> persistência -> erro -> teste"]}
+    {
+      "id": "spring-component-scan-bean",
+      "name": "Spring bean, component scan e injeção oficial",
+      "aliases": [
+        "@Component",
+        "@Service",
+        "@Autowired"
+      ],
+      "introducedIn": "spring-core",
+      "reinforcedIn": [
+        "spring-boot-fundamentos",
+        "spring-mvc"
+      ],
+      "prerequisiteConceptIds": [
+        "ioc-lifecycle-bean",
+        "annotation-metadata-contract"
+      ],
+      "commonConfusions": [
+        "achar que anotação cria objeto sozinha",
+        "usar campo estático para fugir de DI"
+      ],
+      "outcomes": [
+        "registrar e injetar componentes entendendo quem controla lifecycle"
+      ]
+    },
+    {
+      "id": "spring-bean-scope-configuration",
+      "name": "Escopo de bean e configuração explícita",
+      "aliases": [
+        "singleton",
+        "prototype",
+        "@Configuration",
+        "@Bean"
+      ],
+      "introducedIn": "spring-core",
+      "reinforcedIn": [
+        "spring-boot-fundamentos"
+      ],
+      "prerequisiteConceptIds": [
+        "spring-component-scan-bean"
+      ],
+      "commonConfusions": [
+        "singleton Spring igual singleton GoF global",
+        "usar @Bean para regra de negócio comum"
+      ],
+      "outcomes": [
+        "decidir quando componente é descoberto ou declarado manualmente"
+      ]
+    },
+    {
+      "id": "boot-bootstrap-autoconfig",
+      "name": "Spring Boot bootstrap e auto-configuração",
+      "aliases": [
+        "@SpringBootApplication",
+        "auto-configuration"
+      ],
+      "introducedIn": "spring-boot-fundamentos",
+      "reinforcedIn": [
+        "devtools",
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "spring-component-scan-bean",
+        "build-lifecycle"
+      ],
+      "commonConfusions": [
+        "achar que starter é código mágico sem condição",
+        "não ler relatório de auto-configuração"
+      ],
+      "outcomes": [
+        "explicar inicialização e condições de configuração automática"
+      ]
+    },
+    {
+      "id": "boot-config-properties",
+      "name": "Configuração tipada no Spring Boot",
+      "aliases": [
+        "@ConfigurationProperties",
+        "application.yml"
+      ],
+      "introducedIn": "spring-boot-fundamentos",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "configuracao-externa"
+      ],
+      "commonConfusions": [
+        "espalhar @Value por toda regra",
+        "commitar secret em yml"
+      ],
+      "outcomes": [
+        "carregar configuração externa validável sem vazar segredo"
+      ]
+    },
+    {
+      "id": "devtools-restart-boundary",
+      "name": "DevTools e limite de restart de desenvolvimento",
+      "aliases": [
+        "DevTools",
+        "restart"
+      ],
+      "introducedIn": "devtools",
+      "reinforcedIn": [
+        "spring-boot-fundamentos"
+      ],
+      "prerequisiteConceptIds": [
+        "boot-bootstrap-autoconfig"
+      ],
+      "commonConfusions": [
+        "depender de devtools em produção",
+        "confundir restart com hot swap total"
+      ],
+      "outcomes": [
+        "usar feedback rápido sem esconder build/teste reproduzível"
+      ]
+    },
+    {
+      "id": "lombok-generated-code-contract",
+      "name": "Lombok como geração em compilação",
+      "aliases": [
+        "@Getter",
+        "@Builder",
+        "@RequiredArgsConstructor"
+      ],
+      "introducedIn": "lombok",
+      "reinforcedIn": [
+        "spring-jpa"
+      ],
+      "prerequisiteConceptIds": [
+        "annotation-metadata-contract",
+        "encapsulamento-invariante"
+      ],
+      "commonConfusions": [
+        "achar que Lombok muda o runtime",
+        "gerar setter que quebra invariante"
+      ],
+      "outcomes": [
+        "usar ou evitar Lombok preservando contrato de domínio"
+      ]
+    },
+    {
+      "id": "mvc-controller-binding",
+      "name": "Controller MVC, binding e serialização",
+      "aliases": [
+        "@RestController",
+        "@RequestBody",
+        "@PathVariable"
+      ],
+      "introducedIn": "spring-mvc",
+      "reinforcedIn": [
+        "validacao-erros",
+        "rest-resource-contracts"
+      ],
+      "prerequisiteConceptIds": [
+        "http-mensagem-recurso",
+        "json-formato-contrato",
+        "spring-component-scan-bean"
+      ],
+      "commonConfusions": [
+        "controller conter regra de negócio",
+        "confundir binding com validação de domínio"
+      ],
+      "outcomes": [
+        "mapear HTTP para DTO/caso de uso sem vazar framework"
+      ]
+    },
+    {
+      "id": "mvc-response-status-contract",
+      "name": "Resposta HTTP explícita no Spring MVC",
+      "aliases": [
+        "ResponseEntity",
+        "@ResponseStatus"
+      ],
+      "introducedIn": "spring-mvc",
+      "reinforcedIn": [
+        "api-design-avancado"
+      ],
+      "prerequisiteConceptIds": [
+        "http-status-classe"
+      ],
+      "commonConfusions": [
+        "retornar 200 para todo erro",
+        "expor stack trace"
+      ],
+      "outcomes": [
+        "devolver status, headers e body por contrato"
+      ]
+    },
+    {
+      "id": "jpa-entity-identity",
+      "name": "JPA Entity e identidade persistente",
+      "aliases": [
+        "@Entity",
+        "@Id"
+      ],
+      "introducedIn": "spring-jpa",
+      "reinforcedIn": [
+        "jpa-transacoes",
+        "dto-mapping"
+      ],
+      "prerequisiteConceptIds": [
+        "entidade-value-object",
+        "modelo-relacional-tabela-chave"
+      ],
+      "commonConfusions": [
+        "Entity JPA igual entidade de domínio sempre",
+        "usar setter público em todo campo"
+      ],
+      "outcomes": [
+        "mapear classe para tabela preservando identidade e invariantes"
+      ]
+    },
+    {
+      "id": "springdata-repository-contract",
+      "name": "Spring Data repository como porta persistente",
+      "aliases": [
+        "JpaRepository",
+        "repository"
+      ],
+      "introducedIn": "spring-jpa",
+      "reinforcedIn": [
+        "n-mais-1"
+      ],
+      "prerequisiteConceptIds": [
+        "jdbc-driver-connection",
+        "adapter-fronteira-externa"
+      ],
+      "commonConfusions": [
+        "achar que repository elimina SQL",
+        "consultas derivadas sem índice/semântica"
+      ],
+      "outcomes": [
+        "usar repository entendendo query, transação e custo"
+      ]
+    },
+    {
+      "id": "jpa-relationship-loading",
+      "name": "Relacionamentos JPA e carregamento",
+      "aliases": [
+        "@OneToMany",
+        "LAZY",
+        "EAGER"
+      ],
+      "introducedIn": "spring-jpa",
+      "reinforcedIn": [
+        "n-mais-1",
+        "jpa-transacoes"
+      ],
+      "prerequisiteConceptIds": [
+        "join-cardinalidade-sql",
+        "agregado-consistencia"
+      ],
+      "commonConfusions": [
+        "mapear todo relacionamento bidirecional",
+        "usar EAGER para esconder LazyInitializationException"
+      ],
+      "outcomes": [
+        "modelar relação considerando cardinalidade, consulta e aggregate"
+      ]
+    },
+    {
+      "id": "jpa-flush-dirty-checking",
+      "name": "Flush, dirty checking e persistence context",
+      "aliases": [
+        "flush",
+        "dirty checking"
+      ],
+      "introducedIn": "jpa-transacoes",
+      "reinforcedIn": [
+        "n-mais-1"
+      ],
+      "prerequisiteConceptIds": [
+        "jpa-entity-identity",
+        "sql-transacao-atomicidade"
+      ],
+      "commonConfusions": [
+        "flush é commit",
+        "entidade detachada continua sincronizando"
+      ],
+      "outcomes": [
+        "separar estado em memória, SQL enviado e commit confirmado"
+      ]
+    },
+    {
+      "id": "transaction-proxy-boundary",
+      "name": "@Transactional e limite de proxy",
+      "aliases": [
+        "@Transactional",
+        "proxy"
+      ],
+      "introducedIn": "jpa-transacoes",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "jdbc-transacao-rollback",
+        "ioc-lifecycle-bean"
+      ],
+      "commonConfusions": [
+        "self-invocation abre transação",
+        "rollback automático para toda exceção checada"
+      ],
+      "outcomes": [
+        "posicionar transação no caso de uso correto"
+      ]
+    },
+    {
+      "id": "dto-entity-boundary-spring",
+      "name": "DTO, Entity e boundary no Spring",
+      "aliases": [
+        "DTO mapping",
+        "MapStruct"
+      ],
+      "introducedIn": "dto-mapping",
+      "reinforcedIn": [
+        "rest-resource-contracts",
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "dto-mapping-fronteira",
+        "jpa-entity-identity"
+      ],
+      "commonConfusions": [
+        "expor entity como response",
+        "usar mapper para esconder regra"
+      ],
+      "outcomes": [
+        "separar contrato HTTP, entidade persistente e domínio"
+      ]
+    },
+    {
+      "id": "bean-validation-boundary",
+      "name": "Bean Validation na fronteira",
+      "aliases": [
+        "@Valid",
+        "@NotNull"
+      ],
+      "introducedIn": "validacao-erros",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "annotation-metadata-contract",
+        "mvc-controller-binding"
+      ],
+      "commonConfusions": [
+        "@NotNull substitui regra de domínio",
+        "validar entity JPA como request público"
+      ],
+      "outcomes": [
+        "validar formato/entrada e traduzir violações com clareza"
+      ]
+    },
+    {
+      "id": "controller-advice-problem-details",
+      "name": "ControllerAdvice e Problem Details",
+      "aliases": [
+        "@ControllerAdvice",
+        "ProblemDetail"
+      ],
+      "introducedIn": "validacao-erros",
+      "reinforcedIn": [
+        "api-design-avancado",
+        "rest-resource-contracts"
+      ],
+      "prerequisiteConceptIds": [
+        "mvc-response-status-contract",
+        "causa-excecao"
+      ],
+      "commonConfusions": [
+        "tratar erro com string solta",
+        "vazar stack trace para cliente"
+      ],
+      "outcomes": [
+        "centralizar tradução de exceções para erro HTTP estável"
+      ]
+    },
+    {
+      "id": "pagination-sorting-contract",
+      "name": "Paginação, filtro e ordenação como contrato",
+      "aliases": [
+        "Pageable",
+        "sort",
+        "cursor"
+      ],
+      "introducedIn": "paginacao-swagger",
+      "reinforcedIn": [
+        "api-design-avancado"
+      ],
+      "prerequisiteConceptIds": [
+        "rate-limit-paginacao",
+        "springdata-repository-contract"
+      ],
+      "commonConfusions": [
+        "página sem ordenação estável",
+        "permitir sort por qualquer coluna"
+      ],
+      "outcomes": [
+        "publicar paginação previsível e limitada"
+      ]
+    },
+    {
+      "id": "openapi-documentation-contract",
+      "name": "OpenAPI como contrato documentado",
+      "aliases": [
+        "Swagger",
+        "OpenAPI"
+      ],
+      "introducedIn": "paginacao-swagger",
+      "reinforcedIn": [
+        "api-design-avancado"
+      ],
+      "prerequisiteConceptIds": [
+        "http-header-body-negociacao",
+        "mvc-controller-binding"
+      ],
+      "commonConfusions": [
+        "documentação substitui teste",
+        "gerar contrato que não reflete erro real"
+      ],
+      "outcomes": [
+        "documentar exemplos, schemas e erros verificáveis"
+      ]
+    },
+    {
+      "id": "http-optimistic-concurrency",
+      "name": "Concorrência otimista HTTP",
+      "aliases": [
+        "ETag",
+        "If-Match",
+        "409"
+      ],
+      "introducedIn": "api-design-avancado",
+      "reinforcedIn": [
+        "rest-resource-contracts"
+      ],
+      "prerequisiteConceptIds": [
+        "http-idempotencia-seguranca",
+        "mvcc-isolamento-lock"
+      ],
+      "commonConfusions": [
+        "última escrita vence sempre",
+        "ETag como cache apenas"
+      ],
+      "outcomes": [
+        "evitar lost update com precondition ou versão"
+      ]
+    },
+    {
+      "id": "api-compatible-evolution",
+      "name": "Evolução compatível de API",
+      "aliases": [
+        "backward compatibility",
+        "versioning"
+      ],
+      "introducedIn": "api-design-avancado",
+      "reinforcedIn": [
+        "rest-resource-contracts"
+      ],
+      "prerequisiteConceptIds": [
+        "migration-expand-contract",
+        "openapi-documentation-contract"
+      ],
+      "commonConfusions": [
+        "campo opcional sempre compatível",
+        "versionar por mudança interna"
+      ],
+      "outcomes": [
+        "classificar breaking changes e planejar depreciação"
+      ]
+    },
+    {
+      "id": "cors-browser-policy",
+      "name": "CORS como política do navegador",
+      "aliases": [
+        "CORS",
+        "preflight"
+      ],
+      "introducedIn": "cors-rate-limit",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "http-header-body-negociacao",
+        "mvc-controller-binding"
+      ],
+      "commonConfusions": [
+        "CORS é autenticação",
+        "liberar * com credenciais"
+      ],
+      "outcomes": [
+        "configurar origem, método e header por fronteira real"
+      ]
+    },
+    {
+      "id": "api-rate-limit-boundary",
+      "name": "Rate limiting na borda da API",
+      "aliases": [
+        "429",
+        "rate limit"
+      ],
+      "introducedIn": "cors-rate-limit",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "rate-limit-paginacao",
+        "http-status-classe"
+      ],
+      "commonConfusions": [
+        "rate limit resolve autorização",
+        "não retornar Retry-After"
+      ],
+      "outcomes": [
+        "limitar abuso e comunicar capacidade com status adequado"
+      ]
+    },
+    {
+      "id": "nplusone-query-shape",
+      "name": "N+1 e forma da consulta",
+      "aliases": [
+        "N+1",
+        "fetch join"
+      ],
+      "introducedIn": "n-mais-1",
+      "reinforcedIn": [
+        "mini-helpdesk-api"
+      ],
+      "prerequisiteConceptIds": [
+        "jpa-relationship-loading",
+        "postgres-explain-analyze"
+      ],
+      "commonConfusions": [
+        "resolver com EAGER global",
+        "não olhar SQL gerado"
+      ],
+      "outcomes": [
+        "detectar consultas repetidas e escolher fetch/projeção adequada"
+      ]
+    },
+    {
+      "id": "helpdesk-api-vertical-slice",
+      "name": "API vertical slice com Spring",
+      "aliases": [
+        "vertical slice",
+        "help desk"
+      ],
+      "introducedIn": "mini-helpdesk-api",
+      "reinforcedIn": [
+        "rest-resource-contracts"
+      ],
+      "prerequisiteConceptIds": [
+        "mvc-controller-binding",
+        "springdata-repository-contract",
+        "controller-advice-problem-details"
+      ],
+      "commonConfusions": [
+        "montar todas as camadas sem caso funcionando",
+        "projeto sem falhas demonstradas"
+      ],
+      "outcomes": [
+        "entregar uma fatia API -> caso de uso -> persistência -> erro -> teste"
+      ]
+    }
   ],
   "chapters": {
-    "spring-core": {"order":0,"objectives":["Mapear DI manual para IoC oficial do Spring","Entender component scan, stereotypes, escopos e @Bean","Separar componente, configuração e regra de negócio","Evitar campo estático/global como atalho"],"whyItExists":"Depois do mini-framework pré-Spring, o aluno já conhece annotations, reflection, DI e IoC. Spring Core entra como implementação industrial dessas ideias, não como primeira explicação mágica.","prerequisiteChapterIds":["projetospring","build"],"introducedConceptIds":["spring-component-scan-bean","spring-bean-scope-configuration"],"usedConceptIds":["mini-framework-dispatcher","ioc-lifecycle-bean","annotation-metadata-contract"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"spring-core-intuition","type":"intuition","authorship":"authored","title":"Spring automatiza uma composição que você já fez à mão","body":"O container descobre componentes, cria objetos, injeta dependências e controla parte do ciclo de vida. O objetivo é reduzir montagem repetitiva, não esconder onde a regra deve viver.","analogyLimit":"Oficina ajuda a imaginar montagem, mas Spring também usa classpath, condições, proxies, escopos e lifecycle."}],"appendBlocks":[{"id":"spring-core-quiz","type":"quiz","authorship":"authored","conceptId":"spring-component-scan-bean","prompt":"O que faz uma classe anotada com @Service virar dependência injetável?","options":[{"id":"sc-a","label":"O container Spring escaneia, registra e instancia o componente conforme sua configuração.","correct":true,"explanation":"A anotação é metadado; o container é quem lê e age."},{"id":"sc-b","label":"A JVM injeta automaticamente qualquer classe com esse nome.","correct":false,"explanation":"A JVM não conhece @Service como regra especial."},{"id":"sc-c","label":"O Maven transforma a classe em singleton global estático.","correct":false,"explanation":"Build empacota; quem gerencia bean é o container."}]}],"codeExplanations":{"spring-core-code-5":{"explanation":["@Service é especialização de @Component para semântica de serviço.","Constructor injection torna dependências obrigatórias e testáveis."],"commonMistakes":["Usar field injection por conveniência","Colocar regra de negócio na configuração"]},"spring-core-code-11":{"explanation":["Stereotypes comunicam papel arquitetural e participam do component scan.","A diferença é semântica e de integração futura, não superpoder da classe."],"commonMistakes":["Escolher annotation aleatoriamente","Criar componente para entidade de domínio"]},"spring-core-code-15":{"explanation":["@Configuration e @Bean declaram objetos que o Spring não descobre sozinho ou cuja criação precisa de fábrica.","Isso pertence à composition root/configuração, não ao domínio."],"commonMistakes":["Usar @Bean para todo objeto simples","Ler secret direto em classe de regra"]}},"resources":[{"id":"spring-core-beans","type":"reference","title":"Spring Framework: IoC Container","url":"https://docs.spring.io/spring-framework/reference/core/beans.html","reinforces":"Beans, container, injeção, lifecycle e configuração.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-component-scanning","type":"reference","title":"Spring: Classpath Scanning and Managed Components","url":"https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html","reinforces":"Component scan, stereotypes e detecção de beans.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "spring-boot-fundamentos": {"order":1,"objectives":["Entender bootstrap de uma aplicação Boot","Ler auto-configuração como conjunto de condições","Usar starters e versões com responsabilidade","Modelar configuração tipada sem secrets no código"],"whyItExists":"Spring Core explica o container; Spring Boot explica como a aplicação sobe com convenções, starters e auto-configuração. Isso evita tratar Boot como template pronto sem saber por que ele funciona.","prerequisiteChapterIds":["spring-core","build"],"introducedConceptIds":["boot-bootstrap-autoconfig","boot-config-properties"],"usedConceptIds":["spring-component-scan-bean","build-lifecycle","configuracao-externa"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"boot-intuition","type":"intuition","authorship":"authored","title":"Boot escolhe bons padrões, mas eles são condicionais","body":"Auto-configuração não é mágica universal. Ela observa classpath, propriedades e beans existentes para decidir o que criar. Quando você entende as condições, sabe explicar por que algo apareceu ou não.","analogyLimit":"Piloto automático ajuda, mas Boot não decide objetivo de negócio nem substitui leitura de logs e configuração."}],"appendBlocks":[{"id":"boot-quiz","type":"quiz","authorship":"authored","conceptId":"boot-bootstrap-autoconfig","prompt":"Por que adicionar um starter pode mudar os beans disponíveis?","options":[{"id":"boot-a","label":"Porque o classpath passa a satisfazer condições de auto-configuração.","correct":true,"explanation":"Boot observa bibliotecas, propriedades e beans para ativar configurações."},{"id":"boot-b","label":"Porque qualquer dependência executa código antes do main.","correct":false,"explanation":"Dependência no classpath não executa tudo automaticamente; Boot avalia condições."},{"id":"boot-c","label":"Porque o Spring ignora @Configuration quando há starter.","correct":false,"explanation":"Configuração explícita continua participando."}]}],"codeExplanations":{"spring-boot-fundamentos-code-4":{"explanation":["@SpringBootApplication combina configuração, component scan e auto-configuração.","O main delega bootstrap para SpringApplication."],"commonMistakes":["Mover classe principal para pacote que não escaneia componentes","Achar que main contém regra de negócio"]},"spring-boot-fundamentos-code-7":{"explanation":["@ConfigurationProperties agrupa configuração tipada.","Validação e prefixo reduzem strings soltas e @Value espalhado."],"commonMistakes":["Colocar senha real no arquivo versionado","Usar @Value para dezenas de propriedades relacionadas"]},"spring-boot-fundamentos-code-8":{"explanation":["Starters agrupam dependências compatíveis para um recurso.","A versão deve vir do gerenciamento do Boot quando possível."],"commonMistakes":["Misturar versões incompatíveis","Adicionar starter sem entender recurso ativado"]}},"resources":[{"id":"boot-autoconfiguration","type":"reference","title":"Spring Boot: Auto-configuration","url":"https://docs.spring.io/spring-boot/reference/using/auto-configuration.html","reinforces":"Condições, auto-configuração e substituição por configuração explícita.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"boot-external-config","type":"reference","title":"Spring Boot: Externalized Configuration","url":"https://docs.spring.io/spring-boot/reference/features/external-config.html","reinforces":"Ordem de propriedades, configuração externa e binding tipado.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "devtools": {"order":2,"objectives":["Usar DevTools para feedback local rápido","Distinguir restart de build/teste reproduzível","Manter DevTools fora de expectativa de produção","Entender limites de classloader/restart"],"whyItExists":"Depois do bootstrap, o aluno pode ganhar feedback local sem confundir ferramenta de desenvolvimento com garantia de entrega. DevTools acelera estudo, mas não substitui teste, build e reload controlado.","prerequisiteChapterIds":["spring-boot-fundamentos"],"introducedConceptIds":["devtools-restart-boundary"],"usedConceptIds":["boot-bootstrap-autoconfig","build-lifecycle"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"devtools-intuition","type":"intuition","authorship":"authored","title":"Feedback rápido não é validação final","body":"DevTools reinicia partes da aplicação quando arquivos mudam para acelerar o ciclo local. Isso ajuda a estudar, mas o comportamento final continua precisando de testes e build limpo.","analogyLimit":"Rascunho rápido ajuda, mas não é prova de publicação."}],"appendBlocks":[{"id":"devtools-quiz","type":"quiz","authorship":"authored","conceptId":"devtools-restart-boundary","prompt":"Qual uso de DevTools é saudável?","options":[{"id":"dev-a","label":"Acelerar o ciclo local mantendo build e testes como validação real.","correct":true,"explanation":"DevTools é ferramenta de desenvolvimento, não gate de qualidade."},{"id":"dev-b","label":"Depender dele em produção para atualizar código sem deploy.","correct":false,"explanation":"DevTools não é mecanismo de deploy."},{"id":"dev-c","label":"Ignorar falhas que só aparecem após reiniciar do zero.","correct":false,"explanation":"Restart limpo ainda precisa ser testado."}]}],"codeExplanations":{"devtools-code-3":{"explanation":["A dependência habilita comportamento de desenvolvimento como restart automático.","Ela deve ficar no escopo adequado para não virar contrato de produção."],"commonMistakes":["Depender do DevTools no servidor","Confundir restart parcial com build limpo"]}},"resources":[{"id":"boot-devtools","type":"reference","title":"Spring Boot: Developer Tools","url":"https://docs.spring.io/spring-boot/reference/using/devtools.html","reinforces":"Recursos, restart, LiveReload e limites do DevTools.","language":"en","publisher":"Spring","official":true,"expectedLevel":"beginner","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"boot-devtools-restart","type":"reference","title":"Spring Boot DevTools: Automatic Restart","url":"https://docs.spring.io/spring-boot/reference/using/devtools.html#using.devtools.restart","reinforces":"Como o restart funciona e quando pode surpreender.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "lombok": {"order":3,"objectives":["Entender Lombok como geração em compilação","Usar constructor injection sem boilerplate excessivo","Proteger invariantes ao evitar setters indiscriminados","Avaliar trade-off de legibilidade/tooling"],"whyItExists":"Lombok aparece cedo em projetos Spring, mas o aluno já sabe annotations, encapsulamento e records. Agora pode decidir quando gerar código repetitivo ajuda e quando esconde contrato importante.","prerequisiteChapterIds":["encapsulamento","anotacoes","spring-core"],"introducedConceptIds":["lombok-generated-code-contract"],"usedConceptIds":["annotation-metadata-contract","encapsulamento-invariante","spring-component-scan-bean"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"lombok-intuition","type":"intuition","authorship":"authored","title":"Lombok escreve código por você; ele não decide o design","body":"@Getter ou @RequiredArgsConstructor reduzem repetição, mas os métodos gerados continuam existindo no contrato da classe. Se você gera setter para tudo, também gera caminhos para quebrar invariantes.","analogyLimit":"Atalho de teclado ajuda, mas ainda pode inserir texto ruim."}],"appendBlocks":[{"id":"lombok-quiz","type":"quiz","authorship":"authored","conceptId":"lombok-generated-code-contract","prompt":"Qual é o risco de usar @Data em uma entidade rica de domínio?","options":[{"id":"lom-a","label":"Gerar setters/equals/toString que podem expor ou quebrar invariantes sem intenção.","correct":true,"explanation":"Boilerplate gerado ainda faz parte do comportamento público."},{"id":"lom-b","label":"Impedir totalmente a compilação de qualquer projeto Spring.","correct":false,"explanation":"Lombok compila com plugin/processador configurado."},{"id":"lom-c","label":"Transformar Java em linguagem dinâmica em runtime.","correct":false,"explanation":"A geração ocorre em compilação."}]}],"quizRationales":{"lombok-concept-check-0":["Lombok reduz boilerplate, mas o código gerado continua precisando respeitar encapsulamento.","Anotações não substituem decisão de domínio.","Records e construtores explícitos podem ser melhores quando o contrato deve ficar óbvio."]},"resources":[{"id":"lombok-features","type":"reference","title":"Project Lombok Features","url":"https://projectlombok.org/features/","reinforces":"Lista oficial de anotações, geração e trade-offs.","language":"en","publisher":"Project Lombok","official":true,"expectedLevel":"beginner","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"lombok-constructor","type":"reference","title":"Project Lombok: Constructor annotations","url":"https://projectlombok.org/features/constructor","reinforces":"@RequiredArgsConstructor, @AllArgsConstructor e constructor injection.","language":"en","publisher":"Project Lombok","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "spring-mvc": {"order":4,"objectives":["Mapear requisições HTTP para métodos de controller","Separar binding, validação, regra e resposta","Escolher status e headers de forma explícita","Evitar controller como camada de domínio"],"whyItExists":"O aluno já conhece HTTP, JSON e DI. Spring MVC entra para adaptar mensagens HTTP a casos de uso, mostrando o que o framework automatiza e o que continua sendo decisão de contrato.","prerequisiteChapterIds":["spring-boot-fundamentos","http-wire-contract","java-httpclient-json"],"introducedConceptIds":["mvc-controller-binding","mvc-response-status-contract"],"usedConceptIds":["http-mensagem-recurso","json-formato-contrato","spring-component-scan-bean"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"spring-mvc-intuition","type":"intuition","authorship":"authored","title":"Controller é adaptador HTTP, não dono da regra","body":"O controller recebe método, URI, headers e corpo; transforma isso em comando/consulta para o caso de uso; depois traduz o resultado para status, headers e corpo. Ele deve ser fino o bastante para trocar transporte sem reescrever domínio.","analogyLimit":"Adaptador não significa pass-through burro: ele ainda decide contrato HTTP, mas não regra central de negócio."}],"appendBlocks":[{"id":"spring-mvc-status-quiz","type":"quiz","authorship":"authored","conceptId":"mvc-response-status-contract","prompt":"Quando ResponseEntity é preferível a retornar apenas um objeto?","options":[{"id":"mvc-a","label":"Quando status, headers ou ausência de body fazem parte do contrato HTTP.","correct":true,"explanation":"A resposta publicada não é só JSON; status e headers também comunicam semântica."},{"id":"mvc-b","label":"Quando o service precisa acessar diretamente o servlet request.","correct":false,"explanation":"Isso acopla regra ao transporte e costuma piorar testabilidade."},{"id":"mvc-c","label":"Quando todo erro deve virar 200 com uma mensagem no body.","correct":false,"explanation":"Status HTTP precisa preservar significado para cliente, cache e observabilidade."}]}],"codeExplanations":{"spring-mvc-code-3":{"explanation":["@RestController combina controller com serialização de resposta.","Anotações de mapping conectam método/URI a um método Java, mas não validam regra de negócio sozinhas."],"commonMistakes":["Colocar regra transacional no controller","Retornar entidade JPA diretamente como contrato público"]}},"resources":[{"id":"spring-mvc-controller","type":"reference","title":"Spring MVC: Annotated Controllers","url":"https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html","reinforces":"Controllers anotados, binding e métodos de handler.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-mvc-request-mapping","type":"reference","title":"Spring MVC: Mapping Requests","url":"https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html","reinforces":"Mapeamento de método, path, parâmetros, headers e consumes/produces.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "spring-jpa": {"order":5,"objectives":["Mapear entity, id e repository sem perder custo SQL","Entender repository como adapter de persistência","Modelar relacionamentos considerando consulta e aggregate","Evitar expor entity JPA como DTO"],"whyItExists":"Depois de SQL, JDBC e Spring MVC, JPA aparece como abstração de persistência com ganhos reais e custos reais. O aluno precisa enxergar a tabela e a consulta por trás do repository.","prerequisiteChapterIds":["jdbc","spring-mvc","lombok"],"introducedConceptIds":["jpa-entity-identity","springdata-repository-contract","jpa-relationship-loading"],"usedConceptIds":["modelo-relacional-tabela-chave","jdbc-driver-connection","adapter-fronteira-externa"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"spring-jpa-intuition","type":"intuition","authorship":"authored","title":"Repository não apaga o banco; ele encapsula acesso","body":"Spring Data reduz código repetitivo de persistência, mas continua emitindo SQL, abrindo conexões e carregando dados com custos. A abstração boa deixa o caso de uso limpo sem fingir que tabela, índice e transação sumiram.","analogyLimit":"Um câmbio automático ainda depende do motor; repository ainda depende do banco."}],"appendBlocks":[{"id":"spring-jpa-quiz","type":"quiz","authorship":"authored","conceptId":"springdata-repository-contract","prompt":"Qual afirmação descreve melhor JpaRepository?","options":[{"id":"jpa-a","label":"Uma porta/adaptador que oferece operações de persistência e gera/execura consultas conforme contrato.","correct":true,"explanation":"Ele reduz boilerplate, mas não elimina consulta, transação nem custo."},{"id":"jpa-b","label":"Um substituto para modelagem relacional, índices e transações.","correct":false,"explanation":"Essas decisões continuam determinando correção e performance."},{"id":"jpa-c","label":"Um DTO público seguro para retornar diretamente ao frontend.","correct":false,"explanation":"Entity persistente e contrato HTTP evoluem por motivos diferentes."}]}],"codeExplanations":{"spring-jpa-code-4":{"explanation":["@Entity marca uma classe como persistível e @Id define identidade no banco.","Identidade persistente não é o mesmo que igualdade de valor em todo domínio."],"commonMistakes":["Gerar setter público para todo campo","Misturar entidade JPA com response DTO"]},"spring-jpa-code-6":{"explanation":["JpaRepository fornece operações comuns e cria consultas por convenção quando possível.","O nome do método vira contrato de consulta; índices e cardinalidade continuam importando."],"commonMistakes":["Criar query derivada longa e ambígua","Ignorar SQL gerado"]},"spring-jpa-code-9":{"explanation":["Relacionamentos descrevem associação persistente e estratégia de carregamento.","LAZY adia carga; EAGER antecipa carga e pode explodir payload/consulta."],"commonMistakes":["Usar EAGER para resolver erro de sessão","Criar relacionamento bidirecional sem necessidade de navegação"]}},"resources":[{"id":"spring-data-jpa-start","type":"reference","title":"Spring Data JPA: Getting Started","url":"https://docs.spring.io/spring-data/jpa/reference/jpa/getting-started.html","reinforces":"Configuração, repository e primeira persistência com Spring Data JPA.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-data-repositories","type":"reference","title":"Spring Data: Repository Core Concepts","url":"https://docs.spring.io/spring-data/jpa/reference/repositories/core-concepts.html","reinforces":"Repository, interfaces, métodos e contrato de abstração.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "jpa-transacoes": {"order":6,"objectives":["Separar persistence context, flush e commit","Posicionar @Transactional no caso de uso","Entender dirty checking e estado detached","Evitar self-invocation e rollback implícito mal entendido"],"whyItExists":"JPA sem transação vira superstição. Depois de repository e JDBC transaction, este capítulo aprofunda o ciclo em memória/SQL/commit para o aluno prever comportamento antes de depurar no escuro.","prerequisiteChapterIds":["spring-jpa","migrations"],"introducedConceptIds":["jpa-flush-dirty-checking","transaction-proxy-boundary"],"usedConceptIds":["jpa-entity-identity","sql-transacao-atomicidade","jdbc-transacao-rollback"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"jpa-transacoes-intuition","type":"intuition","authorship":"authored","title":"Flush não é commit","body":"JPA mantém entidades gerenciadas em um contexto. Dirty checking detecta mudanças, flush envia SQL, commit confirma a transação. Confundir essas etapas faz bug parecer magia.","analogyLimit":"Fila de comandos ajuda a imaginar flush, mas isolamento, locks e rollback são contratos do banco/transação."}],"appendBlocks":[{"id":"jpa-transacoes-quiz","type":"quiz","authorship":"authored","conceptId":"jpa-flush-dirty-checking","prompt":"O que dirty checking faz dentro de uma transação?","options":[{"id":"tx-a","label":"Compara entidades gerenciadas e gera alterações SQL no flush quando necessário.","correct":true,"explanation":"A entidade precisa estar gerenciada; flush envia SQL, commit confirma."},{"id":"tx-b","label":"Comita imediatamente qualquer setter chamado em qualquer objeto.","correct":false,"explanation":"Setter em objeto detached não sincroniza automaticamente."},{"id":"tx-c","label":"Substitui constraints e isolamento do banco.","correct":false,"explanation":"Banco ainda valida constraints e aplica isolamento/locks."}]}],"codeExplanations":{"jpa-transacoes-code-5":{"explanation":["@Transactional delimita uma unidade de trabalho no proxy Spring.","A fronteira saudável costuma ser o caso de uso, não cada linha de repository."],"commonMistakes":["Anotar método privado esperando proxy","Abrir transação no controller por conveniência"]},"jpa-transacoes-code-10":{"explanation":["Entidade gerenciada pode ser sincronizada por dirty checking sem chamar save a cada alteração.","O commit depende da transação e pode falhar por constraint ou concorrência."],"commonMistakes":["Achar que flush confirmou durable commit","Ignorar exceções no commit"]},"jpa-transacoes-code-16":{"explanation":["Self-invocation pula o proxy e pode ignorar comportamento transacional esperado.","Rollback padrão diferencia exceções runtime e checadas, salvo configuração explícita."],"commonMistakes":["Chamar método @Transactional de dentro da mesma classe","Assumir rollback para qualquer exceção checada"]}},"resources":[{"id":"spring-tx-declarative","type":"reference","title":"Spring Framework: Declarative Transaction Management","url":"https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative.html","reinforces":"Modelo declarativo de transações, proxies e fronteiras.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-tx-annotations","type":"reference","title":"Spring Framework: @Transactional Settings","url":"https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html","reinforces":"Semântica de @Transactional, propagation, rollback e limites.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "dto-mapping": {"order":7,"objectives":["Separar request DTO, response DTO e entity","Mapear sem esconder regra de negócio","Evitar mass assignment e vazamento de campos internos","Decidir quando mapper manual ou MapStruct compensa"],"whyItExists":"Com MVC e JPA ensinados, o risco natural é devolver entity como JSON e chamar isso de API. DTO mapping cria fronteira explícita entre contrato público, domínio e persistência.","prerequisiteChapterIds":["spring-mvc","spring-jpa"],"introducedConceptIds":["dto-entity-boundary-spring"],"usedConceptIds":["dto-mapping-fronteira","jpa-entity-identity","mvc-controller-binding"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"dto-mapping-intuition","type":"intuition","authorship":"authored","title":"DTO é contrato público; entity é estado persistente","body":"Um request DTO descreve o que o cliente pode enviar. Um response DTO descreve o que você promete devolver. A entity descreve persistência e invariantes internas. Misturar tudo prende evolução da API ao banco.","analogyLimit":"Formulário e ficha interna ajudam a imaginar, mas DTO também carrega versionamento e segurança de contrato."}],"appendBlocks":[{"id":"dto-mapping-quiz","type":"quiz","authorship":"authored","conceptId":"dto-entity-boundary-spring","prompt":"Por que não devolver Entity JPA diretamente como response?","options":[{"id":"dto-a","label":"Porque contrato HTTP e persistência evoluem por motivos diferentes e expor entity vaza detalhes internos.","correct":true,"explanation":"DTO preserva boundary e reduz acoplamento."},{"id":"dto-b","label":"Porque JSON não consegue representar objetos Java simples.","correct":false,"explanation":"Serialização representa objetos; o problema é design e segurança."},{"id":"dto-c","label":"Porque repository só aceita records como retorno.","correct":false,"explanation":"Repository pode retornar entities/projeções; a escolha do contrato é sua."}]}],"codeExplanations":{"dto-mapping-code-6":{"explanation":["Mapper manual deixa cada campo visível e revisável.","Campos ausentes no DTO não podem ser alterados pelo cliente por acidente."],"commonMistakes":["Copiar todos os campos sem decidir contrato","Colocar validação de domínio dentro do mapper"]},"dto-mapping-code-9":{"explanation":["MapStruct gera implementação em compilação para mappings repetitivos.","Mesmo com ferramenta, o contrato de origem/destino precisa ser intencional."],"commonMistakes":["Usar mapper para esconder regra complexa","Não testar campos sensíveis omitidos"]}},"resources":[{"id":"mapstruct-reference","type":"reference","title":"MapStruct Reference Guide","url":"https://mapstruct.org/documentation/stable/reference/html/","reinforces":"Geração de mappers, convenções e limites do mapeamento em compilação.","language":"en","publisher":"MapStruct","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-request-body","type":"reference","title":"Spring MVC: @RequestBody","url":"https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html","reinforces":"Binding de corpo HTTP para objetos de entrada.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "validacao-erros": {"order":8,"objectives":["Aplicar Bean Validation na fronteira de entrada","Diferenciar erro de formato, regra e estado","Centralizar tradução com ControllerAdvice","Publicar erros estáveis sem stack trace"],"whyItExists":"Depois de DTO, a API precisa rejeitar entrada inválida e comunicar falhas sem vazar implementação. Validação e erro são parte do contrato, não detalhes decorativos.","prerequisiteChapterIds":["dto-mapping","excecoes"],"introducedConceptIds":["bean-validation-boundary","controller-advice-problem-details"],"usedConceptIds":["mvc-response-status-contract","causa-excecao","dto-entity-boundary-spring"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"validacao-erros-intuition","type":"intuition","authorship":"authored","title":"Erro bom orienta o próximo passo do cliente","body":"Bean Validation verifica formato e restrições de entrada. Regras de domínio verificam estado e intenção. ControllerAdvice traduz exceções para uma resposta HTTP previsível, sem expor stack trace.","analogyLimit":"Mensagem amigável ajuda, mas o contrato também precisa de status, tipo, correlação e estabilidade."}],"appendBlocks":[{"id":"validacao-erros-quiz","type":"quiz","authorship":"authored","conceptId":"controller-advice-problem-details","prompt":"Qual resposta é melhor para erro de validação em API pública?","options":[{"id":"val-a","label":"Um formato estável com status, campos inválidos e mensagem acionável, sem stack trace.","correct":true,"explanation":"Cliente consegue tratar programaticamente e usuário entende correção."},{"id":"val-b","label":"Sempre 500 com e.getMessage() bruto.","correct":false,"explanation":"Isso mistura erro de cliente com falha interna e vaza detalhe."},{"id":"val-c","label":"Sempre 200 com success=false.","correct":false,"explanation":"Status HTTP deixa de comunicar semântica para clientes e ferramentas."}]}],"codeExplanations":{"validacao-erros-code-5":{"explanation":["@Valid aciona validação do DTO na fronteira do controller.","Anotações como @NotBlank descrevem restrições de entrada, não todo o domínio."],"commonMistakes":["Validar entity JPA como request público","Achar que @Valid substitui regra de negócio"]},"validacao-erros-code-9":{"explanation":["@ControllerAdvice centraliza tradução de exceções para respostas HTTP.","ProblemDetail padroniza type, title, status e detalhes úteis."],"commonMistakes":["Capturar Exception genérica e esconder causa","Expor stack trace no body"]}},"resources":[{"id":"spring-mvc-validation","type":"reference","title":"Spring MVC: Validation","url":"https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-validation.html","reinforces":"Validação de controller, Bean Validation e tratamento de erros de entrada.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-controller-advice","type":"reference","title":"Spring MVC: Controller Advice","url":"https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html","reinforces":"Tratamento global de exceções e respostas consistentes.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "paginacao-swagger": {"order":9,"objectives":["Publicar paginação com limite e ordenação estável","Entender Pageable sem prometer custo invisível","Documentar schemas, exemplos e erros com OpenAPI","Evitar documentação divergente do comportamento real"],"whyItExists":"Depois que a API devolve dados e erros, ela precisa escalar contrato de listagem e documentação. Paginação e OpenAPI reduzem surpresa para clientes e protegem o servidor.","prerequisiteChapterIds":["validacao-erros","spring-jpa"],"introducedConceptIds":["pagination-sorting-contract","openapi-documentation-contract"],"usedConceptIds":["rate-limit-paginacao","springdata-repository-contract","http-header-body-negociacao"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"paginacao-swagger-intuition","type":"intuition","authorship":"authored","title":"Listagem sem limite vira contrato perigoso","body":"Paginação define quanto o cliente pode pedir, em que ordem e como avançar. OpenAPI registra esse contrato para humanos e ferramentas, mas só vale se exemplos e testes refletirem a API real.","analogyLimit":"Índice de livro ajuda a imaginar páginas, mas bancos exigem ordenação estável, índices e limites."}],"appendBlocks":[{"id":"paginacao-swagger-quiz","type":"quiz","authorship":"authored","conceptId":"pagination-sorting-contract","prompt":"Qual cuidado torna paginação mais previsível?","options":[{"id":"pag-a","label":"Definir limite máximo e ordenação estável documentada.","correct":true,"explanation":"Sem ordem estável, itens podem repetir ou sumir entre páginas."},{"id":"pag-b","label":"Permitir size ilimitado porque Pageable já protege o banco.","correct":false,"explanation":"Pageable representa pedido; você ainda deve limitar custo."},{"id":"pag-c","label":"Omitir erros da documentação para deixar o Swagger limpo.","correct":false,"explanation":"Erros fazem parte do contrato que clientes precisam tratar."}]}],"codeExplanations":{"paginacao-swagger-code-4":{"explanation":["Pageable recebe page, size e sort e integra com repositories Spring Data.","A API deve impor limites e ordenar de forma previsível."],"commonMistakes":["Aceitar size enorme","Ordenar por campo não indexado ou sensível"]},"paginacao-swagger-code-7":{"explanation":["OpenAPI descreve endpoints, schemas, parâmetros e respostas.","O contrato documentado deve incluir exemplos de sucesso e erro."],"commonMistakes":["Documentar só status 200","Deixar schema diferente do DTO real"]},"paginacao-swagger-code-8":{"explanation":["Anotações enriquecem documentação, mas não substituem teste de comportamento.","Use descrições para explicar semântica, não para repetir nomes de campos."],"commonMistakes":["Usar Swagger como validação única","Não revisar documentação após mudar DTO"]}},"resources":[{"id":"spring-data-web-pagination","type":"reference","title":"Spring Data Web Support","url":"https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html","reinforces":"Integração de Pageable, Sort e suporte web do Spring Data.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"openapi-311","type":"reference","title":"OpenAPI Specification 3.1.1","url":"https://spec.openapis.org/oas/v3.1.1.html","reinforces":"Contrato formal de endpoints, schemas, parâmetros e respostas.","language":"en","publisher":"OpenAPI Initiative","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "api-design-avancado": {"order":10,"objectives":["Projetar erros, compatibilidade e concorrência de contrato","Identificar breaking changes antes de publicar","Usar Problem Details, ETag e status adequados","Separar evolução interna de versão pública"],"whyItExists":"Com endpoints, DTOs e documentação no lugar, o próximo salto é desenhar API para clientes reais. O capítulo aprofunda compatibilidade, concorrência e semântica HTTP além do CRUD feliz.","prerequisiteChapterIds":["paginacao-swagger","jpa-transacoes"],"introducedConceptIds":["http-optimistic-concurrency","api-compatible-evolution"],"usedConceptIds":["controller-advice-problem-details","openapi-documentation-contract","mvcc-isolamento-lock"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"api-design-avancado-intuition","type":"intuition","authorship":"authored","title":"API publicada vira promessa para desconhecidos","body":"Depois que clientes dependem da API, mudar campo, status, enum ou erro pode quebrar automações. Design avançado é prever conflito, repetição, cache, versão e depreciação antes de virar incidente.","analogyLimit":"Contrato assinado ajuda a imaginar estabilidade, mas APIs também têm tolerância a campos extras e evolução incremental."}],"appendBlocks":[{"id":"api-design-avancado-quiz","type":"quiz","authorship":"authored","conceptId":"api-compatible-evolution","prompt":"Qual mudança tem maior chance de quebrar clientes?","options":[{"id":"api-a","label":"Renomear um campo obrigatório já publicado sem período de compatibilidade.","correct":true,"explanation":"Clientes que desserializam ou validam o campo antigo falham."},{"id":"api-b","label":"Adicionar campo opcional quando clientes toleram campos desconhecidos.","correct":false,"explanation":"Pode ser compatível se a política dos clientes permitir."},{"id":"api-c","label":"Melhorar log interno sem alterar contrato HTTP.","correct":false,"explanation":"Mudança interna não deveria afetar clientes."}]}],"codeExplanations":{"api-design-avancado-code-6":{"explanation":["ETag/If-Match permite rejeitar atualização baseada em versão antiga.","Isso evita lost update quando dois clientes alteram o mesmo recurso."],"commonMistakes":["Usar ETag só como cache e ignorar precondition","Aceitar última escrita vence sem regra clara"]},"api-design-avancado-code-10":{"explanation":["Problem Details cria estrutura interoperável para erro HTTP.","type, title, status e detalhe devem ser estáveis e úteis para suporte."],"commonMistakes":["Criar erro diferente em cada endpoint","Expor exceção interna como contrato"]}},"resources":[{"id":"problem-details-rfc9457-api","type":"reference","title":"RFC 9457: Problem Details for HTTP APIs","url":"https://www.rfc-editor.org/rfc/rfc9457","reinforces":"Formato padronizado para erros HTTP interoperáveis.","language":"en","publisher":"IETF","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"http-semantics-rfc9110","type":"reference","title":"RFC 9110: HTTP Semantics","url":"https://www.rfc-editor.org/rfc/rfc9110","reinforces":"Semântica de métodos, status, representação e preconditions.","language":"en","publisher":"IETF","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "n-mais-1": {"order":11,"objectives":["Reconhecer N+1 pelo padrão de SQL gerado","Escolher fetch join, entity graph ou projeção conforme caso","Medir antes/depois com logs e plano de execução","Evitar EAGER global como remendo"],"whyItExists":"Depois de JPA e design de API, o aluno precisa ver como uma representação aparentemente simples pode disparar consultas repetidas. Performance aqui é consequência de modelagem, carregamento e contrato de resposta.","prerequisiteChapterIds":["spring-jpa","paginacao-swagger"],"introducedConceptIds":["nplusone-query-shape"],"usedConceptIds":["jpa-relationship-loading","postgres-explain-analyze","pagination-sorting-contract"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"n-mais-1-intuition","type":"intuition","authorship":"authored","title":"N+1 é formato de acesso, não azar do banco","body":"Uma consulta busca N registros e, para cada um, outra consulta busca dependências. O problema nasce da forma como o código navega relações e da representação que a API pediu.","analogyLimit":"Buscar itens um por um ajuda a imaginar, mas a correção depende de cardinalidade, filtro, paginação e memória."}],"appendBlocks":[{"id":"n-mais-1-quiz","type":"quiz","authorship":"authored","conceptId":"nplusone-query-shape","prompt":"Qual correção é mais responsável para N+1?","options":[{"id":"n1-a","label":"Medir o SQL gerado e escolher fetch/projeção adequada ao caso de uso.","correct":true,"explanation":"A solução depende da consulta e do contrato de resposta."},{"id":"n1-b","label":"Trocar todos os relacionamentos para EAGER.","correct":false,"explanation":"EAGER global pode criar consultas maiores, ciclos e payload desnecessário."},{"id":"n1-c","label":"Aumentar o pool de conexões sem mudar consulta.","correct":false,"explanation":"Isso pode mascarar sintoma e piorar pressão no banco."}]}],"codeExplanations":{"n-mais-1-code-4":{"explanation":["A navegação de coleção LAZY dentro de loop pode disparar consulta por item.","Logs SQL mostram o padrão repetitivo com clareza."],"commonMistakes":["Não ligar logs SQL em diagnóstico","Culpar apenas o banco sem olhar acesso"]},"n-mais-1-code-10":{"explanation":["Fetch join/projeção carrega exatamente o que o caso precisa em menos round-trips.","A paginação precisa ser revisada quando há joins com coleção."],"commonMistakes":["Aplicar fetch join em toda consulta","Ignorar duplicação e memória"]}},"resources":[{"id":"spring-data-query-methods","type":"reference","title":"Spring Data JPA: Query Methods","url":"https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html","reinforces":"Consultas derivadas, @Query e formas de consulta em repositories.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"postgres-explain-doc","type":"reference","title":"PostgreSQL: Using EXPLAIN","url":"https://www.postgresql.org/docs/current/using-explain.html","reinforces":"Leitura de plano de execução para confirmar custo e forma da consulta.","language":"en","publisher":"PostgreSQL","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "cors-rate-limit": {"order":12,"objectives":["Entender CORS como política aplicada pelo navegador","Configurar origens, métodos, headers e credenciais com critério","Distinguir CORS de autenticação/autorização","Aplicar rate limit e comunicar 429/Retry-After"],"whyItExists":"Quando a API começa a ser consumida por frontend e clientes externos, surgem fronteiras reais de browser e capacidade. CORS e rate limit protegem integração sem virar falsa segurança.","prerequisiteChapterIds":["spring-mvc","api-design-avancado"],"introducedConceptIds":["cors-browser-policy","api-rate-limit-boundary"],"usedConceptIds":["http-header-body-negociacao","mvc-controller-binding","http-status-classe"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"cors-rate-limit-intuition","type":"intuition","authorship":"authored","title":"CORS deixa o navegador chamar; não prova quem está chamando","body":"CORS é uma política de segurança do navegador para scripts cross-origin. Rate limit controla abuso e capacidade. Nenhum dos dois substitui autenticação, autorização e validação no servidor.","analogyLimit":"Portaria ajuda a imaginar origem permitida, mas CORS não bloqueia cURL, backend ou atacante fora do navegador."}],"appendBlocks":[{"id":"cors-rate-limit-quiz","type":"quiz","authorship":"authored","conceptId":"cors-browser-policy","prompt":"Qual afirmação sobre CORS é correta?","options":[{"id":"cors-a","label":"Ele controla se o navegador permite uma página chamar uma origem diferente com certos métodos/headers.","correct":true,"explanation":"CORS é enforcement do browser, negociado por headers e preflight."},{"id":"cors-b","label":"Ele autentica usuários e substitui JWT/sessão.","correct":false,"explanation":"Origem permitida não identifica usuário nem autorização."},{"id":"cors-c","label":"Ele impede qualquer cliente HTTP de chamar a API.","correct":false,"explanation":"Clientes fora do navegador não obedecem CORS da mesma forma."}]}],"codeExplanations":{"cors-rate-limit-code-5":{"explanation":["Configuração CORS define origens, métodos, headers e credenciais aceitos.","Preflight valida se a chamada cross-origin será permitida pelo navegador."],"commonMistakes":["Usar * com credenciais","Liberar tudo em produção por erro local"]},"cors-rate-limit-code-8":{"explanation":["Rate limit deve retornar 429 quando a política é excedida.","Retry-After ajuda cliente a se comportar sem tentativa cega."],"commonMistakes":["Retornar 500 para excesso de uso","Não separar limites por identidade/chave/origem"]},"cors-rate-limit-code-12":{"explanation":["Filtros/interceptors aplicam política antes do controller quando apropriado.","A política deve ser observável em logs e métricas."],"commonMistakes":["Implementar contador em memória sem entender múltiplas instâncias","Punir todos os usuários por uma chave mal escolhida"]}},"resources":[{"id":"spring-cors-webmvc","type":"reference","title":"Spring MVC: CORS","url":"https://docs.spring.io/spring-framework/reference/web/webmvc-cors.html","reinforces":"Configuração CORS global e por controller no Spring MVC.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"rfc6585-429","type":"reference","title":"RFC 6585: Additional HTTP Status Codes","url":"https://www.rfc-editor.org/rfc/rfc6585","reinforces":"Status 429 Too Many Requests e semântica de rate limiting.","language":"en","publisher":"IETF","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}},
-    "mini-helpdesk-api": {"order":13,"objectives":["Construir uma fatia vertical de API Spring","Unir controller, DTO, validação, service, repository e erros","Testar contrato feliz e falhas principais","Demonstrar paginação, transação, CORS/rate limit e N+1 sob controle"],"whyItExists":"O módulo de Spring precisa terminar em uma API pequena, verificável e sem teatro. O projeto junta os conceitos ensinados em uma fatia de helpdesk que funciona de ponta a ponta antes de crescer.","prerequisiteChapterIds":["cors-rate-limit","n-mais-1","validacao-erros"],"introducedConceptIds":["helpdesk-api-vertical-slice"],"usedConceptIds":["mvc-controller-binding","springdata-repository-contract","controller-advice-problem-details","bean-validation-boundary","nplusone-query-shape"],"generateCompatibilityQuizzes":false,"prependBlocks":[{"id":"mini-helpdesk-intuition","type":"intuition","authorship":"authored","title":"Uma fatia funcionando ensina mais que dez camadas vazias","body":"Comece por um caso real: abrir chamado, listar chamados, alterar status e tratar erro. Cada camada entra porque resolve uma necessidade observável da fatia, não porque um desenho genérico mandou.","analogyLimit":"Fatia vertical não elimina arquitetura; ela força arquitetura a provar valor cedo."}],"appendBlocks":[{"id":"mini-helpdesk-project","type":"project","authorship":"authored","title":"API de helpdesk verificável","brief":"Implemente uma API Spring Boot para chamados com criação, consulta paginada, mudança de status, validação, erro padronizado, persistência e testes de contrato.","requirements":["Endpoint para criar chamado com request DTO validado","Endpoint paginado para listar chamados com ordenação estável","Endpoint para mudar status respeitando transação e regra de domínio","Problem Details para validação, não encontrado e conflito","Repository JPA com consulta que não gera N+1 no caso listado","Configuração CORS restrita ao frontend de estudo e política simples de rate limit","Testes de controller/service/repository cobrindo sucesso e falhas"],"guidance":"bounded","acceptanceCriteria":["OpenAPI ou README documenta request, response, status e exemplos de erro.","Nenhuma Entity JPA é exposta como response público.","Teste demonstra erro de validação, 404, 409 e criação/listagem felizes.","Logs ou teste comprovam que listagem principal não dispara N+1.","Secrets e configurações variáveis ficam fora do código versionado."],"knowledgeMatrix":[{"requirement":"Contrato HTTP verificável","conceptIds":["mvc-controller-binding","mvc-response-status-contract","openapi-documentation-contract"],"chapterIds":["spring-mvc","paginacao-swagger"],"expectedEvidence":"Endpoints possuem status, DTOs, exemplos e testes que falham se o contrato mudar sem intenção."},{"requirement":"Boundary DTO/Entity","conceptIds":["dto-entity-boundary-spring","jpa-entity-identity"],"chapterIds":["dto-mapping","spring-jpa"],"expectedEvidence":"Request/response DTOs não expõem campos internos nem permitem mass assignment."},{"requirement":"Erro e validação","conceptIds":["bean-validation-boundary","controller-advice-problem-details"],"chapterIds":["validacao-erros"],"expectedEvidence":"Problem Details estável cobre validação, inexistência e conflito com correlação."},{"requirement":"Transação e persistência","conceptIds":["transaction-proxy-boundary","springdata-repository-contract"],"chapterIds":["jpa-transacoes","spring-jpa"],"expectedEvidence":"Caso de uso transacional altera status de forma atômica e testável."},{"requirement":"Performance e borda","conceptIds":["nplusone-query-shape","cors-browser-policy","api-rate-limit-boundary"],"chapterIds":["n-mais-1","cors-rate-limit"],"expectedEvidence":"Listagem não gera N+1 e políticas de CORS/rate limit são explícitas."}],"englishSpecification":{"title":"Verifiable help desk API","brief":"Build a small Spring Boot API whose contract, errors, persistence boundaries, and tests are observable.","requirements":["Validated request DTOs","Stable paginated list endpoint","Problem Details for errors","JPA repository without N+1 in the main list","Controller and integration tests"],"acceptanceCriteria":["No JPA entity is exposed as a public response.","Tests cover success, validation error, not found, and conflict.","The public contract is documented with examples."]}},{"id":"mini-helpdesk-quiz","type":"quiz","authorship":"authored","conceptId":"helpdesk-api-vertical-slice","prompt":"Qual decisão torna o projeto mais didático e confiável?","options":[{"id":"help-a","label":"Entregar uma fatia vertical pequena com contrato, erro, persistência e testes observáveis.","correct":true,"explanation":"A fatia prova integração real sem espalhar complexidade vazia."},{"id":"help-b","label":"Criar todas as classes de todas as camadas antes de escolher um caso de uso.","correct":false,"explanation":"Isso gera arquitetura teatral e pouco feedback."},{"id":"help-c","label":"Retornar entity diretamente para acelerar o frontend.","correct":false,"explanation":"Acelera agora e cobra acoplamento depois."}]}],"quizRationales":{"mini-helpdesk-api:0":["Uma API didática precisa ser pequena, observável e testável de ponta a ponta.","Camadas entram para sustentar contrato e regra, não para cumprir ritual.","Sem testes de erro e contrato, o projeto vira demonstração frágil."]},"resources":[{"id":"boot-testing-applications","type":"reference","title":"Spring Boot: Testing Spring Boot Applications","url":"https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html","reinforces":"Testes de aplicação Spring Boot, slices e integração verificável.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"spring-mvc-test","type":"reference","title":"Spring Framework: MockMvc","url":"https://docs.spring.io/spring-framework/reference/testing/mockmvc.html","reinforces":"Teste de contrato MVC sem depender de servidor externo.","language":"en","publisher":"Spring","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}}
+    "spring-core": {
+      "order": 0,
+      "objectives": [
+        "Mapear DI manual para IoC oficial do Spring",
+        "Entender component scan, stereotypes, escopos e @Bean",
+        "Separar componente, configuração e regra de negócio",
+        "Evitar campo estático/global como atalho"
+      ],
+      "whyItExists": "Depois do mini-framework pré-Spring, o aluno já conhece annotations, reflection, DI e IoC. Spring Core entra como implementação industrial dessas ideias, não como primeira explicação mágica.",
+      "prerequisiteChapterIds": [
+        "projetospring",
+        "build"
+      ],
+      "introducedConceptIds": [
+        "spring-component-scan-bean",
+        "spring-bean-scope-configuration"
+      ],
+      "usedConceptIds": [
+        "mini-framework-dispatcher",
+        "ioc-lifecycle-bean",
+        "annotation-metadata-contract"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "spring-core-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Spring automatiza uma composição que você já fez à mão",
+          "body": "O container descobre componentes, cria objetos, injeta dependências e controla parte do ciclo de vida. O objetivo é reduzir montagem repetitiva, não esconder onde a regra deve viver.",
+          "analogyLimit": "Oficina ajuda a imaginar montagem, mas Spring também usa classpath, condições, proxies, escopos e lifecycle."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "spring-core-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "spring-component-scan-bean",
+          "prompt": "O que faz uma classe anotada com @Service virar dependência injetável?",
+          "options": [
+            {
+              "id": "sc-a",
+              "label": "O container Spring escaneia, registra e instancia o componente conforme sua configuração.",
+              "correct": true,
+              "explanation": "A anotação é metadado; o container é quem lê e age."
+            },
+            {
+              "id": "sc-b",
+              "label": "A JVM injeta automaticamente qualquer classe com esse nome.",
+              "correct": false,
+              "explanation": "A JVM não conhece @Service como regra especial."
+            },
+            {
+              "id": "sc-c",
+              "label": "O Maven transforma a classe em singleton global estático.",
+              "correct": false,
+              "explanation": "Build empacota; quem gerencia bean é o container."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "spring-core-code-5": {
+          "explanation": [
+            "@Service é especialização de @Component para semântica de serviço.",
+            "Constructor injection torna dependências obrigatórias e testáveis."
+          ],
+          "commonMistakes": [
+            "Usar field injection por conveniência",
+            "Colocar regra de negócio na configuração"
+          ]
+        },
+        "spring-core-code-11": {
+          "explanation": [
+            "Stereotypes comunicam papel arquitetural e participam do component scan.",
+            "A diferença é semântica e de integração futura, não superpoder da classe."
+          ],
+          "commonMistakes": [
+            "Escolher annotation aleatoriamente",
+            "Criar componente para entidade de domínio"
+          ]
+        },
+        "spring-core-code-15": {
+          "explanation": [
+            "@Configuration e @Bean declaram objetos que o Spring não descobre sozinho ou cuja criação precisa de fábrica.",
+            "Isso pertence à composition root/configuração, não ao domínio."
+          ],
+          "commonMistakes": [
+            "Usar @Bean para todo objeto simples",
+            "Ler secret direto em classe de regra"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-core-beans",
+          "type": "reference",
+          "title": "Spring Framework: IoC Container",
+          "url": "https://docs.spring.io/spring-framework/reference/core/beans.html",
+          "reinforces": "Beans, container, injeção, lifecycle e configuração.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-component-scanning",
+          "type": "reference",
+          "title": "Spring: Classpath Scanning and Managed Components",
+          "url": "https://docs.spring.io/spring-framework/reference/core/beans/classpath-scanning.html",
+          "reinforces": "Component scan, stereotypes e detecção de beans.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "spring-boot-fundamentos": {
+      "order": 1,
+      "objectives": [
+        "Entender bootstrap de uma aplicação Boot",
+        "Ler auto-configuração como conjunto de condições",
+        "Usar starters e versões com responsabilidade",
+        "Modelar configuração tipada sem secrets no código"
+      ],
+      "whyItExists": "Spring Core explica o container; Spring Boot explica como a aplicação sobe com convenções, starters e auto-configuração. Isso evita tratar Boot como template pronto sem saber por que ele funciona.",
+      "prerequisiteChapterIds": [
+        "spring-core",
+        "build"
+      ],
+      "introducedConceptIds": [
+        "boot-bootstrap-autoconfig",
+        "boot-config-properties"
+      ],
+      "usedConceptIds": [
+        "spring-component-scan-bean",
+        "build-lifecycle",
+        "configuracao-externa"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "boot-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Boot escolhe bons padrões, mas eles são condicionais",
+          "body": "Auto-configuração não é mágica universal. Ela observa classpath, propriedades e beans existentes para decidir o que criar. Quando você entende as condições, sabe explicar por que algo apareceu ou não.",
+          "analogyLimit": "Piloto automático ajuda, mas Boot não decide objetivo de negócio nem substitui leitura de logs e configuração."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "boot-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "boot-bootstrap-autoconfig",
+          "prompt": "Por que adicionar um starter pode mudar os beans disponíveis?",
+          "options": [
+            {
+              "id": "boot-a",
+              "label": "Porque o classpath passa a satisfazer condições de auto-configuração.",
+              "correct": true,
+              "explanation": "Boot observa bibliotecas, propriedades e beans para ativar configurações."
+            },
+            {
+              "id": "boot-b",
+              "label": "Porque qualquer dependência executa código antes do main.",
+              "correct": false,
+              "explanation": "Dependência no classpath não executa tudo automaticamente; Boot avalia condições."
+            },
+            {
+              "id": "boot-c",
+              "label": "Porque o Spring ignora @Configuration quando há starter.",
+              "correct": false,
+              "explanation": "Configuração explícita continua participando."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "spring-boot-fundamentos-code-4": {
+          "explanation": [
+            "@SpringBootApplication combina @Configuration, @ComponentScan e @EnableAutoConfiguration em uma única anotação.",
+            "O main delega o bootstrap inteiro para SpringApplication.run(...)."
+          ],
+          "commonMistakes": [
+            "Mover classe principal para pacote que não escaneia componentes",
+            "Achar que main contém regra de negócio"
+          ]
+        },
+        "spring-boot-fundamentos-code-8": {
+          "explanation": [
+            "@ConditionalOnClass/@ConditionalOnMissingBean/@ConditionalOnProperty são checagens comuns avaliadas automaticamente -- não existe prioridade mágica, só condições que passam ou falham.",
+            "Declarar seu próprio @Bean DataSource faz @ConditionalOnMissingBean falhar, e essa auto-configuração específica simplesmente não roda."
+          ],
+          "commonMistakes": [
+            "Achar que auto-configuração e bean próprio coexistem -- na prática o bean próprio desativa a condição"
+          ]
+        },
+        "spring-boot-fundamentos-code-12": {
+          "explanation": [
+            "--debug ativa o Condition Evaluation Report, mostrando exatamente quais auto-configurações ativaram (e por quê) e quais não ativaram (e por quê não)."
+          ],
+          "commonMistakes": [
+            "Tentar adivinhar por que uma auto-configuração não ativou em vez de ler o relatório de condições"
+          ]
+        },
+        "spring-boot-fundamentos-code-15": {
+          "explanation": [
+            "@ConfigurationProperties agrupa configuração tipada em vez de @Value espalhado.",
+            "Validação (@NotBlank, @Min) impede a aplicação de subir com configuração inválida."
+          ],
+          "commonMistakes": [
+            "Colocar senha real no arquivo versionado",
+            "Usar @Value para dezenas de propriedades relacionadas"
+          ]
+        },
+        "spring-boot-fundamentos-code-16": {
+          "explanation": [
+            "O YAML mapeia diretamente para os componentes do record de @ConfigurationProperties -- base-url vira baseUrl por convenção kebab-case/camelCase."
+          ]
+        },
+        "spring-boot-fundamentos-code-25": {
+          "explanation": [
+            "server.shutdown=graceful faz o servidor parar de aceitar requisições novas mas esperar as em andamento terminarem, dentro do timeout configurado, antes de desligar de fato."
+          ],
+          "commonMistakes": [
+            "Fazer deploy sem shutdown gracioso e cortar requisições em andamento pela metade"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "boot-autoconfiguration",
+          "type": "reference",
+          "title": "Spring Boot: Auto-configuration",
+          "url": "https://docs.spring.io/spring-boot/reference/using/auto-configuration.html",
+          "reinforces": "Condições, auto-configuração e substituição por configuração explícita.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "boot-external-config",
+          "type": "reference",
+          "title": "Spring Boot: Externalized Configuration",
+          "url": "https://docs.spring.io/spring-boot/reference/features/external-config.html",
+          "reinforces": "Ordem de propriedades, configuração externa e binding tipado.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "devtools": {
+      "order": 2,
+      "objectives": [
+        "Usar DevTools para feedback local rápido",
+        "Distinguir restart de build/teste reproduzível",
+        "Manter DevTools fora de expectativa de produção",
+        "Entender limites de classloader/restart"
+      ],
+      "whyItExists": "Depois do bootstrap, o aluno pode ganhar feedback local sem confundir ferramenta de desenvolvimento com garantia de entrega. DevTools acelera estudo, mas não substitui teste, build e reload controlado.",
+      "prerequisiteChapterIds": [
+        "spring-boot-fundamentos"
+      ],
+      "introducedConceptIds": [
+        "devtools-restart-boundary"
+      ],
+      "usedConceptIds": [
+        "boot-bootstrap-autoconfig",
+        "build-lifecycle"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "devtools-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Feedback rápido não é validação final",
+          "body": "DevTools reinicia partes da aplicação quando arquivos mudam para acelerar o ciclo local. Isso ajuda a estudar, mas o comportamento final continua precisando de testes e build limpo.",
+          "analogyLimit": "Rascunho rápido ajuda, mas não é prova de publicação."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "devtools-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "devtools-restart-boundary",
+          "prompt": "Qual uso de DevTools é saudável?",
+          "options": [
+            {
+              "id": "dev-a",
+              "label": "Acelerar o ciclo local mantendo build e testes como validação real.",
+              "correct": true,
+              "explanation": "DevTools é ferramenta de desenvolvimento, não gate de qualidade."
+            },
+            {
+              "id": "dev-b",
+              "label": "Depender dele em produção para atualizar código sem deploy.",
+              "correct": false,
+              "explanation": "DevTools não é mecanismo de deploy."
+            },
+            {
+              "id": "dev-c",
+              "label": "Ignorar falhas que só aparecem após reiniciar do zero.",
+              "correct": false,
+              "explanation": "Restart limpo ainda precisa ser testado."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "devtools-code-3": {
+          "explanation": [
+            "A dependência habilita comportamento de desenvolvimento como restart automático.",
+            "Ela deve ficar no escopo adequado para não virar contrato de produção."
+          ],
+          "commonMistakes": [
+            "Depender do DevTools no servidor",
+            "Confundir restart parcial com build limpo"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "boot-devtools",
+          "type": "reference",
+          "title": "Spring Boot: Developer Tools",
+          "url": "https://docs.spring.io/spring-boot/reference/using/devtools.html",
+          "reinforces": "Recursos, restart, LiveReload e limites do DevTools.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "beginner",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "boot-devtools-restart",
+          "type": "reference",
+          "title": "Spring Boot DevTools: Automatic Restart",
+          "url": "https://docs.spring.io/spring-boot/reference/using/devtools.html#using.devtools.restart",
+          "reinforces": "Como o restart funciona e quando pode surpreender.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "lombok": {
+      "order": 3,
+      "objectives": [
+        "Entender Lombok como geração em compilação",
+        "Usar constructor injection sem boilerplate excessivo",
+        "Proteger invariantes ao evitar setters indiscriminados",
+        "Avaliar trade-off de legibilidade/tooling"
+      ],
+      "whyItExists": "Lombok aparece cedo em projetos Spring, mas o aluno já sabe annotations, encapsulamento e records. Agora pode decidir quando gerar código repetitivo ajuda e quando esconde contrato importante.",
+      "prerequisiteChapterIds": [
+        "encapsulamento",
+        "anotacoes",
+        "spring-core"
+      ],
+      "introducedConceptIds": [
+        "lombok-generated-code-contract"
+      ],
+      "usedConceptIds": [
+        "annotation-metadata-contract",
+        "encapsulamento-invariante",
+        "spring-component-scan-bean"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "lombok-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Lombok escreve código por você; ele não decide o design",
+          "body": "@Getter ou @RequiredArgsConstructor reduzem repetição, mas os métodos gerados continuam existindo no contrato da classe. Se você gera setter para tudo, também gera caminhos para quebrar invariantes.",
+          "analogyLimit": "Atalho de teclado ajuda, mas ainda pode inserir texto ruim."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "lombok-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "lombok-generated-code-contract",
+          "prompt": "Qual é o risco de usar @Data em uma entidade rica de domínio?",
+          "options": [
+            {
+              "id": "lom-a",
+              "label": "Gerar setters/equals/toString que podem expor ou quebrar invariantes sem intenção.",
+              "correct": true,
+              "explanation": "Boilerplate gerado ainda faz parte do comportamento público."
+            },
+            {
+              "id": "lom-b",
+              "label": "Impedir totalmente a compilação de qualquer projeto Spring.",
+              "correct": false,
+              "explanation": "Lombok compila com plugin/processador configurado."
+            },
+            {
+              "id": "lom-c",
+              "label": "Transformar Java em linguagem dinâmica em runtime.",
+              "correct": false,
+              "explanation": "A geração ocorre em compilação."
+            }
+          ]
+        }
+      ],
+      "quizRationales": {
+        "lombok-concept-check-0": [
+          "Lombok reduz boilerplate, mas o código gerado continua precisando respeitar encapsulamento.",
+          "Anotações não substituem decisão de domínio.",
+          "Records e construtores explícitos podem ser melhores quando o contrato deve ficar óbvio."
+        ]
+      },
+      "resources": [
+        {
+          "id": "lombok-features",
+          "type": "reference",
+          "title": "Project Lombok Features",
+          "url": "https://projectlombok.org/features/",
+          "reinforces": "Lista oficial de anotações, geração e trade-offs.",
+          "language": "en",
+          "publisher": "Project Lombok",
+          "official": true,
+          "expectedLevel": "beginner",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "lombok-constructor",
+          "type": "reference",
+          "title": "Project Lombok: Constructor annotations",
+          "url": "https://projectlombok.org/features/constructor",
+          "reinforces": "@RequiredArgsConstructor, @AllArgsConstructor e constructor injection.",
+          "language": "en",
+          "publisher": "Project Lombok",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      },
+      "codeExplanations": {
+        "lombok-code-7": {
+          "explanation": [
+            "scope=provided é suficiente no Maven: o plugin de compilação descobre annotation processors automaticamente no classpath de compilação."
+          ]
+        },
+        "lombok-code-8": {
+          "explanation": [
+            "No Gradle, compileOnly torna as anotações visíveis, mas annotationProcessor é quem de fato registra o Lombok para rodar durante a compilação -- esquecer essa segunda linha é a causa mais comum de \"Lombok não funciona\" no Gradle."
+          ],
+          "commonMistakes": [
+            "Declarar só compileOnly e esquecer annotationProcessor no Gradle"
+          ]
+        },
+        "lombok-code-12": {
+          "explanation": [
+            "@Value gera uma classe imutável (campos final, sem setters); @With gera um método que devolve uma NOVA instância com um campo alterado, preservando a original."
+          ]
+        },
+        "lombok-code-14": {
+          "explanation": [
+            "delombok materializa em .java reais exatamente o código que o Lombok insere na AST -- útil para conferir o que uma anotação está gerando sem depender só do plugin da IDE."
+          ]
+        },
+        "lombok-code-17": {
+          "explanation": [
+            "lombok.config fixa convenções de projeto (nível de acesso, comportamento de callSuper) sem repetir configuração em cada anotação individualmente."
+          ]
+        }
+      }
+    },
+    "spring-mvc": {
+      "order": 4,
+      "objectives": [
+        "Mapear requisições HTTP para métodos de controller",
+        "Separar binding, validação, regra e resposta",
+        "Escolher status e headers de forma explícita",
+        "Evitar controller como camada de domínio"
+      ],
+      "whyItExists": "O aluno já conhece HTTP, JSON e DI. Spring MVC entra para adaptar mensagens HTTP a casos de uso, mostrando o que o framework automatiza e o que continua sendo decisão de contrato.",
+      "prerequisiteChapterIds": [
+        "spring-boot-fundamentos",
+        "http-wire-contract",
+        "java-httpclient-json"
+      ],
+      "introducedConceptIds": [
+        "mvc-controller-binding",
+        "mvc-response-status-contract"
+      ],
+      "usedConceptIds": [
+        "http-mensagem-recurso",
+        "json-formato-contrato",
+        "spring-component-scan-bean"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "spring-mvc-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Controller é adaptador HTTP, não dono da regra",
+          "body": "O controller recebe método, URI, headers e corpo; transforma isso em comando/consulta para o caso de uso; depois traduz o resultado para status, headers e corpo. Ele deve ser fino o bastante para trocar transporte sem reescrever domínio.",
+          "analogyLimit": "Adaptador não significa pass-through burro: ele ainda decide contrato HTTP, mas não regra central de negócio."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "spring-mvc-status-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "mvc-response-status-contract",
+          "prompt": "Quando ResponseEntity é preferível a retornar apenas um objeto?",
+          "options": [
+            {
+              "id": "mvc-a",
+              "label": "Quando status, headers ou ausência de body fazem parte do contrato HTTP.",
+              "correct": true,
+              "explanation": "A resposta publicada não é só JSON; status e headers também comunicam semântica."
+            },
+            {
+              "id": "mvc-b",
+              "label": "Quando o service precisa acessar diretamente o servlet request.",
+              "correct": false,
+              "explanation": "Isso acopla regra ao transporte e costuma piorar testabilidade."
+            },
+            {
+              "id": "mvc-c",
+              "label": "Quando todo erro deve virar 200 com uma mensagem no body.",
+              "correct": false,
+              "explanation": "Status HTTP precisa preservar significado para cliente, cache e observabilidade."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "spring-mvc-code-3": {
+          "explanation": [
+            "@RestController combina controller com serialização de resposta.",
+            "Anotações de mapping conectam método/URI a um método Java, mas não validam regra de negócio sozinhas."
+          ],
+          "commonMistakes": [
+            "Colocar regra transacional no controller",
+            "Retornar entidade JPA diretamente como contrato público"
+          ]
+        },
+        "spring-mvc-code-8": {
+          "explanation": [
+            "O método do controller nunca é chamado diretamente: DispatcherServlet delega a decisão de qual método (HandlerMapping) e a invocação em si (HandlerAdapter) para peças substituíveis.",
+            "A serialização do retorno (etapa 7) e o tratamento de exceção (etapa 8) também são decisões de peças nomeadas -- HttpMessageConverter e HandlerExceptionResolver -- não mágica do @RestController.",
+            "Uma dependência nova no classpath (ex.: adicionar suporte a XML) se encaixa nesse fluxo plugando outro HttpMessageConverter, sem o controller mudar."
+          ],
+          "commonMistakes": [
+            "Achar que o DispatcherServlet chama o controller diretamente, sem nomear HandlerMapping/HandlerAdapter",
+            "Tratar a serialização da resposta como algo que o Jackson faz sozinho, sem passar por HttpMessageConverter/content negotiation"
+          ]
+        },
+        "spring-mvc-code-15": {
+          "explanation": [
+            "consumes = MediaType.MULTIPART_FORM_DATA_VALUE declara o Content-Type esperado; @RequestPart extrai a parte nomeada do multipart como MultipartFile.",
+            "O Content-Type de um MultipartFile é declarado pelo cliente -- validá-lo é conveniência, não prova de segurança; conteúdo que importa precisa de validação mais forte (assinatura de bytes, tamanho real, limites do servidor)."
+          ],
+          "commonMistakes": [
+            "Confiar no Content-Type do MultipartFile como se fosse garantia de segurança",
+            "Não configurar spring.servlet.multipart.max-file-size/max-request-size e permitir upload sem limite"
+          ]
+        },
+        "spring-mvc-code-19": {
+          "explanation": [
+            "@WebMvcTest(BookController.class) sobe só a camada web (DispatcherServlet, HandlerMapping/HandlerAdapter, HttpMessageConverter) em vez do ApplicationContext inteiro.",
+            "@MockBean substitui o Service real por um dublê configurável -- o teste não depende de banco nem de regra de negócio real.",
+            "MockMvc simula a requisição HTTP completa (roteamento, binding, serialização) sem abrir uma porta de rede real, por isso roda em milissegundos."
+          ],
+          "commonMistakes": [
+            "Usar @SpringBootTest (sobe tudo) quando @WebMvcTest já é suficiente e mais rápido para testar só o controller",
+            "Esquecer @MockBean e deixar o teste depender do Service/repositório reais"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-mvc-controller",
+          "type": "reference",
+          "title": "Spring MVC: Annotated Controllers",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html",
+          "reinforces": "Controllers anotados, binding e métodos de handler.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-mvc-request-mapping",
+          "type": "reference",
+          "title": "Spring MVC: Mapping Requests",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html",
+          "reinforces": "Mapeamento de método, path, parâmetros, headers e consumes/produces.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "spring-jpa": {
+      "order": 5,
+      "objectives": [
+        "Mapear entity, id e repository sem perder custo SQL",
+        "Entender repository como adapter de persistência",
+        "Modelar relacionamentos considerando consulta e aggregate",
+        "Evitar expor entity JPA como DTO"
+      ],
+      "whyItExists": "Depois de SQL, JDBC e Spring MVC, JPA aparece como abstração de persistência com ganhos reais e custos reais. O aluno precisa enxergar a tabela e a consulta por trás do repository.",
+      "prerequisiteChapterIds": [
+        "jdbc",
+        "spring-mvc",
+        "lombok"
+      ],
+      "introducedConceptIds": [
+        "jpa-entity-identity",
+        "springdata-repository-contract",
+        "jpa-relationship-loading"
+      ],
+      "usedConceptIds": [
+        "modelo-relacional-tabela-chave",
+        "jdbc-driver-connection",
+        "adapter-fronteira-externa"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "spring-jpa-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Repository não apaga o banco; ele encapsula acesso",
+          "body": "Spring Data reduz código repetitivo de persistência, mas continua emitindo SQL, abrindo conexões e carregando dados com custos. A abstração boa deixa o caso de uso limpo sem fingir que tabela, índice e transação sumiram.",
+          "analogyLimit": "Um câmbio automático ainda depende do motor; repository ainda depende do banco."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "spring-jpa-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "springdata-repository-contract",
+          "prompt": "Qual afirmação descreve melhor JpaRepository?",
+          "options": [
+            {
+              "id": "jpa-a",
+              "label": "Uma porta/adaptador que oferece operações de persistência e gera/execura consultas conforme contrato.",
+              "correct": true,
+              "explanation": "Ele reduz boilerplate, mas não elimina consulta, transação nem custo."
+            },
+            {
+              "id": "jpa-b",
+              "label": "Um substituto para modelagem relacional, índices e transações.",
+              "correct": false,
+              "explanation": "Essas decisões continuam determinando correção e performance."
+            },
+            {
+              "id": "jpa-c",
+              "label": "Um DTO público seguro para retornar diretamente ao frontend.",
+              "correct": false,
+              "explanation": "Entity persistente e contrato HTTP evoluem por motivos diferentes."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "spring-jpa-code-4": {
+          "explanation": [
+            "@Entity marca uma classe como persistível e @Id define identidade no banco.",
+            "Identidade persistente não é o mesmo que igualdade de valor em todo domínio."
+          ],
+          "commonMistakes": [
+            "Gerar setter público para todo campo",
+            "Misturar entidade JPA com response DTO"
+          ]
+        },
+        "spring-jpa-code-7": {
+          "explanation": [
+            "A implementação da interface é gerada em runtime via Dynamic Proxy (capítulo 20); o handler traduz cada chamada numa query que o EntityManager -- a API real do Hibernate por trás do repository -- de fato executa.",
+            "O nome do método vira contrato de consulta (Query Method); índices e cardinalidade continuam importando mesmo sem escrever SQL."
+          ],
+          "commonMistakes": [
+            "Criar query derivada longa e ambígua em vez de usar @Query",
+            "Ignorar o SQL gerado e nunca conferir se o índice certo está sendo usado"
+          ]
+        },
+        "spring-jpa-code-11": {
+          "explanation": [
+            "JPQL opera sobre entidades e seus campos, não sobre nomes de tabela/coluna -- por isso funciona igual em qualquer banco suportado.",
+            "nativeQuery=true abre mão dessa portabilidade em troca de recursos específicos do banco (como ILIKE do Postgres).",
+            "A projeção via constructor expression (SELECT new pacote.DTO(...)) evita carregar a entidade inteira quando só alguns campos importam."
+          ],
+          "commonMistakes": [
+            "Usar nativeQuery sempre por hábito, perdendo portabilidade sem necessidade real",
+            "Carregar a entidade inteira quando uma projeção resolveria com menos dados trafegados"
+          ]
+        },
+        "spring-jpa-code-14": {
+          "explanation": [
+            "O lado @OneToMany (mappedBy) é só leitura em termos de persistência -- quem o Hibernate realmente persiste é o lado dono (@ManyToOne, que tem a chave estrangeira).",
+            "Métodos auxiliares como addBook/removeBook existem para nunca esquecer de atualizar os dois lados da relação ao mesmo tempo."
+          ],
+          "commonMistakes": [
+            "Manipular a coleção mappedBy diretamente de fora da entidade, deixando o lado dono desatualizado em memória",
+            "Usar EAGER para resolver um erro de sessão em vez de entender o ciclo de vida do relacionamento"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-data-jpa-start",
+          "type": "reference",
+          "title": "Spring Data JPA: Getting Started",
+          "url": "https://docs.spring.io/spring-data/jpa/reference/jpa/getting-started.html",
+          "reinforces": "Configuração, repository e primeira persistência com Spring Data JPA.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-data-repositories",
+          "type": "reference",
+          "title": "Spring Data: Repository Core Concepts",
+          "url": "https://docs.spring.io/spring-data/jpa/reference/repositories/core-concepts.html",
+          "reinforces": "Repository, interfaces, métodos e contrato de abstração.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "jpa-transacoes": {
+      "order": 6,
+      "objectives": [
+        "Separar persistence context, flush e commit",
+        "Posicionar @Transactional no caso de uso",
+        "Entender dirty checking e estado detached",
+        "Evitar self-invocation e rollback implícito mal entendido"
+      ],
+      "whyItExists": "JPA sem transação vira superstição. Depois de repository e JDBC transaction, este capítulo aprofunda o ciclo em memória/SQL/commit para o aluno prever comportamento antes de depurar no escuro.",
+      "prerequisiteChapterIds": [
+        "spring-jpa",
+        "migrations"
+      ],
+      "introducedConceptIds": [
+        "jpa-flush-dirty-checking",
+        "transaction-proxy-boundary"
+      ],
+      "usedConceptIds": [
+        "jpa-entity-identity",
+        "sql-transacao-atomicidade",
+        "jdbc-transacao-rollback"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "jpa-transacoes-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Flush não é commit",
+          "body": "JPA mantém entidades gerenciadas em um contexto. Dirty checking detecta mudanças, flush envia SQL, commit confirma a transação. Confundir essas etapas faz bug parecer magia.",
+          "analogyLimit": "Fila de comandos ajuda a imaginar flush, mas isolamento, locks e rollback são contratos do banco/transação."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "jpa-transacoes-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "jpa-flush-dirty-checking",
+          "prompt": "O que dirty checking faz dentro de uma transação?",
+          "options": [
+            {
+              "id": "tx-a",
+              "label": "Compara entidades gerenciadas e gera alterações SQL no flush quando necessário.",
+              "correct": true,
+              "explanation": "A entidade precisa estar gerenciada; flush envia SQL, commit confirma."
+            },
+            {
+              "id": "tx-b",
+              "label": "Comita imediatamente qualquer setter chamado em qualquer objeto.",
+              "correct": false,
+              "explanation": "Setter em objeto detached não sincroniza automaticamente."
+            },
+            {
+              "id": "tx-c",
+              "label": "Substitui constraints e isolamento do banco.",
+              "correct": false,
+              "explanation": "Banco ainda valida constraints e aplica isolamento/locks."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "jpa-transacoes-code-5": {
+          "explanation": [
+            "@Transactional delimita uma unidade de trabalho no proxy Spring.",
+            "A fronteira saudável costuma ser o caso de uso, não cada linha de repository."
+          ],
+          "commonMistakes": [
+            "Anotar método privado esperando proxy",
+            "Abrir transação no controller por conveniência"
+          ]
+        },
+        "jpa-transacoes-code-10": {
+          "explanation": [
+            "Entidade gerenciada pode ser sincronizada por dirty checking sem chamar save a cada alteração.",
+            "O commit depende da transação e pode falhar por constraint ou concorrência."
+          ],
+          "commonMistakes": [
+            "Achar que flush confirmou durable commit",
+            "Ignorar exceções no commit"
+          ]
+        },
+        "jpa-transacoes-code-13": {
+          "explanation": [
+            "REQUIRES_NEW suspende a transação atual e abre outra totalmente independente -- o registro de auditoria sobrevive mesmo se processarPedido reverter depois.",
+            "O preço real: duas conexões/transações simultâneas; se a externa falhar após a interna já ter commitado, não há como desfazer esse commit."
+          ],
+          "commonMistakes": [
+            "Usar REQUIRES_NEW sem entender que cria uma segunda transação/conexão de verdade",
+            "Esperar que o rollback da transação externa desfaça o que já foi commitado na REQUIRES_NEW"
+          ]
+        },
+        "jpa-transacoes-code-21": {
+          "explanation": [
+            "CountDownLatch força as duas threads a competirem pelo mesmo instante -- um teste sequencial não prova nada sobre concorrência real.",
+            "ObjectOptimisticLockingFailureException é a exceção esperada na transação perdedora quando @Version detecta o conflito."
+          ],
+          "commonMistakes": [
+            "Testar concorrência com chamadas sequenciais, sem sobreposição real de threads",
+            "Não capturar especificamente ObjectOptimisticLockingFailureException, tratando-a como erro genérico"
+          ]
+        },
+        "jpa-transacoes-code-27": {
+          "explanation": [
+            "@Version habilita optimistic locking: cada update verifica se a versão lida ainda é a versão atual no banco antes de escrever.",
+            "Se outra transação já alterou a linha (versão diferente), o update afeta zero linhas e o Hibernate lança ObjectOptimisticLockingFailureException -- a detecção de lost update citada acima."
+          ],
+          "commonMistakes": [
+            "Achar que @Version sozinho impede deadlock -- ele resolve lost update, não deadlock",
+            "Ignorar a exceção de conflito de versão em vez de tratá-la como resultado esperado sob concorrência"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-tx-declarative",
+          "type": "reference",
+          "title": "Spring Framework: Declarative Transaction Management",
+          "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative.html",
+          "reinforces": "Modelo declarativo de transações, proxies e fronteiras.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-tx-annotations",
+          "type": "reference",
+          "title": "Spring Framework: @Transactional Settings",
+          "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+          "reinforces": "Semântica de @Transactional, propagation, rollback e limites.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "dto-mapping": {
+      "order": 7,
+      "objectives": [
+        "Separar request DTO, response DTO e entity",
+        "Mapear sem esconder regra de negócio",
+        "Evitar mass assignment e vazamento de campos internos",
+        "Decidir quando mapper manual ou MapStruct compensa"
+      ],
+      "whyItExists": "Com MVC e JPA ensinados, o risco natural é devolver entity como JSON e chamar isso de API. DTO mapping cria fronteira explícita entre contrato público, domínio e persistência.",
+      "prerequisiteChapterIds": [
+        "spring-mvc",
+        "spring-jpa"
+      ],
+      "introducedConceptIds": [
+        "dto-entity-boundary-spring"
+      ],
+      "usedConceptIds": [
+        "dto-mapping-fronteira",
+        "jpa-entity-identity",
+        "mvc-controller-binding"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "dto-mapping-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "DTO é contrato público; entity é estado persistente",
+          "body": "Um request DTO descreve o que o cliente pode enviar. Um response DTO descreve o que você promete devolver. A entity descreve persistência e invariantes internas. Misturar tudo prende evolução da API ao banco.",
+          "analogyLimit": "Formulário e ficha interna ajudam a imaginar, mas DTO também carrega versionamento e segurança de contrato."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "dto-mapping-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "dto-entity-boundary-spring",
+          "prompt": "Por que não devolver Entity JPA diretamente como response?",
+          "options": [
+            {
+              "id": "dto-a",
+              "label": "Porque contrato HTTP e persistência evoluem por motivos diferentes e expor entity vaza detalhes internos.",
+              "correct": true,
+              "explanation": "DTO preserva boundary e reduz acoplamento."
+            },
+            {
+              "id": "dto-b",
+              "label": "Porque JSON não consegue representar objetos Java simples.",
+              "correct": false,
+              "explanation": "Serialização representa objetos; o problema é design e segurança."
+            },
+            {
+              "id": "dto-c",
+              "label": "Porque repository só aceita records como retorno.",
+              "correct": false,
+              "explanation": "Repository pode retornar entities/projeções; a escolha do contrato é sua."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "dto-mapping-code-6": {
+          "explanation": [
+            "Mapper manual deixa cada campo visível e revisável.",
+            "Campos ausentes no DTO não podem ser alterados pelo cliente por acidente."
+          ],
+          "commonMistakes": [
+            "Copiar todos os campos sem decidir contrato",
+            "Colocar validação de domínio dentro do mapper"
+          ]
+        },
+        "dto-mapping-code-9": {
+          "explanation": [
+            "MapStruct gera implementação em compilação para mappings repetitivos.",
+            "Mesmo com ferramenta, o contrato de origem/destino precisa ser intencional."
+          ],
+          "commonMistakes": [
+            "Usar mapper para esconder regra complexa",
+            "Não testar campos sensíveis omitidos"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "mapstruct-reference",
+          "type": "reference",
+          "title": "MapStruct Reference Guide",
+          "url": "https://mapstruct.org/documentation/stable/reference/html/",
+          "reinforces": "Geração de mappers, convenções e limites do mapeamento em compilação.",
+          "language": "en",
+          "publisher": "MapStruct",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-request-body",
+          "type": "reference",
+          "title": "Spring MVC: @RequestBody",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html",
+          "reinforces": "Binding de corpo HTTP para objetos de entrada.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "validacao-erros": {
+      "order": 8,
+      "objectives": [
+        "Aplicar Bean Validation na fronteira de entrada",
+        "Diferenciar erro de formato, regra e estado",
+        "Centralizar tradução com ControllerAdvice",
+        "Publicar erros estáveis sem stack trace"
+      ],
+      "whyItExists": "Depois de DTO, a API precisa rejeitar entrada inválida e comunicar falhas sem vazar implementação. Validação e erro são parte do contrato, não detalhes decorativos.",
+      "prerequisiteChapterIds": [
+        "dto-mapping",
+        "excecoes"
+      ],
+      "introducedConceptIds": [
+        "bean-validation-boundary",
+        "controller-advice-problem-details"
+      ],
+      "usedConceptIds": [
+        "mvc-response-status-contract",
+        "causa-excecao",
+        "dto-entity-boundary-spring"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "validacao-erros-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Erro bom orienta o próximo passo do cliente",
+          "body": "Bean Validation verifica formato e restrições de entrada. Regras de domínio verificam estado e intenção. ControllerAdvice traduz exceções para uma resposta HTTP previsível, sem expor stack trace.",
+          "analogyLimit": "Mensagem amigável ajuda, mas o contrato também precisa de status, tipo, correlação e estabilidade."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "validacao-erros-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "controller-advice-problem-details",
+          "prompt": "Qual resposta é melhor para erro de validação em API pública?",
+          "options": [
+            {
+              "id": "val-a",
+              "label": "Um formato estável com status, campos inválidos e mensagem acionável, sem stack trace.",
+              "correct": true,
+              "explanation": "Cliente consegue tratar programaticamente e usuário entende correção."
+            },
+            {
+              "id": "val-b",
+              "label": "Sempre 500 com e.getMessage() bruto.",
+              "correct": false,
+              "explanation": "Isso mistura erro de cliente com falha interna e vaza detalhe."
+            },
+            {
+              "id": "val-c",
+              "label": "Sempre 200 com success=false.",
+              "correct": false,
+              "explanation": "Status HTTP deixa de comunicar semântica para clientes e ferramentas."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "validacao-erros-code-5": {
+          "explanation": [
+            "@Valid aciona validação do DTO na fronteira do controller.",
+            "Anotações como @NotBlank descrevem restrições de entrada, não todo o domínio."
+          ],
+          "commonMistakes": [
+            "Validar entity JPA como request público",
+            "Achar que @Valid substitui regra de negócio"
+          ]
+        },
+        "validacao-erros-code-9": {
+          "explanation": [
+            "@ControllerAdvice centraliza tradução de exceções para respostas HTTP.",
+            "ProblemDetail padroniza type, title, status e detalhes úteis."
+          ],
+          "commonMistakes": [
+            "Capturar Exception genérica e esconder causa",
+            "Expor stack trace no body"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-mvc-validation",
+          "type": "reference",
+          "title": "Spring MVC: Validation",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-validation.html",
+          "reinforces": "Validação de controller, Bean Validation e tratamento de erros de entrada.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-controller-advice",
+          "type": "reference",
+          "title": "Spring MVC: Controller Advice",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html",
+          "reinforces": "Tratamento global de exceções e respostas consistentes.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "paginacao-swagger": {
+      "order": 9,
+      "objectives": [
+        "Publicar paginação com limite e ordenação estável",
+        "Entender Pageable sem prometer custo invisível",
+        "Documentar schemas, exemplos e erros com OpenAPI",
+        "Evitar documentação divergente do comportamento real"
+      ],
+      "whyItExists": "Depois que a API devolve dados e erros, ela precisa escalar contrato de listagem e documentação. Paginação e OpenAPI reduzem surpresa para clientes e protegem o servidor.",
+      "prerequisiteChapterIds": [
+        "validacao-erros",
+        "spring-jpa"
+      ],
+      "introducedConceptIds": [
+        "pagination-sorting-contract",
+        "openapi-documentation-contract"
+      ],
+      "usedConceptIds": [
+        "rate-limit-paginacao",
+        "springdata-repository-contract",
+        "http-header-body-negociacao"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "paginacao-swagger-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Listagem sem limite vira contrato perigoso",
+          "body": "Paginação define quanto o cliente pode pedir, em que ordem e como avançar. OpenAPI registra esse contrato para humanos e ferramentas, mas só vale se exemplos e testes refletirem a API real.",
+          "analogyLimit": "Índice de livro ajuda a imaginar páginas, mas bancos exigem ordenação estável, índices e limites."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "paginacao-swagger-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "pagination-sorting-contract",
+          "prompt": "Qual cuidado torna paginação mais previsível?",
+          "options": [
+            {
+              "id": "pag-a",
+              "label": "Definir limite máximo e ordenação estável documentada.",
+              "correct": true,
+              "explanation": "Sem ordem estável, itens podem repetir ou sumir entre páginas."
+            },
+            {
+              "id": "pag-b",
+              "label": "Permitir size ilimitado porque Pageable já protege o banco.",
+              "correct": false,
+              "explanation": "Pageable representa pedido; você ainda deve limitar custo."
+            },
+            {
+              "id": "pag-c",
+              "label": "Omitir erros da documentação para deixar o Swagger limpo.",
+              "correct": false,
+              "explanation": "Erros fazem parte do contrato que clientes precisam tratar."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "paginacao-swagger-code-4": {
+          "explanation": [
+            "Pageable recebe page, size e sort e integra com repositories Spring Data.",
+            "A API deve impor limites e ordenar de forma previsível."
+          ],
+          "commonMistakes": [
+            "Aceitar size enorme",
+            "Ordenar por campo não indexado ou sensível"
+          ]
+        },
+        "paginacao-swagger-code-7": {
+          "explanation": [
+            "OpenAPI descreve endpoints, schemas, parâmetros e respostas.",
+            "O contrato documentado deve incluir exemplos de sucesso e erro."
+          ],
+          "commonMistakes": [
+            "Documentar só status 200",
+            "Deixar schema diferente do DTO real"
+          ]
+        },
+        "paginacao-swagger-code-8": {
+          "explanation": [
+            "Anotações enriquecem documentação, mas não substituem teste de comportamento.",
+            "Use descrições para explicar semântica, não para repetir nomes de campos."
+          ],
+          "commonMistakes": [
+            "Usar Swagger como validação única",
+            "Não revisar documentação após mudar DTO"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-data-web-pagination",
+          "type": "reference",
+          "title": "Spring Data Web Support",
+          "url": "https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html",
+          "reinforces": "Integração de Pageable, Sort e suporte web do Spring Data.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "openapi-311",
+          "type": "reference",
+          "title": "OpenAPI Specification 3.1.1",
+          "url": "https://spec.openapis.org/oas/v3.1.1.html",
+          "reinforces": "Contrato formal de endpoints, schemas, parâmetros e respostas.",
+          "language": "en",
+          "publisher": "OpenAPI Initiative",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "api-design-avancado": {
+      "order": 10,
+      "objectives": [
+        "Projetar erros, compatibilidade e concorrência de contrato",
+        "Identificar breaking changes antes de publicar",
+        "Usar Problem Details, ETag e status adequados",
+        "Separar evolução interna de versão pública"
+      ],
+      "whyItExists": "Com endpoints, DTOs e documentação no lugar, o próximo salto é desenhar API para clientes reais. O capítulo aprofunda compatibilidade, concorrência e semântica HTTP além do CRUD feliz.",
+      "prerequisiteChapterIds": [
+        "paginacao-swagger",
+        "jpa-transacoes"
+      ],
+      "introducedConceptIds": [
+        "http-optimistic-concurrency",
+        "api-compatible-evolution"
+      ],
+      "usedConceptIds": [
+        "controller-advice-problem-details",
+        "openapi-documentation-contract",
+        "mvcc-isolamento-lock"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "api-design-avancado-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "API publicada vira promessa para desconhecidos",
+          "body": "Depois que clientes dependem da API, mudar campo, status, enum ou erro pode quebrar automações. Design avançado é prever conflito, repetição, cache, versão e depreciação antes de virar incidente.",
+          "analogyLimit": "Contrato assinado ajuda a imaginar estabilidade, mas APIs também têm tolerância a campos extras e evolução incremental."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "api-design-avancado-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "api-compatible-evolution",
+          "prompt": "Qual mudança tem maior chance de quebrar clientes?",
+          "options": [
+            {
+              "id": "api-a",
+              "label": "Renomear um campo obrigatório já publicado sem período de compatibilidade.",
+              "correct": true,
+              "explanation": "Clientes que desserializam ou validam o campo antigo falham."
+            },
+            {
+              "id": "api-b",
+              "label": "Adicionar campo opcional quando clientes toleram campos desconhecidos.",
+              "correct": false,
+              "explanation": "Pode ser compatível se a política dos clientes permitir."
+            },
+            {
+              "id": "api-c",
+              "label": "Melhorar log interno sem alterar contrato HTTP.",
+              "correct": false,
+              "explanation": "Mudança interna não deveria afetar clientes."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "api-design-avancado-code-6": {
+          "explanation": [
+            "ETag/If-Match permite rejeitar atualização baseada em versão antiga.",
+            "Isso evita lost update quando dois clientes alteram o mesmo recurso."
+          ],
+          "commonMistakes": [
+            "Usar ETag só como cache e ignorar precondition",
+            "Aceitar última escrita vence sem regra clara"
+          ]
+        },
+        "api-design-avancado-code-10": {
+          "explanation": [
+            "Problem Details cria estrutura interoperável para erro HTTP.",
+            "type, title, status e detalhe devem ser estáveis e úteis para suporte."
+          ],
+          "commonMistakes": [
+            "Criar erro diferente em cada endpoint",
+            "Expor exceção interna como contrato"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "problem-details-rfc9457-api",
+          "type": "reference",
+          "title": "RFC 9457: Problem Details for HTTP APIs",
+          "url": "https://www.rfc-editor.org/rfc/rfc9457",
+          "reinforces": "Formato padronizado para erros HTTP interoperáveis.",
+          "language": "en",
+          "publisher": "IETF",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "http-semantics-rfc9110",
+          "type": "reference",
+          "title": "RFC 9110: HTTP Semantics",
+          "url": "https://www.rfc-editor.org/rfc/rfc9110",
+          "reinforces": "Semântica de métodos, status, representação e preconditions.",
+          "language": "en",
+          "publisher": "IETF",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "n-mais-1": {
+      "order": 11,
+      "objectives": [
+        "Reconhecer N+1 pelo padrão de SQL gerado",
+        "Escolher fetch join, entity graph ou projeção conforme caso",
+        "Medir antes/depois com logs e plano de execução",
+        "Evitar EAGER global como remendo"
+      ],
+      "whyItExists": "Depois de JPA e design de API, o aluno precisa ver como uma representação aparentemente simples pode disparar consultas repetidas. Performance aqui é consequência de modelagem, carregamento e contrato de resposta.",
+      "prerequisiteChapterIds": [
+        "spring-jpa",
+        "paginacao-swagger"
+      ],
+      "introducedConceptIds": [
+        "nplusone-query-shape"
+      ],
+      "usedConceptIds": [
+        "jpa-relationship-loading",
+        "postgres-explain-analyze",
+        "pagination-sorting-contract"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "n-mais-1-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "N+1 é formato de acesso, não azar do banco",
+          "body": "Uma consulta busca N registros e, para cada um, outra consulta busca dependências. O problema nasce da forma como o código navega relações e da representação que a API pediu.",
+          "analogyLimit": "Buscar itens um por um ajuda a imaginar, mas a correção depende de cardinalidade, filtro, paginação e memória."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "n-mais-1-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "nplusone-query-shape",
+          "prompt": "Qual correção é mais responsável para N+1?",
+          "options": [
+            {
+              "id": "n1-a",
+              "label": "Medir o SQL gerado e escolher fetch/projeção adequada ao caso de uso.",
+              "correct": true,
+              "explanation": "A solução depende da consulta e do contrato de resposta."
+            },
+            {
+              "id": "n1-b",
+              "label": "Trocar todos os relacionamentos para EAGER.",
+              "correct": false,
+              "explanation": "EAGER global pode criar consultas maiores, ciclos e payload desnecessário."
+            },
+            {
+              "id": "n1-c",
+              "label": "Aumentar o pool de conexões sem mudar consulta.",
+              "correct": false,
+              "explanation": "Isso pode mascarar sintoma e piorar pressão no banco."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "n-mais-1-code-4": {
+          "explanation": [
+            "A navegação de coleção LAZY dentro de loop pode disparar consulta por item.",
+            "Logs SQL mostram o padrão repetitivo com clareza."
+          ],
+          "commonMistakes": [
+            "Não ligar logs SQL em diagnóstico",
+            "Culpar apenas o banco sem olhar acesso"
+          ]
+        },
+        "n-mais-1-code-10": {
+          "explanation": [
+            "Fetch join/projeção carrega exatamente o que o caso precisa em menos round-trips.",
+            "A paginação precisa ser revisada quando há joins com coleção."
+          ],
+          "commonMistakes": [
+            "Aplicar fetch join em toda consulta",
+            "Ignorar duplicação e memória"
+          ]
+        },
+        "n-mais-1-code-15": {
+          "explanation": [
+            "@BatchSize mantém LAZY mas agrupa buscas pendentes numa query com IN, em vez de uma query por linha -- N vira aproximadamente N/tamanho-do-lote.",
+            "É o meio-termo certo quando o relacionamento só é acessado às vezes, não sempre (caso em que JOIN FETCH resolveria melhor)."
+          ],
+          "commonMistakes": [
+            "Esperar que @BatchSize chegue a uma única query como JOIN FETCH -- ele reduz N, não elimina",
+            "Usar JOIN FETCH em vez de batch fetching quando o relacionamento é acessado só condicionalmente"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-data-query-methods",
+          "type": "reference",
+          "title": "Spring Data JPA: Query Methods",
+          "url": "https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html",
+          "reinforces": "Consultas derivadas, @Query e formas de consulta em repositories.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "postgres-explain-doc",
+          "type": "reference",
+          "title": "PostgreSQL: Using EXPLAIN",
+          "url": "https://www.postgresql.org/docs/current/using-explain.html",
+          "reinforces": "Leitura de plano de execução para confirmar custo e forma da consulta.",
+          "language": "en",
+          "publisher": "PostgreSQL",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "cors-rate-limit": {
+      "order": 12,
+      "objectives": [
+        "Entender CORS como política aplicada pelo navegador",
+        "Configurar origens, métodos, headers e credenciais com critério",
+        "Distinguir CORS de autenticação/autorização",
+        "Aplicar rate limit e comunicar 429/Retry-After"
+      ],
+      "whyItExists": "Quando a API começa a ser consumida por frontend e clientes externos, surgem fronteiras reais de browser e capacidade. CORS e rate limit protegem integração sem virar falsa segurança.",
+      "prerequisiteChapterIds": [
+        "spring-mvc",
+        "api-design-avancado"
+      ],
+      "introducedConceptIds": [
+        "cors-browser-policy",
+        "api-rate-limit-boundary"
+      ],
+      "usedConceptIds": [
+        "http-header-body-negociacao",
+        "mvc-controller-binding",
+        "http-status-classe"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "cors-rate-limit-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "CORS deixa o navegador chamar; não prova quem está chamando",
+          "body": "CORS é uma política de segurança do navegador para scripts cross-origin. Rate limit controla abuso e capacidade. Nenhum dos dois substitui autenticação, autorização e validação no servidor.",
+          "analogyLimit": "Portaria ajuda a imaginar origem permitida, mas CORS não bloqueia cURL, backend ou atacante fora do navegador."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "cors-rate-limit-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "cors-browser-policy",
+          "prompt": "Qual afirmação sobre CORS é correta?",
+          "options": [
+            {
+              "id": "cors-a",
+              "label": "Ele controla se o navegador permite uma página chamar uma origem diferente com certos métodos/headers.",
+              "correct": true,
+              "explanation": "CORS é enforcement do browser, negociado por headers e preflight."
+            },
+            {
+              "id": "cors-b",
+              "label": "Ele autentica usuários e substitui JWT/sessão.",
+              "correct": false,
+              "explanation": "Origem permitida não identifica usuário nem autorização."
+            },
+            {
+              "id": "cors-c",
+              "label": "Ele impede qualquer cliente HTTP de chamar a API.",
+              "correct": false,
+              "explanation": "Clientes fora do navegador não obedecem CORS da mesma forma."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "cors-rate-limit-code-5": {
+          "explanation": [
+            "O erro de CORS aparece no console do navegador, não como resposta HTTP visível -- por isso curl/Postman funcionam normalmente enquanto o front-end falha.",
+            "Same-origin policy é uma regra do navegador, não da sua API; testar fora do navegador não prova que CORS está configurado corretamente."
+          ],
+          "commonMistakes": [
+            "Testar só com curl/Postman e concluir que CORS não é problema"
+          ]
+        },
+        "cors-rate-limit-code-8": {
+          "explanation": [
+            "Configuração CORS define origens, métodos, headers e credenciais aceitos explicitamente.",
+            "allowCredentials(true) exige lista explícita de origens -- nunca funciona combinado com \"*\"."
+          ],
+          "commonMistakes": [
+            "Usar * com credenciais",
+            "Liberar tudo em produção por erro local"
+          ]
+        },
+        "cors-rate-limit-code-12": {
+          "explanation": [
+            "O preflight (OPTIONS) é gerado automaticamente pelo navegador para requisições não simples -- método customizado, header customizado ou Content-Type fora do padrão de formulário.",
+            "Só depois que o preflight responde com os cabeçalhos Access-Control-Allow-* compatíveis o navegador dispara a requisição real -- e essa resposta real também precisa trazer Access-Control-Allow-Origin, ou o navegador bloqueia a leitura do corpo."
+          ],
+          "commonMistakes": [
+            "Configurar CORS só para a requisição real e esquecer que o preflight também precisa de resposta correta",
+            "Não perceber que um erro de CORS pode estar no preflight, não na requisição real"
+          ]
+        },
+        "cors-rate-limit-code-16": {
+          "explanation": [
+            "Rate limit deve retornar 429 quando a política é excedida.",
+            "Bucket4j é uma biblioteca, não um recurso nativo do Spring -- rate limiting não vem de fábrica."
+          ],
+          "commonMistakes": [
+            "Retornar 500 para excesso de uso",
+            "Não separar limites por identidade/chave/origem"
+          ]
+        },
+        "cors-rate-limit-code-12": {
+          "explanation": [
+            "Filtros/interceptors aplicam política antes do controller quando apropriado.",
+            "A política deve ser observável em logs e métricas."
+          ],
+          "commonMistakes": [
+            "Implementar contador em memória sem entender múltiplas instâncias",
+            "Punir todos os usuários por uma chave mal escolhida"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "spring-cors-webmvc",
+          "type": "reference",
+          "title": "Spring MVC: CORS",
+          "url": "https://docs.spring.io/spring-framework/reference/web/webmvc-cors.html",
+          "reinforces": "Configuração CORS global e por controller no Spring MVC.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "rfc6585-429",
+          "type": "reference",
+          "title": "RFC 6585: Additional HTTP Status Codes",
+          "url": "https://www.rfc-editor.org/rfc/rfc6585",
+          "reinforces": "Status 429 Too Many Requests e semântica de rate limiting.",
+          "language": "en",
+          "publisher": "IETF",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    },
+    "mini-helpdesk-api": {
+      "order": 13,
+      "objectives": [
+        "Construir uma fatia vertical de API Spring",
+        "Unir controller, DTO, validação, service, repository e erros",
+        "Testar contrato feliz e falhas principais",
+        "Demonstrar paginação, transação, CORS/rate limit e N+1 sob controle"
+      ],
+      "whyItExists": "O módulo de Spring precisa terminar em uma API pequena, verificável e sem teatro. O projeto junta os conceitos ensinados em uma fatia de helpdesk que funciona de ponta a ponta antes de crescer.",
+      "prerequisiteChapterIds": [
+        "cors-rate-limit",
+        "n-mais-1",
+        "validacao-erros"
+      ],
+      "introducedConceptIds": [
+        "helpdesk-api-vertical-slice"
+      ],
+      "usedConceptIds": [
+        "mvc-controller-binding",
+        "springdata-repository-contract",
+        "controller-advice-problem-details",
+        "bean-validation-boundary",
+        "nplusone-query-shape"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "mini-helpdesk-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Uma fatia funcionando ensina mais que dez camadas vazias",
+          "body": "Comece por um caso real: abrir chamado, listar chamados, alterar status e tratar erro. Cada camada entra porque resolve uma necessidade observável da fatia, não porque um desenho genérico mandou.",
+          "analogyLimit": "Fatia vertical não elimina arquitetura; ela força arquitetura a provar valor cedo."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "mini-helpdesk-project",
+          "type": "project",
+          "authorship": "authored",
+          "title": "API de helpdesk verificável",
+          "brief": "Implemente uma API Spring Boot para chamados com criação, consulta paginada, mudança de status, validação, erro padronizado, persistência e testes de contrato.",
+          "requirements": [
+            "Endpoint para criar chamado com request DTO validado",
+            "Endpoint paginado para listar chamados com ordenação estável",
+            "Endpoint para mudar status respeitando transação e regra de domínio",
+            "Problem Details para validação, não encontrado e conflito",
+            "Repository JPA com consulta que não gera N+1 no caso listado",
+            "Configuração CORS restrita ao frontend de estudo e política simples de rate limit",
+            "Testes de controller/service/repository cobrindo sucesso e falhas"
+          ],
+          "guidance": "bounded",
+          "acceptanceCriteria": [
+            "OpenAPI ou README documenta request, response, status e exemplos de erro.",
+            "Nenhuma Entity JPA é exposta como response público.",
+            "Teste demonstra erro de validação, 404, 409 e criação/listagem felizes.",
+            "Logs ou teste comprovam que listagem principal não dispara N+1.",
+            "Secrets e configurações variáveis ficam fora do código versionado."
+          ],
+          "knowledgeMatrix": [
+            {
+              "requirement": "Contrato HTTP verificável",
+              "conceptIds": [
+                "mvc-controller-binding",
+                "mvc-response-status-contract",
+                "openapi-documentation-contract"
+              ],
+              "chapterIds": [
+                "spring-mvc",
+                "paginacao-swagger"
+              ],
+              "expectedEvidence": "Endpoints possuem status, DTOs, exemplos e testes que falham se o contrato mudar sem intenção."
+            },
+            {
+              "requirement": "Boundary DTO/Entity",
+              "conceptIds": [
+                "dto-entity-boundary-spring",
+                "jpa-entity-identity"
+              ],
+              "chapterIds": [
+                "dto-mapping",
+                "spring-jpa"
+              ],
+              "expectedEvidence": "Request/response DTOs não expõem campos internos nem permitem mass assignment."
+            },
+            {
+              "requirement": "Erro e validação",
+              "conceptIds": [
+                "bean-validation-boundary",
+                "controller-advice-problem-details"
+              ],
+              "chapterIds": [
+                "validacao-erros"
+              ],
+              "expectedEvidence": "Problem Details estável cobre validação, inexistência e conflito com correlação."
+            },
+            {
+              "requirement": "Transação e persistência",
+              "conceptIds": [
+                "transaction-proxy-boundary",
+                "springdata-repository-contract"
+              ],
+              "chapterIds": [
+                "jpa-transacoes",
+                "spring-jpa"
+              ],
+              "expectedEvidence": "Caso de uso transacional altera status de forma atômica e testável."
+            },
+            {
+              "requirement": "Performance e borda",
+              "conceptIds": [
+                "nplusone-query-shape",
+                "cors-browser-policy",
+                "api-rate-limit-boundary"
+              ],
+              "chapterIds": [
+                "n-mais-1",
+                "cors-rate-limit"
+              ],
+              "expectedEvidence": "Listagem não gera N+1 e políticas de CORS/rate limit são explícitas."
+            }
+          ],
+          "englishSpecification": {
+            "title": "Verifiable help desk API",
+            "brief": "Build a small Spring Boot API whose contract, errors, persistence boundaries, and tests are observable.",
+            "requirements": [
+              "Validated request DTOs",
+              "Stable paginated list endpoint",
+              "Problem Details for errors",
+              "JPA repository without N+1 in the main list",
+              "Controller and integration tests"
+            ],
+            "acceptanceCriteria": [
+              "No JPA entity is exposed as a public response.",
+              "Tests cover success, validation error, not found, and conflict.",
+              "The public contract is documented with examples."
+            ]
+          }
+        },
+        {
+          "id": "mini-helpdesk-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "helpdesk-api-vertical-slice",
+          "prompt": "Qual decisão torna o projeto mais didático e confiável?",
+          "options": [
+            {
+              "id": "help-a",
+              "label": "Entregar uma fatia vertical pequena com contrato, erro, persistência e testes observáveis.",
+              "correct": true,
+              "explanation": "A fatia prova integração real sem espalhar complexidade vazia."
+            },
+            {
+              "id": "help-b",
+              "label": "Criar todas as classes de todas as camadas antes de escolher um caso de uso.",
+              "correct": false,
+              "explanation": "Isso gera arquitetura teatral e pouco feedback."
+            },
+            {
+              "id": "help-c",
+              "label": "Retornar entity diretamente para acelerar o frontend.",
+              "correct": false,
+              "explanation": "Acelera agora e cobra acoplamento depois."
+            }
+          ]
+        }
+      ],
+      "quizRationales": {
+        "mini-helpdesk-api:0": [
+          "Uma API didática precisa ser pequena, observável e testável de ponta a ponta.",
+          "Camadas entram para sustentar contrato e regra, não para cumprir ritual.",
+          "Sem testes de erro e contrato, o projeto vira demonstração frágil."
+        ]
+      },
+      "resources": [
+        {
+          "id": "boot-testing-applications",
+          "type": "reference",
+          "title": "Spring Boot: Testing Spring Boot Applications",
+          "url": "https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html",
+          "reinforces": "Testes de aplicação Spring Boot, slices e integração verificável.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-mvc-test",
+          "type": "reference",
+          "title": "Spring Framework: MockMvc",
+          "url": "https://docs.spring.io/spring-framework/reference/testing/mockmvc.html",
+          "reinforces": "Teste de contrato MVC sem depender de servidor externo.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
+    }
   }
 }

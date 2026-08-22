@@ -1,4 +1,5 @@
 import generatedCourse from '@/content/generated-course.json';
+import { requiredChapters } from '@/content/required-chapters';
 import { assembleCourse, type GeneratedCourseData } from '@/content/course';
 
 const course = assembleCourse(generatedCourse as GeneratedCourseData);
@@ -7,7 +8,11 @@ describe('complete course content', () => {
   it('preserves every legacy chapter and resolves all references', () => {
     const chapterIds = new Set(course.chapters.map(chapter => chapter.id));
 
-    expect(course.chapters).toHaveLength(151);
+    // Contagem derivada, não hardcoded: o total de capítulos cresce
+    // legitimamente conforme a reconstrução editorial adiciona capítulos
+    // (ex.: terminal-shell-fundamentos). O que este teste protege é que
+    // NENHUM capítulo legado ou estruturado se perde, não um número fixo.
+    expect(course.chapters).toHaveLength(generatedCourse.chapters.length + requiredChapters.length);
     expect(chapterIds.size).toBe(course.chapters.length);
     expect(course.modules).toHaveLength(20);
     for (const chapter of course.chapters) {
@@ -30,7 +35,12 @@ describe('complete course content', () => {
   });
 
   it('assesses every concept in the structured chapters', () => {
-    const structured = course.chapters.slice(128);
+    // Os capítulos estruturados (required-chapters.ts) são identificados pelo
+    // próprio conjunto de IDs, não por uma posição fixa no array combinado --
+    // a contagem de capítulos legados cresce conforme a reconstrução editorial
+    // adiciona capítulos (ex.: terminal-shell-fundamentos).
+    const structuredIds = new Set(requiredChapters.map(chapter => chapter.id));
+    const structured = course.chapters.filter(chapter => structuredIds.has(chapter.id));
     for (const chapter of structured) {
       const quizzes = chapter.blocks.filter(block => block.type === 'quiz');
       const assessedConcepts = new Set(quizzes.map(quiz => quiz.conceptId));

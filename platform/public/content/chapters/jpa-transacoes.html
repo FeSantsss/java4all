@@ -1,6 +1,6 @@
 <section class="section tk-spring" id="jpa-transacoes">
       <div class="section-head"><span class="section-num">+</span><h2 class="section-title">JPA profundo e transações Spring</h2></div>
-      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~6h</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">Spring Data JPA</a>, <a class="prereq-tag" href="#postgres-concorrencia">Concorrência no PostgreSQL</a></div></div>
+      <div class="topic-meta"><span class="tech-badge tech-spring">Spring</span><div class="meta-item">Dificuldade: <b>Avançado</b></div><div class="time-est">⏱ <b>~7h30</b> de estudo e prática</div><div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">Spring Data JPA</a>, <a class="prereq-tag" href="#postgres-concorrencia">Concorrência no PostgreSQL</a></div></div>
       
       <p>JPA mantém uma unidade de trabalho chamada persistence context. Dentro dela, cada identidade de banco corresponde a uma instância gerenciada; alterações nessa instância podem ser detectadas e sincronizadas no <code>flush</code>. Entender esse ciclo evita SQL inesperado, entidades desatualizadas e transações gigantes.</p>
       <aside class="concept-foundation">
@@ -25,6 +25,66 @@
     rollbackFor = FalhaIntegracao.class)
 <span class="kw">public void</span> transferir(Long origem, Long destino, BigDecimal valor) { ... }</pre>
       <p>Por padrão, o modelo declarativo tradicional faz rollback automático para exceções não verificadas; checked exceptions precisam de regra explícita quando representam falha atômica. <code>readOnly=true</code> é uma dica de otimização, não uma barreira universal contra escrita.</p>
+
+      <h3>REQUIRES_NEW e NESTED, com exemplo e limite real</h3>
+      <pre class="code"><span class="annotation">@Transactional</span>
+<span class="kw">public void</span> processarPedido(Pedido pedido) {
+    pedido.confirmar();
+    auditoria.registrar(<span class="str">"pedido confirmado: "</span> + pedido.getId()); <span class="com">// método com REQUIRES_NEW</span>
+    <span class="kw">if</span> (pedido.valorSuspeito()) {
+        <span class="kw">throw new</span> <span class="cls">FalhaIntegracao</span>(<span class="str">"valor fora do padrão"</span>); <span class="com">// reverte processarPedido inteiro...</span>
+    }
+}
+
+<span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">AuditoriaServico</span> {
+    <span class="annotation">@Transactional</span>(propagation = Propagation.REQUIRES_NEW)
+    <span class="kw">public void</span> <span class="fn">registrar</span>(<span class="kw">String</span> evento) {
+        repositorioAuditoria.save(<span class="kw">new</span> <span class="cls">RegistroAuditoria</span>(evento));
+        <span class="com">// ...mas este registro de auditoria já foi commitado em SUA PRÓPRIA transação
+        // suspensa/independente -- sobrevive ao rollback de processarPedido acima.</span>
+    }
+}</pre>
+      <p><code>REQUIRES_NEW</code> suspende a transação atual e abre outra, totalmente independente — é exatamente o que um log de auditoria precisa: registrar que a tentativa aconteceu, mesmo que o resto falhe e reverta. O preço é real: agora existem duas conexões/transações simultâneas, e se a externa falhar depois que a interna já commitou, não há como desfazer o commit da interna.</p>
+      <div class="warn"><code>NESTED</code> depende de <strong>savepoints</strong> do banco/driver JDBC — nem todo gerenciador de transação suporta (não funciona, por exemplo, sobre transações JTA distribuídas). Diferente de <code>REQUIRES_NEW</code>, <code>NESTED</code> continua dentro da <strong>mesma</strong> transação física: um rollback do bloco aninhado volta só até o savepoint, sem derrubar a transação externa inteira — mas se a transação externa fizer rollback, o savepoint some junto. É uma ferramenta para "tentar uma parte, sem comprometer o resto", não para independência real como <code>REQUIRES_NEW</code>.</div>
+
+      <h3>Deadlock e lost update: as duas falhas de concorrência que todo sistema com escrita concorrente encontra</h3>
+      <ul>
+        <li><strong>Lost update</strong>: duas transações leem a mesma linha, cada uma decide uma mudança com base no valor lido, e a segunda escrita sobrescreve a primeira silenciosamente — sem <code>@Version</code> (optimistic locking) ou lock explícito, nada avisa que isso aconteceu. É o cenário exato que <code>@Version</code>, já citado acima, existe para detectar: a segunda transação recebe um erro de versão em vez de sobrescrever silenciosamente.</li>
+        <li><strong>Deadlock</strong>: a transação A tem lock na linha 1 e espera a linha 2; a transação B tem lock na linha 2 e espera a linha 1 — nenhuma consegue prosseguir. O banco detecta esse ciclo e força o rollback de uma das duas (no Postgres, com <code>SQLState 40P01</code>) para liberar a outra. A resposta correta não é evitar deadlock a qualquer custo (às vezes é inevitável com locks concorrentes), mas capturar a exceção de deadlock especificamente e <strong>reexecutar a transação vencida</strong> com um pequeno backoff — nunca propagar isso como erro genérico 500 para o usuário sem tentar de novo.</li>
+      </ul>
+
+      <h3>Por que uma chamada HTTP externa dentro de uma transação é um problema real</h3>
+      <p>Uma transação aberta mantém uma <strong>conexão do pool</strong> presa até o commit/rollback (o mesmo pool visto em Postgres/JDBC). Se o método transacional faz uma chamada HTTP para outro serviço no meio do caminho, essa conexão fica presa pela duração inteira da chamada de rede — que pode ser 10x, 100x mais lenta que qualquer operação de banco. Com volume concorrente, isso esgota o pool de conexões rapidamente: outras requisições, que nem tocam o serviço externo, começam a falhar por timeout esperando uma conexão livre — um problema de banco de dados causado por uma chamada de rede que nunca devia estar ali dentro. Mova a chamada HTTP para fora da transação (antes de abri-la, ou depois de fechá-la).</p>
+
+      <h3>Testando concorrência de verdade</h3>
+      <pre class="code"><span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveDetectarConflitoDeVersaoEmEmprestimoConcorrente</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+    <span class="cls">Exemplar</span> exemplar = repositorio.save(<span class="kw">new</span> <span class="cls">Exemplar</span>(<span class="str">"livro-1"</span>));
+    ExecutorService pool = Executors.newFixedThreadPool(<span class="num">2</span>);
+    CountDownLatch largada = <span class="kw">new</span> CountDownLatch(<span class="num">1</span>);
+
+    Callable&lt;<span class="kw">Boolean</span>&gt; tentarEmprestar = () -&gt; {
+        largada.await(); <span class="com">// força as duas threads a iniciar juntas, no mesmo instante</span>
+        <span class="kw">try</span> {
+            servicoEmprestimo.emprestar(exemplar.getId());
+            <span class="kw">return true</span>;
+        } <span class="kw">catch</span> (ObjectOptimisticLockingFailureException e) {
+            <span class="kw">return false</span>; <span class="com">// a tentativa que falha termina exatamente aqui</span>
+        }
+    };
+
+    List&lt;Future&lt;<span class="kw">Boolean</span>&gt;&gt; resultados = pool.invokeAll(List.of(tentarEmprestar, tentarEmprestar));
+    largada.countDown();
+
+    <span class="kw">long</span> sucessos = resultados.stream().filter(f -&gt; {
+        <span class="kw">try</span> { <span class="kw">return</span> f.get(); } <span class="kw">catch</span> (Exception e) { <span class="kw">return false</span>; }
+    }).count();
+
+    assertThat(sucessos).isEqualTo(<span class="num">1</span>L); <span class="com">// vence exatamente um resultado, nunca os dois nem nenhum</span>
+}</pre>
+      <p>Um teste sequencial (chamar <code>emprestar</code> duas vezes seguidas, sem sobreposição real) não prova nada sobre concorrência — as duas chamadas nunca disputam a mesma linha ao mesmo tempo. <code>CountDownLatch</code> força as duas threads a competirem de verdade pelo mesmo instante, o que é o único jeito de provar que o optimistic locking funciona sob disputa real, não apenas na teoria.</p>
+
       <h3>O limite do proxy</h3>
       <p><code>@Transactional</code> normalmente é aplicado por <strong>proxy</strong>: um objeto intermediário criado pelo Spring intercepta a chamada, abre a transação, chama o serviço e confirma ou reverte. Uma chamada de um método para outro no mesmo objeto não atravessa esse intermediário; métodos privados também não formam bons limites declarativos. Coloque a transação em um serviço público orientado ao caso de uso e mantenha chamadas lentas de rede fora dela.</p>
       <h3>Relacionamentos e igualdade</h3>

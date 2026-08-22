@@ -1,0 +1,121 @@
+<section class="section" id="terminal-shell-fundamentos">
+      <div class="section-head"><span class="section-num">00</span><h2 class="section-title">Terminal e shell — antes de instalar qualquer coisa</h2></div>
+      <div class="topic-meta">
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante</b></div>
+        <div class="meta-item">Pré-requisito: <span class="prereq-none">nenhum</span></div>
+      </div>
+
+      <p>O resto do curso vai pedir que você digite comandos em uma janela preta várias vezes por capítulo — para compilar com <code>javac</code>, rodar com <code>java</code>, usar Maven, Git, Docker. Nenhum desses capítulos vai parar para explicar <em>o que é</em> essa janela. Este capítulo existe para fechar essa lacuna antes que ela vire um obstáculo silencioso: você vai aprender a navegar, manipular arquivos, entender o que acontece quando aperta Enter, e reconhecer os riscos reais de comandos destrutivos.</p>
+
+      <h3>Terminal, terminal emulator e shell não são a mesma coisa</h3>
+      <table class="cmp">
+        <tbody><tr><th>Termo</th><th>O que é de fato</th></tr>
+        <tr><td><b>Terminal emulator</b></td><td>O programa com janela (iTerm, Windows Terminal, GNOME Terminal, o terminal integrado da sua IDE). Só desenha texto na tela e envia o que você digita para dentro.</td></tr>
+        <tr><td><b>Shell</b></td><td>O programa que de fato interpreta o que você digita e decide o que fazer — é ele quem entende <code>cd</code>, expande <code>*</code>, resolve <code>$PATH</code>. Exemplos: <code>bash</code>, <code>zsh</code>, <code>fish</code>, <code>PowerShell</code>, <code>cmd.exe</code>.</td></tr>
+        <tr><td><b>CLI</b></td><td><em>Command-line interface</em> — qualquer programa (incluindo o shell) que você opera digitando comandos, em vez de clicar.</td></tr>
+        <tr><td><b>Comando</b></td><td>O nome do que você quer executar (<code>ls</code>, <code>git</code>, <code>java</code>) — pode ser um programa instalado ou um <em>builtin</em> do próprio shell.</td></tr>
+        <tr><td><b>Argumento / opção (flag)</b></td><td>Informação extra depois do comando. <code>ls -la meu-projeto</code>: <code>-la</code> é uma opção (modifica o comportamento), <code>meu-projeto</code> é um argumento (o alvo).</td></tr>
+        <tr><td><b>Processo</b></td><td>Uma execução em andamento de um programa — cada comando que roda até terminar é um processo, com seu próprio código de saída (mais adiante).</td></tr>
+      </tbody></table>
+      <div class="secret">Um erro comum: achar que "terminal" e "shell" são sinônimos, ou que existe só um shell ("o" terminal). Você pode abrir o mesmo terminal emulator hoje com <code>bash</code> e amanhã com <code>zsh</code> — a janela é a mesma, o intérprete por trás muda, e algumas sintaxes (como quoting e scripts) não são 100% intercambiáveis entre eles.</div>
+
+      <h3>Onde você está: diretório atual, home e caminhos</h3>
+      <p>Todo shell mantém um <strong>diretório atual</strong> (também chamado <em>working directory</em>) — é a pasta "onde você está" quando roda um comando sem caminho explícito. <strong>Home</strong> é a pasta pessoal do seu usuário (<code>~</code> é um atalho universal para ela). Um <strong>caminho absoluto</strong> começa da raiz do sistema de arquivos (<code>/home/ana/projetos</code> no Linux/macOS, <code>C:\Users\Ana\projetos</code> no Windows); um <strong>caminho relativo</strong> é resolvido a partir do diretório atual (<code>projetos/exercicios</code>, <code>../outra-pasta</code>).</p>
+      <pre class="code">pwd          <span class="com"># print working directory -- mostra o caminho absoluto de onde você está agora</span>
+ls           <span class="com"># lista o conteúdo do diretório atual</span>
+ls -la       <span class="com"># -l: formato detalhado (permissões, dono, tamanho); -a: inclui arquivos ocultos (começam com .)</span>
+cd projetos  <span class="com"># entra na subpasta "projetos" (caminho relativo)</span>
+cd ..        <span class="com"># sobe um nível -- ".." sempre significa "pasta pai"</span>
+cd ~         <span class="com"># volta direto para a home, de qualquer lugar</span>
+mkdir estudos           <span class="com"># cria uma pasta</span>
+mkdir -p a/b/c           <span class="com"># -p: cria a cadeia inteira de pastas intermediárias que ainda não existem</span></pre>
+
+      <h3>Arquivos: criar, copiar, mover, apagar, ler</h3>
+      <pre class="code">touch notas.txt        <span class="com"># cria um arquivo vazio (ou só atualiza a data de modificação, se já existir)</span>
+cp notas.txt copia.txt <span class="com"># copia -- o original continua existindo</span>
+mv copia.txt final.txt <span class="com"># move OU renomeia -- no shell, renomear é só "mover para o mesmo lugar com outro nome"</span>
+rm final.txt           <span class="com"># remove um arquivo -- não existe lixeira aqui</span>
+rmdir pasta-vazia      <span class="com"># remove uma pasta, só se estiver vazia</span>
+cat notas.txt          <span class="com"># despeja o conteúdo inteiro no terminal</span>
+less notas.txt         <span class="com"># abre em modo paginado/navegável -- melhor para arquivos grandes; "q" para sair</span>
+head -n 5 notas.txt    <span class="com"># só as 5 primeiras linhas</span>
+tail -n 5 notas.txt    <span class="com"># só as 5 últimas linhas</span></pre>
+      <div class="warn"><b><code>rm</code> não pergunta e não tem desfazer.</b> Diferente de apagar um arquivo pela interface gráfica (que geralmente vai para uma lixeira), <code>rm</code> remove de verdade, imediatamente. <code>rm -rf alguma-pasta</code> é ainda mais perigoso: <code>-r</code> torna a remoção recursiva (apaga o conteúdo inteiro de uma pasta) e <code>-f</code> força, sem pedir confirmação nem avisar sobre erros. Nunca rode <code>rm -rf</code> copiando de um tutorial sem entender exatamente qual caminho está sendo apagado — e nunca rode como usuário administrador "só para garantir que funciona". Confira o caminho com <code>pwd</code> e <code>ls</code> antes de apagar qualquer coisa recursivamente.</div>
+
+      <h3>Buscando coisas: grep e find</h3>
+      <pre class="code">grep "erro" log.txt          <span class="com"># mostra as linhas de log.txt que contêm "erro"</span>
+grep -r "TODO" src/          <span class="com"># -r: procura recursivamente dentro da pasta src/</span>
+find . -name "*.java"        <span class="com"># procura, a partir do diretório atual (.), arquivos cujo nome termina em .java</span></pre>
+      <p><code>grep</code> busca <em>dentro</em> do conteúdo de arquivos; <code>find</code> busca arquivos e pastas pelo <em>nome/atributos</em> na árvore de diretórios — são complementares, não concorrentes. Ferramentas mais modernas como <code>ripgrep</code> (<code>rg</code>) fazem o mesmo trabalho de <code>grep -r</code> com mais velocidade e melhores padrões; são um complemento útil de instalar depois, não um pré-requisito deste curso.</p>
+
+      <h3>PATH: como o shell acha o programa que você pediu</h3>
+      <p>Quando você digita <code>java</code>, o shell não sabe magicamente onde esse programa está — ele procura, em ordem, em cada pasta listada na variável de ambiente <code>PATH</code>, até achar um executável com esse nome. Se nenhuma pasta do <code>PATH</code> tiver <code>java</code>, o shell responde algo como <code>command not found</code> — quase sempre um problema de instalação ou de <code>PATH</code> mal configurado, não um bug do Java.</p>
+      <pre class="code">command -v java     <span class="com"># mostra o caminho completo do executável "java" que o shell usaria</span>
+command -v javac
+echo $PATH          <span class="com"># lista as pastas onde o shell procura (Linux/macOS/bash-like)</span></pre>
+      <div class="secret"><code>command -v</code> é a forma recomendada pelo padrão POSIX para essa pergunta, e funciona de modo previsível em qualquer shell compatível — ela também reconhece corretamente comandos <em>builtin</em> (embutidos no próprio shell, sem executável separado), o que <code>which</code> nem sempre faz de forma consistente entre sistemas. <code>which</code> ainda é comum e você vai vê-lo em tutoriais, mas prefira <code>command -v</code> quando o objetivo é um script confiável.</div>
+
+      <h3>Quoting: por que espaços quebram comandos</h3>
+      <p>O shell separa o que você digita em pedaços usando espaço como delimitador — então <code>cd Meus Documentos</code> vira dois argumentos (<code>Meus</code> e <code>Documentos</code>), não um caminho com espaço. Aspas dizem ao shell "trate isto como um único pedaço":</p>
+      <pre class="code">cd "Meus Documentos"     <span class="com"># aspas duplas -- trata o espaço como parte do nome, não como separador</span>
+echo 'texto literal $HOME' <span class="com"># aspas simples -- normalmente impedem expansão de variáveis (varia por shell)</span>
+echo "usuário: $HOME"      <span class="com"># aspas duplas -- normalmente permitem expansão de variáveis (varia por shell)</span></pre>
+      <p>As regras exatas de quoting (o que expande dentro de aspas simples vs. duplas, como escapar um caractere especial) variam entre <code>bash</code>/<code>zsh</code>, <code>fish</code> e <code>PowerShell</code> — o princípio ("agrupar texto com espaço como se fosse um só argumento") é portável; a sintaxe exata não é.</p>
+
+      <h3>Redirecionamento: mandando saída para um arquivo</h3>
+      <pre class="code">java Main > saida.txt      <span class="com"># manda o stdout (saída normal) para dentro do arquivo, sobrescrevendo</span>
+java Main >> saida.txt     <span class="com"># mesma coisa, mas ANEXA ao final em vez de sobrescrever</span>
+java Main < entrada.txt    <span class="com"># o conteúdo de entrada.txt vira o stdin (entrada) do programa, como se você tivesse digitado</span>
+java Main 2> erros.txt     <span class="com"># manda só o stderr (saída de erro) para o arquivo</span>
+java Main > saida.txt 2>&1 <span class="com"># manda stdout E stderr para o MESMO arquivo</span></pre>
+      <p>Todo processo tem três canais padrão: <strong>stdin</strong> (entrada), <strong>stdout</strong> (saída normal) e <strong>stderr</strong> (saída de erro) — os mesmos três canais que a Process API do Java (capítulo dedicado, mais adiante) expõe para processos filhos que você mesmo iniciar do seu código.</p>
+
+      <h3>Pipes: conectando um comando ao outro</h3>
+      <pre class="code">cat log.txt | grep "erro" | head -n 10</pre>
+      <p>O caractere <code>|</code> (pipe) conecta o <strong>stdout do processo à esquerda</strong> diretamente ao <strong>stdin do processo à direita</strong> — sem passar por um arquivo intermediário. No exemplo, <code>cat</code> despeja o arquivo, <code>grep</code> filtra as linhas com "erro" recebendo isso como entrada, e <code>head</code> pega só as 10 primeiras dessas linhas filtradas. Cada comando não sabe que está em um pipe — ele só lê do stdin e escreve no stdout normalmente; é o shell quem conecta os dois.</p>
+
+      <h3>Composição de comandos e exit status</h3>
+      <pre class="code">javac Main.java ; java Main    <span class="com"># ";" -- roda o segundo comando DEPOIS do primeiro, não importa o resultado</span>
+javac Main.java && java Main   <span class="com"># "&&" -- só roda o segundo se o primeiro teve SUCESSO</span>
+javac Main.java || echo "falhou a compilação" <span class="com"># "||" -- só roda o segundo se o primeiro FALHOU</span></pre>
+      <p>Essa composição depende do <strong>exit status</strong> (código de saída) de cada processo: por convenção universal em programas de linha de comando, <code>0</code> significa sucesso, e qualquer valor diferente de <code>0</code> significa falha — o significado exato de cada código diferente de zero é definido pelo próprio programa. Guarde essa ideia: o método <code>Process.exitValue()</code> da Process API, mais adiante no curso, expõe exatamente esse mesmo número para processos que você iniciar via Java.</p>
+
+      <h3>Variáveis de ambiente</h3>
+      <p><code>PATH</code> e <code>HOME</code> são exemplos de <strong>variáveis de ambiente</strong> — pares nome/valor que o sistema operacional e os programas conseguem ler. Você já viu <code>echo $PATH</code> acima; definir uma variável temporariamente (só para a sessão atual do terminal) segue uma sintaxe que muda por shell (em bash/zsh: <code>export NOME=valor</code>). Este curso não é um curso de Bash — o que importa aqui é entender que ferramentas como Maven, Docker e o próprio <code>java</code> leem configuração do ambiente, não decorar toda a sintaxe de shell scripting.</p>
+
+      <h3>Permissões: quem pode executar o quê</h3>
+      <pre class="code">ls -l script.sh
+<span class="com"># -rw-r--r-- 1 ana ana 120 ago 22 10:00 script.sh
+#  ^^^^^^^^^ permissões: dono pode ler/escrever, grupo e outros só leem -- ninguém pode EXECUTAR ainda</span>
+chmod +x script.sh   <span class="com"># adiciona permissão de execução para o arquivo</span></pre>
+      <p>Um arquivo de texto comum não é executável por padrão, mesmo que o conteúdo seja um script válido — o sistema operacional distingue "posso ler/escrever este arquivo" de "posso rodar este arquivo como programa". <code>chmod +x</code> resolve o segundo caso.</p>
+
+      <h3>Processos em execução</h3>
+      <pre class="code">ps          <span class="com"># lista processos em execução (do terminal atual, dependendo das opções)</span>
+kill 4821   <span class="com"># pede para o processo de PID 4821 terminar (não é administração de sistema ainda -- só o essencial)</span></pre>
+
+      <h3>Portabilidade: nem todo mundo usa Bash</h3>
+      <p>Este curso usa sintaxe estilo Unix (Bash/Zsh) na maior parte dos exemplos, porque é a mais comum em documentação técnica e em servidores Linux — mas isso não significa que só existe um shell, nem que <code>fish</code> ou <code>PowerShell</code> são "Bash com roupa diferente":</p>
+      <table class="cmp">
+        <tbody><tr><th>Ambiente</th><th>Onde aparece</th><th>Observação</th></tr>
+        <tr><td>Bash / Zsh (POSIX-like)</td><td>Linux, macOS, WSL</td><td>Sintaxe deste capítulo funciona nos dois com pouquíssima diferença prática neste nível.</td></tr>
+        <tr><td>fish</td><td>Instalado por escolha em Linux/macOS</td><td>Sintaxe de variáveis e scripts é deliberadamente diferente de Bash — os <em>conceitos</em> (PATH, pipe, exit status) são os mesmos.</td></tr>
+        <tr><td>PowerShell</td><td>Windows (padrão moderno)</td><td>Comandos nativos têm nomes próprios (<code>Get-ChildItem</code> em vez de <code>ls</code>, embora aliases existam); pipe conecta <em>objetos</em>, não só texto.</td></tr>
+        <tr><td>cmd.exe</td><td>Windows (legado)</td><td>Ainda existe, mas PowerShell é a opção recomendada para uso atual no Windows.</td></tr>
+      </tbody></table>
+      <p>Quando um comando deste curso for específico de um shell, trate-o como <strong>sintaxe específica</strong>; o <strong>conceito</strong> por trás (diretório atual, PATH, pipe, exit status) é portável entre todos eles.</p>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 0.0 — reconhecimento de terminal</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Abra seu terminal. Rode <code>pwd</code> e anote onde você está. Crie uma pasta <code>estudos-java</code> com <code>mkdir</code>, entre nela com <code>cd</code>, crie um arquivo de texto com <code>touch notas.txt</code>, escreva algo nele com o editor de sua preferência, e confirme o conteúdo com <code>cat notas.txt</code>. Rode <code>command -v java</code> e <code>command -v javac</code> — se algum não responder com um caminho, resolva a instalação/PATH antes de seguir para o próximo capítulo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <ul>
+            <li><code>pwd</code> mostra o caminho absoluto do diretório atual antes de qualquer navegação.</li>
+            <li><code>mkdir estudos-java &amp;&amp; cd estudos-java</code> cria e entra na pasta em sequência (usando <code>&amp;&amp;</code>, já praticado acima).</li>
+            <li><code>touch notas.txt</code> cria o arquivo vazio; o editor grava o conteúdo; <code>cat notas.txt</code> confirma o que foi salvo.</li>
+            <li>Se <code>command -v java</code> não retornar um caminho, o problema é de instalação do JDK ou de configuração do <code>PATH</code> — resolva isso antes do capítulo "Introdução &amp; ambiente", que pressupõe <code>java</code>/<code>javac</code> já funcionando.</li>
+          </ul>
+        </div>
+      </div>
+    </section>

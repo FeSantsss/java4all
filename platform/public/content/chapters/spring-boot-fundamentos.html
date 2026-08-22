@@ -15,7 +15,25 @@
         SpringApplication.run(Aplicacao.class, args);
     }
 }</pre>
-      <p><code>@SpringBootApplication</code> combina configuração, component scanning e habilitação da auto-configuração. As auto-configurações são condicionais: observam classes presentes, propriedades e beans já definidos. Declarar seu próprio bean costuma fazer a configuração padrão recuar, mas isso precisa ser verificado com o relatório de condições e testes.</p>
+      <p><code>@SpringBootApplication</code> combina três anotações em uma: <code>@Configuration</code> (a classe pode declarar <code>@Bean</code>), <code>@ComponentScan</code> (escaneia o pacote atual e subpacotes por <code>@Component</code>/<code>@Service</code>/<code>@Repository</code>/<code>@Controller</code>) e <code>@EnableAutoConfiguration</code> (ativa o mecanismo de auto-configuração). É esse terceiro pedaço que faz a "mágica" acontecer — e ela é mais mecânica do que parece.</p>
+
+      <h3>Auto-configuração não é mágica: é uma classe @Configuration com condições</h3>
+      <p>Por trás de cada "recurso automático" do Spring Boot existe uma classe <code>@Configuration</code> comum, anotada com condições que decidem se ela deve ou não se aplicar. Uma versão simplificada de como o Boot decide auto-configurar um <code>DataSource</code> H2 embutido se parece com isto:</p>
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="annotation">@ConditionalOnClass</span>(DataSource.<span class="kw">class</span>) <span class="com">// só se ativa se a classe DataSource estiver no classpath (driver JDBC presente)</span>
+<span class="annotation">@ConditionalOnMissingBean</span>(DataSource.<span class="kw">class</span>) <span class="com">// só se ativa se VOCÊ ainda não declarou seu próprio DataSource</span>
+<span class="annotation">@ConditionalOnProperty</span>(prefix = <span class="str">"spring.datasource"</span>, name = <span class="str">"url"</span>) <span class="com">// só se ativa se essa propriedade existir</span>
+<span class="kw">public class</span> <span class="cls">DataSourceAutoConfiguration</span> {
+    <span class="annotation">@Bean</span>
+    <span class="kw">public</span> DataSource <span class="fn">dataSource</span>(DataSourceProperties props) { <span class="kw">return</span> props.initializeDataSourceBuilder().build(); }
+}</pre>
+      <p>Isso explica exatamente por que "declarar seu próprio bean faz a configuração padrão recuar": <code>@ConditionalOnMissingBean</code> literalmente verifica se já existe um bean daquele tipo no contexto antes de criar o seu — se você declarar seu próprio <code>@Bean DataSource</code>, a condição falha, e a auto-configuração do Boot simplesmente não roda. Não há prioridade nem sobrescrita mágica: é uma checagem condicional comum, só que avaliada automaticamente pelo framework antes de cada <code>@Configuration</code> candidata.</p>
+
+      <h3>Laboratório: descobrindo auto-configuração de verdade, não só ouvindo falar dela</h3>
+      <p>Em vez de aceitar que "o Boot configura sozinho", prove isso você mesmo:</p>
+      <pre class="code">./mvnw spring-boot:run -Dspring-boot.run.arguments=--debug</pre>
+      <p>A flag <code>--debug</code> imprime o <strong>Condition Evaluation Report</strong> no início do log — uma lista de TODAS as auto-configurações candidatas, divididas em "Positive matches" (as que ativaram, com a razão exata) e "Negative matches" (as que não ativaram, e por quê). Procure por <code>DataSourceAutoConfiguration</code> no relatório: se seu projeto tem um driver JDBC no classpath e uma propriedade <code>spring.datasource.url</code>, ela aparece em "Positive matches" citando exatamente as duas condições que discutimos acima. Remova a dependência do driver do <code>pom.xml</code> e rode de novo — ela migra para "Negative matches", com a razão "required class DataSource not found". Isso transforma "auto-configuração" de um conceito abstrato em algo que você literalmente observou ligar e desligar.</p>
+
       <h3>Configuração tipada</h3>
       <pre class="code"><span class="annotation">@ConfigurationProperties</span>(<span class="str">"pagamentos"</span>)
 <span class="kw">public record</span> PagamentoProperties(
@@ -27,8 +45,30 @@
   timeout: 2s
   tentativas: 3</pre>
       <p><strong>Configuração externa</strong> mantém valores que variam por ambiente fora do código. O <code>@ConfigurationProperties</code> agrupa esses valores em um tipo Java; as anotações de validação impedem a aplicação de iniciar com configuração inválida. Prefira isso a espalhar <code>@Value</code>. Nunca forneça segredo real como padrão. <strong>Profiles</strong> ativam conjuntos nomeados de configuração e devem representar diferenças legítimas de ambiente, não combinações incontáveis de comportamento.</p>
+
+      <h3>Property sources e a ordem de precedência</h3>
+      <p>O mesmo nome de propriedade (<code>pagamentos.timeout</code>, por exemplo) pode vir de várias origens ao mesmo tempo — o Spring Boot resolve isso com uma ordem de precedência fixa. Do maior para o menor peso (as primeiras vencem as últimas em caso de conflito), as fontes mais usadas na prática:</p>
+      <ol>
+        <li><strong>Argumentos de linha de comando</strong> — <code>java -jar app.jar --pagamentos.timeout=5s</code></li>
+        <li><strong>Variáveis de ambiente do sistema operacional</strong> — <code>PAGAMENTOS_TIMEOUT=5s</code> (o Boot converte automaticamente <code>PAGAMENTOS_TIMEOUT</code> para <code>pagamentos.timeout</code>)</li>
+        <li><strong><code>application-{profile}.properties/yml</code></strong> específico do profile ativo (ex.: <code>application-prod.yml</code>)</li>
+        <li><strong><code>application.properties/yml</code></strong> — a configuração base do projeto</li>
+        <li><strong>Valores default</strong> declarados no próprio código (ex.: um campo com valor inicial no record de <code>@ConfigurationProperties</code>)</li>
+      </ol>
+      <p>Essa ordem é o motivo pelo qual definir uma variável de ambiente em produção sobrescreve o que está no <code>application.properties</code> sem precisar tocar em código ou reconstruir o artefato — e por que um argumento de linha de comando passado manualmente (útil para depurar um valor específico) sempre vence qualquer arquivo de configuração.</p>
+      <div class="warn"><b>Não confunda argumentos de aplicação com argumentos da JVM.</b> <code>java -jar app.jar --server.port=8081</code> (dois traços, depois do jar) é um argumento de <em>programa</em>, lido pelo Spring; <code>java -Dserver.port=8081 -jar app.jar</code> (um traço, antes do jar, com <code>-D</code>) define uma <em>system property</em> da JVM — o Spring também lê essa, mas em posição de precedência diferente. Misturar os dois formatos por engano é uma causa comum de "a propriedade não está pegando".</div>
+
+      <h3>Logging inicial e encerramento gracioso</h3>
+      <p>Por padrão, o Spring Boot usa <strong>Logback</strong> (via SLF4J, capítulo 27) e imprime no console durante o startup: a versão do Spring Boot, o profile ativo, o tempo até ficar pronto para aceitar requisições, e a porta do servidor embutido. Esses logs iniciais já são uma primeira fonte de diagnóstico — "aplicação não sobe" quase sempre tem a causa raiz visível ali, antes de qualquer stack trace.</p>
+      <pre class="code"><span class="com"># application.properties</span>
+server.shutdown=graceful
+spring.lifecycle.timeout-per-shutdown-phase=20s</pre>
+      <p><strong>Shutdown gracioso</strong> (<code>server.shutdown=graceful</code>) faz o servidor embutido parar de aceitar <strong>novas</strong> requisições ao receber o sinal de encerramento, mas espera até um limite de tempo para as requisições <strong>em andamento</strong> terminarem antes de desligar de fato — evitando cortar pela metade uma requisição que já estava sendo processada quando o processo recebeu SIGTERM (por exemplo, durante um deploy). Sem isso, um redeploy pode derrubar requisições em andamento sem aviso.</p>
+
       <h3>Starters e versões</h3>
       <p>Use o BOM/dependency management da versão de Spring Boot adotada e evite fixar versões individuais de bibliotecas gerenciadas sem motivo. O curso assume <strong>Java 21</strong>; a versão exata do Spring Boot deve estar registrada no projeto e no README, porque compatibilidade de springdoc, Testcontainers e plugins depende dela.</p>
       <div class="warn"><b>JSON e ObjectMapper:</b> Jackson é a biblioteca que o Boot normalmente usa para converter objetos Java e JSON; <code>ObjectMapper</code> é seu objeto central de configuração e conversão. Declarar um <code>new ObjectMapper()</code> isolado pode perder módulos e customizações do Boot. Prefira customizadores, módulos Jackson como beans ou injete o mapper auto-configurado.</div>
       <div class="exercise"><div class="exercise-head"><h4>Laboratório — explique o bootstrap</h4><span class="exercise-tag m">médio</span></div><p>Crie uma API pelo Initializr com Web, Validation e Actuator. Rode com <code>--debug</code>, encontre a auto-configuração do servidor, sobrescreva uma propriedade tipada e escreva um teste que falha quando a configuração é inválida.</p><button class="reveal-btn">Ver critérios</button><div class="solution"><p>O relatório deve distinguir condições positivas e negativas; a aplicação não deve acessar variável de ambiente diretamente dentro da regra de negócio.</p></div></div>
+
+      <div class="exercise"><div class="exercise-head"><h4>Exercício — precedência de configuração na prática</h4><span class="exercise-tag m">médio</span></div><p>Defina <code>server.port=8080</code> em <code>application.properties</code>. Rode a aplicação três vezes: (1) sem nenhum override; (2) com a variável de ambiente <code>SERVER_PORT=8090</code>; (3) com <code>SERVER_PORT=8090</code> definida E o argumento <code>--server.port=8095</code> passado na linha de comando. Anote a porta real usada em cada execução e explique qual fonte venceu em cada caso.</p><button class="reveal-btn">Ver solução</button><div class="solution"><p>(1) 8080, do <code>application.properties</code>. (2) 8090, a variável de ambiente sobrescreve o arquivo. (3) 8095, o argumento de linha de comando vence tanto a variável de ambiente quanto o arquivo — é a fonte de maior precedência entre as três.</p></div></div>
     </section>

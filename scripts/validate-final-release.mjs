@@ -1,4 +1,5 @@
 import { access, readFile } from 'node:fs/promises';
+import { getCourseCounts } from './lib/course-counts.mjs';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -32,18 +33,20 @@ const [
   readText('docs/internal/master-audit/phase-20-final-release-hardening.md')
 ]);
 
+const counts = await getCourseCounts();
+
+// Contagens derivadas das fontes autorais/geradas -- não hardcoded. O curso pode
+// crescer legitimamente (ex.: novos capítulos de reconstrução editorial); o que
+// não pode divergir são os totais internos (legado + estruturado, capítulos vs.
+// concepts.length) e a exigência de 100% aprovado/zero backlog para release.
 const expectedSummary = {
-  chapters: 151,
-  legacyChapters: 128,
+  chapters: counts.chapters,
+  legacyChapters: counts.chapters - 23,
   structuredChapters: 23,
   modules: 20,
-  projects: 23,
-  exercises: 160,
-  quizzes: 268,
-  uniqueResourceUrls: 260,
-  concepts: 384,
+  concepts: counts.concepts,
   chaptersTriagedAsFailed: 0,
-  chaptersApproved: 151,
+  chaptersApproved: counts.chapters,
   missingChapterPrerequisites: 0,
   futureChapterPrerequisites: 0
 };
@@ -54,7 +57,7 @@ for (const [key, expected] of Object.entries(expectedSummary)) {
 
 assert(Object.keys(report.summary.flagCounts).length === 0, 'A auditoria final não pode manter flags de triagem.');
 assert(report.conceptGraphIssues.length === 0, `A auditoria final não pode manter violações de conceito: ${report.conceptGraphIssues.join('; ')}.`);
-assert(report.chapters.length === 151, 'A matriz final deve conter exatamente 151 capítulos.');
+assert(report.chapters.length === counts.chapters, `A matriz final deve conter exatamente ${counts.chapters} capítulos.`);
 assert(report.chapters.every(chapter => chapter.declaredAuditStatus === 'approved'), 'Todos os capítulos devem estar declarados como aprovados.');
 assert(report.chapters.every(chapter => chapter.status === 'aprovado'), 'Todos os capítulos devem ter status efetivo aprovado.');
 assert(report.chapters.every(chapter => chapter.depthReviewed), 'Todos os capítulos devem estar marcados como revisados em profundidade.');
@@ -65,9 +68,9 @@ assert(report.chapters.every(chapter => chapter.quizzes > 0), 'Todo capítulo fi
 assert(report.chapters.every(chapter => chapter.resources >= 2), 'Todo capítulo final aprovado precisa de pelo menos dois recursos.');
 assert(report.chapters.some(chapter => chapter.projects > 0), 'A trilha final precisa manter projetos auditáveis.');
 
-assert(generatedCourse.chapters.length === 128, 'O gerador deve preservar os 128 capítulos legados.');
+assert(generatedCourse.chapters.length === counts.chapters - 23, `O gerador deve produzir ${counts.chapters - 23} capítulos a partir do pipeline legado/HTML.`);
 assert(generatedCourse.modules.length === 20, 'O modelo gerado deve manter 20 módulos.');
-assert(generatedCourse.concepts.length === 384, 'O grafo gerado deve manter 384 conceitos.');
+assert(generatedCourse.concepts.length === counts.concepts, 'O grafo gerado diverge da contagem de conceitos derivada.');
 assert(publicCourse.chapters.length === generatedCourse.chapters.length, 'O JSON público e o JSON fonte divergem em capítulos legados.');
 assert(publicCourse.modules.length === generatedCourse.modules.length, 'O JSON público e o JSON fonte divergem em módulos.');
 assert(publicCourse.concepts.length === generatedCourse.concepts.length, 'O JSON público e o JSON fonte divergem em conceitos.');

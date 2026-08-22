@@ -2,8 +2,8 @@
       <div class="section-head"><span class="section-num">68</span><h2 class="section-title">Spring Cache Abstraction</h2></div>
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
-        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#redis">38 · Redis</a>, <a class="prereq-tag" href="#spring-aop">70 · Spring AOP</a></div>
       </div>
 
@@ -34,7 +34,27 @@ spring.data.redis.port=6379</pre>
 
       <div class="secret"><code>@Cacheable</code> é literalmente um aspecto AOP (capítulo 70) construído pelo próprio time do Spring: o método real (<code>buscarPorId</code>) só é chamado se a chave não existir no cache — o proxy intercepta a chamada, checa o Redis primeiro, e só delega para o código real em caso de cache miss. É exatamente o padrão que você implementou manualmente no exercício 38.1, formalizado em uma anotação.</div>
 
-      <div class="warn"><b>O mesmo aviso do capítulo 38 continua valendo, agora automatizado:</b> esquecer o <code>@CacheEvict</code> correspondente em métodos de atualização é a causa mais comum de "por que o sistema mostra dado desatualizado" com Spring Cache — a anotação não invalida sozinha, você precisa declarar explicitamente qual operação de escrita deveria limpar qual cache.</div>
+      <div class="warn"><b>Sendo um proxy, <code>@Cacheable</code> herda a mesma limitação de self-invocation já vista em <code>@Transactional</code>/<code>@PreAuthorize</code>/<code>@CircuitBreaker</code> (capítulo 70):</b> chamar <code>this.buscarPorId(id)</code> de dentro de outro método do <strong>mesmo</strong> <code>LivroServico</code> nunca passa pelo proxy — o cache é ignorado silenciosamente, sem erro nenhum, e o método real roda toda vez. Se um método precisa reaproveitar o cache de outro, a chamada precisa vir de <strong>fora</strong> da classe (via injeção), nunca de <code>this</code>.</div>
+
+      <h3>Key generation: como o Spring decide a chave do cache</h3>
+      <p><code>key = "#id"</code> é uma expressão <strong>SpEL</strong> (Spring Expression Language) referenciando o parâmetro <code>id</code> do método. Sem <code>key</code> explícita, o <code>SimpleKeyGenerator</code> padrão entra em ação — e seu comportamento surpreende quem nunca leu a documentação:</p>
+      <pre class="code"><span class="annotation">@Cacheable</span>(<span class="str">"livros-por-filtro"</span>) <span class="com">// sem "key": SimpleKeyGenerator combina TODOS os parâmetros</span>
+<span class="kw">public</span> List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">buscarComFiltro</span>(<span class="kw">String</span> categoria, <span class="kw">int</span> pagina) {
+    <span class="com">// chave = SimpleKey["ficcao", 0] -- os dois parâmetros definem a chave.
+    // Chamar buscarComFiltro("ficcao", 1) gera uma chave DIFERENTE -- cache miss esperado.</span>
+    ...
+}
+
+<span class="annotation">@Cacheable</span>(value = <span class="str">"livros-por-filtro"</span>, key = <span class="str">"#categoria + '-' + #pagina"</span>) <span class="com">// chave explícita, legível</span>
+<span class="kw">public</span> List&lt;<span class="cls">LivroDTO</span>&gt; <span class="fn">buscarComFiltroExplicito</span>(<span class="kw">String</span> categoria, <span class="kw">int</span> pagina) { ... }</pre>
+      <p>Sem parâmetro nenhum, o <code>SimpleKeyGenerator</code> usa uma chave fixa (<code>SimpleKey.EMPTY</code>) — todo mundo que chama o método compartilha a mesma entrada de cache, o que geralmente é o comportamento desejado para dados globais (configuração, lista fixa). O problema real aparece com múltiplos parâmetros: é fácil esquecer que a chave composta muda a cada combinação diferente, multiplicando entradas de cache sem perceber.</p>
+
+      <h3>Cache stampede: quando a expiração vira um problema de escala</h3>
+      <p>Uma chave popular expira. No mesmo instante, dezenas de requisições concorrentes checam o cache, todas encontram <em>miss</em>, e todas disparam a mesma consulta cara ao banco simultaneamente — o cache, que existia para <em>proteger</em> o banco, momentaneamente amplifica a carga exatamente quando ela deveria estar mais baixa. Esse efeito tem nome: <strong>cache stampede</strong> (ou <em>thundering herd</em>). Duas mitigações comuns: <strong>TTL com jitter</strong> (um pouco de variação aleatória no tempo de expiração de cada chave, para que chaves populares não expirem todas no mesmo milissegundo) e um padrão de <strong>lock/single-flight</strong> (só a primeira requisição que encontra o miss recalcula o valor; as demais esperam o resultado dela em vez de recalcular em paralelo).</p>
+
+      <h3>TTL: o cache não deveria durar para sempre</h3>
+      <pre class="code">spring.cache.redis.time-to-live=600000 <span class="com"># 10 minutos, em milissegundos -- vale para todos os caches por padrão</span></pre>
+      <p>Sem TTL configurado, uma entrada de cache no Redis pode viver indefinidamente — se o dado de origem mudar por um caminho que não passa pelo <code>@CacheEvict</code> (uma migration manual, um job em batch, outro serviço escrevendo direto no banco), o cache fica desatualizado para sempre, sem nenhum mecanismo de autocorreção. TTL é uma rede de segurança: mesmo que a invalidação explícita falhe ou seja esquecida, o dado errado tem prazo de validade.</p>
 
       <div class="study-tip">Comece sempre sem cache. Adicione <code>@Cacheable</code> apenas depois de identificar, com dados reais (não suposição), que um método específico é chamado com frequência e é caro o suficiente para justificar a complexidade extra de invalidação. Cache prematuro tende a introduzir bugs de dado desatualizado sem ganho de performance mensurável.</div>
 

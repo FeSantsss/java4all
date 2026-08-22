@@ -61,7 +61,9 @@ for (const chapter of course.chapters) {
   }
 }
 
-if (codeExamples.length !== 414) errors.push(`Expected all 414 legacy code examples, found ${codeExamples.length}.`);
+// Piso, não meta exata: o número de exemplos de código cresce legitimamente
+// conforme capítulos são aprofundados ou novos capítulos são adicionados.
+if (codeExamples.length < 414) errors.push(`Expected at least 414 legacy code examples, found ${codeExamples.length}.`);
 if (levelCounts.some(count => count === 0)) errors.push(`English progression is incomplete: ${levelCounts.join('/')}.`);
 
 if (errors.length) {

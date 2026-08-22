@@ -15,7 +15,7 @@ describe('complete React course shell', () => {
   it('renders identity, progress, resources and technical English', async () => {
     render(<App course={course} />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' })).toBeInTheDocument();
     expect(screen.getByText('java4br')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Central de estudos' })).toBeInTheDocument();
     expect(screen.getByText(/Technical English/)).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('complete React course shell', () => {
 
   it('navigates to a mandatory structured chapter and persists learning actions', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Java HttpClient e JSON sem framework web' }));
     expect(screen.getByRole('heading', { level: 1, name: 'Java HttpClient e JSON sem framework web' })).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('complete React course shell', () => {
 
   it('filters the full navigation explicitly by title', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Buscar pelo título' }), { target: { value: 'Spring' } });
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Spring Core — IoC/DI oficial' })).toBeInTheDocument());
@@ -287,7 +287,9 @@ describe('complete React course shell', () => {
 
   it('renders the complete legacy exercise solution and the Markdown workspace', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
+    fireEvent.click(screen.getByRole('button', { name: 'Introdução & ambiente' }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Introdução & ambiente' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver solução' }));
     expect(screen.getByText((_, element) => (
@@ -301,7 +303,7 @@ describe('complete React course shell', () => {
 
   it('exposes complete glossary definitions and executable learning panels', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.click(screen.getByRole('button', { name: 'Central de estudos' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Domínio e erros' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Glossário' }));
@@ -315,7 +317,7 @@ describe('complete React course shell', () => {
 
   it('switches between system, high-contrast and real-white themes', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.click(screen.getByRole('button', { name: /Preferências/ }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Alto contraste' }));
@@ -330,7 +332,7 @@ describe('complete React course shell', () => {
 
   it('keeps the editable daily study goal in the restored overview', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.click(screen.getByRole('button', { name: 'Central de estudos' }));
     const goal = screen.getByRole('combobox', { name: 'Meta diária' });
     fireEvent.change(goal, { target: { value: '45' } });
@@ -340,7 +342,7 @@ describe('complete React course shell', () => {
 
   it('stores contextual English evidence and runs a Java example locally', async () => {
     render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.change(screen.getByRole('textbox', { name: 'Evidence in English no capítulo' }), { target: { value: 'The JVM executes bytecode.' } });
     expect(screen.getByRole('textbox', { name: 'Evidence in English no capítulo' })).toHaveValue('The JVM executes bytecode.');
 

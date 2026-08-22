@@ -2,164 +2,1487 @@
   "version": 1,
   "phase": 16,
   "concepts": [
-    {"id":"message-envelope-payload-metadata","name":"Envelope de mensagem, payload e metadados","aliases":["message envelope","payload","metadata"],"introducedIn":"mensageria","reinforcedIn":["in-memory-event-bus","aws-sns-sqs"],"prerequisiteConceptIds":["json-formato-contrato","temporal-coupling-sync"],"commonConfusions":["mensagem é só o JSON do domínio","metadados são detalhe opcional"],"outcomes":["separar dado de negócio, identidade, tipo, versão, correlação e metadados operacionais"]},
-    {"id":"event-command-message-intent","name":"Evento, comando e mensagem por intenção","aliases":["event","command","message"],"introducedIn":"mensageria","reinforcedIn":["in-memory-event-bus","messaging-model","saga-schema-ordering"],"prerequisiteConceptIds":["bounded-context-context-map"],"commonConfusions":["todo nome no passado é evento correto","evento é chamada remota sem resposta"],"outcomes":["nomear mensagens pelo tempo e pela responsabilidade esperada"]},
-    {"id":"queue-work-competing-consumers","name":"Queue e consumidores competindo por trabalho","aliases":["queue","competing consumers"],"introducedIn":"mensageria","reinforcedIn":["messaging-model","aws-sns-sqs"],"prerequisiteConceptIds":["temporal-coupling-sync"],"commonConfusions":["queue entrega cópia para todos","mais consumidores sempre preservam ordem"],"outcomes":["distribuir trabalho com redelivery, backlog e ownership claro"]},
-    {"id":"pubsub-fanout-subscription","name":"Pub/sub, fan-out e assinatura durável","aliases":["pub/sub","fan-out","subscription"],"introducedIn":"mensageria","reinforcedIn":["messaging-model","aws-sns-sqs"],"prerequisiteConceptIds":["event-command-message-intent"],"commonConfusions":["fan-out é o mesmo que vários workers na mesma fila","publicar evento garante que todo consumidor já processou"],"outcomes":["desenhar consumidores independentes com cópias e ritmos próprios"]},
-    {"id":"delivery-at-least-once-idempotency","name":"At-least-once e idempotência do consumidor","aliases":["at-least-once","idempotent consumer"],"introducedIn":"mensageria","reinforcedIn":["delivery-failure-lab","kafka-confiavel"],"prerequisiteConceptIds":["http-idempotencia-seguranca","partial-failure-unknown-state"],"commonConfusions":["at-least-once significa exatamente uma vez","DLQ elimina necessidade de idempotência"],"outcomes":["absorver duplicação e reentrega sem corromper estado"]},
-    {"id":"broker-backlog-backpressure","name":"Broker, backlog e backpressure operacional","aliases":["broker","backlog","backpressure"],"introducedIn":"messaging-model","reinforcedIn":["aws-sns-sqs","eda-observability-security","kafka"],"prerequisiteConceptIds":["metrics-cardinality-labels"],"commonConfusions":["broker é só transporte invisível","backlog alto sempre é incidente"],"outcomes":["medir diferença entre produção e consumo com limites, retenção e alertas"]},
-    {"id":"sns-topic-fanout-policy","name":"SNS topic, assinatura e policy de fan-out","aliases":["SNS topic","subscription policy"],"introducedIn":"aws-sns-sqs","reinforcedIn":["delivery-failure-lab"],"prerequisiteConceptIds":["pubsub-fanout-subscription","runtime-secret-boundary"],"commonConfusions":["SNS guarda mensagens para qualquer consumo futuro","policy permissiva é detalhe de laboratório"],"outcomes":["publicar em tópico e autorizar filas específicas com menor privilégio"]},
-    {"id":"sqs-queue-visibility-receipt","name":"SQS queue, receipt handle e visibility timeout","aliases":["SQS queue","receipt handle","visibility timeout"],"introducedIn":"aws-sns-sqs","reinforcedIn":["delivery-failure-lab","async-integration-tests"],"prerequisiteConceptIds":["queue-work-competing-consumers"],"commonConfusions":["receber apaga a mensagem","visibility timeout é lock permanente"],"outcomes":["processar, apagar após sucesso e aceitar reentrega como comportamento normal"]},
-    {"id":"fifo-deduplication-group","name":"FIFO, deduplicação e message group","aliases":["FIFO queue","message group","deduplication"],"introducedIn":"aws-sns-sqs","reinforcedIn":["delivery-failure-lab"],"prerequisiteConceptIds":["delivery-at-least-once-idempotency"],"commonConfusions":["FIFO dá ordenação global gratuita","deduplication resolve efeito externo duplicado"],"outcomes":["limitar ordenação e deduplicação ao contrato real do grupo de mensagens"]},
-    {"id":"dlq-redrive-policy","name":"DLQ, redrive e isolamento de falha","aliases":["DLQ","dead-letter queue","redrive"],"introducedIn":"delivery-failure-lab","reinforcedIn":["eda-observability-security","async-integration-tests"],"prerequisiteConceptIds":["delivery-at-least-once-idempotency","sqs-queue-visibility-receipt"],"commonConfusions":["DLQ é lixeira eterna","redrive automático corrige bug de schema"],"outcomes":["isolar poison messages, corrigir causa e reprocessar com evidência"]},
-    {"id":"visibility-timeout-retry-window","name":"Janela de retry e visibility timeout","aliases":["retry window","visibility timeout"],"introducedIn":"delivery-failure-lab","reinforcedIn":["async-integration-tests"],"prerequisiteConceptIds":["sqs-queue-visibility-receipt","retry-backoff-jitter"],"commonConfusions":["timeout maior sempre aumenta confiabilidade","retry sem limite é seguro em mensageria"],"outcomes":["dimensionar timeout, backoff e maxReceiveCount pelo tempo real do handler"]},
-    {"id":"kafka-topic-partition-offset","name":"Kafka topic, partition e offset","aliases":["Kafka topic","partition","offset"],"introducedIn":"kafka","reinforcedIn":["spring-kafka","event-driven-profundo"],"prerequisiteConceptIds":["broker-backlog-backpressure","pubsub-fanout-subscription"],"commonConfusions":["Kafka é fila única","offset confirma efeito de negócio automaticamente"],"outcomes":["ler Kafka como log particionado com posição por consumidor"]},
-    {"id":"kafka-producer-consumer-record","name":"Producer, consumer e record Kafka","aliases":["producer","consumer","record"],"introducedIn":"kafka","reinforcedIn":["spring-kafka"],"prerequisiteConceptIds":["message-envelope-payload-metadata"],"commonConfusions":["record não precisa key","serialização é detalhe sem contrato"],"outcomes":["publicar e consumir records com key, value, headers e serialização explícitos"]},
-    {"id":"consumer-group-rebalance-offset","name":"Consumer group, rebalance e commit de offset","aliases":["consumer group","rebalance","offset commit"],"introducedIn":"kafka","reinforcedIn":["spring-kafka","kafka-confiavel"],"prerequisiteConceptIds":["kafka-topic-partition-offset","delivery-at-least-once-idempotency"],"commonConfusions":["grupo replica evento para todos","commit antes do efeito é sempre seguro"],"outcomes":["controlar divisão de partições, reprocessamento e pontos de commit"]},
-    {"id":"spring-kafka-listener-template","name":"Spring Kafka listener e KafkaTemplate","aliases":["@KafkaListener","KafkaTemplate"],"introducedIn":"spring-kafka","reinforcedIn":["kafka-confiavel"],"prerequisiteConceptIds":["kafka-producer-consumer-record","boot-bootstrap-autoconfig"],"commonConfusions":["Spring esconde semântica de offset","listener sem tratamento de erro já é confiável"],"outcomes":["integrar Kafka ao Spring preservando contratos do broker"]},
-    {"id":"kafka-schema-evolution-contract","name":"Schema evolution em eventos Kafka","aliases":["schema evolution","event version"],"introducedIn":"kafka-confiavel","reinforcedIn":["event-driven-profundo","saga-schema-ordering"],"prerequisiteConceptIds":["json-formato-contrato","contract-test-evolution"],"commonConfusions":["consumidor novo apaga compatibilidade antiga","retry corrige incompatibilidade permanente"],"outcomes":["evoluir evento com versionamento, compatibilidade e testes de contrato"]},
-    {"id":"kafka-retry-dlt-policy","name":"Retry topic e DLT no Kafka","aliases":["retry topic","DLT","dead-letter topic"],"introducedIn":"kafka-confiavel","reinforcedIn":["event-driven-profundo"],"prerequisiteConceptIds":["consumer-group-rebalance-offset","dlq-redrive-policy"],"commonConfusions":["reprocessar infinitamente melhora disponibilidade","DLT é destino final sem diagnóstico"],"outcomes":["separar falha transitória de permanente e preservar evidência para reprocessamento"]},
-    {"id":"kafka-idempotent-consumer","name":"Consumidor Kafka idempotente","aliases":["idempotent Kafka consumer"],"introducedIn":"kafka-confiavel","reinforcedIn":["outbox-inbox"],"prerequisiteConceptIds":["delivery-at-least-once-idempotency","aggregate-transaction-boundary"],"commonConfusions":["producer idempotent resolve o banco do consumidor","commit de offset equivale a transação local"],"outcomes":["registrar event ID e efeito em fronteira transacional local"]},
-    {"id":"kafka-log-replication-ordering","name":"Log replicado, ordering e retenção no Kafka","aliases":["replicated log","ordering","retention"],"introducedIn":"event-driven-profundo","reinforcedIn":["saga-schema-ordering"],"prerequisiteConceptIds":["kafka-topic-partition-offset","artifact-image-provenance"],"commonConfusions":["Kafka ordena globalmente todos os eventos","retenção substitui auditoria de domínio"],"outcomes":["usar partições e retenção respeitando semântica, custo e replay"]},
-    {"id":"partition-key-ordering-contract","name":"Chave de partição como contrato de ordenação","aliases":["partition key","ordering contract"],"introducedIn":"event-driven-profundo","reinforcedIn":["saga-schema-ordering"],"prerequisiteConceptIds":["kafka-log-replication-ordering","aggregate-transaction-boundary"],"commonConfusions":["key aleatória sempre distribui melhor","ordenar globalmente simplifica tudo"],"outcomes":["escolher key pelo aggregate/fluxo que exige ordem observável"]},
-    {"id":"kafka-offset-commit-replay","name":"Offset commit, replay e recuperação","aliases":["replay","offset reset","commit"],"introducedIn":"event-driven-profundo","reinforcedIn":["testes-integracao-avancados"],"prerequisiteConceptIds":["consumer-group-rebalance-offset","kafka-idempotent-consumer"],"commonConfusions":["replay é sempre seguro sem idempotência","reset de offset corrige bug automaticamente"],"outcomes":["reprocessar com isolamento, evidência e efeitos idempotentes"]},
-    {"id":"eda-correlation-causality","name":"Correlação, causalidade e identidade em EDA","aliases":["correlationId","causationId","eventId"],"introducedIn":"eda-observability-security","reinforcedIn":["event-driven-profundo"],"prerequisiteConceptIds":["structured-log-correlation-id","message-envelope-payload-metadata"],"commonConfusions":["um único ID serve para tudo","payload inteiro é necessário no log"],"outcomes":["rastrear fluxo assíncrono sem vazar dados sensíveis"]},
-    {"id":"async-trace-boundary","name":"Fronteira de trace assíncrono","aliases":["async span","messaging trace"],"introducedIn":"eda-observability-security","reinforcedIn":["async-integration-tests"],"prerequisiteConceptIds":["trace-span-boundary","eda-correlation-causality"],"commonConfusions":["trace assíncrono deve parecer chamada HTTP contínua","span sem contexto basta"],"outcomes":["propagar contexto em producer/consumer sem falsear causalidade"]},
-    {"id":"message-security-iam-policy","name":"Segurança de mensagem e policy IAM mínima","aliases":["message security","IAM policy"],"introducedIn":"eda-observability-security","reinforcedIn":["aws-sns-sqs"],"prerequisiteConceptIds":["runtime-secret-boundary","spring-security-authorization"],"commonConfusions":["ambiente de mensageria não tem autorização","payload pode carregar segredo por conveniência"],"outcomes":["limitar publish/consume, proteger payload e evitar vazamento operacional"]},
-    {"id":"localstack-container-boundary","name":"LocalStack/Testcontainers como fronteira de teste","aliases":["LocalStack","Testcontainers AWS"],"introducedIn":"async-integration-tests","reinforcedIn":["testes-integracao-avancados"],"prerequisiteConceptIds":["testcontainers-disposable-dependency","sqs-queue-visibility-receipt"],"commonConfusions":["emulador local é igual à cloud","container resolve desenho de teste ruim"],"outcomes":["testar contrato local documentando limites entre emulação e serviço real"]},
-    {"id":"async-awaitility-eventual-assertion","name":"Assertiva eventual com Awaitility","aliases":["Awaitility","eventual assertion"],"introducedIn":"async-integration-tests","reinforcedIn":["testes-integracao-avancados"],"prerequisiteConceptIds":["deterministic-integration-test","visibility-timeout-retry-window"],"commonConfusions":["sleep maior deixa teste determinístico","Awaitility corrige race condition"],"outcomes":["esperar condição observável com deadline e diagnóstico"]},
-    {"id":"springboot-test-slice-contract","name":"Contrato de slice test no Spring Boot","aliases":["Spring Boot test slice","@SpringBootTest"],"introducedIn":"testes-integracao-avancados","reinforcedIn":["async-integration-tests"],"prerequisiteConceptIds":["spring-kafka-listener-template","deterministic-integration-test"],"commonConfusions":["todo teste precisa subir aplicação inteira","slice simula broker real"],"outcomes":["escolher escopo de teste conforme fronteira real a validar"]},
-    {"id":"kafka-testcontainer-determinism","name":"Kafka Testcontainer determinístico","aliases":["Kafka Testcontainer"],"introducedIn":"testes-integracao-avancados","reinforcedIn":["async-integration-tests"],"prerequisiteConceptIds":["testcontainers-disposable-dependency","kafka-topic-partition-offset"],"commonConfusions":["container torna teste rápido por padrão","topic compartilhado não vaza entre testes"],"outcomes":["subir Kafka descartável com readiness, tópicos isolados e assertivas por efeito"]}
+    {
+      "id": "message-envelope-payload-metadata",
+      "name": "Envelope de mensagem, payload e metadados",
+      "aliases": [
+        "message envelope",
+        "payload",
+        "metadata"
+      ],
+      "introducedIn": "mensageria",
+      "reinforcedIn": [
+        "in-memory-event-bus",
+        "aws-sns-sqs"
+      ],
+      "prerequisiteConceptIds": [
+        "json-formato-contrato",
+        "temporal-coupling-sync"
+      ],
+      "commonConfusions": [
+        "mensagem é só o JSON do domínio",
+        "metadados são detalhe opcional"
+      ],
+      "outcomes": [
+        "separar dado de negócio, identidade, tipo, versão, correlação e metadados operacionais"
+      ]
+    },
+    {
+      "id": "event-command-message-intent",
+      "name": "Evento, comando e mensagem por intenção",
+      "aliases": [
+        "event",
+        "command",
+        "message"
+      ],
+      "introducedIn": "mensageria",
+      "reinforcedIn": [
+        "in-memory-event-bus",
+        "messaging-model",
+        "saga-schema-ordering"
+      ],
+      "prerequisiteConceptIds": [
+        "bounded-context-context-map"
+      ],
+      "commonConfusions": [
+        "todo nome no passado é evento correto",
+        "evento é chamada remota sem resposta"
+      ],
+      "outcomes": [
+        "nomear mensagens pelo tempo e pela responsabilidade esperada"
+      ]
+    },
+    {
+      "id": "queue-work-competing-consumers",
+      "name": "Queue e consumidores competindo por trabalho",
+      "aliases": [
+        "queue",
+        "competing consumers"
+      ],
+      "introducedIn": "mensageria",
+      "reinforcedIn": [
+        "messaging-model",
+        "aws-sns-sqs"
+      ],
+      "prerequisiteConceptIds": [
+        "temporal-coupling-sync"
+      ],
+      "commonConfusions": [
+        "queue entrega cópia para todos",
+        "mais consumidores sempre preservam ordem"
+      ],
+      "outcomes": [
+        "distribuir trabalho com redelivery, backlog e ownership claro"
+      ]
+    },
+    {
+      "id": "pubsub-fanout-subscription",
+      "name": "Pub/sub, fan-out e assinatura durável",
+      "aliases": [
+        "pub/sub",
+        "fan-out",
+        "subscription"
+      ],
+      "introducedIn": "mensageria",
+      "reinforcedIn": [
+        "messaging-model",
+        "aws-sns-sqs"
+      ],
+      "prerequisiteConceptIds": [
+        "event-command-message-intent"
+      ],
+      "commonConfusions": [
+        "fan-out é o mesmo que vários workers na mesma fila",
+        "publicar evento garante que todo consumidor já processou"
+      ],
+      "outcomes": [
+        "desenhar consumidores independentes com cópias e ritmos próprios"
+      ]
+    },
+    {
+      "id": "delivery-at-least-once-idempotency",
+      "name": "At-least-once e idempotência do consumidor",
+      "aliases": [
+        "at-least-once",
+        "idempotent consumer"
+      ],
+      "introducedIn": "mensageria",
+      "reinforcedIn": [
+        "delivery-failure-lab",
+        "kafka-confiavel"
+      ],
+      "prerequisiteConceptIds": [
+        "http-idempotencia-seguranca",
+        "partial-failure-unknown-state"
+      ],
+      "commonConfusions": [
+        "at-least-once significa exatamente uma vez",
+        "DLQ elimina necessidade de idempotência"
+      ],
+      "outcomes": [
+        "absorver duplicação e reentrega sem corromper estado"
+      ]
+    },
+    {
+      "id": "broker-backlog-backpressure",
+      "name": "Broker, backlog e backpressure operacional",
+      "aliases": [
+        "broker",
+        "backlog",
+        "backpressure"
+      ],
+      "introducedIn": "messaging-model",
+      "reinforcedIn": [
+        "aws-sns-sqs",
+        "eda-observability-security",
+        "kafka"
+      ],
+      "prerequisiteConceptIds": [
+        "metrics-cardinality-labels"
+      ],
+      "commonConfusions": [
+        "broker é só transporte invisível",
+        "backlog alto sempre é incidente"
+      ],
+      "outcomes": [
+        "medir diferença entre produção e consumo com limites, retenção e alertas"
+      ]
+    },
+    {
+      "id": "sns-topic-fanout-policy",
+      "name": "SNS topic, assinatura e policy de fan-out",
+      "aliases": [
+        "SNS topic",
+        "subscription policy"
+      ],
+      "introducedIn": "aws-sns-sqs",
+      "reinforcedIn": [
+        "delivery-failure-lab"
+      ],
+      "prerequisiteConceptIds": [
+        "pubsub-fanout-subscription",
+        "runtime-secret-boundary"
+      ],
+      "commonConfusions": [
+        "SNS guarda mensagens para qualquer consumo futuro",
+        "policy permissiva é detalhe de laboratório"
+      ],
+      "outcomes": [
+        "publicar em tópico e autorizar filas específicas com menor privilégio"
+      ]
+    },
+    {
+      "id": "sqs-queue-visibility-receipt",
+      "name": "SQS queue, receipt handle e visibility timeout",
+      "aliases": [
+        "SQS queue",
+        "receipt handle",
+        "visibility timeout"
+      ],
+      "introducedIn": "aws-sns-sqs",
+      "reinforcedIn": [
+        "delivery-failure-lab",
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "queue-work-competing-consumers"
+      ],
+      "commonConfusions": [
+        "receber apaga a mensagem",
+        "visibility timeout é lock permanente"
+      ],
+      "outcomes": [
+        "processar, apagar após sucesso e aceitar reentrega como comportamento normal"
+      ]
+    },
+    {
+      "id": "fifo-deduplication-group",
+      "name": "FIFO, deduplicação e message group",
+      "aliases": [
+        "FIFO queue",
+        "message group",
+        "deduplication"
+      ],
+      "introducedIn": "aws-sns-sqs",
+      "reinforcedIn": [
+        "delivery-failure-lab"
+      ],
+      "prerequisiteConceptIds": [
+        "delivery-at-least-once-idempotency"
+      ],
+      "commonConfusions": [
+        "FIFO dá ordenação global gratuita",
+        "deduplication resolve efeito externo duplicado"
+      ],
+      "outcomes": [
+        "limitar ordenação e deduplicação ao contrato real do grupo de mensagens"
+      ]
+    },
+    {
+      "id": "dlq-redrive-policy",
+      "name": "DLQ, redrive e isolamento de falha",
+      "aliases": [
+        "DLQ",
+        "dead-letter queue",
+        "redrive"
+      ],
+      "introducedIn": "delivery-failure-lab",
+      "reinforcedIn": [
+        "eda-observability-security",
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "delivery-at-least-once-idempotency",
+        "sqs-queue-visibility-receipt"
+      ],
+      "commonConfusions": [
+        "DLQ é lixeira eterna",
+        "redrive automático corrige bug de schema"
+      ],
+      "outcomes": [
+        "isolar poison messages, corrigir causa e reprocessar com evidência"
+      ]
+    },
+    {
+      "id": "visibility-timeout-retry-window",
+      "name": "Janela de retry e visibility timeout",
+      "aliases": [
+        "retry window",
+        "visibility timeout"
+      ],
+      "introducedIn": "delivery-failure-lab",
+      "reinforcedIn": [
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "sqs-queue-visibility-receipt",
+        "retry-backoff-jitter"
+      ],
+      "commonConfusions": [
+        "timeout maior sempre aumenta confiabilidade",
+        "retry sem limite é seguro em mensageria"
+      ],
+      "outcomes": [
+        "dimensionar timeout, backoff e maxReceiveCount pelo tempo real do handler"
+      ]
+    },
+    {
+      "id": "kafka-topic-partition-offset",
+      "name": "Kafka topic, partition e offset",
+      "aliases": [
+        "Kafka topic",
+        "partition",
+        "offset"
+      ],
+      "introducedIn": "kafka",
+      "reinforcedIn": [
+        "spring-kafka",
+        "event-driven-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "broker-backlog-backpressure",
+        "pubsub-fanout-subscription"
+      ],
+      "commonConfusions": [
+        "Kafka é fila única",
+        "offset confirma efeito de negócio automaticamente"
+      ],
+      "outcomes": [
+        "ler Kafka como log particionado com posição por consumidor"
+      ]
+    },
+    {
+      "id": "kafka-producer-consumer-record",
+      "name": "Producer, consumer e record Kafka",
+      "aliases": [
+        "producer",
+        "consumer",
+        "record"
+      ],
+      "introducedIn": "kafka",
+      "reinforcedIn": [
+        "spring-kafka"
+      ],
+      "prerequisiteConceptIds": [
+        "message-envelope-payload-metadata"
+      ],
+      "commonConfusions": [
+        "record não precisa key",
+        "serialização é detalhe sem contrato"
+      ],
+      "outcomes": [
+        "publicar e consumir records com key, value, headers e serialização explícitos"
+      ]
+    },
+    {
+      "id": "consumer-group-rebalance-offset",
+      "name": "Consumer group, rebalance e commit de offset",
+      "aliases": [
+        "consumer group",
+        "rebalance",
+        "offset commit"
+      ],
+      "introducedIn": "kafka",
+      "reinforcedIn": [
+        "spring-kafka",
+        "kafka-confiavel"
+      ],
+      "prerequisiteConceptIds": [
+        "kafka-topic-partition-offset",
+        "delivery-at-least-once-idempotency"
+      ],
+      "commonConfusions": [
+        "grupo replica evento para todos",
+        "commit antes do efeito é sempre seguro"
+      ],
+      "outcomes": [
+        "controlar divisão de partições, reprocessamento e pontos de commit"
+      ]
+    },
+    {
+      "id": "spring-kafka-listener-template",
+      "name": "Spring Kafka listener e KafkaTemplate",
+      "aliases": [
+        "@KafkaListener",
+        "KafkaTemplate"
+      ],
+      "introducedIn": "spring-kafka",
+      "reinforcedIn": [
+        "kafka-confiavel"
+      ],
+      "prerequisiteConceptIds": [
+        "kafka-producer-consumer-record",
+        "boot-bootstrap-autoconfig"
+      ],
+      "commonConfusions": [
+        "Spring esconde semântica de offset",
+        "listener sem tratamento de erro já é confiável"
+      ],
+      "outcomes": [
+        "integrar Kafka ao Spring preservando contratos do broker"
+      ]
+    },
+    {
+      "id": "kafka-schema-evolution-contract",
+      "name": "Schema evolution em eventos Kafka",
+      "aliases": [
+        "schema evolution",
+        "event version"
+      ],
+      "introducedIn": "kafka-confiavel",
+      "reinforcedIn": [
+        "event-driven-profundo",
+        "saga-schema-ordering"
+      ],
+      "prerequisiteConceptIds": [
+        "json-formato-contrato",
+        "contract-test-evolution"
+      ],
+      "commonConfusions": [
+        "consumidor novo apaga compatibilidade antiga",
+        "retry corrige incompatibilidade permanente"
+      ],
+      "outcomes": [
+        "evoluir evento com versionamento, compatibilidade e testes de contrato"
+      ]
+    },
+    {
+      "id": "kafka-retry-dlt-policy",
+      "name": "Retry topic e DLT no Kafka",
+      "aliases": [
+        "retry topic",
+        "DLT",
+        "dead-letter topic"
+      ],
+      "introducedIn": "kafka-confiavel",
+      "reinforcedIn": [
+        "event-driven-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "consumer-group-rebalance-offset",
+        "dlq-redrive-policy"
+      ],
+      "commonConfusions": [
+        "reprocessar infinitamente melhora disponibilidade",
+        "DLT é destino final sem diagnóstico"
+      ],
+      "outcomes": [
+        "separar falha transitória de permanente e preservar evidência para reprocessamento"
+      ]
+    },
+    {
+      "id": "kafka-idempotent-consumer",
+      "name": "Consumidor Kafka idempotente",
+      "aliases": [
+        "idempotent Kafka consumer"
+      ],
+      "introducedIn": "kafka-confiavel",
+      "reinforcedIn": [
+        "outbox-inbox"
+      ],
+      "prerequisiteConceptIds": [
+        "delivery-at-least-once-idempotency",
+        "aggregate-transaction-boundary"
+      ],
+      "commonConfusions": [
+        "producer idempotent resolve o banco do consumidor",
+        "commit de offset equivale a transação local"
+      ],
+      "outcomes": [
+        "registrar event ID e efeito em fronteira transacional local"
+      ]
+    },
+    {
+      "id": "kafka-log-replication-ordering",
+      "name": "Log replicado, ordering e retenção no Kafka",
+      "aliases": [
+        "replicated log",
+        "ordering",
+        "retention"
+      ],
+      "introducedIn": "event-driven-profundo",
+      "reinforcedIn": [
+        "saga-schema-ordering"
+      ],
+      "prerequisiteConceptIds": [
+        "kafka-topic-partition-offset",
+        "artifact-image-provenance"
+      ],
+      "commonConfusions": [
+        "Kafka ordena globalmente todos os eventos",
+        "retenção substitui auditoria de domínio"
+      ],
+      "outcomes": [
+        "usar partições e retenção respeitando semântica, custo e replay"
+      ]
+    },
+    {
+      "id": "partition-key-ordering-contract",
+      "name": "Chave de partição como contrato de ordenação",
+      "aliases": [
+        "partition key",
+        "ordering contract"
+      ],
+      "introducedIn": "event-driven-profundo",
+      "reinforcedIn": [
+        "saga-schema-ordering"
+      ],
+      "prerequisiteConceptIds": [
+        "kafka-log-replication-ordering",
+        "aggregate-transaction-boundary"
+      ],
+      "commonConfusions": [
+        "key aleatória sempre distribui melhor",
+        "ordenar globalmente simplifica tudo"
+      ],
+      "outcomes": [
+        "escolher key pelo aggregate/fluxo que exige ordem observável"
+      ]
+    },
+    {
+      "id": "kafka-offset-commit-replay",
+      "name": "Offset commit, replay e recuperação",
+      "aliases": [
+        "replay",
+        "offset reset",
+        "commit"
+      ],
+      "introducedIn": "event-driven-profundo",
+      "reinforcedIn": [
+        "testes-integracao-avancados"
+      ],
+      "prerequisiteConceptIds": [
+        "consumer-group-rebalance-offset",
+        "kafka-idempotent-consumer"
+      ],
+      "commonConfusions": [
+        "replay é sempre seguro sem idempotência",
+        "reset de offset corrige bug automaticamente"
+      ],
+      "outcomes": [
+        "reprocessar com isolamento, evidência e efeitos idempotentes"
+      ]
+    },
+    {
+      "id": "eda-correlation-causality",
+      "name": "Correlação, causalidade e identidade em EDA",
+      "aliases": [
+        "correlationId",
+        "causationId",
+        "eventId"
+      ],
+      "introducedIn": "eda-observability-security",
+      "reinforcedIn": [
+        "event-driven-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "structured-log-correlation-id",
+        "message-envelope-payload-metadata"
+      ],
+      "commonConfusions": [
+        "um único ID serve para tudo",
+        "payload inteiro é necessário no log"
+      ],
+      "outcomes": [
+        "rastrear fluxo assíncrono sem vazar dados sensíveis"
+      ]
+    },
+    {
+      "id": "async-trace-boundary",
+      "name": "Fronteira de trace assíncrono",
+      "aliases": [
+        "async span",
+        "messaging trace"
+      ],
+      "introducedIn": "eda-observability-security",
+      "reinforcedIn": [
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "trace-span-boundary",
+        "eda-correlation-causality"
+      ],
+      "commonConfusions": [
+        "trace assíncrono deve parecer chamada HTTP contínua",
+        "span sem contexto basta"
+      ],
+      "outcomes": [
+        "propagar contexto em producer/consumer sem falsear causalidade"
+      ]
+    },
+    {
+      "id": "message-security-iam-policy",
+      "name": "Segurança de mensagem e policy IAM mínima",
+      "aliases": [
+        "message security",
+        "IAM policy"
+      ],
+      "introducedIn": "eda-observability-security",
+      "reinforcedIn": [
+        "aws-sns-sqs"
+      ],
+      "prerequisiteConceptIds": [
+        "runtime-secret-boundary",
+        "spring-security-authorization"
+      ],
+      "commonConfusions": [
+        "ambiente de mensageria não tem autorização",
+        "payload pode carregar segredo por conveniência"
+      ],
+      "outcomes": [
+        "limitar publish/consume, proteger payload e evitar vazamento operacional"
+      ]
+    },
+    {
+      "id": "localstack-container-boundary",
+      "name": "LocalStack/Testcontainers como fronteira de teste",
+      "aliases": [
+        "LocalStack",
+        "Testcontainers AWS"
+      ],
+      "introducedIn": "async-integration-tests",
+      "reinforcedIn": [
+        "testes-integracao-avancados"
+      ],
+      "prerequisiteConceptIds": [
+        "testcontainers-disposable-dependency",
+        "sqs-queue-visibility-receipt"
+      ],
+      "commonConfusions": [
+        "emulador local é igual à cloud",
+        "container resolve desenho de teste ruim"
+      ],
+      "outcomes": [
+        "testar contrato local documentando limites entre emulação e serviço real"
+      ]
+    },
+    {
+      "id": "async-awaitility-eventual-assertion",
+      "name": "Assertiva eventual com Awaitility",
+      "aliases": [
+        "Awaitility",
+        "eventual assertion"
+      ],
+      "introducedIn": "async-integration-tests",
+      "reinforcedIn": [
+        "testes-integracao-avancados"
+      ],
+      "prerequisiteConceptIds": [
+        "deterministic-integration-test",
+        "visibility-timeout-retry-window"
+      ],
+      "commonConfusions": [
+        "sleep maior deixa teste determinístico",
+        "Awaitility corrige race condition"
+      ],
+      "outcomes": [
+        "esperar condição observável com deadline e diagnóstico"
+      ]
+    },
+    {
+      "id": "springboot-test-slice-contract",
+      "name": "Contrato de slice test no Spring Boot",
+      "aliases": [
+        "Spring Boot test slice",
+        "@SpringBootTest"
+      ],
+      "introducedIn": "testes-integracao-avancados",
+      "reinforcedIn": [
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "spring-kafka-listener-template",
+        "deterministic-integration-test"
+      ],
+      "commonConfusions": [
+        "todo teste precisa subir aplicação inteira",
+        "slice simula broker real"
+      ],
+      "outcomes": [
+        "escolher escopo de teste conforme fronteira real a validar"
+      ]
+    },
+    {
+      "id": "kafka-testcontainer-determinism",
+      "name": "Kafka Testcontainer determinístico",
+      "aliases": [
+        "Kafka Testcontainer"
+      ],
+      "introducedIn": "testes-integracao-avancados",
+      "reinforcedIn": [
+        "async-integration-tests"
+      ],
+      "prerequisiteConceptIds": [
+        "testcontainers-disposable-dependency",
+        "kafka-topic-partition-offset"
+      ],
+      "commonConfusions": [
+        "container torna teste rápido por padrão",
+        "topic compartilhado não vaza entre testes"
+      ],
+      "outcomes": [
+        "subir Kafka descartável com readiness, tópicos isolados e assertivas por efeito"
+      ]
+    }
   ],
   "chapters": {
     "mensageria": {
       "order": 0,
-      "objectives": ["Entender mensagem antes de broker", "Diferenciar evento, comando, queue e pub/sub", "Explicar at-least-once e duplicação com exemplos simples", "Preparar o aluno para SNS/SQS e Kafka sem salto conceitual"],
+      "objectives": [
+        "Entender mensagem antes de broker",
+        "Diferenciar evento, comando, queue e pub/sub",
+        "Explicar at-least-once e duplicação com exemplos simples",
+        "Preparar o aluno para SNS/SQS e Kafka sem salto conceitual"
+      ],
       "whyItExists": "Depois de medir acoplamento síncrono, o aluno precisa de uma porta de entrada rasa: uma mensagem é um contrato transportado no tempo. Antes de Kafka, cloud ou framework, entram intenção, envelope, fila, fan-out, duplicação e idempotência.",
-      "prerequisiteChapterIds": ["coupled-services-lab", "http", "json"],
-      "introducedConceptIds": ["message-envelope-payload-metadata", "event-command-message-intent", "queue-work-competing-consumers", "pubsub-fanout-subscription", "delivery-at-least-once-idempotency"],
-      "usedConceptIds": ["temporal-coupling-sync", "partial-failure-unknown-state", "json-formato-contrato"],
+      "prerequisiteChapterIds": [
+        "coupled-services-lab",
+        "http",
+        "json"
+      ],
+      "introducedConceptIds": [
+        "message-envelope-payload-metadata",
+        "event-command-message-intent",
+        "queue-work-competing-consumers",
+        "pubsub-fanout-subscription",
+        "delivery-at-least-once-idempotency"
+      ],
+      "usedConceptIds": [
+        "temporal-coupling-sync",
+        "partial-failure-unknown-state",
+        "json-formato-contrato"
+      ],
       "generateCompatibilityQuizzes": false,
       "prependBlocks": [
-        {"id":"mensageria-intuition","type":"intuition","authorship":"authored","title":"Mensagem desacopla tempo, não elimina responsabilidade","body":"Mensageria começa com uma ideia simples: em vez de exigir que outro serviço responda agora, você registra algo que outro consumidor pode processar depois. Isso reduz acoplamento temporal, mas cria novas responsabilidades: contrato da mensagem, duplicação, ordem, reprocessamento e observabilidade.","analogyLimit":"Correio ajuda como metáfora de envio, mas software precisa de IDs, versão, retry, DLQ e efeito idempotente."},
-        {"id":"mensageria-shallow-first","type":"mental-model","authorship":"authored","title":"Comece pelo caminho mais raso","body":"Na primeira leitura, pense em três perguntas: o que aconteceu, quem precisa saber e o que fazer se chegar duas vezes. Broker, partição e offset ficam para depois.","flow":["1. Produtor cria uma mensagem com tipo, payload e metadados.","2. Canal guarda ou distribui a mensagem conforme a topologia.","3. Consumidor processa e confirma somente depois do efeito esperado.","4. Se falhar, a mensagem pode voltar; por isso o efeito precisa tolerar duplicação."]}
+        {
+          "id": "mensageria-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Mensagem desacopla tempo, não elimina responsabilidade",
+          "body": "Mensageria começa com uma ideia simples: em vez de exigir que outro serviço responda agora, você registra algo que outro consumidor pode processar depois. Isso reduz acoplamento temporal, mas cria novas responsabilidades: contrato da mensagem, duplicação, ordem, reprocessamento e observabilidade.",
+          "analogyLimit": "Correio ajuda como metáfora de envio, mas software precisa de IDs, versão, retry, DLQ e efeito idempotente."
+        },
+        {
+          "id": "mensageria-shallow-first",
+          "type": "mental-model",
+          "authorship": "authored",
+          "title": "Comece pelo caminho mais raso",
+          "body": "Na primeira leitura, pense em três perguntas: o que aconteceu, quem precisa saber e o que fazer se chegar duas vezes. Broker, partição e offset ficam para depois.",
+          "flow": [
+            "1. Produtor cria uma mensagem com tipo, payload e metadados.",
+            "2. Canal guarda ou distribui a mensagem conforme a topologia.",
+            "3. Consumidor processa e confirma somente depois do efeito esperado.",
+            "4. Se falhar, a mensagem pode voltar; por isso o efeito precisa tolerar duplicação."
+          ]
+        }
       ],
       "appendBlocks": [
-        {"id":"mensageria-topology-table","type":"table","authorship":"authored","title":"Primeira decisão de topologia","headers":["Pergunta","Use","Evite confundir com"],"rows":[["Um trabalhador deve assumir uma tarefa?","Queue com consumidores competindo","Pub/sub"],["Vários contextos independentes devem reagir ao fato?","Pub/sub/fan-out","Vários workers no mesmo grupo"],["Preciso de resposta imediata para continuar a tela?","HTTP/síncrono ou comando com estado explícito","Evento usado como RPC escondido"]]},
-        {"id":"mensageria-quiz","type":"quiz","authorship":"authored","conceptId":"delivery-at-least-once-idempotency","prompt":"Qual é a consequência prática de at-least-once?","options":[{"id":"mensageria-a","label":"A mensagem pode ser entregue mais de uma vez; o consumidor precisa tornar o efeito idempotente.","correct":true,"explanation":"At-least-once privilegia não perder mensagem, aceitando duplicação."},{"id":"mensageria-b","label":"O broker garante que o banco do consumidor nunca será alterado duas vezes.","correct":false,"explanation":"Broker não controla a transação local do consumidor."},{"id":"mensageria-c","label":"A mensagem vira síncrona e dispensa observabilidade.","correct":false,"explanation":"Assincronia exige ainda mais correlação e métrica."}]}
+        {
+          "id": "mensageria-topology-table",
+          "type": "table",
+          "authorship": "authored",
+          "title": "Primeira decisão de topologia",
+          "headers": [
+            "Pergunta",
+            "Use",
+            "Evite confundir com"
+          ],
+          "rows": [
+            [
+              "Um trabalhador deve assumir uma tarefa?",
+              "Queue com consumidores competindo",
+              "Pub/sub"
+            ],
+            [
+              "Vários contextos independentes devem reagir ao fato?",
+              "Pub/sub/fan-out",
+              "Vários workers no mesmo grupo"
+            ],
+            [
+              "Preciso de resposta imediata para continuar a tela?",
+              "HTTP/síncrono ou comando com estado explícito",
+              "Evento usado como RPC escondido"
+            ]
+          ]
+        },
+        {
+          "id": "mensageria-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "delivery-at-least-once-idempotency",
+          "prompt": "Qual é a consequência prática de at-least-once?",
+          "options": [
+            {
+              "id": "mensageria-a",
+              "label": "A mensagem pode ser entregue mais de uma vez; o consumidor precisa tornar o efeito idempotente.",
+              "correct": true,
+              "explanation": "At-least-once privilegia não perder mensagem, aceitando duplicação."
+            },
+            {
+              "id": "mensageria-b",
+              "label": "O broker garante que o banco do consumidor nunca será alterado duas vezes.",
+              "correct": false,
+              "explanation": "Broker não controla a transação local do consumidor."
+            },
+            {
+              "id": "mensageria-c",
+              "label": "A mensagem vira síncrona e dispensa observabilidade.",
+              "correct": false,
+              "explanation": "Assincronia exige ainda mais correlação e métrica."
+            }
+          ]
+        }
       ],
       "codeExplanations": {
-        "mensageria-code-12": {"explanation":["O exemplo deve ser lido como contrato mínimo: uma mensagem tem tipo, identificação e conteúdo de negócio.","Antes de usar broker real, garanta que o consumidor sabe o que fazer em duplicação e falha."],"commonMistakes":["Tratar payload como objeto interno mutável","Processar antes de validar tipo/versão/ID"]}
+        "mensageria-code-12": {
+          "explanation": [
+            "O exemplo deve ser lido como contrato mínimo: uma mensagem tem tipo, identificação e conteúdo de negócio.",
+            "Antes de usar broker real, garanta que o consumidor sabe o que fazer em duplicação e falha."
+          ],
+          "commonMistakes": [
+            "Tratar payload como objeto interno mutável",
+            "Processar antes de validar tipo/versão/ID"
+          ]
+        }
       },
       "resources": [
-        {"id":"aws-sqs-exactly-once-idempotency","type":"official-docs","title":"Amazon SQS: exactly-once processing in FIFO queues","url":"https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html","reinforces":"Deduplicação, FIFO e limites práticos de entrega.","language":"en","publisher":"AWS","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"aws-sns-sqs-fanout-phase16","type":"official-docs","title":"Fanout to Amazon SQS queues","url":"https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html","reinforces":"Pub/sub com filas independentes para consumidores diferentes.","language":"en","publisher":"AWS","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "aws-sqs-exactly-once-idempotency",
+          "type": "official-docs",
+          "title": "Amazon SQS: exactly-once processing in FIFO queues",
+          "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html",
+          "reinforces": "Deduplicação, FIFO e limites práticos de entrega.",
+          "language": "en",
+          "publisher": "AWS",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "aws-sns-sqs-fanout-phase16",
+          "type": "official-docs",
+          "title": "Fanout to Amazon SQS queues",
+          "url": "https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html",
+          "reinforces": "Pub/sub com filas independentes para consumidores diferentes.",
+          "language": "en",
+          "publisher": "AWS",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "kafka": {
       "order": 7,
-      "objectives": ["Entender Kafka como log particionado", "Diferenciar topic, partition, record, key e offset", "Executar producer/consumer com contrato de serialização", "Explicar consumer group e rebalance sem mistério"],
+      "objectives": [
+        "Entender Kafka como log particionado",
+        "Diferenciar topic, partition, record, key e offset",
+        "Executar producer/consumer com contrato de serialização",
+        "Explicar consumer group e rebalance sem mistério"
+      ],
       "whyItExists": "Kafka só entra depois que queue, pub/sub e entrega já foram entendidos. O capítulo aprofunda o broker como log distribuído: mensagens ficam ordenadas por partição, consumidores avançam por offset e grupos dividem trabalho.",
-      "prerequisiteChapterIds": ["messaging-model", "compose"],
-      "introducedConceptIds": ["kafka-topic-partition-offset", "kafka-producer-consumer-record", "consumer-group-rebalance-offset"],
-      "usedConceptIds": ["broker-backlog-backpressure", "delivery-at-least-once-idempotency", "compose-service-network"],
+      "prerequisiteChapterIds": [
+        "messaging-model",
+        "compose"
+      ],
+      "introducedConceptIds": [
+        "kafka-topic-partition-offset",
+        "kafka-producer-consumer-record",
+        "consumer-group-rebalance-offset"
+      ],
+      "usedConceptIds": [
+        "broker-backlog-backpressure",
+        "delivery-at-least-once-idempotency",
+        "compose-service-network"
+      ],
       "generateCompatibilityQuizzes": false,
-      "prependBlocks": [{"id":"kafka-intuition","type":"intuition","authorship":"authored","title":"Kafka é log particionado, não fila mágica","body":"Kafka organiza records em topics divididos por partitions. Cada consumidor guarda sua posição por offset. Isso permite replay e escala, mas exige escolher key, serialização, retenção e momento de commit com cuidado.","analogyLimit":"Um diário por partição ajuda a imaginar sequência, mas Kafka envolve replicação, retenção, grupos e rebalances."}],
-      "appendBlocks": [{"id":"kafka-quiz","type":"quiz","authorship":"authored","conceptId":"kafka-topic-partition-offset","prompt":"Por que a key importa em Kafka?","options":[{"id":"kafka-a","label":"Ela influencia a partição e, portanto, a ordem observável daquele fluxo.","correct":true,"explanation":"Ordenação é garantida por partição, não globalmente por todo topic."},{"id":"kafka-b","label":"Ela transforma qualquer topic em transação global.","correct":false,"explanation":"Key não cria transação entre serviços."},{"id":"kafka-c","label":"Ela elimina necessidade de serializador.","correct":false,"explanation":"Key e value também são serializados por contrato."}]}],
+      "prependBlocks": [
+        {
+          "id": "kafka-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Kafka é log particionado, não fila mágica",
+          "body": "Kafka organiza records em topics divididos por partitions. Cada consumidor guarda sua posição por offset. Isso permite replay e escala, mas exige escolher key, serialização, retenção e momento de commit com cuidado.",
+          "analogyLimit": "Um diário por partição ajuda a imaginar sequência, mas Kafka envolve replicação, retenção, grupos e rebalances."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "kafka-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "kafka-topic-partition-offset",
+          "prompt": "Por que a key importa em Kafka?",
+          "options": [
+            {
+              "id": "kafka-a",
+              "label": "Ela influencia a partição e, portanto, a ordem observável daquele fluxo.",
+              "correct": true,
+              "explanation": "Ordenação é garantida por partição, não globalmente por todo topic."
+            },
+            {
+              "id": "kafka-b",
+              "label": "Ela transforma qualquer topic em transação global.",
+              "correct": false,
+              "explanation": "Key não cria transação entre serviços."
+            },
+            {
+              "id": "kafka-c",
+              "label": "Ela elimina necessidade de serializador.",
+              "correct": false,
+              "explanation": "Key e value também são serializados por contrato."
+            }
+          ]
+        }
+      ],
       "codeExplanations": {
-        "kafka-code-6": {"explanation":["O producer envia um record para topic com key/value/headers conforme serializadores configurados.","A key deve ser escolhida pelo contrato de ordenação e distribuição, não aleatoriamente por hábito."],"commonMistakes":["Usar key null quando precisa preservar ordem por aggregate","Ignorar erro de callback/futuro de envio"]},
-        "kafka-code-8": {"explanation":["O consumer lê records e avança offset conforme a política de commit.","Commit antes do efeito pode perder processamento em crash; commit depois pode duplicar efeito."],"commonMistakes":["Confundir offset com confirmação de regra de negócio","Processar duplicação sem idempotência"]}
+        "kafka-code-6": {
+          "explanation": [
+            "O producer envia um record para topic com key/value/headers conforme serializadores configurados.",
+            "A key deve ser escolhida pelo contrato de ordenação e distribuição, não aleatoriamente por hábito."
+          ],
+          "commonMistakes": [
+            "Usar key null quando precisa preservar ordem por aggregate",
+            "Ignorar erro de callback/futuro de envio"
+          ]
+        },
+        "kafka-code-8": {
+          "explanation": [
+            "O consumer lê records e avança offset conforme a política de commit.",
+            "Commit antes do efeito pode perder processamento em crash; commit depois pode duplicar efeito."
+          ],
+          "commonMistakes": [
+            "Confundir offset com confirmação de regra de negócio",
+            "Processar duplicação sem idempotência"
+          ]
+        }
       },
       "resources": [
-        {"id":"apache-kafka-design-phase16","type":"official-docs","title":"Apache Kafka: Design","url":"https://kafka.apache.org/40/documentation.html#design","reinforces":"Log particionado, retenção, consumers e garantias de design.","language":"en","publisher":"Apache Kafka","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"apache-kafka-intro-phase16","type":"official-docs","title":"Apache Kafka: Introduction","url":"https://kafka.apache.org/intro","reinforces":"Conceitos centrais de event streaming, topics e consumers.","language":"en","publisher":"Apache Kafka","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "apache-kafka-design-phase16",
+          "type": "official-docs",
+          "title": "Apache Kafka: Design",
+          "url": "https://kafka.apache.org/40/documentation.html#design",
+          "reinforces": "Log particionado, retenção, consumers e garantias de design.",
+          "language": "en",
+          "publisher": "Apache Kafka",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "apache-kafka-intro-phase16",
+          "type": "official-docs",
+          "title": "Apache Kafka: Introduction",
+          "url": "https://kafka.apache.org/intro",
+          "reinforces": "Conceitos centrais de event streaming, topics e consumers.",
+          "language": "en",
+          "publisher": "Apache Kafka",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "spring-kafka": {
       "order": 8,
-      "objectives": ["Usar KafkaTemplate e @KafkaListener sem esconder semântica Kafka", "Configurar serialização e erro em Spring Boot", "Relacionar listener, offset e transação local", "Testar listener como fronteira de integração"],
+      "objectives": [
+        "Usar KafkaTemplate e @KafkaListener sem esconder semântica Kafka",
+        "Configurar serialização e erro em Spring Boot",
+        "Relacionar listener, offset e transação local",
+        "Testar listener como fronteira de integração"
+      ],
       "whyItExists": "Depois de Kafka puro, Spring Kafka mostra adaptação ao ecossistema Spring. A anotação simplifica wiring, mas não muda key, partition, offset, reentrega, serialização nem idempotência.",
-      "prerequisiteChapterIds": ["kafka", "di", "json"],
-      "introducedConceptIds": ["spring-kafka-listener-template"],
-      "usedConceptIds": ["kafka-producer-consumer-record", "consumer-group-rebalance-offset", "boot-bootstrap-autoconfig"],
+      "prerequisiteChapterIds": [
+        "kafka",
+        "di",
+        "json"
+      ],
+      "introducedConceptIds": [
+        "spring-kafka-listener-template"
+      ],
+      "usedConceptIds": [
+        "kafka-producer-consumer-record",
+        "consumer-group-rebalance-offset",
+        "boot-bootstrap-autoconfig"
+      ],
       "generateCompatibilityQuizzes": false,
-      "prependBlocks": [{"id":"spring-kafka-intuition","type":"intuition","authorship":"authored","title":"Spring Kafka adapta Kafka ao modelo Spring","body":"KafkaTemplate e @KafkaListener reduzem cerimônia de infraestrutura. Mesmo assim, o contrato continua sendo o do Kafka: record, topic, key, serialização, commit, reprocessamento e erro observável.","analogyLimit":"A anotação parece controller HTTP, mas o ciclo de vida assíncrono e offset do broker continuam existindo."}],
-      "appendBlocks": [{"id":"spring-kafka-quiz","type":"quiz","authorship":"authored","conceptId":"spring-kafka-listener-template","prompt":"O que @KafkaListener não resolve sozinho?","options":[{"id":"sk-a","label":"Idempotência, contrato de schema e política correta de commit/erro.","correct":true,"explanation":"A anotação conecta o listener; a confiabilidade continua sendo desenho explícito."},{"id":"sk-b","label":"A criação de uma classe Java.","correct":false,"explanation":"Isso é sintaxe, não semântica de mensageria."},{"id":"sk-c","label":"A necessidade de escrever métodos.","correct":false,"explanation":"Listeners ainda são métodos com contrato de entrada e efeito."}]}],
+      "prependBlocks": [
+        {
+          "id": "spring-kafka-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Spring Kafka adapta Kafka ao modelo Spring",
+          "body": "KafkaTemplate e @KafkaListener reduzem cerimônia de infraestrutura. Mesmo assim, o contrato continua sendo o do Kafka: record, topic, key, serialização, commit, reprocessamento e erro observável.",
+          "analogyLimit": "A anotação parece controller HTTP, mas o ciclo de vida assíncrono e offset do broker continuam existindo."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "spring-kafka-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "spring-kafka-listener-template",
+          "prompt": "O que @KafkaListener não resolve sozinho?",
+          "options": [
+            {
+              "id": "sk-a",
+              "label": "Idempotência, contrato de schema e política correta de commit/erro.",
+              "correct": true,
+              "explanation": "A anotação conecta o listener; a confiabilidade continua sendo desenho explícito."
+            },
+            {
+              "id": "sk-b",
+              "label": "A criação de uma classe Java.",
+              "correct": false,
+              "explanation": "Isso é sintaxe, não semântica de mensageria."
+            },
+            {
+              "id": "sk-c",
+              "label": "A necessidade de escrever métodos.",
+              "correct": false,
+              "explanation": "Listeners ainda são métodos com contrato de entrada e efeito."
+            }
+          ]
+        }
+      ],
       "codeExplanations": {
-        "spring-kafka-code-3": {"explanation":["KafkaTemplate publica records usando serializers e propriedades do producer configurado pelo Spring.","Callback/resultado precisa ser observado quando a aplicação depende da confirmação de envio."],"commonMistakes":["Ignorar falha assíncrona de envio","Acoplar DTO interno diretamente ao evento público"]},
-        "spring-kafka-code-4": {"explanation":["@KafkaListener declara o ponto de consumo, mas o método precisa validar payload, tratar erro e preservar idempotência.","Erro não tratado volta para a infraestrutura conforme a política configurada."],"commonMistakes":["Fazer efeito não idempotente antes de validação","Assumir que listener roda exatamente uma vez"]}
+        "spring-kafka-code-5": {
+          "explanation": [
+            "KafkaTemplate publica records usando serializers e propriedades do producer configurado pelo Spring.",
+            "O envio é assíncrono: o resultado (sucesso ou falha) só é conhecido através do CompletableFuture retornado, não no momento da chamada."
+          ],
+          "commonMistakes": [
+            "Ignorar falha assíncrona de envio",
+            "Concatenar JSON manualmente em vez de usar um serializer real"
+          ]
+        },
+        "spring-kafka-code-6": {
+          "explanation": [
+            "As propriedades de producer definem os serializers de chave/valor e a política de confirmação (acks) usadas pelo KafkaTemplate autoconfigurado.",
+            "acks=all prioriza durabilidade sobre latência de confirmação."
+          ],
+          "commonMistakes": [
+            "Usar StringSerializer para um valor que não é String",
+            "Não declarar acks e assumir a política default"
+          ]
+        },
+        "spring-kafka-code-9": {
+          "explanation": [
+            "@KafkaListener declara o ponto de consumo, mas o método precisa validar payload, tratar erro e preservar idempotência.",
+            "concurrency define quantas threads consumidoras o listener container sobe, nunca mais que o número de partições atribuíveis."
+          ],
+          "commonMistakes": [
+            "Fazer efeito não idempotente antes de validar a mensagem",
+            "Assumir que listener roda exatamente uma vez"
+          ]
+        },
+        "spring-kafka-code-13": {
+          "explanation": [
+            "Desabilitar o auto-commit do cliente Kafka cru entrega o controle de commit ao listener container do Spring.",
+            "ack-mode=record comita a cada registro processado, priorizando segurança sobre throughput."
+          ],
+          "commonMistakes": [
+            "Deixar enable-auto-commit=true e ainda assim tratar erro manualmente",
+            "Achar que ack-mode=record elimina duplicidade -- ainda é at-least-once"
+          ]
+        },
+        "spring-kafka-code-17": {
+          "explanation": [
+            "DefaultErrorHandler com DeadLetterPublishingRecoverer tenta novamente com backoff e, esgotadas as tentativas, desvia a mensagem para um Dead Letter Topic.",
+            "Retry não resolve mensagem envenenada (defeito de dados) -- só falhas transitórias se beneficiam de nova tentativa."
+          ],
+          "commonMistakes": [
+            "Aplicar retry indiscriminadamente a erros de dado permanentes",
+            "Não monitorar o volume do DLT"
+          ]
+        }
       },
       "resources": [
-        {"id":"spring-kafka-reference-phase16","type":"official-docs","title":"Spring for Apache Kafka Reference","url":"https://docs.spring.io/spring-kafka/reference/","reinforces":"Templates, listeners, containers, erro e configuração Spring Kafka.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"spring-kafka-testing-phase16","type":"official-docs","title":"Spring Kafka: Testing Applications","url":"https://docs.spring.io/spring-kafka/reference/testing.html","reinforces":"Estratégias de teste para aplicações com Spring Kafka.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "spring-kafka-reference-phase16",
+          "type": "official-docs",
+          "title": "Spring for Apache Kafka Reference",
+          "url": "https://docs.spring.io/spring-kafka/reference/",
+          "reinforces": "Templates, listeners, containers, erro e configuração Spring Kafka.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-kafka-testing-phase16",
+          "type": "official-docs",
+          "title": "Spring Kafka: Testing Applications",
+          "url": "https://docs.spring.io/spring-kafka/reference/testing.html",
+          "reinforces": "Estratégias de teste para aplicações com Spring Kafka.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "kafka-confiavel": {
       "order": 9,
-      "objectives": ["Projetar consumer idempotente", "Definir retry/DLT por tipo de falha", "Evoluir schema sem quebrar consumidor", "Conectar offset, transação local e evidência operacional"],
+      "objectives": [
+        "Projetar consumer idempotente",
+        "Definir retry/DLT por tipo de falha",
+        "Evoluir schema sem quebrar consumidor",
+        "Conectar offset, transação local e evidência operacional"
+      ],
       "whyItExists": "Agora que Kafka e Spring Kafka já existem, confiabilidade deixa de ser promessa de ferramenta. O aluno aprofunda duplicação, commit, DLT, schema, reprocessamento e efeito idempotente.",
-      "prerequisiteChapterIds": ["spring-kafka", "jpa-transacoes"],
-      "introducedConceptIds": ["kafka-schema-evolution-contract", "kafka-retry-dlt-policy", "kafka-idempotent-consumer"],
-      "usedConceptIds": ["consumer-group-rebalance-offset", "delivery-at-least-once-idempotency", "aggregate-transaction-boundary"],
+      "prerequisiteChapterIds": [
+        "spring-kafka",
+        "jpa-transacoes"
+      ],
+      "introducedConceptIds": [
+        "kafka-schema-evolution-contract",
+        "kafka-retry-dlt-policy",
+        "kafka-idempotent-consumer"
+      ],
+      "usedConceptIds": [
+        "consumer-group-rebalance-offset",
+        "delivery-at-least-once-idempotency",
+        "aggregate-transaction-boundary"
+      ],
       "generateCompatibilityQuizzes": false,
-      "prependBlocks": [{"id":"kafka-confiavel-intuition","type":"intuition","authorship":"authored","title":"Confiabilidade em Kafka é contrato de efeito","body":"O broker pode entregar e reentregar records. A aplicação confiável é a que sabe quando confirmar, como deduplicar, que falha deve ir para retry/DLT e como evoluir schema sem quebrar consumidores antigos.","analogyLimit":"“Não perder mensagem” é só parte do problema; o efeito no banco, no e-mail ou no estoque precisa ser correto."}],
-      "appendBlocks": [{"id":"kafka-confiavel-quiz","type":"quiz","authorship":"authored","conceptId":"kafka-idempotent-consumer","prompt":"Qual desenho protege contra duplicação de evento?","options":[{"id":"kc-a","label":"Registrar eventId e efeito na mesma transação local com restrição única.","correct":true,"explanation":"Assim a duplicação vira caso controlado, não efeito duplicado."},{"id":"kc-b","label":"Fazer commit do offset antes de processar sempre.","correct":false,"explanation":"Isso pode perder efeito em crash."},{"id":"kc-c","label":"Aumentar partitions até não duplicar.","correct":false,"explanation":"Partições não eliminam reentrega."}]}],
+      "prependBlocks": [
+        {
+          "id": "kafka-confiavel-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Confiabilidade em Kafka é contrato de efeito",
+          "body": "O broker pode entregar e reentregar records. A aplicação confiável é a que sabe quando confirmar, como deduplicar, que falha deve ir para retry/DLT e como evoluir schema sem quebrar consumidores antigos.",
+          "analogyLimit": "“Não perder mensagem” é só parte do problema; o efeito no banco, no e-mail ou no estoque precisa ser correto."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "kafka-confiavel-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "kafka-idempotent-consumer",
+          "prompt": "Qual desenho protege contra duplicação de evento?",
+          "options": [
+            {
+              "id": "kc-a",
+              "label": "Registrar eventId e efeito na mesma transação local com restrição única.",
+              "correct": true,
+              "explanation": "Assim a duplicação vira caso controlado, não efeito duplicado."
+            },
+            {
+              "id": "kc-b",
+              "label": "Fazer commit do offset antes de processar sempre.",
+              "correct": false,
+              "explanation": "Isso pode perder efeito em crash."
+            },
+            {
+              "id": "kc-c",
+              "label": "Aumentar partitions até não duplicar.",
+              "correct": false,
+              "explanation": "Partições não eliminam reentrega."
+            }
+          ]
+        }
+      ],
       "codeExplanations": {
-        "kafka-confiavel-code-6": {"explanation":["O tratamento de erro deve classificar falha transitória, permanente e incompatibilidade de contrato.","DLT preserva evidência para diagnóstico e redrive controlado."],"commonMistakes":["Retry infinito em erro de schema","Enviar tudo para DLT sem metadados de causa"]},
-        "kafka-confiavel-code-10": {"explanation":["O consumidor idempotente precisa gravar a marca de processamento junto do efeito protegido.","Se marcar antes e cair antes do efeito, a mensagem pode ser perdida logicamente."],"commonMistakes":["Deduplicar só em memória","Separar event log e efeito em transações independentes sem recuperação"]}
+        "kafka-confiavel-code-6": {
+          "explanation": [
+            "O tratamento de erro deve classificar falha transitória, permanente e incompatibilidade de contrato.",
+            "DLT preserva evidência para diagnóstico e redrive controlado."
+          ],
+          "commonMistakes": [
+            "Retry infinito em erro de schema",
+            "Enviar tudo para DLT sem metadados de causa"
+          ]
+        },
+        "kafka-confiavel-code-10": {
+          "explanation": [
+            "O consumidor idempotente precisa gravar a marca de processamento junto do efeito protegido.",
+            "Se marcar antes e cair antes do efeito, a mensagem pode ser perdida logicamente."
+          ],
+          "commonMistakes": [
+            "Deduplicar só em memória",
+            "Separar event log e efeito em transações independentes sem recuperação"
+          ]
+        }
       },
       "resources": [
-        {"id":"spring-kafka-retry-topic-phase16","type":"official-docs","title":"Spring Kafka: Non-Blocking Retries","url":"https://docs.spring.io/spring-kafka/reference/retrytopic.html","reinforces":"Retry topics, DLT e política de falha no Spring Kafka.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"apache-kafka-guarantees-phase16","type":"official-docs","title":"Apache Kafka: Message Delivery Semantics","url":"https://kafka.apache.org/40/documentation.html#semantics","reinforces":"Garantias de entrega, producer idempotent e transações Kafka.","language":"en","publisher":"Apache Kafka","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "spring-kafka-retry-topic-phase16",
+          "type": "official-docs",
+          "title": "Spring Kafka: Non-Blocking Retries",
+          "url": "https://docs.spring.io/spring-kafka/reference/retrytopic.html",
+          "reinforces": "Retry topics, DLT e política de falha no Spring Kafka.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "apache-kafka-guarantees-phase16",
+          "type": "official-docs",
+          "title": "Apache Kafka: Message Delivery Semantics",
+          "url": "https://kafka.apache.org/40/documentation.html#semantics",
+          "reinforces": "Garantias de entrega, producer idempotent e transações Kafka.",
+          "language": "en",
+          "publisher": "Apache Kafka",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "event-driven-profundo": {
       "order": 10,
-      "objectives": ["Modelar EDA como ownership de tempo e estado", "Escolher key de partição por contrato de ordenação", "Planejar replay sem corromper efeitos externos", "Diferenciar evento de comando em processos longos"],
+      "objectives": [
+        "Modelar EDA como ownership de tempo e estado",
+        "Escolher key de partição por contrato de ordenação",
+        "Planejar replay sem corromper efeitos externos",
+        "Diferenciar evento de comando em processos longos"
+      ],
       "whyItExists": "Depois dos blocos práticos, EDA profunda consolida arquitetura: evento muda a fronteira de tempo, ownership e observabilidade. A discussão agora é quando usar, como evoluir e como operar sem criar coreografia invisível.",
-      "prerequisiteChapterIds": ["kafka", "mensageria", "arquitetura-software"],
-      "introducedConceptIds": ["kafka-log-replication-ordering", "partition-key-ordering-contract", "kafka-offset-commit-replay"],
-      "usedConceptIds": ["event-command-message-intent", "bounded-context-context-map", "eda-correlation-causality"],
+      "prerequisiteChapterIds": [
+        "kafka",
+        "mensageria",
+        "arquitetura-software"
+      ],
+      "introducedConceptIds": [
+        "kafka-log-replication-ordering",
+        "partition-key-ordering-contract",
+        "kafka-offset-commit-replay"
+      ],
+      "usedConceptIds": [
+        "event-command-message-intent",
+        "bounded-context-context-map",
+        "eda-correlation-causality"
+      ],
       "generateCompatibilityQuizzes": false,
-      "prependBlocks": [{"id":"event-driven-profundo-intuition","type":"intuition","authorship":"authored","title":"EDA muda ownership do tempo","body":"Em EDA, um serviço declara fatos e outros reagem no próprio tempo. Isso pode reduzir acoplamento temporal, mas aumenta necessidade de contrato, replay, versionamento, correlação, limites de ordenação e governança de fluxo.","analogyLimit":"Eventos lembram notícias, mas consumidores podem reprocessar, atrasar, deduplicar e gerar novos eventos com causalidade própria."}],
-      "appendBlocks": [{"id":"event-driven-profundo-quiz","type":"quiz","authorship":"authored","conceptId":"partition-key-ordering-contract","prompt":"Quando uma partition key é boa?","options":[{"id":"edp-a","label":"Quando agrupa o fluxo que realmente exige ordem, como aggregateId de Pedido.","correct":true,"explanation":"A key deve representar o contrato de ordenação necessário."},{"id":"edp-b","label":"Quando força todos os eventos do sistema na mesma partição.","correct":false,"explanation":"Isso cria gargalo e falsa ordenação global."},{"id":"edp-c","label":"Quando muda aleatoriamente a cada mensagem para facilitar replay.","correct":false,"explanation":"Isso destrói ordenação por fluxo."}]}],
+      "prependBlocks": [
+        {
+          "id": "event-driven-profundo-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "EDA muda ownership do tempo",
+          "body": "Em EDA, um serviço declara fatos e outros reagem no próprio tempo. Isso pode reduzir acoplamento temporal, mas aumenta necessidade de contrato, replay, versionamento, correlação, limites de ordenação e governança de fluxo.",
+          "analogyLimit": "Eventos lembram notícias, mas consumidores podem reprocessar, atrasar, deduplicar e gerar novos eventos com causalidade própria."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "event-driven-profundo-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "partition-key-ordering-contract",
+          "prompt": "Quando uma partition key é boa?",
+          "options": [
+            {
+              "id": "edp-a",
+              "label": "Quando agrupa o fluxo que realmente exige ordem, como aggregateId de Pedido.",
+              "correct": true,
+              "explanation": "A key deve representar o contrato de ordenação necessário."
+            },
+            {
+              "id": "edp-b",
+              "label": "Quando força todos os eventos do sistema na mesma partição.",
+              "correct": false,
+              "explanation": "Isso cria gargalo e falsa ordenação global."
+            },
+            {
+              "id": "edp-c",
+              "label": "Quando muda aleatoriamente a cada mensagem para facilitar replay.",
+              "correct": false,
+              "explanation": "Isso destrói ordenação por fluxo."
+            }
+          ]
+        }
+      ],
       "codeExplanations": {
-        "event-driven-profundo-code-5": {"explanation":["O exemplo de evento deve carregar identidade, tipo, versão e momento de ocorrência.","Sem esses metadados, replay e compatibilidade ficam frágeis."],"commonMistakes":["Usar DTO de tela como evento","Remover campo obrigatório sem versão"]},
-        "event-driven-profundo-code-9": {"explanation":["A key de partição deve preservar a ordem do agregado ou fluxo relevante.","Ordenação global raramente é necessária e custa escala."],"commonMistakes":["Usar UUID aleatório como key de tudo","Misturar eventos de aggregates diferentes quando ordem importa"]},
-        "event-driven-profundo-code-12": {"explanation":["Replay reexecuta leitura de eventos; efeitos externos precisam ser isolados ou idempotentes.","Reprocessar sem modo seguro pode reenviar e-mail, cobrar ou duplicar estoque."],"commonMistakes":["Reprocessar produção sem dry-run","Não registrar versão do handler"]},
-        "event-driven-profundo-code-15": {"explanation":["A coreografia deve continuar compreensível por diagrama, logs e estados persistidos.","Fluxo invisível entre consumidores aumenta risco operacional."],"commonMistakes":["Criar ciclo de eventos sem owner","Confundir evento com comando secreto"]},
-        "event-driven-profundo-code-18": {"explanation":["Governança de schema e compatibilidade precisa ser testada como contrato entre times.","Retry não corrige breaking change permanente."],"commonMistakes":["Quebrar consumidor antigo por pressa","Assumir que JSON livre dispensa schema"]}
+        "event-driven-profundo-code-5": {
+          "explanation": [
+            "O exemplo de evento deve carregar identidade, tipo, versão e momento de ocorrência.",
+            "Sem esses metadados, replay e compatibilidade ficam frágeis."
+          ],
+          "commonMistakes": [
+            "Usar DTO de tela como evento",
+            "Remover campo obrigatório sem versão"
+          ]
+        },
+        "event-driven-profundo-code-9": {
+          "explanation": [
+            "A key de partição deve preservar a ordem do agregado ou fluxo relevante.",
+            "Ordenação global raramente é necessária e custa escala."
+          ],
+          "commonMistakes": [
+            "Usar UUID aleatório como key de tudo",
+            "Misturar eventos de aggregates diferentes quando ordem importa"
+          ]
+        },
+        "event-driven-profundo-code-12": {
+          "explanation": [
+            "Replay reexecuta leitura de eventos; efeitos externos precisam ser isolados ou idempotentes.",
+            "Reprocessar sem modo seguro pode reenviar e-mail, cobrar ou duplicar estoque."
+          ],
+          "commonMistakes": [
+            "Reprocessar produção sem dry-run",
+            "Não registrar versão do handler"
+          ]
+        },
+        "event-driven-profundo-code-15": {
+          "explanation": [
+            "A coreografia deve continuar compreensível por diagrama, logs e estados persistidos.",
+            "Fluxo invisível entre consumidores aumenta risco operacional."
+          ],
+          "commonMistakes": [
+            "Criar ciclo de eventos sem owner",
+            "Confundir evento com comando secreto"
+          ]
+        },
+        "event-driven-profundo-code-18": {
+          "explanation": [
+            "Governança de schema e compatibilidade precisa ser testada como contrato entre times.",
+            "Retry não corrige breaking change permanente."
+          ],
+          "commonMistakes": [
+            "Quebrar consumidor antigo por pressa",
+            "Assumir que JSON livre dispensa schema"
+          ]
+        }
       },
       "resources": [
-        {"id":"apache-kafka-design-deep-phase16","type":"official-docs","title":"Apache Kafka: Design","url":"https://kafka.apache.org/40/documentation.html#design","reinforces":"Partições, log, retenção, ordering e consumidores.","language":"en","publisher":"Apache Kafka","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"martin-fowler-event-driven-phase16","type":"reference","title":"Martin Fowler: What do you mean by “Event-Driven”?","url":"https://martinfowler.com/articles/201701-event-driven.html","reinforces":"Diferenças de estilos event-driven e armadilhas de arquitetura.","language":"en","publisher":"Martin Fowler","official":false,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "apache-kafka-design-deep-phase16",
+          "type": "official-docs",
+          "title": "Apache Kafka: Design",
+          "url": "https://kafka.apache.org/40/documentation.html#design",
+          "reinforces": "Partições, log, retenção, ordering e consumidores.",
+          "language": "en",
+          "publisher": "Apache Kafka",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "martin-fowler-event-driven-phase16",
+          "type": "reference",
+          "title": "Martin Fowler: What do you mean by “Event-Driven”?",
+          "url": "https://martinfowler.com/articles/201701-event-driven.html",
+          "reinforces": "Diferenças de estilos event-driven e armadilhas de arquitetura.",
+          "language": "en",
+          "publisher": "Martin Fowler",
+          "official": false,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "testes-integracao-avancados": {
       "order": 11,
-      "objectives": ["Escolher escopo de teste para banco, Spring e broker", "Subir Kafka/Testcontainers com isolamento", "Aguardar efeito assíncrono sem sleep fixo", "Gerar evidência útil quando o teste falha"],
+      "objectives": [
+        "Escolher escopo de teste para banco, Spring e broker",
+        "Subir Kafka/Testcontainers com isolamento",
+        "Aguardar efeito assíncrono sem sleep fixo",
+        "Gerar evidência útil quando o teste falha"
+      ],
       "whyItExists": "Depois de Kafka/Spring Kafka confiáveis, testes avançados validam fronteiras reais. A pergunta não é 'mock ou container?', mas qual risco cada camada prova: regra pura, adapter, banco, broker, listener, retry e efeito final.",
-      "prerequisiteChapterIds": ["testcontainers", "mockito", "spring-kafka"],
-      "introducedConceptIds": ["springboot-test-slice-contract", "kafka-testcontainer-determinism"],
-      "usedConceptIds": ["spring-kafka-listener-template", "async-awaitility-eventual-assertion", "deterministic-integration-test"],
+      "prerequisiteChapterIds": [
+        "testcontainers",
+        "mockito",
+        "spring-kafka"
+      ],
+      "introducedConceptIds": [
+        "springboot-test-slice-contract",
+        "kafka-testcontainer-determinism"
+      ],
+      "usedConceptIds": [
+        "spring-kafka-listener-template",
+        "async-awaitility-eventual-assertion",
+        "deterministic-integration-test"
+      ],
       "generateCompatibilityQuizzes": false,
-      "prependBlocks": [{"id":"testes-integracao-avancados-intuition","type":"intuition","authorship":"authored","title":"Teste de integração prova fronteira, não sorte de timing","body":"Um teste assíncrono bom sobe dependência real quando ela importa, publica estímulo controlado e espera um efeito observável com deadline. Sleep fixo é loteria: às vezes passa lento, às vezes falha sem explicar.","analogyLimit":"É ensaio com cenário real, mas ainda precisa roteiro, isolamento e critério claro de aprovação."}],
-      "appendBlocks": [{"id":"testes-integracao-avancados-quiz","type":"quiz","authorship":"authored","conceptId":"kafka-testcontainer-determinism","prompt":"Qual prática deixa teste Kafka mais determinístico?","options":[{"id":"tia-a","label":"Topic/grupo isolados por teste, readiness explícito e assertiva eventual do efeito.","correct":true,"explanation":"Isso reduz vazamento entre testes e espera comportamento, não tempo arbitrário."},{"id":"tia-b","label":"Thread.sleep alto depois de publicar.","correct":false,"explanation":"Sleep não prova condição e torna falha opaca."},{"id":"tia-c","label":"Compartilhar o mesmo topic com toda suíte sem limpeza.","correct":false,"explanation":"Estado compartilhado causa flakiness."}]}],
+      "prependBlocks": [
+        {
+          "id": "testes-integracao-avancados-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Teste de integração prova fronteira, não sorte de timing",
+          "body": "Um teste assíncrono bom sobe dependência real quando ela importa, publica estímulo controlado e espera um efeito observável com deadline. Sleep fixo é loteria: às vezes passa lento, às vezes falha sem explicar.",
+          "analogyLimit": "É ensaio com cenário real, mas ainda precisa roteiro, isolamento e critério claro de aprovação."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "testes-integracao-avancados-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "kafka-testcontainer-determinism",
+          "prompt": "Qual prática deixa teste Kafka mais determinístico?",
+          "options": [
+            {
+              "id": "tia-a",
+              "label": "Topic/grupo isolados por teste, readiness explícito e assertiva eventual do efeito.",
+              "correct": true,
+              "explanation": "Isso reduz vazamento entre testes e espera comportamento, não tempo arbitrário."
+            },
+            {
+              "id": "tia-b",
+              "label": "Thread.sleep alto depois de publicar.",
+              "correct": false,
+              "explanation": "Sleep não prova condição e torna falha opaca."
+            },
+            {
+              "id": "tia-c",
+              "label": "Compartilhar o mesmo topic com toda suíte sem limpeza.",
+              "correct": false,
+              "explanation": "Estado compartilhado causa flakiness."
+            }
+          ]
+        }
+      ],
       "codeExplanations": {
-        "testes-integracao-avancados-code-4": {"explanation":["O setup do container deve esperar readiness antes do teste executar.","Imagem e ciclo de vida precisam ser previsíveis para a suíte."],"commonMistakes":["Assumir que porta aberta significa broker pronto","Reutilizar estado sem limpeza"]},
-        "testes-integracao-avancados-code-6": {"explanation":["A configuração dinâmica injeta bootstrap servers ou URLs reais do container no contexto Spring.","Isso evita hardcode de localhost/porta que falha em CI."],"commonMistakes":["Fixar porta aleatória no código","Subir contexto inteiro quando um slice bastaria"]},
-        "testes-integracao-avancados-code-9": {"explanation":["A assertiva deve esperar efeito final com deadline e mensagem de falha útil.","O teste fica mais confiável quando observa banco, evento consumido ou estado persistido."],"commonMistakes":["Usar sleep fixo","Assertar apenas que publish não lançou exceção"]}
+        "testes-integracao-avancados-code-4": {
+          "explanation": [
+            "O setup do container deve esperar readiness antes do teste executar.",
+            "Imagem e ciclo de vida precisam ser previsíveis para a suíte."
+          ],
+          "commonMistakes": [
+            "Assumir que porta aberta significa broker pronto",
+            "Reutilizar estado sem limpeza"
+          ]
+        },
+        "testes-integracao-avancados-code-6": {
+          "explanation": [
+            "A configuração dinâmica injeta bootstrap servers ou URLs reais do container no contexto Spring.",
+            "Isso evita hardcode de localhost/porta que falha em CI."
+          ],
+          "commonMistakes": [
+            "Fixar porta aleatória no código",
+            "Subir contexto inteiro quando um slice bastaria"
+          ]
+        },
+        "testes-integracao-avancados-code-9": {
+          "explanation": [
+            "A assertiva deve esperar efeito final com deadline e mensagem de falha útil.",
+            "O teste fica mais confiável quando observa banco, evento consumido ou estado persistido."
+          ],
+          "commonMistakes": [
+            "Usar sleep fixo",
+            "Assertar apenas que publish não lançou exceção"
+          ]
+        }
       },
       "resources": [
-        {"id":"testcontainers-kafka-phase16","type":"official-docs","title":"Testcontainers Kafka Module","url":"https://java.testcontainers.org/modules/kafka/","reinforces":"Kafka container, classes atuais e configuração para testes.","language":"en","publisher":"Testcontainers","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"},
-        {"id":"spring-boot-testing-phase16","type":"official-docs","title":"Spring Boot: Testing","url":"https://docs.spring.io/spring-boot/reference/testing/index.html","reinforces":"Test slices, @SpringBootTest e escopo de teste Spring.","language":"en","publisher":"Spring","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-22","auditStatus":"approved"}
+        {
+          "id": "testcontainers-kafka-phase16",
+          "type": "official-docs",
+          "title": "Testcontainers Kafka Module",
+          "url": "https://java.testcontainers.org/modules/kafka/",
+          "reinforces": "Kafka container, classes atuais e configuração para testes.",
+          "language": "en",
+          "publisher": "Testcontainers",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "spring-boot-testing-phase16",
+          "type": "official-docs",
+          "title": "Spring Boot: Testing",
+          "url": "https://docs.spring.io/spring-boot/reference/testing/index.html",
+          "reinforces": "Test slices, @SpringBootTest e escopo de teste Spring.",
+          "language": "en",
+          "publisher": "Spring",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
       ],
-      "audit": {"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     }
   }
 }

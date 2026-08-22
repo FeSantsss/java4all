@@ -3,63 +3,104 @@
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#kafka">41 · Kafka na prática</a>, <a class="prereq-tag" href="#di">22 · Injeção de dependência</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
       </div>
 
-      <p>O que você acabou de escrever manualmente no capítulo 41 (configurar <code>Properties</code>, criar producer/consumer, fazer o loop de <code>poll</code>) é exatamente o boilerplate que o <strong>Spring Kafka</strong> elimina — mesma relação de "entenda antes de automatizar" que já vimos com JDBC → Spring Data JPA.</p>
+      <p>O que você acabou de escrever manualmente no capítulo 41 (configurar <code>Properties</code>, criar producer/consumer, fazer o loop de <code>poll</code>) é exatamente o boilerplate que o <strong>Spring Kafka</strong> elimina — mesma relação de "entenda antes de automatizar" que já vimos com JDBC → Spring Data JPA. Mas "eliminar boilerplate" não significa "esconder o mecanismo": este capítulo mostra o que o Spring realmente faz por baixo de <code>KafkaTemplate</code> e <code>@KafkaListener</code>, porque depurar um consumer travado exige saber disso.</p>
 
-      <pre class="code"><span class="com">// producer: uma linha, o Spring já gerencia a configuração via application.properties</span>
+      <h3>Produzindo eventos: KafkaTemplate + serializer real, não concatenação de string</h3>
+      <p>O primeiro erro comum é montar o JSON manualmente com concatenação de <code>String</code> — funciona só enquanto o payload é trivial, quebra silenciosamente assim que um campo tem aspas, acentos ou um valor <code>null</code>. O jeito correto é declarar um DTO de evento e deixar o <code>JsonSerializer</code> (baseado no Jackson, capítulo 25) fazer a serialização:</p>
+      <pre class="code"><span class="com">// DTO do evento -- um record é suficiente e imutável (capítulo 62)</span>
+<span class="kw">public record</span> <span class="cls">PedidoFinalizadoEvent</span>(<span class="kw">String</span> pedidoId, <span class="kw">BigDecimal</span> total, Instant ocorridoEm) {}
+
 <span class="annotation">@Service</span>
 <span class="kw">public class</span> <span class="cls">PedidoEventPublisher</span> {
-    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate;
+    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, PedidoFinalizadoEvent&gt; kafkaTemplate;
 
-    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate) { <span class="com">// injeção, capítulo 22!</span>
+    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, PedidoFinalizadoEvent&gt; kafkaTemplate) { <span class="com">// injeção, capítulo 22</span>
         <span class="kw">this</span>.kafkaTemplate = kafkaTemplate;
     }
 
-    <span class="kw">public void</span> <span class="fn">publicarPedidoFinalizado</span>(<span class="kw">String</span> pedidoId) {
-        kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, pedidoId, <span class="str">"{\"id\":\""</span> + pedidoId + <span class="str">"\"}"</span>);
-    }
-}
+    <span class="kw">public void</span> <span class="fn">publicarPedidoFinalizado</span>(PedidoFinalizadoEvent evento) {
+        <span class="com">// chave = pedidoId -- garante que eventos do MESMO pedido caem sempre na MESMA partição (ordem preservada, capítulo 41)</span>
+        CompletableFuture&lt;SendResult&lt;<span class="kw">String</span>, PedidoFinalizadoEvent&gt;&gt; futuro =
+            kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, evento.pedidoId(), evento);
 
-<span class="com">// consumer: uma anotação substitui o loop de poll() inteiro</span>
-<span class="annotation">@Service</span>
-<span class="kw">public class</span> <span class="cls">NotificacaoListener</span> {
-    <span class="annotation">@KafkaListener</span>(topics = <span class="str">"pedidos-finalizados"</span>, groupId = <span class="str">"servico-notificacao"</span>)
-    <span class="kw">public void</span> <span class="fn">ouvir</span>(<span class="kw">String</span> mensagem) {
-        System.out.println(<span class="str">"Notificando sobre: "</span> + mensagem);
+        futuro.whenComplete((resultado, erro) -&gt; {
+            <span class="kw">if</span> (erro != <span class="kw">null</span>) {
+                <span class="com">// envio assíncrono -- erro de rede/broker só aparece aqui, não na chamada de send()</span>
+                log.error(<span class="str">"Falha ao publicar evento do pedido {}"</span>, evento.pedidoId(), erro);
+            } <span class="kw">else</span> {
+                log.info(<span class="str">"Evento publicado na partição {} offset {}"</span>,
+                    resultado.getRecordMetadata().partition(), resultado.getRecordMetadata().offset());
+            }
+        });
     }
 }</pre>
-
       <pre class="code"><span class="com"># application.properties</span>
 spring.kafka.bootstrap-servers=localhost:9092
-spring.kafka.consumer.group-id=servico-notificacao
-spring.kafka.consumer.auto-offset-reset=earliest</pre>
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+spring.kafka.producer.acks=all <span class="com"># espera confirmação de todas as réplicas in-sync (capítulo 35 -- durabilidade)</span></pre>
 
-      <div class="secret">Por trás de <code>@KafkaListener</code>, o Spring cria uma thread dedicada (relembra o capítulo 14) que fica rodando o equivalente ao <code>while(true) { poll(...) }</code> manual que você escreveu no capítulo anterior — só que gerenciado, com retry configurável e integração automática com o restante do container de beans. É exatamente o mesmo padrão de "reflection + anotação automatizando boilerplate" que apareceu em todo o capítulo 20.</div>
+      <div class="warn"><b><code>send()</code> é assíncrono:</b> ele retorna imediatamente um <code>CompletableFuture</code> (capítulo 14) — o método <code>publicarPedidoFinalizado</code> não espera o broker confirmar nada antes de retornar. Se você precisa saber se a publicação teve sucesso antes de continuar (por exemplo, só marcar o pedido como "notificado" depois do envio confirmado), trate o <code>CompletableFuture</code> explicitamente, como no exemplo acima — nunca ignore o resultado do <code>send()</code> assumindo que "se não lançou exceção na hora, deu certo".</div>
+
+      <h3>Consumindo eventos: @KafkaListener, o listener container e concorrência</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">NotificacaoListener</span> {
+    <span class="annotation">@KafkaListener</span>(
+        topics = <span class="str">"pedidos-finalizados"</span>,
+        groupId = <span class="str">"servico-notificacao"</span>,
+        concurrency = <span class="str">"3"</span> <span class="com">// até 3 threads consumidoras neste processo, uma por partição atribuída</span>
+    )
+    <span class="kw">public void</span> <span class="fn">ouvir</span>(PedidoFinalizadoEvent evento) {
+        System.out.println(<span class="str">"Notificando sobre o pedido "</span> + evento.pedidoId());
+    }
+}</pre>
+      <div class="secret"><code>@KafkaListener</code> <strong>não</strong> cria "uma thread dedicada" — ele cria um <strong>listener container</strong> (<code>ConcurrentMessageListenerContainer</code>) que gerencia um ou mais <em>consumer threads</em>, cada um rodando o equivalente ao loop <code>while (true) { poll(...) }</code> que você escreveu manualmente no capítulo 41. A propriedade <code>concurrency</code> define quantas threads (e portanto quantas instâncias internas de <code>Consumer</code>) o container sobe para este listener, dentro deste processo. Uma regra que a Kafka já te ensinou no capítulo anterior continua valendo aqui: o número efetivo de consumidores ativos <strong>de um mesmo consumer group</strong> nunca ultrapassa o número de partições do tópico — se o tópico tem 3 partições e você configurar <code>concurrency = 5</code>, 2 threads ficam ociosas, sem nenhuma partição atribuída. Cada thread do container processa suas partições atribuídas sequencialmente e sozinha; não há paralelismo dentro de uma mesma partição, exatamente como no consumer "cru" do capítulo 41 — é isso que preserva a ordem de eventos com a mesma chave.</div>
+
+      <h3>Commit de offset e modos de acknowledgment</h3>
+      <p>Por padrão (<code>AckMode.BATCH</code>), o container comita o offset automaticamente depois que o lote de registros retornado pelo <code>poll()</code> é processado com sucesso pelo seu método <code>@KafkaListener</code> — isso te dá <strong>at-least-once</strong>: se o processo cair depois de processar mas antes de comitar, a mensagem será reentregue e processada de novo no restart. Se sua lógica não for naturalmente idempotente (capítulo 39), processar duas vezes pode duplicar efeitos (enviar duas notificações, debitar duas vezes).</p>
+      <pre class="code">spring.kafka.consumer.enable-auto-commit=false <span class="com"># deixe o container controlar o commit, não o cliente Kafka cru</span>
+spring.kafka.listener.ack-mode=record <span class="com"># comita a cada registro processado (mais seguro, mais overhead)</span></pre>
+      <div class="warn"><b>"Exactly once" tem escopo limitado:</b> Kafka oferece semântica <em>exactly-once</em> apenas dentro de transações Kafka-para-Kafka (ler de um tópico, escrever em outro, dentro da mesma transação). Assim que seu listener produz um <strong>efeito colateral fora do Kafka</strong> (enviar e-mail, gravar em outro banco via HTTP), você está de volta ao mundo de <em>at-least-once</em> — a defesa real contra duplicidade é fazer o efeito colateral ser <strong>idempotente</strong> (capítulo 39), não confiar em uma garantia de entrega única.</div>
+
+      <h3>Erros no consumer: DefaultErrorHandler, retry e Dead Letter Topic</h3>
+      <p>Se <code>ouvir(...)</code> lançar uma exceção, o comportamento padrão do Spring Kafka não é simplesmente travar o listener nem descartar a mensagem silenciosamente — é reprocessar com retry configurável e, esgotadas as tentativas, desviar a mensagem para um <strong>Dead Letter Topic</strong> (DLT) em vez de bloquear o processamento de tudo que vem depois dela:</p>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> DefaultErrorHandler <span class="fn">errorHandler</span>(KafkaTemplate&lt;<span class="kw">Object</span>, <span class="kw">Object</span>&gt; template) {
+    <span class="kw">var</span> recoverer = <span class="kw">new</span> DeadLetterPublishingRecoverer(template); <span class="com">// publica no tópico "pedidos-finalizados.DLT"</span>
+    <span class="kw">var</span> backoff = <span class="kw">new</span> FixedBackOff(<span class="num">1000L</span>, <span class="num">3L</span>); <span class="com">// 3 tentativas, 1s entre elas</span>
+    <span class="kw">return new</span> DefaultErrorHandler(recoverer, backoff);
+}</pre>
+      <div class="warn"><b>Mensagem envenenada (poison message):</b> se o erro é um defeito de dados (um JSON malformado que nunca vai deserializar, um campo obrigatório ausente), retry não resolve nada — a mesma mensagem falha as 3 tentativas e só então vai pro DLT, atrasando o processamento das mensagens seguintes daquela partição enquanto isso. Diferencie, no seu código, uma falha transitória (banco fora do ar, timeout de rede — vale retry) de uma falha permanente de dados (vale ir direto pro DLT, sem gastar tentativas).</div>
+
+      <h3>Testando com Testcontainers</h3>
+      <p>Testar contra um Kafka real (via Testcontainers, capítulo 55) é mais confiável que mockar <code>KafkaTemplate</code>: um mock não valida serialização, particionamento por chave, nem o comportamento do listener container. Suba um broker Kafka efêmero por execução de teste, publique um evento real, e verifique que o listener reagiu — do jeito que você testaria qualquer integração com um sistema externo.</p>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 42.1 — Migrando para Spring Kafka</h4><span class="exercise-tag m">médio</span></div>
-        <p>Reescreva o <code>PedidoProducer</code> e <code>NotificacaoConsumer</code> do exercício 41.1 usando <code>KafkaTemplate</code> e <code>@KafkaListener</code>. Configure o <code>application.properties</code> com o <code>bootstrap-servers</code> e <code>group-id</code> corretos.</p>
+        <p>Reescreva o <code>PedidoProducer</code> e <code>NotificacaoConsumer</code> do exercício 41.1 usando <code>KafkaTemplate&lt;String, PedidoFinalizadoEvent&gt;</code> (não <code>String</code> cru) e <code>@KafkaListener</code>. Configure o <code>application.properties</code> com <code>bootstrap-servers</code>, os serializers/deserializers JSON e o <code>group-id</code> corretos. Explique por que usar o <code>pedidoId</code> como chave de particionamento é importante para a ordem dos eventos.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
 <pre class="code"><span class="annotation">@Service</span>
 <span class="kw">public class</span> <span class="cls">PedidoEventPublisher</span> {
-    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate;
-    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, <span class="kw">String</span>&gt; kafkaTemplate) { <span class="kw">this</span>.kafkaTemplate = kafkaTemplate; }
-    <span class="kw">public void</span> <span class="fn">publicar</span>(<span class="kw">String</span> pedidoId) {
-        kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, pedidoId, <span class="str">"{\"id\":\""</span> + pedidoId + <span class="str">"\"}"</span>);
+    <span class="kw">private final</span> KafkaTemplate&lt;<span class="kw">String</span>, PedidoFinalizadoEvent&gt; kafkaTemplate;
+    <span class="kw">public</span> <span class="fn">PedidoEventPublisher</span>(KafkaTemplate&lt;<span class="kw">String</span>, PedidoFinalizadoEvent&gt; kafkaTemplate) { <span class="kw">this</span>.kafkaTemplate = kafkaTemplate; }
+    <span class="kw">public void</span> <span class="fn">publicar</span>(PedidoFinalizadoEvent evento) {
+        kafkaTemplate.send(<span class="str">"pedidos-finalizados"</span>, evento.pedidoId(), evento); <span class="com">// chave = pedidoId</span>
     }
 }
 
 <span class="annotation">@Service</span>
 <span class="kw">public class</span> <span class="cls">NotificacaoListener</span> {
     <span class="annotation">@KafkaListener</span>(topics = <span class="str">"pedidos-finalizados"</span>, groupId = <span class="str">"servico-notificacao"</span>)
-    <span class="kw">public void</span> <span class="fn">ouvir</span>(<span class="kw">String</span> mensagem) {
-        System.out.println(<span class="str">"Notificando: "</span> + mensagem);
+    <span class="kw">public void</span> <span class="fn">ouvir</span>(PedidoFinalizadoEvent evento) {
+        System.out.println(<span class="str">"Notificando: "</span> + evento.pedidoId());
     }
 }</pre>
+          <p style="margin-top:12px">Todos os eventos com a mesma chave (o mesmo <code>pedidoId</code>) são roteados sempre para a mesma partição, e uma partição é lida sempre por uma única thread consumidora do grupo, em ordem de offset. Se a chave fosse aleatória, dois eventos do mesmo pedido poderiam cair em partições diferentes e ser processados fora de ordem por consumidores distintos.</p>
         </div>
       </div>
     </section>

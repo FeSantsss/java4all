@@ -14,8 +14,54 @@ notas[<span class="num">1</span>] = <span class="num">10</span>;
 <span class="kw">int</span>[] c = a.clone();         <span class="com">// novo array de primitivos</span>
 b[<span class="num">0</span>] = <span class="num">99</span>;                    <span class="com">// a[0] também vira 99</span></pre>
       <p>Em arrays de objetos, <code>clone</code> cria outro array, mas copia referências dos elementos. Os objetos internos continuam compartilhados. Isso é uma cópia rasa.</p>
+      <h3>Valores default e arrays de referências</h3>
+      <pre class="code"><span class="kw">int</span>[] inteiros = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">3</span>];      <span class="com">// {0, 0, 0} -- primitivos numéricos começam em zero</span>
+<span class="kw">boolean</span>[] flags = <span class="kw">new</span> <span class="kw">boolean</span>[<span class="num">2</span>]; <span class="com">// {false, false}</span>
+String[] nomes = <span class="kw">new</span> String[<span class="num">3</span>];    <span class="com">// {null, null, null} -- array de REFERÊNCIAS, não de objetos prontos</span>
+
+System.out.println(nomes[<span class="num">0</span>].length()); <span class="com">// NullPointerException -- a posição existe, mas está vazia (null)</span></pre>
+      <p>Um array de tipo referência (como <code>String[]</code>) não cria os objetos automaticamente — cada posição começa como <code>null</code> até você atribuir algo explicitamente. Acessar uma posição fora dos limites do array (índice negativo ou <code>&gt;= length</code>) lança <code>ArrayIndexOutOfBoundsException</code>; acessar um membro de uma posição que existe mas está <code>null</code> lança <code>NullPointerException</code> — são erros diferentes, com causas diferentes, e a mensagem da exceção diz qual dos dois aconteceu.</p>
+      <h3>Passagem para método e retorno</h3>
+      <pre class="code"><span class="kw">static void</span> <span class="fn">duplicarValores</span>(<span class="kw">int</span>[] valores) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; valores.length; i++) valores[i] *= <span class="num">2</span>;
+}
+
+<span class="kw">static int</span>[] <span class="fn">criarSequencia</span>(<span class="kw">int</span> tamanho) {
+    <span class="kw">int</span>[] resultado = <span class="kw">new</span> <span class="kw">int</span>[tamanho];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; tamanho; i++) resultado[i] = i;
+    <span class="kw">return</span> resultado; <span class="com">// devolve a REFERÊNCIA -- o array não é copiado ao retornar</span>
+}</pre>
+      <p>Como array é um objeto, passá-lo para um método passa a referência (uma cópia da referência, não do conteúdo) — o método recebe acesso ao mesmo array do chamador, e alterações nas posições são visíveis para quem chamou. Isso é diferente de reatribuir o parâmetro (<code>valores = new int[0]</code> dentro do método não afeta a variável do chamador).</p>
+      <h3>Arrays utility class: pare de reinventar</h3>
+      <pre class="code"><span class="kw">import</span> java.util.Arrays;
+
+<span class="kw">int</span>[] original = {<span class="num">5</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">4</span>};
+<span class="kw">int</span>[] copia = Arrays.copyOf(original, original.length); <span class="com">// cópia independente, mesmo tamanho</span>
+<span class="kw">int</span>[] maior = Arrays.copyOf(original, <span class="num">6</span>);           <span class="com">// cópia com 2 posições extras, preenchidas com 0</span>
+<span class="kw">int</span>[] fatia = Arrays.copyOfRange(original, <span class="num">1</span>, <span class="num">3</span>);  <span class="com">// {3, 1} -- início inclusivo, fim exclusivo</span>
+
+Arrays.fill(maior, <span class="num">4</span>, maior.length, -<span class="num">1</span>); <span class="com">// preenche as posições 4 e 5 com -1</span>
+Arrays.sort(original);                       <span class="com">// ordena IN PLACE -- muda o array original, não retorna outro</span>
+System.out.println(Arrays.toString(original)); <span class="com">// [1, 3, 4, 5] -- toString normal mostraria só o hash do objeto array</span>
+System.out.println(Arrays.equals(original, copia)); <span class="com">// false -- copia não foi ordenada, o conteúdo diverge agora</span></pre>
+      <div class="warn"><b><code>binarySearch</code> exige array ordenado.</b> <code>Arrays.binarySearch(array, alvo)</code> só funciona corretamente se o array já estiver ordenado (normalmente com <code>Arrays.sort</code> antes) — em um array fora de ordem, o resultado é indefinido, não necessariamente "não encontrado". A precondição é responsabilidade de quem chama, o método não verifica.</div>
+      <p>Nunca escreva um laço manual para copiar, preencher, imprimir ou comparar arrays de valores primitivos: <code>Arrays.copyOf</code>, <code>Arrays.fill</code>, <code>Arrays.toString</code> e <code>Arrays.equals</code> já existem, são testados e comunicam a intenção imediatamente a quem lê. <code>System.out.println(array)</code> direto imprime algo como <code>[I@1b6d3586</code> (o hash do objeto) — não o conteúdo; use sempre <code>Arrays.toString</code> para depurar.</p>
       <h3>Matrizes são arrays de arrays</h3>
       <p><code>int[][]</code> não exige linhas do mesmo tamanho. Cada linha é outro array e pode até ser <code>null</code>. Percorra usando <code>matriz.length</code> para linhas e <code>matriz[i].length</code> para colunas.</p>
+      <pre class="code"><span class="kw">int</span>[][] triangular = {
+    {<span class="num">1</span>},
+    {<span class="num">1</span>, <span class="num">2</span>},
+    {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}
+}; <span class="com">// jagged array -- linhas de tamanhos diferentes, perfeitamente válido em Java</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> linha = <span class="num">0</span>; linha &lt; triangular.length; linha++) {
+    <span class="kw">for</span> (<span class="kw">int</span> coluna = <span class="num">0</span>; coluna &lt; triangular[linha].length; coluna++) {
+        System.out.print(triangular[linha][coluna] + <span class="str">" "</span>);
+    }
+    System.out.println();
+}</pre>
+      <p>Diferente de outras linguagens que exigem matrizes retangulares, Java literalmente representa <code>int[][]</code> como um array de arrays independentes — <strong>jagged arrays</strong> (linhas de tamanhos diferentes) não são um caso especial, são a estrutura de dados de verdade por trás de toda matriz Java. Uma linha específica pode até ser <code>null</code> (nunca inicializada), então percorrer sem checar <code>triangular[linha] != null</code> antes pode lançar <code>NullPointerException</code> se alguma linha ficou sem atribuição.</p>
       <div class="warn"><b>Array não cresce.</b> Se o tamanho varia durante a execução, a coleção adequada costuma ser <code>ArrayList</code>. Não reimplemente crescimento manual sem uma razão técnica.</div>
       <div class="exercise"><div class="exercise-head"><h4>Estatísticas sem atalhos</h4><span class="exercise-tag m">Prática</span></div><p>Receba um array e encontre mínimo, máximo, média e posição do primeiro máximo. Trate array vazio explicitamente.</p></div>
+      <div class="exercise"><div class="exercise-head"><h4>Aliasing e cópia</h4><span class="exercise-tag m">Diagnóstico</span></div><p>Escreva um método que recebe um array de <code>int</code>, um método que o modifica in-place, e demonstre com <code>Arrays.toString</code> a diferença entre passar o array direto (o chamador vê a mudança) e passar <code>Arrays.copyOf(array, array.length)</code> (o chamador não vê). Depois monte uma matriz triangular (jagged) de 4 linhas e imprima usando dois laços aninhados.</p></div>
     </section>

@@ -44,7 +44,7 @@ function blockText(block) {
 const files = (await readdir(chapterDirectory)).filter(file => file.endsWith('.html')).sort();
 const expectedFiles = catalog.chapters.map(chapter => `${chapter.id}.html`).sort();
 assert(JSON.stringify(files) === JSON.stringify(expectedFiles), 'O conjunto de arquivos HTML não corresponde exatamente ao catálogo.');
-assert(catalog.chapters.length === 128, 'O catálogo separado deve preservar 128 capítulos legados.');
+assert(catalog.chapters.length === generated.chapters.length, 'O catálogo separado diverge da contagem de capítulos legados gerados.');
 assert(glossary.length === 111, 'O glossário separado deve preservar 111 definições.');
 assert(generated.glossary.length === glossary.length, 'O modelo React não carregou o glossário completo.');
 

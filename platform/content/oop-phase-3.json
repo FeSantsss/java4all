@@ -3,131 +3,2528 @@
   "phase": "3-oop-modeling",
   "reviewedAt": "2026-08-21",
   "concepts": [
-    {"id":"classe-instancia-objeto","name":"Classe, instância e objeto","aliases":["class","instance"],"introducedIn":"classes","reinforcedIn":["atributos","construtores"],"prerequisiteConceptIds":["variavel-tipo-estatico"],"commonConfusions":["chamar classe e objeto de mesma coisa","achar que declarar uma referência cria um objeto"],"outcomes":["distinguir declaração de classe, referência e instância criada com new"]},
-    {"id":"identidade-referencia-objeto","name":"Identidade e referências de objetos","aliases":["object identity","aliasing"],"introducedIn":"classes","reinforcedIn":["atributos","associacoes-cardinalidade"],"prerequisiteConceptIds":["primitivo-referencia","identidade-conteudo"],"commonConfusions":["achar que atribuição copia o objeto","confundir mesmo estado com mesma identidade"],"outcomes":["prever aliasing, null e comparação de identidade"]},
-    {"id":"ciclo-alcancabilidade","name":"Criação, alcance e coleta de objetos","aliases":["garbage collection"],"introducedIn":"classes","reinforcedIn":["associacoes-cardinalidade"],"prerequisiteConceptIds":["identidade-referencia-objeto"],"commonConfusions":["tratar stack e heap como regra exata para toda variável","achar que GC fecha recursos"],"outcomes":["explicar quando um objeto deixa de ser alcançável sem prometer momento de coleta"]},
-
-    {"id":"estado-comportamento","name":"Estado e comportamento","aliases":["fields and methods"],"introducedIn":"atributos","reinforcedIn":["encapsulamento","pilares-profundo"],"prerequisiteConceptIds":["classe-instancia-objeto","metodo-contrato"],"commonConfusions":["modelar classe como saco de dados","confundir variável local com campo"],"outcomes":["atribuir responsabilidades e manter regras próximas do estado"]},
-    {"id":"campo-instancia","name":"Campos e valores padrão","aliases":["instance field"],"introducedIn":"atributos","reinforcedIn":["construtores"],"prerequisiteConceptIds":["variavel-tipo-estatico","classe-instancia-objeto"],"commonConfusions":["presumir que campo e variável local inicializam igual"],"outcomes":["distinguir campo, parâmetro e variável local"]},
-    {"id":"comando-consulta","name":"Comandos, consultas e efeitos","aliases":["command-query distinction"],"introducedIn":"atributos","reinforcedIn":["encapsulamento","mini-biblioteca-cli"],"prerequisiteConceptIds":["metodo-contrato","estado-comportamento"],"commonConfusions":["getter que altera estado","método que imprime no lugar de retornar"],"outcomes":["tornar efeitos e resultados de métodos observáveis"]},
-
-    {"id":"construtor-invariante","name":"Construtor e estado inicial válido","aliases":["constructor"],"introducedIn":"construtores","reinforcedIn":["encapsulamento","associacoes-cardinalidade"],"prerequisiteConceptIds":["estado-comportamento","ordem-de-condicoes"],"commonConfusions":["achar que construtor tem tipo de retorno","deixar objeto parcialmente inicializado"],"outcomes":["criar objetos que já nascem respeitando suas regras"]},
-    {"id":"construtor-padrao","name":"Construtor padrão implícito","aliases":["default constructor"],"introducedIn":"construtores","reinforcedIn":["heranca"],"prerequisiteConceptIds":["classe-instancia-objeto"],"commonConfusions":["achar que Java sempre mantém construtor sem argumentos"],"outcomes":["prever quando o compilador declara ou deixa de declarar construtor padrão"]},
-    {"id":"this-encadeamento","name":"this e encadeamento de construtores","aliases":["this()"],"introducedIn":"construtores","reinforcedIn":["static"],"prerequisiteConceptIds":["construtor-invariante"],"commonConfusions":["confundir this com a classe","chamar this() fora da primeira instrução"],"outcomes":["delegar inicialização sem duplicar regras"]},
-
-    {"id":"encapsulamento-invariante","name":"Encapsulamento e invariantes","aliases":["information hiding"],"introducedIn":"encapsulamento","reinforcedIn":["pilares-profundo","mini-biblioteca-cli"],"prerequisiteConceptIds":["construtor-invariante","estado-comportamento"],"commonConfusions":["equacionar encapsulamento a getters e setters"],"outcomes":["proteger estado por operações de domínio"]},
-    {"id":"controle-acesso","name":"Controle de acesso","aliases":["public","private","protected","package access"],"introducedIn":"encapsulamento","reinforcedIn":["heranca","interfaces"],"prerequisiteConceptIds":["classe-instancia-objeto"],"commonConfusions":["chamar ausência de modificador de public","usar protected como public para subclasses"],"outcomes":["escolher a menor visibilidade necessária"]},
-    {"id":"imutabilidade-objeto","name":"Imutabilidade de objeto","aliases":["immutable object"],"introducedIn":"encapsulamento","reinforcedIn":["static","associacoes-cardinalidade"],"prerequisiteConceptIds":["encapsulamento-invariante","string-imutavel"],"commonConfusions":["achar que referência final torna o objeto imutável"],"outcomes":["projetar estado que não muda após construção"]},
-
-    {"id":"membro-estatico","name":"Membros de classe com static","aliases":["class member"],"introducedIn":"static","reinforcedIn":["pilares-profundo"],"prerequisiteConceptIds":["classe-instancia-objeto","campo-instancia"],"commonConfusions":["achar que existe uma cópia static por objeto","acessar estado de instância sem objeto"],"outcomes":["distinguir estado da classe e de cada instância"]},
-    {"id":"final-referencia-tipo","name":"final em variável, método e classe","aliases":["final"],"introducedIn":"static","reinforcedIn":["heranca","abstracao"],"prerequisiteConceptIds":["imutabilidade-objeto","identidade-referencia-objeto"],"commonConfusions":["confundir referência final com objeto imutável"],"outcomes":["explicar o que final restringe em cada contexto"]},
-    {"id":"this-instancia","name":"this como objeto atual","aliases":["current object"],"introducedIn":"static","reinforcedIn":["heranca","associacoes-cardinalidade"],"prerequisiteConceptIds":["this-encadeamento","membro-estatico"],"commonConfusions":["usar this em contexto static"],"outcomes":["identificar o receptor de uma chamada de instância"]},
-
-    {"id":"heranca-subtipo","name":"Herança e relação de subtipo","aliases":["extends","is-a"],"introducedIn":"heranca","reinforcedIn":["polimorfismo","pilares-profundo"],"prerequisiteConceptIds":["controle-acesso","final-referencia-tipo"],"commonConfusions":["usar herança apenas para reaproveitar código","achar que construtores são herdados"],"outcomes":["validar se toda subclasse pode substituir a superclasse"]},
-    {"id":"super-sobrescrita","name":"super, herança e sobrescrita","aliases":["override"],"introducedIn":"heranca","reinforcedIn":["polimorfismo","abstracao"],"prerequisiteConceptIds":["heranca-subtipo","construtor-padrao"],"commonConfusions":["confundir sobrescrita com sobrecarga","reduzir visibilidade ao sobrescrever"],"outcomes":["estender ou substituir comportamento herdado conscientemente"]},
-    {"id":"heranca-composicao","name":"Herança versus composição","aliases":["is-a versus has-a"],"introducedIn":"heranca","reinforcedIn":["pilares-profundo","associacoes-cardinalidade"],"prerequisiteConceptIds":["heranca-subtipo","estado-comportamento"],"commonConfusions":["usar extends para uma relação tem-um"],"outcomes":["escolher colaboração quando não existe subtipo verdadeiro"]},
-
-    {"id":"polimorfismo-substituicao","name":"Polimorfismo por substituição","aliases":["upcasting"],"introducedIn":"polimorfismo","reinforcedIn":["interfaces","pilares-profundo"],"prerequisiteConceptIds":["heranca-subtipo","super-sobrescrita"],"commonConfusions":["achar que o objeto perde seu tipo real"],"outcomes":["tratar subtipos uniformemente sem perder comportamento específico"]},
-    {"id":"despacho-dinamico","name":"Despacho dinâmico de método","aliases":["dynamic dispatch"],"introducedIn":"polimorfismo","reinforcedIn":["interfaces","pilares-profundo"],"prerequisiteConceptIds":["polimorfismo-substituicao"],"commonConfusions":["afirmar que campos são polimórficos","ensinar vtable como exigência da linguagem"],"outcomes":["prever qual método de instância sobrescrito executa"]},
-    {"id":"downcast-instanceof","name":"Downcast e teste de tipo","aliases":["instanceof"],"introducedIn":"polimorfismo","reinforcedIn":["pilares-profundo"],"prerequisiteConceptIds":["polimorfismo-substituicao"],"commonConfusions":["usar cast para mudar o objeto","downcastar sem verificar o tipo real"],"outcomes":["reconhecer quando downcast indica abstração insuficiente"]},
-
-    {"id":"classe-metodo-abstrato","name":"Classe e método abstratos","aliases":["abstract class"],"introducedIn":"abstracao","reinforcedIn":["interfaces","pilares-profundo"],"prerequisiteConceptIds":["heranca-subtipo","despacho-dinamico"],"commonConfusions":["achar que abstrato significa sem construtor","confundir abstração com palavra-chave abstract"],"outcomes":["combinar estado compartilhado e operações obrigatórias"]},
-    {"id":"contrato-parcial","name":"Contrato parcial e comportamento compartilhado","aliases":["partial implementation"],"introducedIn":"abstracao","reinforcedIn":["interfaces"],"prerequisiteConceptIds":["classe-metodo-abstrato","super-sobrescrita"],"commonConfusions":["criar método fictício que retorna zero"],"outcomes":["impedir instanciação de um conceito incompleto"]},
-    {"id":"abstracao-modelagem","name":"Abstração como escolha de relevância","aliases":["domain abstraction"],"introducedIn":"abstracao","reinforcedIn":["pilares-profundo","associacoes-cardinalidade"],"prerequisiteConceptIds":["estado-comportamento"],"commonConfusions":["reduzir abstração a classe abstrata"],"outcomes":["selecionar dados e comportamentos relevantes ao problema"]},
-
-    {"id":"interface-contrato","name":"Interface como contrato de tipo","aliases":["interface"],"introducedIn":"interfaces","reinforcedIn":["pilares-profundo","mini-biblioteca-cli"],"prerequisiteConceptIds":["polimorfismo-substituicao","classe-metodo-abstrato"],"commonConfusions":["dizer que interface nunca possui implementação","usar Object e cast quando o contrato pode ser tipado"],"outcomes":["programar contra capacidade sem exigir uma hierarquia de classes"]},
-    {"id":"implementacao-multipla-interfaces","name":"Múltiplos contratos por interfaces","aliases":["implements"],"introducedIn":"interfaces","reinforcedIn":["mini-biblioteca-cli"],"prerequisiteConceptIds":["interface-contrato"],"commonConfusions":["confundir múltiplas interfaces com múltiplas superclasses"],"outcomes":["combinar capacidades independentes em um tipo"]},
-    {"id":"default-conflito-interface","name":"Métodos default e resolução de conflito","aliases":["default method"],"introducedIn":"interfaces","reinforcedIn":["pilares-profundo"],"prerequisiteConceptIds":["interface-contrato","super-sobrescrita"],"commonConfusions":["achar que Java escolhe um default arbitrariamente"],"outcomes":["resolver explicitamente contratos default incompatíveis"]},
-
-    {"id":"quatro-pilares-cooperacao","name":"Cooperação entre os pilares de POO","aliases":["POO integrada"],"introducedIn":"pilares-profundo","reinforcedIn":["associacoes-cardinalidade","mini-biblioteca-cli"],"prerequisiteConceptIds":["encapsulamento-invariante","heranca-composicao","despacho-dinamico","abstracao-modelagem","interface-contrato"],"commonConfusions":["decorar quatro definições isoladas"],"outcomes":["explicar qual problema cada mecanismo resolve no mesmo modelo"]},
-    {"id":"decisao-modelagem-poo","name":"Decisões e custos da modelagem orientada a objetos","aliases":["OO trade-offs"],"introducedIn":"pilares-profundo","reinforcedIn":["associacoes-cardinalidade","mini-biblioteca-cli"],"prerequisiteConceptIds":["quatro-pilares-cooperacao"],"commonConfusions":["tratar herança ou interface como dogma"],"outcomes":["justificar encapsulamento, subtipo e colaboração pelos efeitos no modelo"]},
-
-    {"id":"associacao-direcao","name":"Associação e direção","aliases":["unidirectional","bidirectional"],"introducedIn":"associacoes-cardinalidade","reinforcedIn":["mini-biblioteca-cli"],"prerequisiteConceptIds":["identidade-referencia-objeto","decisao-modelagem-poo"],"commonConfusions":["achar que toda relação precisa de dois lados","confundir navegação com tabela de banco"],"outcomes":["modelar somente direções exigidas pelos casos de uso"]},
-    {"id":"cardinalidade-objeto","name":"Cardinalidade entre objetos","aliases":["0..1","1","0..N"],"introducedIn":"associacoes-cardinalidade","reinforcedIn":["mini-biblioteca-cli"],"prerequisiteConceptIds":["associacao-direcao","array-indice-length"],"commonConfusions":["deixar mínimo e máximo implícitos"],"outcomes":["representar e testar limites de participação"]},
-    {"id":"composicao-ciclo-vida","name":"Associação, agregação e composição","aliases":["ownership","whole-part"],"introducedIn":"associacoes-cardinalidade","reinforcedIn":["mini-biblioteca-cli"],"prerequisiteConceptIds":["heranca-composicao","ciclo-alcancabilidade"],"commonConfusions":["chamar todo campo de composição","confundir composição de objetos com herança"],"outcomes":["justificar ownership pelo ciclo de vida da parte"]},
-    {"id":"consistencia-relacao","name":"Consistência de relações","aliases":["relationship invariant"],"introducedIn":"associacoes-cardinalidade","reinforcedIn":["mini-biblioteca-cli"],"prerequisiteConceptIds":["encapsulamento-invariante","cardinalidade-objeto"],"commonConfusions":["atualizar apenas um lado de relação bidirecional"],"outcomes":["centralizar validação e transição de todos os lados"]},
-
-    {"id":"projeto-poo-incremental","name":"Projeto POO incremental","aliases":["incremental OO design"],"introducedIn":"mini-biblioteca-cli","reinforcedIn":[],"prerequisiteConceptIds":["incremento-executavel","decisao-modelagem-poo"],"commonConfusions":["começar pelo menu antes das invariantes"],"outcomes":["construir e verificar o domínio antes da CLI"]},
-    {"id":"evidencia-invariante-objeto","name":"Evidência de invariantes entre objetos","aliases":["object invariant evidence"],"introducedIn":"mini-biblioteca-cli","reinforcedIn":[],"prerequisiteConceptIds":["evidencia-manual","encapsulamento-invariante"],"commonConfusions":["testar apenas mensagens do menu"],"outcomes":["demonstrar transições válidas e recusas sem depender do terminal"]}
+    {
+      "id": "classe-instancia-objeto",
+      "name": "Classe, instância e objeto",
+      "aliases": [
+        "class",
+        "instance"
+      ],
+      "introducedIn": "classes",
+      "reinforcedIn": [
+        "atributos",
+        "construtores"
+      ],
+      "prerequisiteConceptIds": [
+        "variavel-tipo-estatico"
+      ],
+      "commonConfusions": [
+        "chamar classe e objeto de mesma coisa",
+        "achar que declarar uma referência cria um objeto"
+      ],
+      "outcomes": [
+        "distinguir declaração de classe, referência e instância criada com new"
+      ]
+    },
+    {
+      "id": "identidade-referencia-objeto",
+      "name": "Identidade e referências de objetos",
+      "aliases": [
+        "object identity",
+        "aliasing"
+      ],
+      "introducedIn": "classes",
+      "reinforcedIn": [
+        "atributos",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "primitivo-referencia",
+        "identidade-conteudo"
+      ],
+      "commonConfusions": [
+        "achar que atribuição copia o objeto",
+        "confundir mesmo estado com mesma identidade"
+      ],
+      "outcomes": [
+        "prever aliasing, null e comparação de identidade"
+      ]
+    },
+    {
+      "id": "ciclo-alcancabilidade",
+      "name": "Criação, alcance e coleta de objetos",
+      "aliases": [
+        "garbage collection"
+      ],
+      "introducedIn": "classes",
+      "reinforcedIn": [
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "identidade-referencia-objeto"
+      ],
+      "commonConfusions": [
+        "tratar stack e heap como regra exata para toda variável",
+        "achar que GC fecha recursos"
+      ],
+      "outcomes": [
+        "explicar quando um objeto deixa de ser alcançável sem prometer momento de coleta"
+      ]
+    },
+    {
+      "id": "estado-comportamento",
+      "name": "Estado e comportamento",
+      "aliases": [
+        "fields and methods"
+      ],
+      "introducedIn": "atributos",
+      "reinforcedIn": [
+        "encapsulamento",
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "classe-instancia-objeto",
+        "metodo-contrato"
+      ],
+      "commonConfusions": [
+        "modelar classe como saco de dados",
+        "confundir variável local com campo"
+      ],
+      "outcomes": [
+        "atribuir responsabilidades e manter regras próximas do estado"
+      ]
+    },
+    {
+      "id": "campo-instancia",
+      "name": "Campos e valores padrão",
+      "aliases": [
+        "instance field"
+      ],
+      "introducedIn": "atributos",
+      "reinforcedIn": [
+        "construtores"
+      ],
+      "prerequisiteConceptIds": [
+        "variavel-tipo-estatico",
+        "classe-instancia-objeto"
+      ],
+      "commonConfusions": [
+        "presumir que campo e variável local inicializam igual"
+      ],
+      "outcomes": [
+        "distinguir campo, parâmetro e variável local"
+      ]
+    },
+    {
+      "id": "comando-consulta",
+      "name": "Comandos, consultas e efeitos",
+      "aliases": [
+        "command-query distinction"
+      ],
+      "introducedIn": "atributos",
+      "reinforcedIn": [
+        "encapsulamento",
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "metodo-contrato",
+        "estado-comportamento"
+      ],
+      "commonConfusions": [
+        "getter que altera estado",
+        "método que imprime no lugar de retornar"
+      ],
+      "outcomes": [
+        "tornar efeitos e resultados de métodos observáveis"
+      ]
+    },
+    {
+      "id": "construtor-invariante",
+      "name": "Construtor e estado inicial válido",
+      "aliases": [
+        "constructor"
+      ],
+      "introducedIn": "construtores",
+      "reinforcedIn": [
+        "encapsulamento",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "estado-comportamento",
+        "ordem-de-condicoes"
+      ],
+      "commonConfusions": [
+        "achar que construtor tem tipo de retorno",
+        "deixar objeto parcialmente inicializado"
+      ],
+      "outcomes": [
+        "criar objetos que já nascem respeitando suas regras"
+      ]
+    },
+    {
+      "id": "construtor-padrao",
+      "name": "Construtor padrão implícito",
+      "aliases": [
+        "default constructor"
+      ],
+      "introducedIn": "construtores",
+      "reinforcedIn": [
+        "heranca"
+      ],
+      "prerequisiteConceptIds": [
+        "classe-instancia-objeto"
+      ],
+      "commonConfusions": [
+        "achar que Java sempre mantém construtor sem argumentos"
+      ],
+      "outcomes": [
+        "prever quando o compilador declara ou deixa de declarar construtor padrão"
+      ]
+    },
+    {
+      "id": "this-encadeamento",
+      "name": "this e encadeamento de construtores",
+      "aliases": [
+        "this()"
+      ],
+      "introducedIn": "construtores",
+      "reinforcedIn": [
+        "static"
+      ],
+      "prerequisiteConceptIds": [
+        "construtor-invariante"
+      ],
+      "commonConfusions": [
+        "confundir this com a classe",
+        "chamar this() fora da primeira instrução"
+      ],
+      "outcomes": [
+        "delegar inicialização sem duplicar regras"
+      ]
+    },
+    {
+      "id": "encapsulamento-invariante",
+      "name": "Encapsulamento e invariantes",
+      "aliases": [
+        "information hiding"
+      ],
+      "introducedIn": "encapsulamento",
+      "reinforcedIn": [
+        "pilares-profundo",
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "construtor-invariante",
+        "estado-comportamento"
+      ],
+      "commonConfusions": [
+        "equacionar encapsulamento a getters e setters"
+      ],
+      "outcomes": [
+        "proteger estado por operações de domínio"
+      ]
+    },
+    {
+      "id": "controle-acesso",
+      "name": "Controle de acesso",
+      "aliases": [
+        "public",
+        "private",
+        "protected",
+        "package access"
+      ],
+      "introducedIn": "encapsulamento",
+      "reinforcedIn": [
+        "heranca",
+        "interfaces"
+      ],
+      "prerequisiteConceptIds": [
+        "classe-instancia-objeto"
+      ],
+      "commonConfusions": [
+        "chamar ausência de modificador de public",
+        "usar protected como public para subclasses"
+      ],
+      "outcomes": [
+        "escolher a menor visibilidade necessária"
+      ]
+    },
+    {
+      "id": "imutabilidade-objeto",
+      "name": "Imutabilidade de objeto",
+      "aliases": [
+        "immutable object"
+      ],
+      "introducedIn": "encapsulamento",
+      "reinforcedIn": [
+        "static",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "encapsulamento-invariante",
+        "string-imutavel"
+      ],
+      "commonConfusions": [
+        "achar que referência final torna o objeto imutável"
+      ],
+      "outcomes": [
+        "projetar estado que não muda após construção"
+      ]
+    },
+    {
+      "id": "membro-estatico",
+      "name": "Membros de classe com static",
+      "aliases": [
+        "class member"
+      ],
+      "introducedIn": "static",
+      "reinforcedIn": [
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "classe-instancia-objeto",
+        "campo-instancia"
+      ],
+      "commonConfusions": [
+        "achar que existe uma cópia static por objeto",
+        "acessar estado de instância sem objeto"
+      ],
+      "outcomes": [
+        "distinguir estado da classe e de cada instância"
+      ]
+    },
+    {
+      "id": "final-referencia-tipo",
+      "name": "final em variável, método e classe",
+      "aliases": [
+        "final"
+      ],
+      "introducedIn": "static",
+      "reinforcedIn": [
+        "heranca",
+        "abstracao"
+      ],
+      "prerequisiteConceptIds": [
+        "imutabilidade-objeto",
+        "identidade-referencia-objeto"
+      ],
+      "commonConfusions": [
+        "confundir referência final com objeto imutável"
+      ],
+      "outcomes": [
+        "explicar o que final restringe em cada contexto"
+      ]
+    },
+    {
+      "id": "this-instancia",
+      "name": "this como objeto atual",
+      "aliases": [
+        "current object"
+      ],
+      "introducedIn": "static",
+      "reinforcedIn": [
+        "heranca",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "this-encadeamento",
+        "membro-estatico"
+      ],
+      "commonConfusions": [
+        "usar this em contexto static"
+      ],
+      "outcomes": [
+        "identificar o receptor de uma chamada de instância"
+      ]
+    },
+    {
+      "id": "heranca-subtipo",
+      "name": "Herança e relação de subtipo",
+      "aliases": [
+        "extends",
+        "is-a"
+      ],
+      "introducedIn": "heranca",
+      "reinforcedIn": [
+        "polimorfismo",
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "controle-acesso",
+        "final-referencia-tipo"
+      ],
+      "commonConfusions": [
+        "usar herança apenas para reaproveitar código",
+        "achar que construtores são herdados"
+      ],
+      "outcomes": [
+        "validar se toda subclasse pode substituir a superclasse"
+      ]
+    },
+    {
+      "id": "super-sobrescrita",
+      "name": "super, herança e sobrescrita",
+      "aliases": [
+        "override"
+      ],
+      "introducedIn": "heranca",
+      "reinforcedIn": [
+        "polimorfismo",
+        "abstracao"
+      ],
+      "prerequisiteConceptIds": [
+        "heranca-subtipo",
+        "construtor-padrao"
+      ],
+      "commonConfusions": [
+        "confundir sobrescrita com sobrecarga",
+        "reduzir visibilidade ao sobrescrever"
+      ],
+      "outcomes": [
+        "estender ou substituir comportamento herdado conscientemente"
+      ]
+    },
+    {
+      "id": "heranca-composicao",
+      "name": "Herança versus composição",
+      "aliases": [
+        "is-a versus has-a"
+      ],
+      "introducedIn": "heranca",
+      "reinforcedIn": [
+        "pilares-profundo",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "heranca-subtipo",
+        "estado-comportamento"
+      ],
+      "commonConfusions": [
+        "usar extends para uma relação tem-um"
+      ],
+      "outcomes": [
+        "escolher colaboração quando não existe subtipo verdadeiro"
+      ]
+    },
+    {
+      "id": "polimorfismo-substituicao",
+      "name": "Polimorfismo por substituição",
+      "aliases": [
+        "upcasting"
+      ],
+      "introducedIn": "polimorfismo",
+      "reinforcedIn": [
+        "interfaces",
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "heranca-subtipo",
+        "super-sobrescrita"
+      ],
+      "commonConfusions": [
+        "achar que o objeto perde seu tipo real"
+      ],
+      "outcomes": [
+        "tratar subtipos uniformemente sem perder comportamento específico"
+      ]
+    },
+    {
+      "id": "despacho-dinamico",
+      "name": "Despacho dinâmico de método",
+      "aliases": [
+        "dynamic dispatch"
+      ],
+      "introducedIn": "polimorfismo",
+      "reinforcedIn": [
+        "interfaces",
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "polimorfismo-substituicao"
+      ],
+      "commonConfusions": [
+        "afirmar que campos são polimórficos",
+        "ensinar vtable como exigência da linguagem"
+      ],
+      "outcomes": [
+        "prever qual método de instância sobrescrito executa"
+      ]
+    },
+    {
+      "id": "downcast-instanceof",
+      "name": "Downcast e teste de tipo",
+      "aliases": [
+        "instanceof"
+      ],
+      "introducedIn": "polimorfismo",
+      "reinforcedIn": [
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "polimorfismo-substituicao"
+      ],
+      "commonConfusions": [
+        "usar cast para mudar o objeto",
+        "downcastar sem verificar o tipo real"
+      ],
+      "outcomes": [
+        "reconhecer quando downcast indica abstração insuficiente"
+      ]
+    },
+    {
+      "id": "classe-metodo-abstrato",
+      "name": "Classe e método abstratos",
+      "aliases": [
+        "abstract class"
+      ],
+      "introducedIn": "abstracao",
+      "reinforcedIn": [
+        "interfaces",
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "heranca-subtipo",
+        "despacho-dinamico"
+      ],
+      "commonConfusions": [
+        "achar que abstrato significa sem construtor",
+        "confundir abstração com palavra-chave abstract"
+      ],
+      "outcomes": [
+        "combinar estado compartilhado e operações obrigatórias"
+      ]
+    },
+    {
+      "id": "contrato-parcial",
+      "name": "Contrato parcial e comportamento compartilhado",
+      "aliases": [
+        "partial implementation"
+      ],
+      "introducedIn": "abstracao",
+      "reinforcedIn": [
+        "interfaces"
+      ],
+      "prerequisiteConceptIds": [
+        "classe-metodo-abstrato",
+        "super-sobrescrita"
+      ],
+      "commonConfusions": [
+        "criar método fictício que retorna zero"
+      ],
+      "outcomes": [
+        "impedir instanciação de um conceito incompleto"
+      ]
+    },
+    {
+      "id": "abstracao-modelagem",
+      "name": "Abstração como escolha de relevância",
+      "aliases": [
+        "domain abstraction"
+      ],
+      "introducedIn": "abstracao",
+      "reinforcedIn": [
+        "pilares-profundo",
+        "associacoes-cardinalidade"
+      ],
+      "prerequisiteConceptIds": [
+        "estado-comportamento"
+      ],
+      "commonConfusions": [
+        "reduzir abstração a classe abstrata"
+      ],
+      "outcomes": [
+        "selecionar dados e comportamentos relevantes ao problema"
+      ]
+    },
+    {
+      "id": "interface-contrato",
+      "name": "Interface como contrato de tipo",
+      "aliases": [
+        "interface"
+      ],
+      "introducedIn": "interfaces",
+      "reinforcedIn": [
+        "pilares-profundo",
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "polimorfismo-substituicao",
+        "classe-metodo-abstrato"
+      ],
+      "commonConfusions": [
+        "dizer que interface nunca possui implementação",
+        "usar Object e cast quando o contrato pode ser tipado"
+      ],
+      "outcomes": [
+        "programar contra capacidade sem exigir uma hierarquia de classes"
+      ]
+    },
+    {
+      "id": "implementacao-multipla-interfaces",
+      "name": "Múltiplos contratos por interfaces",
+      "aliases": [
+        "implements"
+      ],
+      "introducedIn": "interfaces",
+      "reinforcedIn": [
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "interface-contrato"
+      ],
+      "commonConfusions": [
+        "confundir múltiplas interfaces com múltiplas superclasses"
+      ],
+      "outcomes": [
+        "combinar capacidades independentes em um tipo"
+      ]
+    },
+    {
+      "id": "default-conflito-interface",
+      "name": "Métodos default e resolução de conflito",
+      "aliases": [
+        "default method"
+      ],
+      "introducedIn": "interfaces",
+      "reinforcedIn": [
+        "pilares-profundo"
+      ],
+      "prerequisiteConceptIds": [
+        "interface-contrato",
+        "super-sobrescrita"
+      ],
+      "commonConfusions": [
+        "achar que Java escolhe um default arbitrariamente"
+      ],
+      "outcomes": [
+        "resolver explicitamente contratos default incompatíveis"
+      ]
+    },
+    {
+      "id": "quatro-pilares-cooperacao",
+      "name": "Cooperação entre os pilares de POO",
+      "aliases": [
+        "POO integrada"
+      ],
+      "introducedIn": "pilares-profundo",
+      "reinforcedIn": [
+        "associacoes-cardinalidade",
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "encapsulamento-invariante",
+        "heranca-composicao",
+        "despacho-dinamico",
+        "abstracao-modelagem",
+        "interface-contrato"
+      ],
+      "commonConfusions": [
+        "decorar quatro definições isoladas"
+      ],
+      "outcomes": [
+        "explicar qual problema cada mecanismo resolve no mesmo modelo"
+      ]
+    },
+    {
+      "id": "decisao-modelagem-poo",
+      "name": "Decisões e custos da modelagem orientada a objetos",
+      "aliases": [
+        "OO trade-offs"
+      ],
+      "introducedIn": "pilares-profundo",
+      "reinforcedIn": [
+        "associacoes-cardinalidade",
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "quatro-pilares-cooperacao"
+      ],
+      "commonConfusions": [
+        "tratar herança ou interface como dogma"
+      ],
+      "outcomes": [
+        "justificar encapsulamento, subtipo e colaboração pelos efeitos no modelo"
+      ]
+    },
+    {
+      "id": "associacao-direcao",
+      "name": "Associação e direção",
+      "aliases": [
+        "unidirectional",
+        "bidirectional"
+      ],
+      "introducedIn": "associacoes-cardinalidade",
+      "reinforcedIn": [
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "identidade-referencia-objeto",
+        "decisao-modelagem-poo"
+      ],
+      "commonConfusions": [
+        "achar que toda relação precisa de dois lados",
+        "confundir navegação com tabela de banco"
+      ],
+      "outcomes": [
+        "modelar somente direções exigidas pelos casos de uso"
+      ]
+    },
+    {
+      "id": "cardinalidade-objeto",
+      "name": "Cardinalidade entre objetos",
+      "aliases": [
+        "0..1",
+        "1",
+        "0..N"
+      ],
+      "introducedIn": "associacoes-cardinalidade",
+      "reinforcedIn": [
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "associacao-direcao",
+        "array-indice-length"
+      ],
+      "commonConfusions": [
+        "deixar mínimo e máximo implícitos"
+      ],
+      "outcomes": [
+        "representar e testar limites de participação"
+      ]
+    },
+    {
+      "id": "composicao-ciclo-vida",
+      "name": "Associação, agregação e composição",
+      "aliases": [
+        "ownership",
+        "whole-part"
+      ],
+      "introducedIn": "associacoes-cardinalidade",
+      "reinforcedIn": [
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "heranca-composicao",
+        "ciclo-alcancabilidade"
+      ],
+      "commonConfusions": [
+        "chamar todo campo de composição",
+        "confundir composição de objetos com herança"
+      ],
+      "outcomes": [
+        "justificar ownership pelo ciclo de vida da parte"
+      ]
+    },
+    {
+      "id": "consistencia-relacao",
+      "name": "Consistência de relações",
+      "aliases": [
+        "relationship invariant"
+      ],
+      "introducedIn": "associacoes-cardinalidade",
+      "reinforcedIn": [
+        "mini-biblioteca-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "encapsulamento-invariante",
+        "cardinalidade-objeto"
+      ],
+      "commonConfusions": [
+        "atualizar apenas um lado de relação bidirecional"
+      ],
+      "outcomes": [
+        "centralizar validação e transição de todos os lados"
+      ]
+    },
+    {
+      "id": "projeto-poo-incremental",
+      "name": "Projeto POO incremental",
+      "aliases": [
+        "incremental OO design"
+      ],
+      "introducedIn": "mini-biblioteca-cli",
+      "reinforcedIn": [],
+      "prerequisiteConceptIds": [
+        "incremento-executavel",
+        "decisao-modelagem-poo"
+      ],
+      "commonConfusions": [
+        "começar pelo menu antes das invariantes"
+      ],
+      "outcomes": [
+        "construir e verificar o domínio antes da CLI"
+      ]
+    },
+    {
+      "id": "evidencia-invariante-objeto",
+      "name": "Evidência de invariantes entre objetos",
+      "aliases": [
+        "object invariant evidence"
+      ],
+      "introducedIn": "mini-biblioteca-cli",
+      "reinforcedIn": [],
+      "prerequisiteConceptIds": [
+        "evidencia-manual",
+        "encapsulamento-invariante"
+      ],
+      "commonConfusions": [
+        "testar apenas mensagens do menu"
+      ],
+      "outcomes": [
+        "demonstrar transições válidas e recusas sem depender do terminal"
+      ]
+    }
   ],
   "chapters": {
     "classes": {
-      "order":0,"objectives":["Distinguir classe, objeto e referência","Criar instâncias e prever aliasing","Explicar alcançabilidade sem tratar stack/heap como garantia da linguagem"],"whyItExists":"Os fundamentos manipulavam valores soltos; classes permitem definir um novo tipo que reúne o estado e as operações de uma responsabilidade do problema.","prerequisiteChapterIds":["mini-caixa-eletronico"],"introducedConceptIds":["classe-instancia-objeto","identidade-referencia-objeto","ciclo-alcancabilidade"],"usedConceptIds":["variavel-tipo-estatico","primitivo-referencia","identidade-conteudo","metodo-contrato"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"classes-intuition","type":"intuition","authorship":"authored","title":"A classe define; cada objeto existe separadamente","body":"Classe é a declaração de um tipo. new avalia argumentos, reserva uma nova instância e devolve uma referência. Duas chamadas de new produzem identidades distintas mesmo quando os campos têm valores iguais.","analogyLimit":"Molde e produto ajudam no início, mas objetos também possuem comportamento e identidade; a classe não fabrica fisicamente nem guarda todas as instâncias."}],
-      "appendBlocks":[{"id":"classes-model","type":"mental-model","authorship":"authored","title":"Referência não é o objeto","body":"Uma variável de tipo Cafe pode conter null ou uma referência que permite alcançar uma instância. b = a copia essa referência; não executa new nem duplica campos. A especificação exige o comportamento observável, mas não obriga toda variável local a morar literalmente numa região chamada stack.","flow":["Declarar Cafe a não cria Cafe","new Cafe() cria uma instância","a recebe a referência","b = a copia a referência","alterar via b é observado via a"],"lifecycle":["Enquanto alguma raiz alcança o objeto, ele permanece alcançável","Sem referências alcançáveis, torna-se elegível à coleta","O momento da coleta não é garantido e GC não fecha recursos externos"]},{"id":"classes-quiz","type":"quiz","authorship":"authored","conceptId":"identidade-referencia-objeto","prompt":"Duas variáveis recebem new Cafe() separadamente e os campos ficam iguais. O que x == y produz?","options":[{"id":"classes-q-a","label":"false, porque as referências apontam para instâncias distintas.","correct":true,"explanation":"Cada new criou uma identidade; == entre referências verifica identidade, não conteúdo dos campos."},{"id":"classes-q-b","label":"true, porque campos iguais tornam os objetos idênticos.","correct":false,"explanation":"Igualdade de estado não altera a identidade criada por cada new."},{"id":"classes-q-c","label":"Erro de compilação, porque objetos não aceitam ==.","correct":false,"explanation":"Referências compatíveis podem ser comparadas com ==."}]}],
-      "codeExplanations":{"classes-code-3":{"explanation":["A declaração Cafe define campos e um método de instância.","new Cafe() cria uma instância e a chamada descrever usa o objeto referenciado por expresso."],"commonMistakes":["Achar que Cafe expresso já cria objeto","Acessar membro quando a referência é null"]},"classes-code-7":{"explanation":["b = a copia a referência para o mesmo Cafe.","A atribuição por b altera o único objeto alcançado também por a."],"commonMistakes":["Esperar uma cópia automática","Usar clone sem conhecer seu contrato"]}},
-      "resources":[{"id":"classes-jls-declaration","type":"reference","title":"JLS 8.1: declarações de classe","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1","reinforces":"Define classe, corpo, superclasse e interfaces no contrato da linguagem.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"classes-jls-instance","type":"reference","title":"JLS 12.5: criação de instâncias","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.5","reinforces":"Descreve alocação, valores padrão, inicialização e construtor.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 0,
+      "objectives": [
+        "Distinguir classe, objeto e referência",
+        "Criar instâncias e prever aliasing",
+        "Explicar alcançabilidade sem tratar stack/heap como garantia da linguagem"
+      ],
+      "whyItExists": "Os fundamentos manipulavam valores soltos; classes permitem definir um novo tipo que reúne o estado e as operações de uma responsabilidade do problema.",
+      "prerequisiteChapterIds": [
+        "mini-caixa-eletronico"
+      ],
+      "introducedConceptIds": [
+        "classe-instancia-objeto",
+        "identidade-referencia-objeto",
+        "ciclo-alcancabilidade"
+      ],
+      "usedConceptIds": [
+        "variavel-tipo-estatico",
+        "primitivo-referencia",
+        "identidade-conteudo",
+        "metodo-contrato"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "classes-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "A classe define; cada objeto existe separadamente",
+          "body": "Classe é a declaração de um tipo. new avalia argumentos, reserva uma nova instância e devolve uma referência. Duas chamadas de new produzem identidades distintas mesmo quando os campos têm valores iguais.",
+          "analogyLimit": "Molde e produto ajudam no início, mas objetos também possuem comportamento e identidade; a classe não fabrica fisicamente nem guarda todas as instâncias."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "classes-model",
+          "type": "mental-model",
+          "authorship": "authored",
+          "title": "Referência não é o objeto",
+          "body": "Uma variável de tipo Cafe pode conter null ou uma referência que permite alcançar uma instância. b = a copia essa referência; não executa new nem duplica campos. A especificação exige o comportamento observável, mas não obriga toda variável local a morar literalmente numa região chamada stack.",
+          "flow": [
+            "Declarar Cafe a não cria Cafe",
+            "new Cafe() cria uma instância",
+            "a recebe a referência",
+            "b = a copia a referência",
+            "alterar via b é observado via a"
+          ],
+          "lifecycle": [
+            "Enquanto alguma raiz alcança o objeto, ele permanece alcançável",
+            "Sem referências alcançáveis, torna-se elegível à coleta",
+            "O momento da coleta não é garantido e GC não fecha recursos externos"
+          ]
+        },
+        {
+          "id": "classes-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "identidade-referencia-objeto",
+          "prompt": "Duas variáveis recebem new Cafe() separadamente e os campos ficam iguais. O que x == y produz?",
+          "options": [
+            {
+              "id": "classes-q-a",
+              "label": "false, porque as referências apontam para instâncias distintas.",
+              "correct": true,
+              "explanation": "Cada new criou uma identidade; == entre referências verifica identidade, não conteúdo dos campos."
+            },
+            {
+              "id": "classes-q-b",
+              "label": "true, porque campos iguais tornam os objetos idênticos.",
+              "correct": false,
+              "explanation": "Igualdade de estado não altera a identidade criada por cada new."
+            },
+            {
+              "id": "classes-q-c",
+              "label": "Erro de compilação, porque objetos não aceitam ==.",
+              "correct": false,
+              "explanation": "Referências compatíveis podem ser comparadas com ==."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "classes-code-3": {
+          "explanation": [
+            "A declaração Cafe define campos e um método de instância.",
+            "new Cafe() cria uma instância e a chamada descrever usa o objeto referenciado por expresso."
+          ],
+          "commonMistakes": [
+            "Achar que Cafe expresso já cria objeto",
+            "Acessar membro quando a referência é null"
+          ]
+        },
+        "classes-code-7": {
+          "explanation": [
+            "b = a copia a referência para o mesmo Cafe.",
+            "A atribuição por b altera o único objeto alcançado também por a."
+          ],
+          "commonMistakes": [
+            "Esperar uma cópia automática",
+            "Usar clone sem conhecer seu contrato"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "classes-jls-declaration",
+          "type": "reference",
+          "title": "JLS 8.1: declarações de classe",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1",
+          "reinforces": "Define classe, corpo, superclasse e interfaces no contrato da linguagem.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "classes-jls-instance",
+          "type": "reference",
+          "title": "JLS 12.5: criação de instâncias",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.5",
+          "reinforces": "Descreve alocação, valores padrão, inicialização e construtor.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "atributos": {
-      "order":1,"objectives":["Separar campo, parâmetro e variável local","Colocar comportamento junto ao estado que protege","Distinguir consulta, comando, retorno e efeito"],"whyItExists":"Um objeto útil precisa lembrar estado entre chamadas e oferecer operações coerentes sobre ele; campos soltos e métodos utilitários não expressam quem protege a regra.","prerequisiteChapterIds":["classes"],"introducedConceptIds":["estado-comportamento","campo-instancia","comando-consulta"],"usedConceptIds":["classe-instancia-objeto","identidade-referencia-objeto","metodo-contrato","passagem-por-valor"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"atributos-intuition","type":"intuition","authorship":"authored","title":"O objeto lembra e age","body":"Campos registram o estado entre chamadas. Métodos observam ou modificam esse estado sob um contrato. A pergunta de modelagem não é “quais getters criar?”, mas “qual objeto deve garantir esta regra?”.","analogyLimit":"Pensar no objeto como responsável ajuda, mas ele não é uma pessoa; efeitos e dependências ainda precisam estar explícitos no código."}],
-      "appendBlocks":[{"id":"atributos-comparison","type":"comparison","authorship":"authored","title":"Campo, parâmetro e variável local","criteria":["pertence a","duração","inicialização"],"alternatives":[{"name":"Campo de instância","values":["objeto","enquanto o objeto existe","valor padrão antes do construtor"],"useWhen":"o dado compõe o estado do objeto","avoidWhen":"serve apenas a um cálculo temporário"},{"name":"Parâmetro","values":["chamada","durante o método","recebe cópia do argumento"],"useWhen":"a operação precisa de entrada externa","avoidWhen":"o valor já pertence ao estado"},{"name":"Variável local","values":["bloco","durante o bloco","deve ser inicializada antes do uso"],"useWhen":"guardar resultado intermediário","avoidWhen":"o dado precisa sobreviver entre chamadas"}]},{"id":"atributos-quiz","type":"quiz","authorship":"authored","conceptId":"comando-consulta","prompt":"Qual método deixa seu efeito mais claro para sacar um valor?","options":[{"id":"atributos-q-a","label":"boolean sacar(double valor), que altera saldo apenas se puder e informa o resultado.","correct":true,"explanation":"A assinatura expõe entrada, efeito condicionado e resultado observável."},{"id":"atributos-q-b","label":"double getSaldo(), que também desconta um valor escondido.","correct":false,"explanation":"Uma consulta com efeito oculto viola a expectativa criada pelo nome."},{"id":"atributos-q-c","label":"void processar(), que lê Scanner, altera saldo e imprime tudo.","correct":false,"explanation":"O contrato não revela a operação e mistura fronteira com regra."}]}],
-      "codeExplanations":{"atributos-code-3":{"explanation":["saldo é estado de cada ContaBancaria; depositar e sacar são comportamentos sobre esse estado.","sacar altera somente depois de verificar saldo e retorna se a operação ocorreu."],"commonMistakes":["Aceitar valor negativo","Usar double para dinheiro em aplicação real"]},"atributos-code-6":{"explanation":["Todo parâmetro recebe uma cópia do valor do argumento.","A cópia de uma referência alcança o mesmo objeto; mutar o objeto é visível, reatribuir o parâmetro não."],"commonMistakes":["Dizer que Java passa objetos por referência","Confundir reatribuição com mutação"]},"atributos-code-10":{"explanation":["As três assinaturas diferem por quantidade ou tipo de parâmetros.","O compilador escolhe a sobrecarga a partir dos argumentos; retorno isolado não diferencia assinatura."],"commonMistakes":["Criar overload que muda apenas retorno","Depender de conversões ambíguas"]}},
-      "resources":[{"id":"atributos-jls-fields","type":"reference","title":"JLS 8.3: campos","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3","reinforces":"Define campos de classe, de instância, inicialização e ocultação.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"atributos-jls-methods","type":"reference","title":"JLS 8.4: métodos","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4","reinforces":"Confirma parâmetros, retorno, corpo e assinatura.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 1,
+      "objectives": [
+        "Separar campo, parâmetro e variável local",
+        "Colocar comportamento junto ao estado que protege",
+        "Distinguir consulta, comando, retorno e efeito"
+      ],
+      "whyItExists": "Um objeto útil precisa lembrar estado entre chamadas e oferecer operações coerentes sobre ele; campos soltos e métodos utilitários não expressam quem protege a regra.",
+      "prerequisiteChapterIds": [
+        "classes"
+      ],
+      "introducedConceptIds": [
+        "estado-comportamento",
+        "campo-instancia",
+        "comando-consulta"
+      ],
+      "usedConceptIds": [
+        "classe-instancia-objeto",
+        "identidade-referencia-objeto",
+        "metodo-contrato",
+        "passagem-por-valor"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "atributos-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "O objeto lembra e age",
+          "body": "Campos registram o estado entre chamadas. Métodos observam ou modificam esse estado sob um contrato. A pergunta de modelagem não é “quais getters criar?”, mas “qual objeto deve garantir esta regra?”.",
+          "analogyLimit": "Pensar no objeto como responsável ajuda, mas ele não é uma pessoa; efeitos e dependências ainda precisam estar explícitos no código."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "atributos-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Campo, parâmetro e variável local",
+          "criteria": [
+            "pertence a",
+            "duração",
+            "inicialização"
+          ],
+          "alternatives": [
+            {
+              "name": "Campo de instância",
+              "values": [
+                "objeto",
+                "enquanto o objeto existe",
+                "valor padrão antes do construtor"
+              ],
+              "useWhen": "o dado compõe o estado do objeto",
+              "avoidWhen": "serve apenas a um cálculo temporário"
+            },
+            {
+              "name": "Parâmetro",
+              "values": [
+                "chamada",
+                "durante o método",
+                "recebe cópia do argumento"
+              ],
+              "useWhen": "a operação precisa de entrada externa",
+              "avoidWhen": "o valor já pertence ao estado"
+            },
+            {
+              "name": "Variável local",
+              "values": [
+                "bloco",
+                "durante o bloco",
+                "deve ser inicializada antes do uso"
+              ],
+              "useWhen": "guardar resultado intermediário",
+              "avoidWhen": "o dado precisa sobreviver entre chamadas"
+            }
+          ]
+        },
+        {
+          "id": "atributos-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "comando-consulta",
+          "prompt": "Qual método deixa seu efeito mais claro para sacar um valor?",
+          "options": [
+            {
+              "id": "atributos-q-a",
+              "label": "boolean sacar(double valor), que altera saldo apenas se puder e informa o resultado.",
+              "correct": true,
+              "explanation": "A assinatura expõe entrada, efeito condicionado e resultado observável."
+            },
+            {
+              "id": "atributos-q-b",
+              "label": "double getSaldo(), que também desconta um valor escondido.",
+              "correct": false,
+              "explanation": "Uma consulta com efeito oculto viola a expectativa criada pelo nome."
+            },
+            {
+              "id": "atributos-q-c",
+              "label": "void processar(), que lê Scanner, altera saldo e imprime tudo.",
+              "correct": false,
+              "explanation": "O contrato não revela a operação e mistura fronteira com regra."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "atributos-code-4": {
+          "explanation": [
+            "Atributos guardam estado; métodos definem comportamento -- depositar/sacar alteram saldo através de regras, nunca por atribuição direta de fora."
+          ]
+        },
+        "atributos-code-7": {
+          "explanation": [
+            "Primitivos são copiados por valor; para objetos, a cópia é da referência -- mutar o objeto apontado é visível fora, mas reatribuir o parâmetro local não é."
+          ],
+          "commonMistakes": [
+            "Achar que reatribuir o parâmetro de um objeto afeta a variável do chamador"
+          ]
+        },
+        "atributos-code-11": {
+          "explanation": [
+            "Sobrecarga distingue métodos pela assinatura (tipo e quantidade de parâmetros) -- o tipo de retorno sozinho não compila como diferenciador."
+          ],
+          "commonMistakes": [
+            "Tentar sobrecarregar dois métodos que só diferem no tipo de retorno"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "atributos-jls-fields",
+          "type": "reference",
+          "title": "JLS 8.3: campos",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3",
+          "reinforces": "Define campos de classe, de instância, inicialização e ocultação.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "atributos-jls-methods",
+          "type": "reference",
+          "title": "JLS 8.4: métodos",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4",
+          "reinforces": "Confirma parâmetros, retorno, corpo e assinatura.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "construtores": {
-      "order":2,"objectives":["Garantir estado inicial válido","Prever quando existe construtor padrão","Usar this e this() sem duplicar inicialização"],"whyItExists":"Preencher campos depois de new cria uma janela em que o objeto existe incompleto; o construtor concentra os dados obrigatórios e estabelece a invariante inicial.","prerequisiteChapterIds":["atributos"],"introducedConceptIds":["construtor-invariante","construtor-padrao","this-encadeamento"],"usedConceptIds":["estado-comportamento","campo-instancia","ordem-de-condicoes","metodo-contrato"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"construtores-intuition","type":"intuition","authorship":"authored","title":"new precisa terminar com um objeto utilizável","body":"O construtor não é um método comum nem possui retorno. Ele participa da criação da instância e deve estabelecer todos os campos obrigatórios antes de entregar a referência ao chamador.","analogyLimit":"“Nascimento” comunica estado inicial, mas Java pode criar objetos por mecanismos especiais; aqui estudamos a criação normal com new."}],
-      "appendBlocks":[{"id":"construtores-error","type":"error-case","authorship":"authored","title":"O construtor sem argumentos desapareceu","scenario":"A classe passa a declarar Produto(String nome), mas o código ainda chama new Produto().","symptom":"Erro de compilação informando que a lista de argumentos não corresponde.","cause":"O compilador só declara o construtor padrão quando a classe não declara construtor algum.","diagnosis":["Liste os construtores declarados","Compare tipos e quantidade de argumentos da chamada"],"correction":"Passe o nome exigido ou declare conscientemente outro construtor que delegue para a regra principal.","prevention":"Trate cada construtor como um contrato de estados iniciais permitidos."},{"id":"construtores-quiz","type":"quiz","authorship":"authored","conceptId":"this-encadeamento","prompt":"Por que this(tipo, false) deve ser a primeira instrução do construtor?","options":[{"id":"construtores-q-a","label":"Porque a linguagem exige que a invocação alternativa de construtor venha primeiro.","correct":true,"explanation":"Assim uma única cadeia de inicialização é estabelecida antes do restante do corpo."},{"id":"construtores-q-b","label":"Porque this sempre significa a classe, não o objeto.","correct":false,"explanation":"this representa o objeto atual; this(...) é uma forma especial de delegação entre construtores."},{"id":"construtores-q-c","label":"Porque construtores retornam o objeto nessa linha.","correct":false,"explanation":"Construtor não declara nem devolve um tipo de retorno."}]}],
-      "codeExplanations":{"construtores-code-3":{"explanation":["Os argumentos fornecem os dois dados exigidos para criar Cafe.","this.tipo seleciona o campo; tipo sozinho seleciona o parâmetro mais próximo."],"commonMistakes":["Escrever void Cafe e criar um método","Esquecer de inicializar campo obrigatório"]},"construtores-code-6":{"explanation":["Cafe(String) delega para Cafe(String, boolean) e centraliza o padrão sem açúcar.","this(...) precisa ser a primeira instrução."],"commonMistakes":["Duplicar validação nos dois construtores","Criar ciclo de delegação"]},"construtores-code-10":{"explanation":["Produto sem construtor declarado recebe o construtor sem argumentos fornecido pelo compilador.","Ao declarar Produto(String), a classe deixa de receber esse construtor padrão; cada forma de criação desejada precisa ser escrita."],"commonMistakes":["Achar que toda classe sempre possui construtor sem argumentos","Confundir construtor padrão gerado com um construtor explícito vazio"]}},
-      "resources":[{"id":"construtores-jls","type":"reference","title":"JLS 8.8: declarações de construtor","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.8","reinforces":"Define sintaxe, acesso, sobrecarga, corpo e ausência de herança.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"construtores-default","type":"reference","title":"JLS 8.8.9: construtor padrão","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.8.9","reinforces":"Explica exatamente quando o compilador declara um construtor implícito.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21","notes":["Inicialização com herança fica marcada como prévia e não como prática obrigatória."]}
+      "order": 2,
+      "objectives": [
+        "Garantir estado inicial válido",
+        "Prever quando existe construtor padrão",
+        "Usar this e this() sem duplicar inicialização"
+      ],
+      "whyItExists": "Preencher campos depois de new cria uma janela em que o objeto existe incompleto; o construtor concentra os dados obrigatórios e estabelece a invariante inicial.",
+      "prerequisiteChapterIds": [
+        "atributos"
+      ],
+      "introducedConceptIds": [
+        "construtor-invariante",
+        "construtor-padrao",
+        "this-encadeamento"
+      ],
+      "usedConceptIds": [
+        "estado-comportamento",
+        "campo-instancia",
+        "ordem-de-condicoes",
+        "metodo-contrato"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "construtores-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "new precisa terminar com um objeto utilizável",
+          "body": "O construtor não é um método comum nem possui retorno. Ele participa da criação da instância e deve estabelecer todos os campos obrigatórios antes de entregar a referência ao chamador.",
+          "analogyLimit": "“Nascimento” comunica estado inicial, mas Java pode criar objetos por mecanismos especiais; aqui estudamos a criação normal com new."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "construtores-error",
+          "type": "error-case",
+          "authorship": "authored",
+          "title": "O construtor sem argumentos desapareceu",
+          "scenario": "A classe passa a declarar Produto(String nome), mas o código ainda chama new Produto().",
+          "symptom": "Erro de compilação informando que a lista de argumentos não corresponde.",
+          "cause": "O compilador só declara o construtor padrão quando a classe não declara construtor algum.",
+          "diagnosis": [
+            "Liste os construtores declarados",
+            "Compare tipos e quantidade de argumentos da chamada"
+          ],
+          "correction": "Passe o nome exigido ou declare conscientemente outro construtor que delegue para a regra principal.",
+          "prevention": "Trate cada construtor como um contrato de estados iniciais permitidos."
+        },
+        {
+          "id": "construtores-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "this-encadeamento",
+          "prompt": "Por que this(tipo, false) deve ser a primeira instrução do construtor?",
+          "options": [
+            {
+              "id": "construtores-q-a",
+              "label": "Porque a linguagem exige que a invocação alternativa de construtor venha primeiro.",
+              "correct": true,
+              "explanation": "Assim uma única cadeia de inicialização é estabelecida antes do restante do corpo."
+            },
+            {
+              "id": "construtores-q-b",
+              "label": "Porque this sempre significa a classe, não o objeto.",
+              "correct": false,
+              "explanation": "this representa o objeto atual; this(...) é uma forma especial de delegação entre construtores."
+            },
+            {
+              "id": "construtores-q-c",
+              "label": "Porque construtores retornam o objeto nessa linha.",
+              "correct": false,
+              "explanation": "Construtor não declara nem devolve um tipo de retorno."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "construtores-code-4": {
+          "explanation": [
+            "O construtor roda automaticamente no new, garantindo que tipo e comAcucar já estejam definidos antes de qualquer uso do objeto."
+          ]
+        },
+        "construtores-code-7": {
+          "explanation": [
+            "this(...) delega para outro construtor da mesma classe -- precisa ser a primeira instrução do construtor que delega."
+          ],
+          "commonMistakes": [
+            "Chamar this(...) depois de outras instruções no construtor"
+          ]
+        },
+        "construtores-code-11": {
+          "explanation": [
+            "Assim que qualquer construtor é declarado, o construtor padrão sem argumentos deixa de existir implicitamente."
+          ],
+          "commonMistakes": [
+            "Esperar que new Produto() ainda compile depois de declarar um construtor com parâmetros"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "construtores-jls",
+          "type": "reference",
+          "title": "JLS 8.8: declarações de construtor",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.8",
+          "reinforces": "Define sintaxe, acesso, sobrecarga, corpo e ausência de herança.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "construtores-default",
+          "type": "reference",
+          "title": "JLS 8.8.9: construtor padrão",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.8.9",
+          "reinforces": "Explica exatamente quando o compilador declara um construtor implícito.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21",
+        "notes": [
+          "Inicialização com herança fica marcada como prévia e não como prática obrigatória."
+        ]
+      }
     },
     "encapsulamento": {
-      "order":3,"objectives":["Proteger invariantes por operações públicas","Escolher a menor visibilidade necessária","Distinguir referência final de objeto imutável"],"whyItExists":"Se qualquer parte do programa pode alterar qualquer campo, nenhuma classe consegue garantir suas próprias regras; encapsulamento cria uma fronteira responsável pelas transições válidas.","prerequisiteChapterIds":["construtores"],"introducedConceptIds":["encapsulamento-invariante","controle-acesso","imutabilidade-objeto"],"usedConceptIds":["construtor-invariante","estado-comportamento","comando-consulta","string-imutavel"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"encapsulamento-intuition","type":"intuition","authorship":"authored","title":"Estado privado permite promessas públicas","body":"private impede alteração externa direta. Métodos como depositar e sacar nomeiam transições e verificam regras antes da mudança; um setter para cada campo devolveria o mesmo risco com outra sintaxe.","analogyLimit":"Uma porta controlada ilustra acesso, mas encapsulamento também reduz conhecimento sobre a representação interna, não apenas bloqueia escrita."}],
-      "appendBlocks":[{"id":"encapsulamento-model","type":"mental-model","authorship":"authored","title":"A invariante atravessa toda operação","body":"Uma invariante é uma condição que deve ser verdadeira antes e depois de cada operação pública concluída. Construtor estabelece; métodos preservam; visibilidade impede atalhos externos.","flow":["Construtor recebe dados","Valida e estabelece estado","Operação pública recebe intenção","Recusa ou produz nova transição válida","Consulta expõe somente informação necessária"],"ownership":["A classe protege seu estado","O chamador escolhe quando pedir a operação, não como alterar os campos"]},{"id":"encapsulamento-quiz","type":"quiz","authorship":"authored","conceptId":"encapsulamento-invariante","prompt":"Por que setSaldo(double) público não protege a conta mesmo com saldo private?","options":[{"id":"encapsulamento-q-a","label":"Porque continua permitindo qualquer estado sem expressar as regras de depósito e saque.","correct":true,"explanation":"A escrita foi apenas embrulhada; a classe ainda não controla transições válidas."},{"id":"encapsulamento-q-b","label":"Porque métodos públicos nunca podem alterar campos private.","correct":false,"explanation":"Métodos da própria classe acessam seus campos privados normalmente."},{"id":"encapsulamento-q-c","label":"Porque private só funciona em tipos primitivos.","correct":false,"explanation":"Controle de acesso vale para membros de qualquer tipo."}]}],
-      "quizRationales":{"encapsulamento:0":["Acesso private fora da classe é rejeitado em compilação, não apenas avisado.","private restringe o acesso e a violação é um erro de compilação.","O membro não se transforma em null; a expressão é inválida antes da execução."]},
-      "codeExplanations":{"encapsulamento-code-3":{"explanation":["Campos privados só mudam pelo construtor e pelas operações públicas.","sacar preserva a regra de valor positivo e saldo suficiente antes da subtração."],"commonMistakes":["Expor setSaldo","Aceitar NaN ou double monetário em produção"]},"encapsulamento-code-9":{"explanation":["O setter genérico permite estado inválido.","A operação sacar comunica intenção e concentra a validação."],"commonMistakes":["Gerar setters indiscriminadamente","Misturar mensagem de interface com regra"]},"encapsulamento-code-12":{"explanation":["Campos final são atribuídos no construtor e não mudam depois.","transladar preserva o objeto atual e retorna outra instância."],"commonMistakes":["Confundir ausência de setter com imutabilidade completa","Expor referência mutável interna"]}},
-      "resources":[{"id":"encapsulamento-jls-access","type":"reference","title":"JLS 6.6: controle de acesso","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.6","reinforces":"Define acessibilidade de membros e construtores.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"encapsulamento-final","type":"reference","title":"JLS 8.3.1.2: campos final","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.2","reinforces":"Distingue atribuição única de imutabilidade do objeto referenciado.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 3,
+      "objectives": [
+        "Proteger invariantes por operações públicas",
+        "Escolher a menor visibilidade necessária",
+        "Distinguir referência final de objeto imutável"
+      ],
+      "whyItExists": "Se qualquer parte do programa pode alterar qualquer campo, nenhuma classe consegue garantir suas próprias regras; encapsulamento cria uma fronteira responsável pelas transições válidas.",
+      "prerequisiteChapterIds": [
+        "construtores"
+      ],
+      "introducedConceptIds": [
+        "encapsulamento-invariante",
+        "controle-acesso",
+        "imutabilidade-objeto"
+      ],
+      "usedConceptIds": [
+        "construtor-invariante",
+        "estado-comportamento",
+        "comando-consulta",
+        "string-imutavel"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "encapsulamento-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Estado privado permite promessas públicas",
+          "body": "private impede alteração externa direta. Métodos como depositar e sacar nomeiam transições e verificam regras antes da mudança; um setter para cada campo devolveria o mesmo risco com outra sintaxe.",
+          "analogyLimit": "Uma porta controlada ilustra acesso, mas encapsulamento também reduz conhecimento sobre a representação interna, não apenas bloqueia escrita."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "encapsulamento-model",
+          "type": "mental-model",
+          "authorship": "authored",
+          "title": "A invariante atravessa toda operação",
+          "body": "Uma invariante é uma condição que deve ser verdadeira antes e depois de cada operação pública concluída. Construtor estabelece; métodos preservam; visibilidade impede atalhos externos.",
+          "flow": [
+            "Construtor recebe dados",
+            "Valida e estabelece estado",
+            "Operação pública recebe intenção",
+            "Recusa ou produz nova transição válida",
+            "Consulta expõe somente informação necessária"
+          ],
+          "ownership": [
+            "A classe protege seu estado",
+            "O chamador escolhe quando pedir a operação, não como alterar os campos"
+          ]
+        },
+        {
+          "id": "encapsulamento-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "encapsulamento-invariante",
+          "prompt": "Por que setSaldo(double) público não protege a conta mesmo com saldo private?",
+          "options": [
+            {
+              "id": "encapsulamento-q-a",
+              "label": "Porque continua permitindo qualquer estado sem expressar as regras de depósito e saque.",
+              "correct": true,
+              "explanation": "A escrita foi apenas embrulhada; a classe ainda não controla transições válidas."
+            },
+            {
+              "id": "encapsulamento-q-b",
+              "label": "Porque métodos públicos nunca podem alterar campos private.",
+              "correct": false,
+              "explanation": "Métodos da própria classe acessam seus campos privados normalmente."
+            },
+            {
+              "id": "encapsulamento-q-c",
+              "label": "Porque private só funciona em tipos primitivos.",
+              "correct": false,
+              "explanation": "Controle de acesso vale para membros de qualquer tipo."
+            }
+          ]
+        }
+      ],
+      "quizRationales": {
+        "encapsulamento:0": [
+          "Acesso private fora da classe é rejeitado em compilação, não apenas avisado.",
+          "private restringe o acesso e a violação é um erro de compilação.",
+          "O membro não se transforma em null; a expressão é inválida antes da execução."
+        ]
+      },
+      "codeExplanations": {
+        "encapsulamento-code-3": {
+          "explanation": [
+            "Campos privados só mudam pelo construtor e pelas operações públicas.",
+            "sacar preserva a regra de valor positivo e saldo suficiente antes da subtração."
+          ],
+          "commonMistakes": [
+            "Expor setSaldo",
+            "Aceitar NaN ou double monetário em produção"
+          ]
+        },
+        "encapsulamento-code-9": {
+          "explanation": [
+            "O setter genérico permite estado inválido.",
+            "A operação sacar comunica intenção e concentra a validação."
+          ],
+          "commonMistakes": [
+            "Gerar setters indiscriminadamente",
+            "Misturar mensagem de interface com regra"
+          ]
+        },
+        "encapsulamento-code-12": {
+          "explanation": [
+            "Campos final são atribuídos no construtor e não mudam depois.",
+            "transladar preserva o objeto atual e retorna outra instância."
+          ],
+          "commonMistakes": [
+            "Confundir ausência de setter com imutabilidade completa",
+            "Expor referência mutável interna"
+          ]
+        },
+        "encapsulamento-code-15": {
+          "explanation": [
+            "Devolver a referência de um array interno permite alterar o estado do objeto sem passar por nenhum método dele -- o mesmo problema de encapsulamento de fachada, só que via array em vez de setter."
+          ],
+          "commonMistakes": [
+            "Achar que private no campo já impede mutação externa mesmo quando o getter devolve a referência direta"
+          ]
+        },
+        "encapsulamento-code-17": {
+          "explanation": [
+            "Arrays.copyOf devolve uma cópia independente; expor só a operação de consulta (contemAluno) evita devolver a estrutura interna por completo."
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "encapsulamento-jls-access",
+          "type": "reference",
+          "title": "JLS 6.6: controle de acesso",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html#jls-6.6",
+          "reinforces": "Define acessibilidade de membros e construtores.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "encapsulamento-final",
+          "type": "reference",
+          "title": "JLS 8.3.1.2: campos final",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.2",
+          "reinforces": "Distingue atribuição única de imutabilidade do objeto referenciado.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "static": {
-      "order":4,"objectives":["Distinguir membros de classe e de instância","Explicar final em variável, método e classe","Usar this somente com um objeto atual"],"whyItExists":"Alguns dados pertencem ao tipo como um todo, enquanto outros pertencem a cada instância; confundir esses ciclos cria estado global acidental e acessos sem objeto.","prerequisiteChapterIds":["encapsulamento"],"introducedConceptIds":["membro-estatico","final-referencia-tipo","this-instancia"],"usedConceptIds":["classe-instancia-objeto","campo-instancia","imutabilidade-objeto","this-encadeamento"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"static-intuition","type":"intuition","authorship":"authored","title":"Uma informação por classe ou uma por objeto?","body":"totalCriados descreve o conjunto de instâncias e existe uma vez por classe; id descreve cada instância e existe em cada objeto. Um método static não possui receptor implícito, portanto não possui this.","analogyLimit":"“Compartilhado” não significa seguro para acesso concorrente; sincronização será ensinada depois."}],
-      "appendBlocks":[{"id":"static-comparison","type":"comparison","authorship":"authored","title":"Três usos de final","criteria":["alvo","restrição","não garante"],"alternatives":[{"name":"Variável final","values":["variável","uma atribuição","imutabilidade do objeto"],"useWhen":"a referência ou valor não deve ser reatribuído","avoidWhen":"você precisa trocar o valor"},{"name":"Método final","values":["método de instância","não pode ser sobrescrito","classe imutável"],"useWhen":"subclasses não podem alterar o contrato","avoidWhen":"variação por subtipo é necessária"},{"name":"Classe final","values":["tipo","não pode ser estendido","campos imutáveis"],"useWhen":"subtipos não fazem parte do contrato","avoidWhen":"há hierarquia deliberada"}]},{"id":"static-quiz","type":"quiz","authorship":"authored","conceptId":"membro-estatico","prompt":"Por que um método static não acessa diretamente o campo de instância id?","options":[{"id":"static-q-a","label":"Porque não existe um objeto atual que determine qual id ler.","correct":true,"explanation":"O método pertence à classe e pode ser chamado sem instância; é preciso receber ou criar uma referência explicitamente."},{"id":"static-q-b","label":"Porque static transforma todos os campos em constantes.","correct":false,"explanation":"static define pertencimento à classe, não constância."},{"id":"static-q-c","label":"Porque id precisa obrigatoriamente ser public.","correct":false,"explanation":"Visibilidade não resolve ausência de receptor de instância."}]}],
-      "codeExplanations":{"static-code-3":{"explanation":["totalCriados é único para a classe; id é final e diferente por objeto.","getTotalCriados é chamado na classe e não depende de this."],"commonMistakes":["Chamar membro static pela instância","Usar contador global onde identidade externa seria necessária"]},"static-code-6":{"explanation":["PI_APROX é constante da classe.","raio é atribuído uma vez em cada objeto pelo construtor."],"commonMistakes":["Achar que final double torna a classe final","Esquecer que final de referência não congela o objeto"]},"static-code-11":{"explanation":["Cada método atualiza o próprio objeto e retorna this.","O encadeamento é apenas uma sequência de chamadas sobre a mesma referência."],"commonMistakes":["Retornar novo objeto sem intenção","Usar encadeamento para esconder validação"]}},
-      "resources":[{"id":"static-jls","type":"reference","title":"JLS 8.3.1.1: campos static","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.1","reinforces":"Define uma variável de classe versus uma variável por instância.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"static-this","type":"reference","title":"JLS 15.8.3: expressão this","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.8.3","reinforces":"Confirma o objeto atual e as restrições em contexto static.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 4,
+      "objectives": [
+        "Distinguir membros de classe e de instância",
+        "Explicar final em variável, método e classe",
+        "Usar this somente com um objeto atual"
+      ],
+      "whyItExists": "Alguns dados pertencem ao tipo como um todo, enquanto outros pertencem a cada instância; confundir esses ciclos cria estado global acidental e acessos sem objeto.",
+      "prerequisiteChapterIds": [
+        "encapsulamento"
+      ],
+      "introducedConceptIds": [
+        "membro-estatico",
+        "final-referencia-tipo",
+        "this-instancia"
+      ],
+      "usedConceptIds": [
+        "classe-instancia-objeto",
+        "campo-instancia",
+        "imutabilidade-objeto",
+        "this-encadeamento"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "static-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Uma informação por classe ou uma por objeto?",
+          "body": "totalCriados descreve o conjunto de instâncias e existe uma vez por classe; id descreve cada instância e existe em cada objeto. Um método static não possui receptor implícito, portanto não possui this.",
+          "analogyLimit": "“Compartilhado” não significa seguro para acesso concorrente; sincronização será ensinada depois."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "static-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Três usos de final",
+          "criteria": [
+            "alvo",
+            "restrição",
+            "não garante"
+          ],
+          "alternatives": [
+            {
+              "name": "Variável final",
+              "values": [
+                "variável",
+                "uma atribuição",
+                "imutabilidade do objeto"
+              ],
+              "useWhen": "a referência ou valor não deve ser reatribuído",
+              "avoidWhen": "você precisa trocar o valor"
+            },
+            {
+              "name": "Método final",
+              "values": [
+                "método de instância",
+                "não pode ser sobrescrito",
+                "classe imutável"
+              ],
+              "useWhen": "subclasses não podem alterar o contrato",
+              "avoidWhen": "variação por subtipo é necessária"
+            },
+            {
+              "name": "Classe final",
+              "values": [
+                "tipo",
+                "não pode ser estendido",
+                "campos imutáveis"
+              ],
+              "useWhen": "subtipos não fazem parte do contrato",
+              "avoidWhen": "há hierarquia deliberada"
+            }
+          ]
+        },
+        {
+          "id": "static-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "membro-estatico",
+          "prompt": "Por que um método static não acessa diretamente o campo de instância id?",
+          "options": [
+            {
+              "id": "static-q-a",
+              "label": "Porque não existe um objeto atual que determine qual id ler.",
+              "correct": true,
+              "explanation": "O método pertence à classe e pode ser chamado sem instância; é preciso receber ou criar uma referência explicitamente."
+            },
+            {
+              "id": "static-q-b",
+              "label": "Porque static transforma todos os campos em constantes.",
+              "correct": false,
+              "explanation": "static define pertencimento à classe, não constância."
+            },
+            {
+              "id": "static-q-c",
+              "label": "Porque id precisa obrigatoriamente ser public.",
+              "correct": false,
+              "explanation": "Visibilidade não resolve ausência de receptor de instância."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "static-code-3": {
+          "explanation": [
+            "totalCriados é único para a classe; id é final e diferente por objeto.",
+            "getTotalCriados é chamado na classe e não depende de this."
+          ],
+          "commonMistakes": [
+            "Chamar membro static pela instância",
+            "Usar contador global onde identidade externa seria necessária"
+          ]
+        },
+        "static-code-6": {
+          "explanation": [
+            "PI_APROX é constante da classe.",
+            "raio é atribuído uma vez em cada objeto pelo construtor."
+          ],
+          "commonMistakes": [
+            "Achar que final double torna a classe final",
+            "Esquecer que final de referência não congela o objeto"
+          ]
+        },
+        "static-code-11": {
+          "explanation": [
+            "Cada método atualiza o próprio objeto e retorna this.",
+            "O encadeamento é apenas uma sequência de chamadas sobre a mesma referência."
+          ],
+          "commonMistakes": [
+            "Retornar novo objeto sem intenção",
+            "Usar encadeamento para esconder validação"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "static-jls",
+          "type": "reference",
+          "title": "JLS 8.3.1.1: campos static",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.3.1.1",
+          "reinforces": "Define uma variável de classe versus uma variável por instância.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "static-this",
+          "type": "reference",
+          "title": "JLS 15.8.3: expressão this",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.8.3",
+          "reinforces": "Confirma o objeto atual e as restrições em contexto static.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "heranca": {
-      "order":5,"objectives":["Modelar subtipo verdadeiro com extends","Usar super e sobrescrita corretamente","Escolher composição quando a relação é tem-um"],"whyItExists":"Quando tipos realmente compartilham um contrato de substituição, herança permite tratar a especialização como o tipo mais geral; usada apenas para reaproveitar linhas, ela cria acoplamento e modelos falsos.","prerequisiteChapterIds":["static"],"introducedConceptIds":["heranca-subtipo","super-sobrescrita","heranca-composicao"],"usedConceptIds":["controle-acesso","final-referencia-tipo","construtor-invariante","this-instancia"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"heranca-intuition","type":"intuition","authorship":"authored","title":"Subclasse precisa continuar sendo a superclasse","body":"Gerente extends Funcionario afirma que todo Gerente pode ocupar qualquer lugar que espera Funcionario sem quebrar seu contrato. Reuso é consequência; substituição coerente é o critério.","analogyLimit":"A frase “é um” é um filtro inicial, não uma prova: o comportamento prometido também precisa permanecer válido."}],
-      "appendBlocks":[{"id":"heranca-comparison","type":"comparison","authorship":"authored","title":"Herança ou composição","criteria":["relação","acoplamento","variação"],"alternatives":[{"name":"Herança","values":["é um subtipo","forte","sobrescrita"],"useWhen":"o subtipo preserva o contrato do tipo geral","avoidWhen":"o objetivo é apenas reutilizar implementação"},{"name":"Composição","values":["tem/usa um colaborador","explícito","troca de colaborador"],"useWhen":"um objeto delega parte do trabalho a outro","avoidWhen":"o consumidor precisa realmente do mesmo tipo abstrato"}]},{"id":"heranca-quiz","type":"quiz","authorship":"authored","conceptId":"heranca-composicao","prompt":"Por que Carro extends Motor é uma modelagem ruim?","options":[{"id":"heranca-q-a","label":"Porque carro tem um motor; não é um tipo de motor.","correct":true,"explanation":"A relação é colaboração/composição, e a substituição Carro por Motor não preserva significado."},{"id":"heranca-q-b","label":"Porque Java não permite nenhuma herança.","correct":false,"explanation":"Java permite uma superclasse direta; o problema é semântico."},{"id":"heranca-q-c","label":"Porque extends só funciona com interfaces.","correct":false,"explanation":"Classes usam extends; interfaces são implementadas com implements por classes."}]}],
-      "codeExplanations":{"heranca-code-3":{"explanation":["Gerente inicializa a parte Funcionario com super antes de seus próprios campos.","@Override substitui calcularSalario para o subtipo mantendo a mesma operação pública."],"commonMistakes":["Usar protected em todos os campos","Esquecer de preservar o contrato da superclasse"]},"heranca-code-7":{"explanation":["Toda classe deriva de Object e pode redefinir representação e igualdade.","O contrato completo de equals/hashCode será aprofundado em Java Core; aqui o exemplo mostra apenas a origem desses métodos."],"commonMistakes":["Confundir equals com identidade","Usar campo mutável em igualdade sem avaliar consequências"]},"heranca-code-11":{"explanation":["Cada super.falar chama a implementação da superclasse imediata.","new C().falar percorre as chamadas explícitas A, B e C."],"commonMistakes":["Achar que super pula diretamente para Object","Criar hierarquias profundas sem necessidade"]}},
-      "resources":[{"id":"heranca-jls-superclass","type":"reference","title":"JLS 8.1.4: superclasses e subclasses","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.4","reinforces":"Define herança simples e relação de subtipo entre classes.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"heranca-jls-override","type":"reference","title":"JLS 8.4.8.1: sobrescrita","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.1","reinforces":"Distingue sobrescrita de ocultação e sobrecarga.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21","notes":["equals/hashCode permanece somente como prévia; prática com HashSet foi removida para Java Core."]}
+      "order": 5,
+      "objectives": [
+        "Modelar subtipo verdadeiro com extends",
+        "Usar super e sobrescrita corretamente",
+        "Escolher composição quando a relação é tem-um"
+      ],
+      "whyItExists": "Quando tipos realmente compartilham um contrato de substituição, herança permite tratar a especialização como o tipo mais geral; usada apenas para reaproveitar linhas, ela cria acoplamento e modelos falsos.",
+      "prerequisiteChapterIds": [
+        "static"
+      ],
+      "introducedConceptIds": [
+        "heranca-subtipo",
+        "super-sobrescrita",
+        "heranca-composicao"
+      ],
+      "usedConceptIds": [
+        "controle-acesso",
+        "final-referencia-tipo",
+        "construtor-invariante",
+        "this-instancia"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "heranca-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Subclasse precisa continuar sendo a superclasse",
+          "body": "Gerente extends Funcionario afirma que todo Gerente pode ocupar qualquer lugar que espera Funcionario sem quebrar seu contrato. Reuso é consequência; substituição coerente é o critério.",
+          "analogyLimit": "A frase “é um” é um filtro inicial, não uma prova: o comportamento prometido também precisa permanecer válido."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "heranca-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Herança ou composição",
+          "criteria": [
+            "relação",
+            "acoplamento",
+            "variação"
+          ],
+          "alternatives": [
+            {
+              "name": "Herança",
+              "values": [
+                "é um subtipo",
+                "forte",
+                "sobrescrita"
+              ],
+              "useWhen": "o subtipo preserva o contrato do tipo geral",
+              "avoidWhen": "o objetivo é apenas reutilizar implementação"
+            },
+            {
+              "name": "Composição",
+              "values": [
+                "tem/usa um colaborador",
+                "explícito",
+                "troca de colaborador"
+              ],
+              "useWhen": "um objeto delega parte do trabalho a outro",
+              "avoidWhen": "o consumidor precisa realmente do mesmo tipo abstrato"
+            }
+          ]
+        },
+        {
+          "id": "heranca-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "heranca-composicao",
+          "prompt": "Por que Carro extends Motor é uma modelagem ruim?",
+          "options": [
+            {
+              "id": "heranca-q-a",
+              "label": "Porque carro tem um motor; não é um tipo de motor.",
+              "correct": true,
+              "explanation": "A relação é colaboração/composição, e a substituição Carro por Motor não preserva significado."
+            },
+            {
+              "id": "heranca-q-b",
+              "label": "Porque Java não permite nenhuma herança.",
+              "correct": false,
+              "explanation": "Java permite uma superclasse direta; o problema é semântico."
+            },
+            {
+              "id": "heranca-q-c",
+              "label": "Porque extends só funciona com interfaces.",
+              "correct": false,
+              "explanation": "Classes usam extends; interfaces são implementadas com implements por classes."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "heranca-code-3": {
+          "explanation": [
+            "Gerente inicializa a parte Funcionario com super antes de seus próprios campos.",
+            "@Override substitui calcularSalario para o subtipo mantendo a mesma operação pública."
+          ],
+          "commonMistakes": [
+            "Usar protected em todos os campos",
+            "Esquecer de preservar o contrato da superclasse"
+          ]
+        },
+        "heranca-code-7": {
+          "explanation": [
+            "Toda classe deriva de Object e pode redefinir representação e igualdade.",
+            "O contrato completo de equals/hashCode será aprofundado em Java Core; aqui o exemplo mostra apenas a origem desses métodos."
+          ],
+          "commonMistakes": [
+            "Confundir equals com identidade",
+            "Usar campo mutável em igualdade sem avaliar consequências"
+          ]
+        },
+        "heranca-code-11": {
+          "explanation": [
+            "Cada super.falar chama a implementação da superclasse imediata.",
+            "new C().falar percorre as chamadas explícitas A, B e C."
+          ],
+          "commonMistakes": [
+            "Achar que super pula diretamente para Object",
+            "Criar hierarquias profundas sem necessidade"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "heranca-jls-superclass",
+          "type": "reference",
+          "title": "JLS 8.1.4: superclasses e subclasses",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.4",
+          "reinforces": "Define herança simples e relação de subtipo entre classes.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "heranca-jls-override",
+          "type": "reference",
+          "title": "JLS 8.4.8.1: sobrescrita",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.8.1",
+          "reinforces": "Distingue sobrescrita de ocultação e sobrecarga.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21",
+        "notes": [
+          "equals/hashCode permanece somente como prévia; prática com HashSet foi removida para Java Core."
+        ]
+      }
     },
     "polimorfismo": {
-      "order":6,"objectives":["Usar referência de supertipo para objetos de subtipos","Prever despacho de métodos sobrescritos","Reconhecer custo e sinal de design de downcasts"],"whyItExists":"Sem polimorfismo, cada novo subtipo força cadeias de if e conhecimento de classes concretas; um contrato comum permite variar comportamento mantendo o código consumidor estável.","prerequisiteChapterIds":["heranca"],"introducedConceptIds":["polimorfismo-substituicao","despacho-dinamico","downcast-instanceof"],"usedConceptIds":["heranca-subtipo","super-sobrescrita","array-indice-length"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"polimorfismo-intuition","type":"intuition","authorship":"authored","title":"O tipo da variável limita; o objeto responde","body":"Uma variável Funcionario aceita Funcionario ou qualquer subtipo. O compilador permite somente operações do tipo declarado; ao chamar método de instância sobrescrito, o comportamento corresponde à classe real do objeto.","analogyLimit":"“Mesma mensagem” descreve o contrato, mas Java resolve chamadas por regras precisas; campos e métodos static não participam do mesmo mecanismo."}],
-      "appendBlocks":[{"id":"polimorfismo-model","type":"mental-model","authorship":"authored","title":"Compilação e execução respondem perguntas distintas","body":"Na compilação, Java verifica se o tipo da variável oferece o método. Na execução, escolhe a implementação sobrescrita pela classe real. A especificação exige esse resultado, não uma estrutura interna específica chamada vtable.","flow":["Funcionario f referencia Gerente","Compilador confirma calcularSalario em Funcionario","Programa executa a chamada","Implementação sobrescrita de Gerente responde"],"ownership":["O consumidor conhece o contrato geral","Cada subtipo mantém sua implementação"]},{"id":"polimorfismo-quiz","type":"quiz","authorship":"authored","conceptId":"despacho-dinamico","prompt":"Funcionario f = new Gerente(...); f.calcularSalario() chama qual implementação?","options":[{"id":"polimorfismo-q-a","label":"A sobrescrita em Gerente, pois esse é o tipo real do objeto.","correct":true,"explanation":"O método de instância sobrescrito usa despacho dinâmico após a chamada ser validada pelo tipo Funcionario."},{"id":"polimorfismo-q-b","label":"Sempre Funcionario, porque esse é o tipo da variável.","correct":false,"explanation":"O tipo da variável limita operações disponíveis, mas não fixa a implementação sobrescrita."},{"id":"polimorfismo-q-c","label":"As duas implementações automaticamente.","correct":false,"explanation":"Apenas uma implementação é selecionada; super só executa se o código a chamar explicitamente."}]}],
-      "codeExplanations":{"polimorfismo-code-3":{"explanation":["O array usa o tipo comum Funcionario para armazenar instâncias diferentes.","A mesma chamada executa a implementação correspondente a cada objeto."],"commonMistakes":["Criar if por tipo sem necessidade","Achar que upcast muda o objeto"]},"polimorfismo-code-7":{"explanation":["O exemplo contrasta campo ocultado e método sobrescrito.","Chame static pelo nome da classe; acesso por instância torna a leitura enganosa."],"commonMistakes":["Esperar polimorfismo de campos","Chamar static por referência"]},"polimorfismo-code-10":{"explanation":["instanceof confirma o tipo real antes de acessar comportamento específico.","Pattern matching cria a variável já refinada no ramo verdadeiro."],"commonMistakes":["Downcast sem teste","Usar muitos casts em vez de melhorar o contrato comum"]}},
-      "resources":[{"id":"polimorfismo-jls-runtime","type":"reference","title":"JLS 15.12.4.4: localização do método em runtime","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.4.4","reinforces":"Define seleção dinâmica da implementação de método de instância.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"advanced","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"polimorfismo-jls-cast","type":"reference","title":"JLS 15.20.2: instanceof","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.20.2","reinforces":"Confirma teste de compatibilidade de tipo e resultado booleano.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 6,
+      "objectives": [
+        "Usar referência de supertipo para objetos de subtipos",
+        "Prever despacho de métodos sobrescritos",
+        "Reconhecer custo e sinal de design de downcasts"
+      ],
+      "whyItExists": "Sem polimorfismo, cada novo subtipo força cadeias de if e conhecimento de classes concretas; um contrato comum permite variar comportamento mantendo o código consumidor estável.",
+      "prerequisiteChapterIds": [
+        "heranca"
+      ],
+      "introducedConceptIds": [
+        "polimorfismo-substituicao",
+        "despacho-dinamico",
+        "downcast-instanceof"
+      ],
+      "usedConceptIds": [
+        "heranca-subtipo",
+        "super-sobrescrita",
+        "array-indice-length"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "polimorfismo-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "O tipo da variável limita; o objeto responde",
+          "body": "Uma variável Funcionario aceita Funcionario ou qualquer subtipo. O compilador permite somente operações do tipo declarado; ao chamar método de instância sobrescrito, o comportamento corresponde à classe real do objeto.",
+          "analogyLimit": "“Mesma mensagem” descreve o contrato, mas Java resolve chamadas por regras precisas; campos e métodos static não participam do mesmo mecanismo."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "polimorfismo-model",
+          "type": "mental-model",
+          "authorship": "authored",
+          "title": "Compilação e execução respondem perguntas distintas",
+          "body": "Na compilação, Java verifica se o tipo da variável oferece o método. Na execução, escolhe a implementação sobrescrita pela classe real. A especificação exige esse resultado, não uma estrutura interna específica chamada vtable.",
+          "flow": [
+            "Funcionario f referencia Gerente",
+            "Compilador confirma calcularSalario em Funcionario",
+            "Programa executa a chamada",
+            "Implementação sobrescrita de Gerente responde"
+          ],
+          "ownership": [
+            "O consumidor conhece o contrato geral",
+            "Cada subtipo mantém sua implementação"
+          ]
+        },
+        {
+          "id": "polimorfismo-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "despacho-dinamico",
+          "prompt": "Funcionario f = new Gerente(...); f.calcularSalario() chama qual implementação?",
+          "options": [
+            {
+              "id": "polimorfismo-q-a",
+              "label": "A sobrescrita em Gerente, pois esse é o tipo real do objeto.",
+              "correct": true,
+              "explanation": "O método de instância sobrescrito usa despacho dinâmico após a chamada ser validada pelo tipo Funcionario."
+            },
+            {
+              "id": "polimorfismo-q-b",
+              "label": "Sempre Funcionario, porque esse é o tipo da variável.",
+              "correct": false,
+              "explanation": "O tipo da variável limita operações disponíveis, mas não fixa a implementação sobrescrita."
+            },
+            {
+              "id": "polimorfismo-q-c",
+              "label": "As duas implementações automaticamente.",
+              "correct": false,
+              "explanation": "Apenas uma implementação é selecionada; super só executa se o código a chamar explicitamente."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "polimorfismo-code-3": {
+          "explanation": [
+            "O array usa o tipo comum Funcionario para armazenar instâncias diferentes.",
+            "A mesma chamada executa a implementação correspondente a cada objeto."
+          ],
+          "commonMistakes": [
+            "Criar if por tipo sem necessidade",
+            "Achar que upcast muda o objeto"
+          ]
+        },
+        "polimorfismo-code-7": {
+          "explanation": [
+            "O exemplo contrasta campo ocultado e método sobrescrito.",
+            "Chame static pelo nome da classe; acesso por instância torna a leitura enganosa."
+          ],
+          "commonMistakes": [
+            "Esperar polimorfismo de campos",
+            "Chamar static por referência"
+          ]
+        },
+        "polimorfismo-code-10": {
+          "explanation": [
+            "instanceof confirma o tipo real antes de acessar comportamento específico.",
+            "Pattern matching cria a variável já refinada no ramo verdadeiro."
+          ],
+          "commonMistakes": [
+            "Downcast sem teste",
+            "Usar muitos casts em vez de melhorar o contrato comum"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "polimorfismo-jls-runtime",
+          "type": "reference",
+          "title": "JLS 15.12.4.4: localização do método em runtime",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.12.4.4",
+          "reinforces": "Define seleção dinâmica da implementação de método de instância.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "advanced",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "polimorfismo-jls-cast",
+          "type": "reference",
+          "title": "JLS 15.20.2: instanceof",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.20.2",
+          "reinforces": "Confirma teste de compatibilidade de tipo e resultado booleano.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "abstracao": {
-      "order":7,"objectives":["Distinguir abstração de classe abstrata","Combinar estado comum e métodos obrigatórios","Impedir instância de conceito incompleto"],"whyItExists":"Uma superclasse fictícia que devolve zero apenas para compilar mente sobre o contrato; tipos abstratos expressam que existe uma ideia comum, mas somente subclasses completas podem ser instanciadas.","prerequisiteChapterIds":["polimorfismo"],"introducedConceptIds":["classe-metodo-abstrato","contrato-parcial","abstracao-modelagem"],"usedConceptIds":["heranca-subtipo","despacho-dinamico","final-referencia-tipo","construtor-invariante"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"abstracao-intuition","type":"intuition","authorship":"authored","title":"Não invente uma resposta para um conceito incompleto","body":"Se Forma não possui uma área genérica correta, area não deve retornar 0. Um método abstract declara a pergunta sem fingir uma resposta, e cada classe concreta fornece sua implementação.","analogyLimit":"Contrato incompleto não significa classe vazia: classes abstratas podem possuir campos, construtor e métodos concretos compartilhados."}],
-      "appendBlocks":[{"id":"abstracao-comparison","type":"comparison","authorship":"authored","title":"Abstração e abstract não são sinônimos","criteria":["natureza","onde acontece","resultado"],"alternatives":[{"name":"Abstração de modelagem","values":["decisão","antes e durante o código","modelo relevante ao contexto"],"useWhen":"escolher o que representar e ignorar","avoidWhen":"procurar apenas uma palavra-chave"},{"name":"Classe abstract","values":["recurso da linguagem","declaração Java","tipo não instanciável"],"useWhen":"há base comum parcial para subclasses","avoidWhen":"não existe relação de subtipo"}]},{"id":"abstracao-quiz","type":"quiz","authorship":"authored","conceptId":"classe-metodo-abstrato","prompt":"Por que Forma.area() abstract é melhor que retornar 0 por padrão?","options":[{"id":"abstracao-q-a","label":"Porque obriga cada subtipo concreto a fornecer uma área válida.","correct":true,"explanation":"O compilador impede uma classe concreta incompleta e o contrato não oferece resposta fictícia."},{"id":"abstracao-q-b","label":"Porque métodos abstract executam mais rápido.","correct":false,"explanation":"A decisão é de correção e modelagem, não promessa de desempenho."},{"id":"abstracao-q-c","label":"Porque classes abstratas não podem ter métodos concretos.","correct":false,"explanation":"Elas podem combinar métodos abstratos e concretos."}]}],
-      "codeExplanations":{"abstracao-code-3":{"explanation":["Forma não pode ser instanciada e exige area em subclasses concretas.","descrever reutiliza o contrato polimórfico chamando area."],"commonMistakes":["Dar corpo a método abstract","Esquecer de implementar método em subclasse concreta"]},"abstracao-code-7":{"explanation":["O construtor protected inicializa estado comum quando uma subclasse é criada.","final no campo garante uma atribuição da referência nome."],"commonMistakes":["Tentar new Forma","Achar que construtor abstrato é herdado"]}},
-      "resources":[{"id":"abstracao-jls-class","type":"reference","title":"JLS 8.1.1.1: classes abstratas","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.1","reinforces":"Define não instanciação e obrigação de implementação.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"abstracao-jls-method","type":"reference","title":"JLS 8.4.3.1: métodos abstratos","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.1","reinforces":"Detalha ausência de corpo e implementação por subtipos.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 7,
+      "objectives": [
+        "Distinguir abstração de classe abstrata",
+        "Combinar estado comum e métodos obrigatórios",
+        "Impedir instância de conceito incompleto"
+      ],
+      "whyItExists": "Uma superclasse fictícia que devolve zero apenas para compilar mente sobre o contrato; tipos abstratos expressam que existe uma ideia comum, mas somente subclasses completas podem ser instanciadas.",
+      "prerequisiteChapterIds": [
+        "polimorfismo"
+      ],
+      "introducedConceptIds": [
+        "classe-metodo-abstrato",
+        "contrato-parcial",
+        "abstracao-modelagem"
+      ],
+      "usedConceptIds": [
+        "heranca-subtipo",
+        "despacho-dinamico",
+        "final-referencia-tipo",
+        "construtor-invariante"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "abstracao-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Não invente uma resposta para um conceito incompleto",
+          "body": "Se Forma não possui uma área genérica correta, area não deve retornar 0. Um método abstract declara a pergunta sem fingir uma resposta, e cada classe concreta fornece sua implementação.",
+          "analogyLimit": "Contrato incompleto não significa classe vazia: classes abstratas podem possuir campos, construtor e métodos concretos compartilhados."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "abstracao-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Abstração e abstract não são sinônimos",
+          "criteria": [
+            "natureza",
+            "onde acontece",
+            "resultado"
+          ],
+          "alternatives": [
+            {
+              "name": "Abstração de modelagem",
+              "values": [
+                "decisão",
+                "antes e durante o código",
+                "modelo relevante ao contexto"
+              ],
+              "useWhen": "escolher o que representar e ignorar",
+              "avoidWhen": "procurar apenas uma palavra-chave"
+            },
+            {
+              "name": "Classe abstract",
+              "values": [
+                "recurso da linguagem",
+                "declaração Java",
+                "tipo não instanciável"
+              ],
+              "useWhen": "há base comum parcial para subclasses",
+              "avoidWhen": "não existe relação de subtipo"
+            }
+          ]
+        },
+        {
+          "id": "abstracao-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "classe-metodo-abstrato",
+          "prompt": "Por que Forma.area() abstract é melhor que retornar 0 por padrão?",
+          "options": [
+            {
+              "id": "abstracao-q-a",
+              "label": "Porque obriga cada subtipo concreto a fornecer uma área válida.",
+              "correct": true,
+              "explanation": "O compilador impede uma classe concreta incompleta e o contrato não oferece resposta fictícia."
+            },
+            {
+              "id": "abstracao-q-b",
+              "label": "Porque métodos abstract executam mais rápido.",
+              "correct": false,
+              "explanation": "A decisão é de correção e modelagem, não promessa de desempenho."
+            },
+            {
+              "id": "abstracao-q-c",
+              "label": "Porque classes abstratas não podem ter métodos concretos.",
+              "correct": false,
+              "explanation": "Elas podem combinar métodos abstratos e concretos."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "abstracao-code-3": {
+          "explanation": [
+            "Forma não pode ser instanciada e exige area em subclasses concretas.",
+            "descrever reutiliza o contrato polimórfico chamando area."
+          ],
+          "commonMistakes": [
+            "Dar corpo a método abstract",
+            "Esquecer de implementar método em subclasse concreta"
+          ]
+        },
+        "abstracao-code-7": {
+          "explanation": [
+            "O construtor protected inicializa estado comum quando uma subclasse é criada.",
+            "final no campo garante uma atribuição da referência nome."
+          ],
+          "commonMistakes": [
+            "Tentar new Forma",
+            "Achar que construtor abstrato é herdado"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "abstracao-jls-class",
+          "type": "reference",
+          "title": "JLS 8.1.1.1: classes abstratas",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.1",
+          "reinforces": "Define não instanciação e obrigação de implementação.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "abstracao-jls-method",
+          "type": "reference",
+          "title": "JLS 8.4.3.1: métodos abstratos",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.4.3.1",
+          "reinforces": "Detalha ausência de corpo e implementação por subtipos.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "interfaces": {
-      "order":8,"objectives":["Definir capacidade por interface tipada","Implementar múltiplos contratos independentes","Entender default e resolver conflitos explicitamente"],"whyItExists":"Classes sem ancestral comum útil podem oferecer a mesma capacidade; interfaces permitem que consumidores dependam do comportamento prometido, não da implementação concreta.","prerequisiteChapterIds":["abstracao"],"introducedConceptIds":["interface-contrato","implementacao-multipla-interfaces","default-conflito-interface"],"usedConceptIds":["polimorfismo-substituicao","classe-metodo-abstrato","controle-acesso","super-sobrescrita"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"interfaces-intuition","type":"intuition","authorship":"authored","title":"Capacidade sem parentesco de implementação","body":"Pix e Cartao podem implementar MetodoPagamento mesmo sem compartilhar campos ou superclasse específica. O consumidor conhece pagar; cada classe decide como cumprir o contrato.","analogyLimit":"Contrato não garante que a implementação seja correta; testes e invariantes ainda precisam verificar o comportamento prometido."}],
-      "appendBlocks":[{"id":"interfaces-comparison","type":"comparison","authorship":"authored","title":"Interface ou classe abstrata","criteria":["estado de instância","herança","uso principal"],"alternatives":[{"name":"Interface","values":["não define campos de instância","uma classe implementa várias","capacidade"],"useWhen":"tipos diferentes compartilham um contrato","avoidWhen":"é necessário estado base compartilhado"},{"name":"Classe abstrata","values":["pode manter campos","uma superclasse direta","base parcial"],"useWhen":"subtipos compartilham estado e comportamento","avoidWhen":"a relação existe apenas por uma capacidade"}]},{"id":"interfaces-quiz","type":"quiz","authorship":"authored","conceptId":"default-conflito-interface","prompt":"Uma classe herda o mesmo método default de duas interfaces sem regra mais específica. O que ocorre?","options":[{"id":"interfaces-q-a","label":"A classe deve sobrescrever e resolver o conflito explicitamente.","correct":true,"explanation":"Java rejeita a ambiguidade em compilação e exige uma decisão do tipo implementador."},{"id":"interfaces-q-b","label":"Java escolhe a primeira interface escrita.","correct":false,"explanation":"A ordem textual de implements não decide o método default."},{"id":"interfaces-q-c","label":"Os dois métodos executam em sequência automaticamente.","correct":false,"explanation":"Não existe composição automática das implementações."}]}],
-      "codeExplanations":{"interfaces-code-3":{"explanation":["Precificavel e Imprimivel descrevem capacidades independentes com tipos concretos de retorno e parâmetro.","Produto promete os dois contratos e pode ser usado por consumidores que conhecem apenas a capacidade necessária."],"commonMistakes":["Colocar operações sem relação na mesma interface","Confundir implements com extends de classe"]},"interfaces-code-6":{"explanation":["enviar é abstrato; enviarUrgente reutiliza o contrato em uma implementação default.","marcarUrgente é static, pertence à interface e pode ser chamado sem criar uma implementação."],"commonMistakes":["Achar que default dispensa implementação do método abstrato","Chamar método static pela instância"]}},
-      "resources":[{"id":"interfaces-jls","type":"reference","title":"JLS 9: interfaces","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html","reinforces":"Define membros, implementação, herança e contratos de interface.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"interfaces-default","type":"reference","title":"JLS 9.4.3: corpo de métodos de interface","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.4.3","reinforces":"Distingue métodos abstract, default, static e private.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21"}
+      "order": 8,
+      "objectives": [
+        "Definir capacidade por interface tipada",
+        "Implementar múltiplos contratos independentes",
+        "Entender default e resolver conflitos explicitamente"
+      ],
+      "whyItExists": "Classes sem ancestral comum útil podem oferecer a mesma capacidade; interfaces permitem que consumidores dependam do comportamento prometido, não da implementação concreta.",
+      "prerequisiteChapterIds": [
+        "abstracao"
+      ],
+      "introducedConceptIds": [
+        "interface-contrato",
+        "implementacao-multipla-interfaces",
+        "default-conflito-interface"
+      ],
+      "usedConceptIds": [
+        "polimorfismo-substituicao",
+        "classe-metodo-abstrato",
+        "controle-acesso",
+        "super-sobrescrita"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "interfaces-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Capacidade sem parentesco de implementação",
+          "body": "Pix e Cartao podem implementar MetodoPagamento mesmo sem compartilhar campos ou superclasse específica. O consumidor conhece pagar; cada classe decide como cumprir o contrato.",
+          "analogyLimit": "Contrato não garante que a implementação seja correta; testes e invariantes ainda precisam verificar o comportamento prometido."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "interfaces-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Interface ou classe abstrata",
+          "criteria": [
+            "estado de instância",
+            "herança",
+            "uso principal"
+          ],
+          "alternatives": [
+            {
+              "name": "Interface",
+              "values": [
+                "não define campos de instância",
+                "uma classe implementa várias",
+                "capacidade"
+              ],
+              "useWhen": "tipos diferentes compartilham um contrato",
+              "avoidWhen": "é necessário estado base compartilhado"
+            },
+            {
+              "name": "Classe abstrata",
+              "values": [
+                "pode manter campos",
+                "uma superclasse direta",
+                "base parcial"
+              ],
+              "useWhen": "subtipos compartilham estado e comportamento",
+              "avoidWhen": "a relação existe apenas por uma capacidade"
+            }
+          ]
+        },
+        {
+          "id": "interfaces-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "default-conflito-interface",
+          "prompt": "Uma classe herda o mesmo método default de duas interfaces sem regra mais específica. O que ocorre?",
+          "options": [
+            {
+              "id": "interfaces-q-a",
+              "label": "A classe deve sobrescrever e resolver o conflito explicitamente.",
+              "correct": true,
+              "explanation": "Java rejeita a ambiguidade em compilação e exige uma decisão do tipo implementador."
+            },
+            {
+              "id": "interfaces-q-b",
+              "label": "Java escolhe a primeira interface escrita.",
+              "correct": false,
+              "explanation": "A ordem textual de implements não decide o método default."
+            },
+            {
+              "id": "interfaces-q-c",
+              "label": "Os dois métodos executam em sequência automaticamente.",
+              "correct": false,
+              "explanation": "Não existe composição automática das implementações."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "interfaces-code-3": {
+          "explanation": [
+            "Precificavel e Imprimivel descrevem capacidades independentes com tipos concretos de retorno e parâmetro.",
+            "Produto promete os dois contratos e pode ser usado por consumidores que conhecem apenas a capacidade necessária."
+          ],
+          "commonMistakes": [
+            "Colocar operações sem relação na mesma interface",
+            "Confundir implements com extends de classe"
+          ]
+        },
+        "interfaces-code-6": {
+          "explanation": [
+            "enviar é abstrato; enviarUrgente reutiliza o contrato em uma implementação default.",
+            "marcarUrgente é static, pertence à interface e pode ser chamado sem criar uma implementação."
+          ],
+          "commonMistakes": [
+            "Achar que default dispensa implementação do método abstrato",
+            "Chamar método static pela instância"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "interfaces-jls",
+          "type": "reference",
+          "title": "JLS 9: interfaces",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html",
+          "reinforces": "Define membros, implementação, herança e contratos de interface.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "interfaces-default",
+          "type": "reference",
+          "title": "JLS 9.4.3: corpo de métodos de interface",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html#jls-9.4.3",
+          "reinforces": "Distingue métodos abstract, default, static e private.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21"
+      }
     },
     "pilares-profundo": {
-      "order":9,"objectives":["Conectar os mecanismos de POO pelo problema resolvido","Separar abstração conceitual de recursos da linguagem","Justificar custos de herança, mutabilidade e acoplamento"],"whyItExists":"Depois de aprender os mecanismos separadamente, o aluno precisa enxergar como eles cooperam numa modelagem e evitar decorar quatro slogans desconectados.","prerequisiteChapterIds":["interfaces"],"introducedConceptIds":["quatro-pilares-cooperacao","decisao-modelagem-poo"],"usedConceptIds":["encapsulamento-invariante","heranca-composicao","despacho-dinamico","abstracao-modelagem","interface-contrato"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"pilares-intuition","type":"intuition","authorship":"authored","title":"POO é responsabilidade e colaboração, não uma lista de pilares","body":"Abstração escolhe o modelo; encapsulamento protege suas regras; subtipos e interfaces estabelecem contratos; polimorfismo permite variar implementações. Herança é uma ferramenta possível, não um objetivo obrigatório.","analogyLimit":"Os quatro nomes são uma lente didática, não uma divisão normativa da especificação Java nem uma pontuação de qualidade."}],
-      "appendBlocks":[{"id":"pilares-table","type":"table","authorship":"authored","title":"Da decisão ao efeito","headers":["Decisão","Problema resolvido","Risco se mal usada"],"rows":[["Abstrair","excesso ou falta de detalhes","modelo irrelevante"],["Encapsular","estado alterado por atalhos","objeto anêmico com setters"],["Criar subtipo","variação sob contrato comum","herança frágil"],["Usar polimorfismo","if por classe concreta","contrato genérico demais"],["Compor objetos","separar responsabilidades","grafo incoerente sem operação de domínio"]],"caption":"Avalie comportamento observável e custo de mudança, não a quantidade de palavras-chave."},{"id":"pilares-quiz","type":"quiz","authorship":"authored","conceptId":"decisao-modelagem-poo","prompt":"Um modelo usa apenas composição, interfaces e objetos encapsulados, sem extends entre classes de domínio. Ele deixa de ser orientado a objetos?","options":[{"id":"pilares-q-a","label":"Não; herança de classes não é requisito para responsabilidade, colaboração e polimorfismo.","correct":true,"explanation":"Interfaces e composição podem oferecer contratos e variação sem uma hierarquia de implementação."},{"id":"pilares-q-b","label":"Sim; todo sistema POO precisa usar os quatro itens na mesma quantidade.","correct":false,"explanation":"Os mecanismos respondem a problemas; forçá-los sem necessidade piora o modelo."},{"id":"pilares-q-c","label":"Sim; composição pertence apenas à programação funcional.","correct":false,"explanation":"Composição de objetos é uma ferramenta central de modelagem orientada a objetos."}]}],
-      "codeExplanations":{"pilares-profundo-code-4":{"explanation":["O diagrama separa estado privado e operações públicas.","A garantia vem das invariantes preservadas, não apenas do modificador private."],"commonMistakes":["Criar setter para saldo","Tratar diagrama como layout real de memória"]},"pilares-profundo-code-8":{"explanation":["A árvore mostra uma relação de subtipo e métodos sobrescritos.","A escolha precisa preservar o contrato; composição é preferível quando não existe é-um."],"commonMistakes":["Herdar apenas para copiar campos","Criar hierarquia profunda"]},"pilares-profundo-code-12":{"explanation":["A chamada pelo tipo geral permite respostas específicas dos objetos.","A especificação exige despacho dinâmico, mas não obriga uma implementação interna por vtable."],"commonMistakes":["Ensinar vtable como regra da JVM","Confundir campo com método sobrescrito"]},"pilares-profundo-code-17":{"explanation":["O modelo Carro inclui somente informações pertinentes ao aluguel.","Outro contexto pode exigir outra abstração do mesmo carro real."],"commonMistakes":["Modelar o mundo inteiro","Confundir abstração com abstract"]},"pilares-profundo-code-21":{"explanation":["O esquema relaciona os mecanismos como decisões cooperativas.","Nenhum pilar precisa aparecer artificialmente quando o problema não o exige."],"commonMistakes":["Avaliar design contando palavras-chave","Usar herança onde colaboração basta"]}},
-      "resources":[{"id":"pilares-dev-oop","type":"guide","title":"dev.java: objetos, classes, interfaces e herança","url":"https://dev.java/learn/oop/","reinforces":"Reúne a introdução oficial aos mecanismos de orientação a objetos em Java.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"beginner","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"pilares-jls-intro","type":"reference","title":"JLS 1: visão geral orientada a objetos","url":"https://docs.oracle.com/javase/specs/jls/se21/html/jls-1.html","reinforces":"Contextualiza classes, instâncias, herança simples, interfaces e polimorfismo.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21","notes":["Removida a afirmação de vtable obrigatória e o enquadramento de entrevista sênior."]}
+      "order": 9,
+      "objectives": [
+        "Conectar os mecanismos de POO pelo problema resolvido",
+        "Separar abstração conceitual de recursos da linguagem",
+        "Justificar custos de herança, mutabilidade e acoplamento"
+      ],
+      "whyItExists": "Depois de aprender os mecanismos separadamente, o aluno precisa enxergar como eles cooperam numa modelagem e evitar decorar quatro slogans desconectados.",
+      "prerequisiteChapterIds": [
+        "interfaces"
+      ],
+      "introducedConceptIds": [
+        "quatro-pilares-cooperacao",
+        "decisao-modelagem-poo"
+      ],
+      "usedConceptIds": [
+        "encapsulamento-invariante",
+        "heranca-composicao",
+        "despacho-dinamico",
+        "abstracao-modelagem",
+        "interface-contrato"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "pilares-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "POO é responsabilidade e colaboração, não uma lista de pilares",
+          "body": "Abstração escolhe o modelo; encapsulamento protege suas regras; subtipos e interfaces estabelecem contratos; polimorfismo permite variar implementações. Herança é uma ferramenta possível, não um objetivo obrigatório.",
+          "analogyLimit": "Os quatro nomes são uma lente didática, não uma divisão normativa da especificação Java nem uma pontuação de qualidade."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "pilares-table",
+          "type": "table",
+          "authorship": "authored",
+          "title": "Da decisão ao efeito",
+          "headers": [
+            "Decisão",
+            "Problema resolvido",
+            "Risco se mal usada"
+          ],
+          "rows": [
+            [
+              "Abstrair",
+              "excesso ou falta de detalhes",
+              "modelo irrelevante"
+            ],
+            [
+              "Encapsular",
+              "estado alterado por atalhos",
+              "objeto anêmico com setters"
+            ],
+            [
+              "Criar subtipo",
+              "variação sob contrato comum",
+              "herança frágil"
+            ],
+            [
+              "Usar polimorfismo",
+              "if por classe concreta",
+              "contrato genérico demais"
+            ],
+            [
+              "Compor objetos",
+              "separar responsabilidades",
+              "grafo incoerente sem operação de domínio"
+            ]
+          ],
+          "caption": "Avalie comportamento observável e custo de mudança, não a quantidade de palavras-chave."
+        },
+        {
+          "id": "pilares-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "decisao-modelagem-poo",
+          "prompt": "Um modelo usa apenas composição, interfaces e objetos encapsulados, sem extends entre classes de domínio. Ele deixa de ser orientado a objetos?",
+          "options": [
+            {
+              "id": "pilares-q-a",
+              "label": "Não; herança de classes não é requisito para responsabilidade, colaboração e polimorfismo.",
+              "correct": true,
+              "explanation": "Interfaces e composição podem oferecer contratos e variação sem uma hierarquia de implementação."
+            },
+            {
+              "id": "pilares-q-b",
+              "label": "Sim; todo sistema POO precisa usar os quatro itens na mesma quantidade.",
+              "correct": false,
+              "explanation": "Os mecanismos respondem a problemas; forçá-los sem necessidade piora o modelo."
+            },
+            {
+              "id": "pilares-q-c",
+              "label": "Sim; composição pertence apenas à programação funcional.",
+              "correct": false,
+              "explanation": "Composição de objetos é uma ferramenta central de modelagem orientada a objetos."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "pilares-profundo-code-4": {
+          "explanation": [
+            "O diagrama separa estado privado e operações públicas.",
+            "A garantia vem das invariantes preservadas, não apenas do modificador private."
+          ],
+          "commonMistakes": [
+            "Criar setter para saldo",
+            "Tratar diagrama como layout real de memória"
+          ]
+        },
+        "pilares-profundo-code-8": {
+          "explanation": [
+            "A árvore mostra uma relação de subtipo e métodos sobrescritos.",
+            "A escolha precisa preservar o contrato; composição é preferível quando não existe é-um."
+          ],
+          "commonMistakes": [
+            "Herdar apenas para copiar campos",
+            "Criar hierarquia profunda"
+          ]
+        },
+        "pilares-profundo-code-12": {
+          "explanation": [
+            "A chamada pelo tipo geral permite respostas específicas dos objetos.",
+            "A especificação exige despacho dinâmico, mas não obriga uma implementação interna por vtable."
+          ],
+          "commonMistakes": [
+            "Ensinar vtable como regra da JVM",
+            "Confundir campo com método sobrescrito"
+          ]
+        },
+        "pilares-profundo-code-17": {
+          "explanation": [
+            "O modelo Carro inclui somente informações pertinentes ao aluguel.",
+            "Outro contexto pode exigir outra abstração do mesmo carro real."
+          ],
+          "commonMistakes": [
+            "Modelar o mundo inteiro",
+            "Confundir abstração com abstract"
+          ]
+        },
+        "pilares-profundo-code-21": {
+          "explanation": [
+            "O esquema relaciona os mecanismos como decisões cooperativas.",
+            "Nenhum pilar precisa aparecer artificialmente quando o problema não o exige."
+          ],
+          "commonMistakes": [
+            "Avaliar design contando palavras-chave",
+            "Usar herança onde colaboração basta"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "pilares-dev-oop",
+          "type": "guide",
+          "title": "dev.java: objetos, classes, interfaces e herança",
+          "url": "https://dev.java/learn/oop/",
+          "reinforces": "Reúne a introdução oficial aos mecanismos de orientação a objetos em Java.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "beginner",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "pilares-jls-intro",
+          "type": "reference",
+          "title": "JLS 1: visão geral orientada a objetos",
+          "url": "https://docs.oracle.com/javase/specs/jls/se21/html/jls-1.html",
+          "reinforces": "Contextualiza classes, instâncias, herança simples, interfaces e polimorfismo.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21",
+        "notes": [
+          "Removida a afirmação de vtable obrigatória e o enquadramento de entrevista sênior."
+        ]
+      }
     },
     "mini-biblioteca-cli": {
-      "order":11,"objectives":["Modelar invariantes antes da interface de console","Implementar relações com arrays e operações de domínio","Demonstrar empréstimo e devolução por evidências manuais"],"whyItExists":"O projeto consolida POO num domínio pequeno: objetos colaboram para impedir empréstimos simultâneos sem depender de coleções, exceções, banco ou frameworks ainda não ensinados.","prerequisiteChapterIds":["associacoes-cardinalidade"],"introducedConceptIds":["projeto-poo-incremental","evidencia-invariante-objeto"],"usedConceptIds":["quatro-pilares-cooperacao","decisao-modelagem-poo","encapsulamento-invariante","interface-contrato","parse-validacao-eof","array-indice-length"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"biblioteca-intuition","type":"intuition","authorship":"authored","title":"Primeiro o domínio; depois o menu","body":"Comece criando um item e verificando emprestar/devolver diretamente no main. Só depois adicione arrays de capacidade fixa, busca e a CLI. Assim o terminal demonstra regras já corretas em vez de hospedá-las.","analogyLimit":"Separar camadas não exige framework ou arquitetura complexa; nesta fase bastam classes e métodos com responsabilidades claras."}],
-      "appendBlocks":[{"id":"biblioteca-project","type":"project","authorship":"authored","title":"Biblioteca orientada a objetos","brief":"Modele itens, usuários e empréstimos em memória, com arrays de capacidade declarada e CLI apenas como fronteira de demonstração.","requirements":["ItemEmprestavel define emprestar, devolver e disponibilidade","Livro e Revista implementam o contrato sem exigir herança artificial","Emprestimo associa um usuário e um item e protege transições","Biblioteca guarda itens e empréstimos em arrays com contadores e capacidade","CLI cadastra, busca, empresta, devolve e encerra por opção ou EOF"],"guidance":"supported","acceptanceCriteria":["Objeto não nasce sem dados obrigatórios","O mesmo item não é emprestado duas vezes","Devolução de item disponível é recusada sem corromper estado","Capacidade cheia é tratada antes de acessar o array","Regra funciona por chamadas diretas sem Scanner ou println","Roteiro registra entrada, esperado e observado"],"knowledgeMatrix":[{"requirement":"Tipos e instâncias","conceptIds":["classe-instancia-objeto","construtor-invariante"],"chapterIds":["classes","construtores"],"expectedEvidence":"Criar dois itens com identidades e estados independentes."},{"requirement":"Estado válido","conceptIds":["encapsulamento-invariante","comando-consulta"],"chapterIds":["atributos","encapsulamento"],"expectedEvidence":"Tentar emprestar duas vezes e comparar estado antes/depois."},{"requirement":"Variação de itens","conceptIds":["interface-contrato","polimorfismo-substituicao"],"chapterIds":["polimorfismo","interfaces"],"expectedEvidence":"Livro e Revista respondem pelo mesmo contrato em um array."},{"requirement":"Relações","conceptIds":["associacao-direcao","cardinalidade-objeto","consistencia-relacao"],"chapterIds":["associacoes-cardinalidade"],"expectedEvidence":"Empréstimo liga exatamente um usuário e um item; item registra sua disponibilidade coerente."},{"requirement":"Armazenamento limitado","conceptIds":["array-indice-length","fronteira-off-by-one"],"chapterIds":["arrays-matrizes","lacos-repeticao"],"expectedEvidence":"Preencher a última posição e recusar uma além da capacidade."},{"requirement":"CLI","conceptIds":["parse-validacao-eof","separacao-io-regra"],"chapterIds":["entrada-console","mini-caixa-eletronico"],"expectedEvidence":"Entrada inválida e EOF não violam as regras do domínio."}]}],
-      "quizRationales":{"mini-biblioteca-cli:0":["A operação que muda o estado deve proteger a invariante; o menu apenas coleta e apresenta.","Mensagem não impede outra chamada de alterar o objeto incorretamente.","Consulta que altera estado esconde efeito e não estabelece uma transição clara."]},
-      "resources":[{"id":"biblioteca-dev-objects","type":"guide","title":"dev.java: criação e uso de objetos","url":"https://dev.java/learn/classes-objects/creating-objects/","reinforces":"Revisa instanciação, referências e chamadas usadas no projeto.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"beginner","verifiedAt":"2026-08-21","auditStatus":"approved"},{"id":"biblioteca-dev-inheritance","type":"guide","title":"dev.java: herança","url":"https://dev.java/learn/inheritance/","reinforces":"Ajuda a revisar subtipo, sobrescrita e alternativas de modelagem antes de justificar a hierarquia.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"beginner","verifiedAt":"2026-08-21","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-21","notes":["Projeto reordenado depois de associações e limitado a arrays, validação e evidência manual."]}
+      "order": 11,
+      "objectives": [
+        "Modelar invariantes antes da interface de console",
+        "Implementar relações com arrays e operações de domínio",
+        "Demonstrar empréstimo e devolução por evidências manuais"
+      ],
+      "whyItExists": "O projeto consolida POO num domínio pequeno: objetos colaboram para impedir empréstimos simultâneos sem depender de coleções, exceções, banco ou frameworks ainda não ensinados.",
+      "prerequisiteChapterIds": [
+        "associacoes-cardinalidade"
+      ],
+      "introducedConceptIds": [
+        "projeto-poo-incremental",
+        "evidencia-invariante-objeto"
+      ],
+      "usedConceptIds": [
+        "quatro-pilares-cooperacao",
+        "decisao-modelagem-poo",
+        "encapsulamento-invariante",
+        "interface-contrato",
+        "parse-validacao-eof",
+        "array-indice-length"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "biblioteca-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Primeiro o domínio; depois o menu",
+          "body": "Comece criando um item e verificando emprestar/devolver diretamente no main. Só depois adicione arrays de capacidade fixa, busca e a CLI. Assim o terminal demonstra regras já corretas em vez de hospedá-las.",
+          "analogyLimit": "Separar camadas não exige framework ou arquitetura complexa; nesta fase bastam classes e métodos com responsabilidades claras."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "biblioteca-project",
+          "type": "project",
+          "authorship": "authored",
+          "title": "Biblioteca orientada a objetos",
+          "brief": "Modele itens, usuários e empréstimos em memória, com arrays de capacidade declarada e CLI apenas como fronteira de demonstração.",
+          "requirements": [
+            "ItemEmprestavel define emprestar, devolver e disponibilidade",
+            "Livro e Revista implementam o contrato sem exigir herança artificial",
+            "Emprestimo associa um usuário e um item e protege transições",
+            "Biblioteca guarda itens e empréstimos em arrays com contadores e capacidade",
+            "CLI cadastra, busca, empresta, devolve e encerra por opção ou EOF"
+          ],
+          "guidance": "supported",
+          "acceptanceCriteria": [
+            "Objeto não nasce sem dados obrigatórios",
+            "O mesmo item não é emprestado duas vezes",
+            "Devolução de item disponível é recusada sem corromper estado",
+            "Capacidade cheia é tratada antes de acessar o array",
+            "Regra funciona por chamadas diretas sem Scanner ou println",
+            "Roteiro registra entrada, esperado e observado"
+          ],
+          "knowledgeMatrix": [
+            {
+              "requirement": "Tipos e instâncias",
+              "conceptIds": [
+                "classe-instancia-objeto",
+                "construtor-invariante"
+              ],
+              "chapterIds": [
+                "classes",
+                "construtores"
+              ],
+              "expectedEvidence": "Criar dois itens com identidades e estados independentes."
+            },
+            {
+              "requirement": "Estado válido",
+              "conceptIds": [
+                "encapsulamento-invariante",
+                "comando-consulta"
+              ],
+              "chapterIds": [
+                "atributos",
+                "encapsulamento"
+              ],
+              "expectedEvidence": "Tentar emprestar duas vezes e comparar estado antes/depois."
+            },
+            {
+              "requirement": "Variação de itens",
+              "conceptIds": [
+                "interface-contrato",
+                "polimorfismo-substituicao"
+              ],
+              "chapterIds": [
+                "polimorfismo",
+                "interfaces"
+              ],
+              "expectedEvidence": "Livro e Revista respondem pelo mesmo contrato em um array."
+            },
+            {
+              "requirement": "Relações",
+              "conceptIds": [
+                "associacao-direcao",
+                "cardinalidade-objeto",
+                "consistencia-relacao"
+              ],
+              "chapterIds": [
+                "associacoes-cardinalidade"
+              ],
+              "expectedEvidence": "Empréstimo liga exatamente um usuário e um item; item registra sua disponibilidade coerente."
+            },
+            {
+              "requirement": "Armazenamento limitado",
+              "conceptIds": [
+                "array-indice-length",
+                "fronteira-off-by-one"
+              ],
+              "chapterIds": [
+                "arrays-matrizes",
+                "lacos-repeticao"
+              ],
+              "expectedEvidence": "Preencher a última posição e recusar uma além da capacidade."
+            },
+            {
+              "requirement": "CLI",
+              "conceptIds": [
+                "parse-validacao-eof",
+                "separacao-io-regra"
+              ],
+              "chapterIds": [
+                "entrada-console",
+                "mini-caixa-eletronico"
+              ],
+              "expectedEvidence": "Entrada inválida e EOF não violam as regras do domínio."
+            }
+          ]
+        }
+      ],
+      "quizRationales": {
+        "mini-biblioteca-cli:0": [
+          "A operação que muda o estado deve proteger a invariante; o menu apenas coleta e apresenta.",
+          "Mensagem não impede outra chamada de alterar o objeto incorretamente.",
+          "Consulta que altera estado esconde efeito e não estabelece uma transição clara."
+        ]
+      },
+      "resources": [
+        {
+          "id": "biblioteca-dev-objects",
+          "type": "guide",
+          "title": "dev.java: criação e uso de objetos",
+          "url": "https://dev.java/learn/classes-objects/creating-objects/",
+          "reinforces": "Revisa instanciação, referências e chamadas usadas no projeto.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "beginner",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "biblioteca-dev-inheritance",
+          "type": "guide",
+          "title": "dev.java: herança",
+          "url": "https://dev.java/learn/inheritance/",
+          "reinforces": "Ajuda a revisar subtipo, sobrescrita e alternativas de modelagem antes de justificar a hierarquia.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "beginner",
+          "verifiedAt": "2026-08-21",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-21",
+        "notes": [
+          "Projeto reordenado depois de associações e limitado a arrays, validação e evidência manual."
+        ]
+      }
     }
   }
 }

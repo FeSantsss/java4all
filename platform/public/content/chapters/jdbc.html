@@ -46,6 +46,90 @@ stmt.setString(1, tituloDigitadoPeloUsuario);</pre>
     <span class="kw">int</span> linhasAfetadas = stmt.executeUpdate(); <span class="com">// INSERT/UPDATE/DELETE usam executeUpdate(), não executeQuery()</span>
 }</pre>
 
+      <h3>Transações: commit, rollback e por que autoCommit=true engana</h3>
+      <p>Por padrão, uma <code>Connection</code> nasce com <code>autoCommit=true</code> — cada instrução SQL confirma sozinha, como se fosse sua própria transação. Isso é conveniente para uma única operação isolada, mas perigoso quando duas ou mais operações precisam ser atômicas (tudo ou nada).</p>
+      <pre class="code"><span class="kw">public void</span> <span class="fn">transferir</span>(Connection conexao, <span class="kw">long</span> contaOrigem, <span class="kw">long</span> contaDestino, <span class="kw">double</span> valor) <span class="kw">throws</span> SQLException {
+    conexao.setAutoCommit(<span class="kw">false</span>); <span class="com">// a partir daqui, nada é confirmado até commit() explícito</span>
+    <span class="kw">try</span> {
+        <span class="kw">try</span> (PreparedStatement debito = conexao.prepareStatement(
+                <span class="str">"UPDATE contas SET saldo = saldo - ? WHERE id = ?"</span>)) {
+            debito.setDouble(1, valor);
+            debito.setLong(2, contaOrigem);
+            debito.executeUpdate();
+        }
+        <span class="kw">try</span> (PreparedStatement credito = conexao.prepareStatement(
+                <span class="str">"UPDATE contas SET saldo = saldo + ? WHERE id = ?"</span>)) {
+            credito.setDouble(1, valor);
+            credito.setLong(2, contaDestino);
+            credito.executeUpdate();
+        }
+        conexao.commit(); <span class="com">// só agora as duas mudanças ficam permanentes, JUNTAS</span>
+    } <span class="kw">catch</span> (SQLException e) {
+        conexao.rollback(); <span class="com">// desfaz o débito e o crédito juntos -- nada fica confirmado pela metade</span>
+        <span class="kw">throw</span> e;
+    } <span class="kw">finally</span> {
+        conexao.setAutoCommit(<span class="kw">true</span>); <span class="com">// devolve a conexão ao estado padrão antes de voltar ao pool</span>
+    }
+}</pre>
+      <div class="warn"><b>Uma transação é uma conexão, não um método.</b> Todas as operações de uma mesma transação precisam usar exatamente a mesma <code>Connection</code> — se cada método pegar sua própria conexão do pool (como no <code>LivroRepositorioJdbc</code> mostrado adiante), débito e crédito rodariam em transações diferentes, e um <code>rollback</code> não desfaria a outra operação. Uma camada de serviço geralmente precisa <em>fornecer</em> a mesma conexão para várias chamadas do repositório dentro de uma transação.</div>
+      <p>Para unidades de trabalho mais complexas, um <strong>savepoint</strong> permite desfazer só uma parte da transação, sem descartar tudo:</p>
+      <pre class="code">Savepoint antesDoCredito = conexao.setSavepoint();
+<span class="kw">try</span> {
+    <span class="com">// tenta o crédito...</span>
+} <span class="kw">catch</span> (SQLException e) {
+    conexao.rollback(antesDoCredito); <span class="com">// desfaz só o que veio depois do savepoint, mantém o débito</span>
+}</pre>
+
+      <h3>Batch: agrupando várias operações em uma única viagem de rede</h3>
+      <pre class="code"><span class="kw">try</span> (PreparedStatement stmt = conexao.prepareStatement(
+        <span class="str">"INSERT INTO livros (titulo, autor, paginas) VALUES (?, ?, ?)"</span>)) {
+    <span class="kw">for</span> (<span class="cls">Livro</span> livro : livros) {
+        stmt.setString(1, livro.getTitulo());
+        stmt.setString(2, livro.getAutor());
+        stmt.setInt(3, livro.getPaginas());
+        stmt.addBatch(); <span class="com">// acumula esta combinação de parâmetros, ainda não executa</span>
+    }
+    <span class="kw">int</span>[] linhasPorOperacao = stmt.executeBatch(); <span class="com">// envia TODAS as inserções em uma única viagem de rede</span>
+}</pre>
+      <p>Sem batch, inserir 1000 linhas significa 1000 viagens de rede separadas (cada uma com sua latência) — <code>addBatch()</code>/<code>executeBatch()</code> agrupa tudo em uma única troca com o banco, reduzindo drasticamente o overhead de rede em cargas de escrita grandes.</p>
+
+      <h3>Chaves geradas: recuperando o ID gerado pelo banco após um INSERT</h3>
+      <pre class="code"><span class="kw">try</span> (PreparedStatement stmt = conexao.prepareStatement(
+        <span class="str">"INSERT INTO livros (titulo, autor, paginas) VALUES (?, ?, ?)"</span>,
+        Statement.RETURN_GENERATED_KEYS)) { <span class="com">// avisa o driver que você quer a chave gerada de volta</span>
+    stmt.setString(1, <span class="str">"Duna"</span>);
+    stmt.setString(2, <span class="str">"Herbert"</span>);
+    stmt.setInt(3, 412);
+    stmt.executeUpdate();
+
+    <span class="kw">try</span> (ResultSet chaves = stmt.getGeneratedKeys()) {
+        <span class="kw">if</span> (chaves.next()) {
+            <span class="kw">long</span> idGerado = chaves.getLong(1); <span class="com">// o SERIAL/IDENTITY que o Postgres gerou para esta linha</span>
+        }
+    }
+}</pre>
+
+      <h3>wasNull(): distinguindo zero de NULL</h3>
+      <pre class="code"><span class="kw">int</span> paginas = rs.getInt(<span class="str">"paginas"</span>); <span class="com">// se a coluna for SQL NULL, getInt devolve 0 -- indistinguível de "realmente zero"!</span>
+<span class="kw">if</span> (rs.wasNull()) {
+    <span class="com">// a última coluna lida era NULL -- "paginas" não é 0, é ausente</span>
+}</pre>
+      <p>Para tipos primitivos (<code>getInt</code>, <code>getDouble</code>, <code>getBoolean</code>...), o <code>ResultSet</code> não tem como devolver <code>null</code> — ele devolve o valor "zero" do tipo (0, 0.0, false) tanto para uma coluna genuinamente zero quanto para uma coluna <code>NULL</code>. <code>wasNull()</code>, chamado logo após o <code>get</code>, é a única forma de saber qual dos dois casos realmente aconteceu. Para colunas que podem ser <code>NULL</code> e você quer tratar isso como ausência real, prefira <code>getObject("paginas", Integer.class)</code>, que devolve <code>null</code> diretamente.</p>
+
+      <h3>SQLException: SQLState, código do fornecedor e tradução</h3>
+      <pre class="code"><span class="kw">try</span> {
+    stmt.executeUpdate();
+} <span class="kw">catch</span> (SQLException e) {
+    System.out.println(e.getSQLState());   <span class="com">// código padronizado ANSI/ISO, ex: "23505" = violação de unicidade</span>
+    System.out.println(e.getErrorCode());  <span class="com">// código específico do PostgreSQL para o mesmo erro</span>
+
+    <span class="kw">if</span> (<span class="str">"23505"</span>.equals(e.getSQLState())) {
+        <span class="kw">throw new</span> <span class="cls">TituloJaCadastradoException</span>(<span class="str">"Já existe um livro com este título"</span>, e); <span class="com">// causa original preservada</span>
+    }
+    <span class="kw">throw new</span> <span class="cls">RuntimeException</span>(<span class="str">"Erro inesperado ao salvar livro"</span>, e);
+}</pre>
+      <p><code>SQLState</code> é um código de 5 caracteres <strong>padronizado entre bancos</strong> (definido pelo padrão SQL/ANSI) — <code>23505</code> significa violação de restrição de unicidade em praticamente qualquer banco compatível, incluindo PostgreSQL. O código de erro específico do driver (<code>getErrorCode()</code>) é próprio de cada fornecedor e não é portável. <strong>Tradução de exceção</strong> é o processo de converter uma <code>SQLException</code> genérica (com esses códigos técnicos) em uma exceção de domínio significativa — <code>TituloJaCadastradoException</code> comunica a intenção para quem chama, sem expor detalhes de SQLState pela aplicação inteira. É exatamente esse mecanismo que o Spring automatiza com <code>@Repository</code> e sua hierarquia de <code>DataAccessException</code>.</p>
+
       <h3>Connection Pool — por que ninguém abre conexão "crua" em produção</h3>
       <p>Abrir uma <code>Connection</code> nova a cada operação é caro (handshake de rede, autenticação). Um <strong>pool de conexões</strong> (ex: HikariCP, que é o padrão usado pelo Spring Boot) mantém um conjunto de conexões já abertas e as reutiliza entre requisições.</p>
 
@@ -69,6 +153,9 @@ stmt.setString(1, tituloDigitadoPeloUsuario);</pre>
     <span class="kw">return</span> livros;
 }</pre>
       <div class="callout"><b>Isso é literalmente o que um ORM (Object-Relational Mapper) automatiza.</b> Hibernate/JPA — usados pelo Spring Data JPA — fazem exatamente esse "linha de tabela vira objeto Java" automaticamente, usando anotações (<code>@Entity</code>, <code>@Column</code>) e reflection (capítulo 20) para descobrir os mapeamentos, no lugar de você escrever esse <code>while (rs.next())</code> manualmente para cada tabela.</div>
+
+      <h3>Testando JDBC de verdade: banco real, não simulado</h3>
+      <p>Testar contra um Postgres real (via <strong>Testcontainers</strong>, que sobe um container descartável só para a execução dos testes) é mais confiável do que mockar <code>Connection</code>/<code>ResultSet</code> ou depender do banco de desenvolvimento da sua máquina: um mock não valida se o SQL é sintaticamente correto, se os tipos batem com o schema real, nem se uma constraint do banco (como a violação de unicidade do exemplo anterior) realmente dispara. O capítulo de Testcontainers, mais adiante, aprofunda o ciclo de vida do container e a integração com testes JUnit.</p>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 24.1 — Repository JDBC</h4><span class="exercise-tag d">difícil</span></div>
@@ -127,6 +214,38 @@ stmt.setString(1, tituloDigitadoPeloUsuario);</pre>
         <span class="kw">return</span> livros;
     }
 }</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 24.2 — Transferência atômica com rollback</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Implemente um método <code>transferir(Connection conexao, long contaOrigem, long contaDestino, double valor)</code> que debita e credita dentro da mesma transação (<code>autoCommit=false</code>, <code>commit</code>/<code>rollback</code>). Escreva um teste que force uma falha no crédito (ex.: <code>contaDestino</code> inexistente) e prove — consultando o saldo depois — que o débito também foi revertido, não só o crédito.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">public void</span> <span class="fn">transferir</span>(Connection conexao, <span class="kw">long</span> origem, <span class="kw">long</span> destino, <span class="kw">double</span> valor) <span class="kw">throws</span> SQLException {
+    conexao.setAutoCommit(<span class="kw">false</span>);
+    <span class="kw">try</span> {
+        <span class="kw">try</span> (PreparedStatement debito = conexao.prepareStatement(
+                <span class="str">"UPDATE contas SET saldo = saldo - ? WHERE id = ?"</span>)) {
+            debito.setDouble(1, valor); debito.setLong(2, origem);
+            debito.executeUpdate();
+        }
+        <span class="kw">try</span> (PreparedStatement credito = conexao.prepareStatement(
+                <span class="str">"UPDATE contas SET saldo = saldo + ? WHERE id = ?"</span>)) {
+            credito.setDouble(1, valor); credito.setLong(2, destino);
+            <span class="kw">int</span> linhas = credito.executeUpdate();
+            <span class="kw">if</span> (linhas == 0) <span class="kw">throw new</span> SQLException(<span class="str">"Conta destino inexistente: "</span> + destino);
+        }
+        conexao.commit();
+    } <span class="kw">catch</span> (SQLException e) {
+        conexao.rollback();
+        <span class="kw">throw</span> e;
+    } <span class="kw">finally</span> {
+        conexao.setAutoCommit(<span class="kw">true</span>);
+    }
+}
+<span class="com">// teste: chamar transferir com contaDestino inexistente, capturar a SQLException,
+// e então consultar o saldo de contaOrigem -- deve estar INALTERADO, provando o rollback</span></pre>
         </div>
       </div>
     </section>

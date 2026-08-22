@@ -3,7 +3,7 @@
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo + prática</div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-jpa">45 · Spring Data JPA</a>, <a class="prereq-tag" href="#postgres">34 · PostgreSQL</a> (EXPLAIN)</div>
       </div>
 
@@ -56,7 +56,18 @@ spring.jpa.properties.hibernate.format_sql=true</pre>
 
       <div class="secret">A configuração <code>FetchType.LAZY</code> sozinha não <em>resolve</em> N+1 — ela só adia: em vez de buscar o autor no momento do <code>findAll()</code>, o Hibernate busca no momento exato em que você chama <code>.getAutor()</code>, ainda uma query por vez. A solução de verdade é sempre buscar <strong>o que você sabe que vai precisar</strong> em uma única consulta com <code>JOIN FETCH</code> ou <code>@EntityGraph</code> — antecipando a necessidade, em vez de deixar o ORM decidir sozinho, linha por linha.</div>
 
-      <div class="study-tip">Sempre que escrever um endpoint que lista objetos com relacionamento, pergunte antes de rodar: "esse endpoint vai acessar o objeto relacionado de cada item da lista?" Se sim, já escreva com <code>JOIN FETCH</code> desde o início — é muito mais fácil prevenir N+1 na hora de escrever do que caçá-lo depois com <code>show-sql</code> em um sistema que já está lento em produção.</div>
+      <h3>Batch fetching: quando LAZY sozinho ainda é lento demais</h3>
+      <p><code>JOIN FETCH</code> resolve bem quando você <strong>sempre</strong> precisa do relacionamento. Mas às vezes você só precisa dele <em>às vezes</em>, e trazer tudo eager pesaria demais na maioria dos casos. <strong>Batch fetching</strong> é o meio-termo: continua LAZY, mas em vez de uma query por linha, o Hibernate agrupa várias buscas pendentes em uma única query com <code>IN</code>:</p>
+      <pre class="code"><span class="annotation">@ManyToOne</span>(fetch = FetchType.LAZY)
+<span class="annotation">@BatchSize</span>(size = <span class="num">20</span>) <span class="com">// agrupa até 20 IDs pendentes em uma única query</span>
+<span class="kw">private</span> <span class="cls">Autor</span> autor;</pre>
+      <p>Com isso, acessar <code>.getAutor()</code> de 20 livros vira <code>SELECT * FROM autores WHERE id IN (?, ?, ..., ?)</code> — uma query para até 20 autores, não 20 queries separadas. Para não precisar anotar campo por campo, <code>spring.jpa.properties.hibernate.default_batch_fetch_size=20</code> aplica o mesmo comportamento globalmente. Batch fetching não chega a UMA query como <code>JOIN FETCH</code>, mas transforma N queries em N/tamanho-do-lote — uma correção real quando o relacionamento é acessado condicionalmente.</p>
+
+      <h3>N+1 × paginação: por que JOIN FETCH de uma coleção quebra o Pageable</h3>
+      <div class="warn">Combinar <code>JOIN FETCH</code> numa coleção (<code>@OneToMany</code>) com <code>Pageable</code>/<code>LIMIT</code> é uma armadilha conhecida: o <code>JOIN</code> multiplica as linhas do resultado (um livro com 3 autores vira 3 linhas), e o banco não consegue aplicar <code>LIMIT</code>/<code>OFFSET</code> corretamente sobre isso no nível SQL. O Hibernate então faz algo perigoso silenciosamente: <strong>traz o resultado inteiro para a memória e pagina lá</strong> — exatamente o cenário de "sistema trava com 10.000 registros" que este capítulo descreve, só que disfarçado atrás de uma paginação que parecia ter resolvido o problema. O próprio Hibernate loga um aviso (<code>firstResult/maxResults specified with collection fetch; applying in memory</code>) quando isso acontece — nunca ignore esse log.</div>
+      <p>Correção comum: separe em duas queries. Primeiro pagina só os <strong>IDs</strong> (sem <code>JOIN FETCH</code>, paginação real no banco); depois busca esses IDs específicos com <code>JOIN FETCH</code> (sem <code>Pageable</code>, mas já filtrado a um conjunto pequeno). Quando o relacionamento é <code>@ManyToOne</code> (não uma coleção), esse problema não existe — o <code>JOIN</code> não multiplica linhas, então <code>JOIN FETCH</code> + <code>Pageable</code> continuam compatíveis normalmente.</p>
+
+      <div class="study-tip">Sempre que escrever um endpoint que lista objetos com relacionamento, pergunte antes de rodar: "esse endpoint vai acessar o objeto relacionado de cada item da lista?" Se sim, já escreva com <code>JOIN FETCH</code> desde o início — é muito mais fácil prevenir N+1 na hora de escrever do que caçá-lo depois com <code>show-sql</code> em um sistema que já está lento em produção. E se a lista for paginada e o relacionamento for uma coleção, lembre da armadilha acima antes de simplesmente adicionar <code>JOIN FETCH</code>.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 46.1 — Caçando e corrigindo um N+1</h4><span class="exercise-tag d">difícil</span></div>
@@ -73,8 +84,8 @@ livros.forEach(l -&gt; System.out.println(l.getAutor().getNome()));
     <span class="annotation">@Query</span>(<span class="str">"SELECT l FROM Livro l JOIN FETCH l.autor"</span>)
     List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarTodosComAutor</span>();
 }
-<span class="com">// agora: List<livro> livros = livroRepository.buscarTodosComAutor();
-// log mostra UMA ÚNICA query, com JOIN, trazendo livro + autor juntos</livro></span></pre>
+<span class="com">// agora: List&lt;Livro&gt; livros = livroRepository.buscarTodosComAutor();
+// log mostra UMA ÚNICA query, com JOIN, trazendo livro + autor juntos</span></pre>
         </div>
       </div>
     </section>

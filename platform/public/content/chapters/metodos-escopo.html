@@ -14,9 +14,24 @@
       <p>Para primitivos, o método recebe uma cópia do valor. Para objetos, recebe uma cópia da referência. O método pode alterar o objeto apontado, mas reatribuir o parâmetro não muda a variável do chamador.</p>
       <h3>Escopo e tempo de vida</h3>
       <p>Uma variável local existe apenas no bloco em que foi declarada. Prefira o menor escopo possível: isso reduz estados simultâneos e impede uso acidental antes ou depois do ponto correto.</p>
-      <h3>Sobrecarga</h3>
-      <p>Métodos podem compartilhar o nome se diferirem na lista de parâmetros. O tipo de retorno sozinho não distingue sobrecargas. Use sobrecarga para variações coerentes da mesma operação, não para esconder comportamentos diferentes.</p>
+      <h3>Sobrecarga (overload)</h3>
+      <pre class="code"><span class="kw">static int</span> <span class="fn">somar</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a + b; }
+<span class="kw">static double</span> <span class="fn">somar</span>(<span class="kw">double</span> a, <span class="kw">double</span> b) { <span class="kw">return</span> a + b; }
+<span class="com">// static double somar(int a, int b) { ... } // ERRO: não compila -- retorno sozinho não distingue sobrecarga</span></pre>
+      <p>Métodos podem compartilhar o nome se diferirem na lista de parâmetros (quantidade ou tipo). O tipo de retorno sozinho não distingue sobrecargas — o compilador escolhe qual versão chamar olhando os <strong>argumentos</strong> na chamada, nunca o que você faz com o retorno. Use sobrecarga para variações coerentes da mesma operação conceitual, não para esconder comportamentos diferentes atrás do mesmo nome.</p>
+      <h3>Varargs</h3>
+      <pre class="code"><span class="kw">static int</span> <span class="fn">somarTodos</span>(<span class="kw">int</span>... valores) { <span class="com">// varargs -- por baixo, é simplesmente um int[]</span>
+    <span class="kw">int</span> total = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> valor : valores) total += valor;
+    <span class="kw">return</span> total;
+}
+
+somarTodos();           <span class="com">// 0 -- varargs aceita zero argumentos, vira um array vazio</span>
+somarTodos(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>);      <span class="com">// 6</span>
+somarTodos(<span class="kw">new int</span>[]{<span class="num">1</span>, <span class="num">2</span>}); <span class="com">// também aceita um array explícito diretamente</span></pre>
+      <p>Um parâmetro varargs (<code>int...</code>) é açúcar sintático para receber um array — dentro do método, <code>valores</code> é literalmente um <code>int[]</code>. Varargs só pode ser o <strong>último</strong> parâmetro da lista, e um método não pode ter dois parâmetros varargs (ambiguidade óbvia para o compilador resolver).</p>
       <div class="secret"><b>O tamanho não é o único sinal.</b> Extraia um método quando um trecho tem um nome conceitual melhor do que o comentário que seria necessário para explicá-lo.</div>
       <div class="exercise"><div class="exercise-head"><h4>Decomposição</h4><span class="exercise-tag m">Prática</span></div><p>Crie um programa de relatório de notas separando leitura, validação, cálculo e apresentação. Nenhum método deve misturar as quatro responsabilidades.</p></div>
+      <div class="exercise"><div class="exercise-head"><h4>Sobrecarga vs. varargs</h4><span class="exercise-tag m">Diagnóstico</span></div><p>Escreva duas versões sobrecarregadas de um método <code>formatar</code> (uma para <code>int</code>, outra para <code>double</code>). Depois reescreva a soma de uma lista de números usando varargs em vez de receber um array explícito, e explique quando cada abordagem comunica melhor a intenção.</p></div>
       <div class="rules-box"><h4>Pronto para POO quando</h4><ul><li>Você escreve e chama métodos sem copiar exemplos.</li><li>Explica passagem por valor em primitivos e referências.</li><li>Usa retorno em vez de imprimir dentro de toda função.</li><li>Consegue dividir um problema em operações pequenas e nomeadas.</li></ul></div>
     </section>

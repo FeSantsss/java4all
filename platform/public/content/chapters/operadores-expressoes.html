@@ -14,5 +14,20 @@
 String b = <span class="kw">new</span> String(<span class="str">"Java"</span>);
 System.out.println(a == b);      <span class="com">// false: referências distintas</span>
 System.out.println(a.equals(b)); <span class="com">// true: mesmo conteúdo</span></pre>
-      <div class="exercise"><div class="exercise-head"><h4>Validador de intervalo</h4><span class="exercise-tag f">Fundamento</span></div><p>Escreva uma expressão que aceite idade entre 18 e 65, inclusive. Depois negue a condição inteira sem repetir a lógica.</p></div>
+      <h3>Incremento, decremento e atribuição composta</h3>
+      <pre class="code"><span class="kw">int</span> x = <span class="num">5</span>;
+<span class="kw">int</span> a = x++;  <span class="com">// pós-incremento: a recebe 5, DEPOIS x vira 6</span>
+<span class="kw">int</span> y = <span class="num">5</span>;
+<span class="kw">int</span> b = ++y;  <span class="com">// pré-incremento: y vira 6 PRIMEIRO, b recebe 6</span>
+
+<span class="kw">int</span> total = <span class="num">10</span>;
+total += <span class="num">5</span>;  <span class="com">// equivalente a total = total + 5, mas o tipo de "total" é preservado no cast implícito</span></pre>
+      <p>A diferença entre <code>x++</code> e <code>++x</code> só importa quando o valor da expressão é usado imediatamente (atribuído, impresso, passado como argumento) — como efeito isolado numa linha própria, os dois produzem o mesmo resultado final em <code>x</code>. Evite misturar incremento com uso da mesma variável na mesma expressão (como <code>arr[i++] = i</code>): a ordem de avaliação existe, mas confiar nela em código de produção prejudica a leitura.</p>
+      <h3>Precedência e associatividade</h3>
+      <pre class="code"><span class="kw">int</span> resultado = <span class="num">2</span> + <span class="num">3</span> * <span class="num">4</span>;      <span class="com">// 14, não 20 -- * tem precedência maior que +</span>
+<span class="kw">int</span> comParenteses = (<span class="num">2</span> + <span class="num">3</span>) * <span class="num">4</span>; <span class="com">// 20 -- parênteses sobrepõem qualquer precedência</span>
+<span class="kw">boolean</span> valido = idade &gt;= <span class="num">18</span> &amp;&amp; idade &lt;= <span class="num">65</span> || temAutorizacao;
+<span class="com">// && tem precedência maior que || -- lido como (idade&gt;=18 && idade&lt;=65) || temAutorizacao</span></pre>
+      <p>Memorizar a tabela completa de precedência é menos importante do que o hábito de usar parênteses sempre que a expressão misturar mais de um tipo de operador lógico ou aritmético numa mesma linha — o parêntese custa nada e remove qualquer ambiguidade para quem lê depois, inclusive você mesmo em seis meses.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Validador de intervalo</h4><span class="exercise-tag f">Fundamento</span></div><p>Escreva uma expressão que aceite idade entre 18 e 65, inclusive. Depois negue a condição inteira sem repetir a lógica. Por fim, preveja o valor de <code>int r = 2 + 3 * 4 - 1;</code> antes de rodar, e reescreva com parênteses tornando a ordem de avaliação explícita.</p></div>
     </section>

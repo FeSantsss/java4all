@@ -14,7 +14,7 @@
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
     &lt;scope&gt;runtime&lt;/scope&gt;
-    &lt;optional&gt;true&lt;/optional&gt; <span class="com">&lt;!-- nunca vai para o build de produção --&gt;</span>
+    &lt;optional&gt;true&lt;/optional&gt; <span class="com">&lt;!-- evita propagação transitiva para quem depender deste projeto --&gt;</span>
 &lt;/dependency&gt;</pre>
 
       <div class="analogy">DevTools é como escrever com um editor que salva e formata automaticamente a cada pausa, em vez de precisar clicar "salvar" manualmente toda vez — o <strong>restart automático</strong> detecta mudanças no classpath e reinicia a aplicação sozinho, muito mais rápido que um restart manual completo, porque reaproveita partes já carregadas da JVM.</div>
@@ -26,7 +26,17 @@
         <tr><td>Propriedades de desenvolvimento</td><td>Desabilita cache de templates e outras otimizações que atrapalham durante o desenvolvimento</td></tr>
       </tbody></table>
 
-      <div class="warn"><b>O <code>&lt;optional&gt;true&lt;/optional&gt;</code> e <code>scope=runtime</code> não são detalhes decorativos:</b> eles garantem que o DevTools nunca seja empacotado no <code>.jar</code> final de produção, mesmo que alguém esqueça de removê-lo do <code>pom.xml</code>. O próprio Spring Boot detecta se está rodando de um <code>.jar</code> empacotado e desativa o DevTools automaticamente como segurança extra — mas não vale confiar só nisso.</div>
+      <div class="warn"><b>O <code>&lt;optional&gt;true&lt;/optional&gt;</code> e <code>scope=runtime</code> não são detalhes decorativos, mas não são o que exclui o DevTools do jar final:</b> por si só, <code>scope=runtime</code> só controla se a dependência entra no <em>classpath de compilação</em> (não entra) — ele não impede que o artefato final a contenha. Quem de fato remove o DevTools do jar empacotado é o <strong>plugin de empacotamento do Spring Boot</strong> (<code>spring-boot-maven-plugin</code>/<code>org.springframework.boot</code> no Gradle): ao montar o jar/war executável, esse plugin exclui explicitamente a dependência <code>spring-boot-devtools</code> do artefato repackaged, independentemente do scope declarado. <code>optional=true</code> resolve um problema diferente: evita que <strong>outros projetos que dependem do seu como biblioteca</strong> herdem o DevTools transitivamente. Então: <code>scope=runtime</code> mantém o DevTools fora do classpath de compilação do seu próprio código; <code>optional=true</code> evita propagação transitiva para quem depende de você; e é o plugin de build do Spring Boot — não o scope — quem garante que ele não vá para o jar final. Além disso, mesmo que o DevTools acabasse presente, o próprio Spring Boot detecta em runtime se está rodando de um jar empacotado e se desativa sozinho, como camada extra de segurança.</div>
+
+      <h3>Por que o restart do DevTools é rápido: dois classloaders, não um</h3>
+      <p>Um restart manual completo reinicia a JVM inteira — recarrega até as bibliotecas de terceiros (Spring, Jackson, o driver JDBC), que quase nunca mudam entre uma edição e outra do seu código. O DevTools acelera isso dividindo as classes da aplicação em <strong>dois class loaders</strong>:</p>
+      <ul>
+        <li><strong>Base classloader</strong>: carrega classes que não mudam durante o desenvolvimento — bibliotecas de terceiros, seus JARs de dependência. Carregado uma única vez.</li>
+        <li><strong>Restart classloader</strong>: carrega apenas as suas classes de projeto (o que está em <code>src/main/java</code>/<code>target/classes</code>). É <strong>esse</strong> classloader que o DevTools descarta e recria a cada mudança detectada.</li>
+      </ul>
+      <p>Como o base classloader nunca precisa recarregar, o restart do DevTools é muito mais rápido que reiniciar a JVM do zero — só as suas classes são recompiladas e religadas, não o ecossistema de bibliotecas inteiro por trás delas. É por isso que adicionar uma <strong>nova dependência</strong> ao <code>pom.xml</code> ainda exige um restart manual completo: uma dependência nova pertence ao base classloader, que o DevTools não recarrega sozinho.</p>
+
+      <div class="warn"><b>Remote DevTools é um risco de segurança real, não só uma curiosidade.</b> O DevTools pode ser configurado para funcionar remotamente (<code>spring.devtools.remote.secret</code>), sincronizando mudanças de classe com uma aplicação rodando em outro servidor. Isso nunca deveria estar habilitado em produção: além do custo de performance, é uma porta de entrada para executar código arbitrário remotamente se o segredo vazar. Confirme sempre que o DevTools está de fato excluído do artefato de produção (a auto-detecção de jar empacotado descrita acima) antes de considerar o risco eliminado.</div>
 
       <div class="study-tip">DevTools economiza tempo real, mas não é "mágico" — se o restart automático não disparar, geralmente é porque a IDE não está configurada para compilar automaticamente ao salvar (no IntelliJ: <code>Build → Compile automatically</code>). Vale configurar isso uma vez e esquecer, em vez de reiniciar manualmente achando que é bug do DevTools.</div>
 

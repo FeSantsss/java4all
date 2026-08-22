@@ -25,6 +25,7 @@
     "validate:ui": "node scripts/validate-ui-accessibility-contract.mjs",
     "validate:learning-tools": "node scripts/validate-learning-tools-contract.mjs",
     "validate:catalog": "node scripts/validate-catalog-integrity.mjs",
+    "validate:content": "node scripts/validate-content-review.mjs",
     "validate:assessment": "node scripts/validate-assessment-integrity.mjs",
     "validate:resources": "node scripts/validate-resource-integrity.mjs",
     "validate:progress": "node scripts/validate-progress-contract.mjs",
@@ -33,7 +34,7 @@
     "validate:traceability": "node scripts/validate-traceability-contract.mjs",
     "validate:master-spec": "node scripts/validate-master-spec-closure.mjs",
     "validate:maintenance": "node scripts/validate-maintenance-guardrails.mjs",
-    "validate": "npm run generate:content && npm run validate:fidelity && npm run validate:english && npm run validate:technical-english && npm run validate:depth && npm run typecheck && npm run lint && npm run test && npm run build && npm run validate:pedagogy && npm run validate:platform && npm run validate:ui && npm run validate:learning-tools && npm run validate:catalog && npm run validate:assessment && npm run validate:resources && npm run validate:progress && npm run validate:deployment && npm run validate:final-release && npm run validate:traceability && npm run validate:master-spec && npm run validate:maintenance && npm run test:e2e"
+    "validate": "npm run generate:content && npm run validate:fidelity && npm run validate:english && npm run validate:technical-english && npm run validate:depth && npm run validate:content && npm run typecheck && npm run lint && npm run test && npm run build && npm run validate:pedagogy && npm run validate:platform && npm run validate:ui && npm run validate:learning-tools && npm run validate:catalog && npm run validate:assessment && npm run validate:resources && npm run validate:progress && npm run validate:deployment && npm run validate:final-release && npm run validate:traceability && npm run validate:master-spec && npm run validate:maintenance && npm run test:e2e"
   },
   "dependencies": {
     "react": "19.2.8",

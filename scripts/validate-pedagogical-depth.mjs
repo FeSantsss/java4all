@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises';
+import { getCourseCounts } from './lib/course-counts.mjs';
 
+const counts = await getCourseCounts();
 const report = JSON.parse(await readFile('docs/internal/master-audit/phase-0-inventory.json', 'utf8'));
 const schema = await readFile('platform/src/content/schema.ts', 'utf8');
 const renderer = await readFile('platform/src/components/course/ContentBlockView.tsx', 'utf8');
@@ -20,7 +22,7 @@ for (const marker of ['introducedConceptIds', 'usedConceptIds', 'PedagogicalAudi
 }
 
 assert(overrides.version === 1 && overrides.chapters && typeof overrides.chapters === 'object', 'Registro autoral de pedagogia inválido.');
-assert(report.summary.chapters === 151, 'A auditoria de profundidade não cobre os 151 capítulos atuais.');
+assert(report.summary.chapters === counts.chapters, `A auditoria de profundidade não cobre os ${counts.chapters} capítulos atuais.`);
 assert(report.summary.missingChapterPrerequisites === 0, 'Há referências para capítulos inexistentes.');
 
 const invalidApprovals = report.chapters.filter(chapter => (

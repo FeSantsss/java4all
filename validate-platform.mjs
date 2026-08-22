@@ -15,13 +15,14 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(generated.source.chapters === 128, 'A migração não preservou os 128 capítulos legados.');
-assert(sourceCatalog.chapters.length === 128, 'O catálogo separado não preservou os 128 capítulos.');
+const legacyChapterCount = generated.chapters.length;
+assert(generated.source.chapters === legacyChapterCount, `A migração diverge da contagem de ${legacyChapterCount} capítulos legados.`);
+assert(sourceCatalog.chapters.length === legacyChapterCount, `O catálogo separado diverge da contagem de ${legacyChapterCount} capítulos.`);
 assert(sourceGlossary.length === 111 && generated.glossary.length === 111, 'As 111 definições do glossário devem chegar ao React.');
-assert((await readdir('platform/public/content/chapters')).filter(file => file.endsWith('.html')).length === 128, 'Cada capítulo legado deve possuir seu próprio HTML.');
+assert((await readdir('platform/public/content/chapters')).filter(file => file.endsWith('.html')).length === legacyChapterCount, 'Cada capítulo legado deve possuir seu próprio HTML.');
 assert(!generatorSource.includes("readFile(resolve(root, 'index.html')") && !generatorSource.includes('curriculum-v2.js'), 'O gerador voltou a depender do monólito legado.');
 assert(generated.modules.length === 20, 'A arquitetura deve possuir 20 módulos pedagógicos.');
-assert(new Set(generated.chapters.map(chapter => chapter.id)).size === 128, 'Há IDs legados duplicados.');
+assert(new Set(generated.chapters.map(chapter => chapter.id)).size === legacyChapterCount, 'Há IDs legados duplicados.');
 
 const blocks = generated.chapters.flatMap(chapter => chapter.blocks);
 const quizzes = blocks.filter(block => block.type === 'quiz');

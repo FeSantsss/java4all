@@ -65,6 +65,50 @@ System.out.println(livro.titulo());</pre>
 
       <div class="callout"><b>DTO (Data Transfer Object):</b> em uma aplicação real, você raramente serializa entidades de domínio diretamente. Crie classes ou records específicos para representar entrada e saída, desacoplando formato externo do modelo interno.</div>
 
+      <h3>Campos desconhecidos: o JSON de entrada nem sempre bate 100% com o DTO</h3>
+      <pre class="code"><span class="kw">String</span> jsonComCampoExtra = <span class="str">"""
+    {"titulo": "Duna", "autor": "Herbert", "paginas": 412, "editora": "Aleph"}
+    """</span>; <span class="com">// "editora" não existe em LivroDTO</span>
+
+LivroDTO livro = mapper.readValue(jsonComCampoExtra, LivroDTO.<span class="kw">class</span>);
+<span class="com">// por padrão, Jackson IGNORA campos desconhecidos silenciosamente -- não lança exceção</span></pre>
+      <pre class="code">ObjectMapper estrito = <span class="kw">new</span> ObjectMapper();
+estrito.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, <span class="kw">true</span>); <span class="com">// agora um campo extra lança UnrecognizedPropertyException</span></pre>
+      <p>O comportamento padrão do Jackson é tolerante a campos desconhecidos — conveniente para não quebrar quando a API de origem adiciona um campo novo, mas perigoso quando um campo extra deveria ter sido mapeado e foi só um erro de nome no DTO (um <code>@JsonProperty</code> com typo, por exemplo, passaria despercebido). Decida conscientemente: APIs de terceiros que você não controla geralmente pedem tolerância; contratos internos que você controla se beneficiam de <code>FAIL_ON_UNKNOWN_PROPERTIES</code> para detectar divergência cedo.</p>
+
+      <h3>Ausente não é o mesmo que null</h3>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">PerfilDTO</span>(<span class="kw">String</span> nome, String apelido) {}
+
+<span class="com">// dois JSONs diferentes, mesmo resultado no Java puro -- a distinção se perde:</span>
+<span class="kw">String</span> comApelidoNulo = <span class="str">"""{"nome": "Ana", "apelido": null}"""</span>;      <span class="com">// campo PRESENTE, valor null</span>
+<span class="kw">String</span> semApelido      = <span class="str">"""{"nome": "Ana"}"""</span>;                    <span class="com">// campo AUSENTE por completo</span>
+<span class="com">// PerfilDTO(nome=Ana, apelido=null) nos DOIS casos -- Java não distingue "ausente" de "presente e null"</span></pre>
+      <p>No JSON, um campo <strong>ausente</strong> e um campo <strong>presente com valor <code>null</code></strong> são conceitualmente diferentes (o primeiro é "não informado", o segundo é "informado como vazio") — mas um DTO Java comum não preserva essa distinção, ambos viram <code>null</code> no campo Java. Quando o contrato realmente precisa diferenciar os dois casos (ex.: um PATCH parcial, onde "não enviei o campo" deve significar "não altere", e "enviei null" deve significar "apague o valor"), a solução usual é mapear o campo como <code>JsonNode</code> bruto e checar <code>node.has("apelido")</code> antes de checar <code>isNull()</code>, ou usar um wrapper como <code>JsonNullable&lt;T&gt;</code> de uma biblioteca dedicada a esse problema.</p>
+
+      <h3>Datas: java.time precisa do módulo certo</h3>
+      <pre class="code"><span class="kw">public record</span> <span class="cls">EventoDTO</span>(<span class="kw">String</span> titulo, LocalDate data) {}
+
+ObjectMapper mapper = <span class="kw">new</span> ObjectMapper()
+    .registerModule(<span class="kw">new</span> JavaTimeModule()) <span class="com">// sem isto, LocalDate/LocalDateTime falham ao serializar/desserializar</span>
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); <span class="com">// serializa como "2026-08-22", não como número de milissegundos</span></pre>
+      <p>Por padrão, o <code>ObjectMapper</code> básico não sabe lidar com os tipos de <code>java.time</code> (<code>LocalDate</code>, <code>LocalDateTime</code>, <code>Instant</code>...) — é preciso registrar o <code>JavaTimeModule</code> (do artefato <code>jackson-datatype-jsr310</code>). O Spring Boot já faz esse registro automaticamente quando o módulo está no classpath; em Java puro com Jackson isolado, é sua responsabilidade.</p>
+
+      <h3>Coleções genéricas: o problema do type erasure na desserialização</h3>
+      <pre class="code"><span class="com">// mapper.readValue(json, List&lt;LivroDTO&gt;.class); // ❌ NÃO compila -- generics sofrem type erasure, não existe List&lt;LivroDTO&gt;.class</span>
+
+List&lt;LivroDTO&gt; livros = mapper.readValue(json, <span class="kw">new</span> TypeReference&lt;List&lt;LivroDTO&gt;&gt;() {}); <span class="com">// TypeReference preserva o tipo genérico via subclasse anônima</span></pre>
+      <p>Como visto no capítulo de generics, <code>List&lt;LivroDTO&gt;.class</code> não existe (type erasure) — Jackson resolve isso com <code>TypeReference&lt;T&gt;</code>, uma classe abstrata que você estende anonimamente; a subclasse anônima <em>preserva</em> a informação de tipo genérico como metadado da classe (o mesmo truque de "super type token"), permitindo que Jackson descubra em runtime que o tipo desejado é <code>List&lt;LivroDTO&gt;</code>, não apenas <code>List</code> bruto.</p>
+
+      <h3>Tratando erros de (des)serialização</h3>
+      <pre class="code"><span class="kw">try</span> {
+    LivroDTO livro = mapper.readValue(jsonPossivelmenteInvalido, LivroDTO.<span class="kw">class</span>);
+} <span class="kw">catch</span> (JsonProcessingException e) {
+    <span class="com">// JsonMappingException (estrutura não bate com o DTO) ou
+    // JsonParseException (o texto nem é um JSON válido) -- ambas subclasses de JsonProcessingException</span>
+    <span class="kw">throw new</span> IllegalArgumentException(<span class="str">"JSON inválido na fronteira da API"</span>, e); <span class="com">// preserva a causa original</span>
+}</pre>
+      <p><code>JsonProcessingException</code> é a superclasse comum de <code>JsonParseException</code> (o texto não é JSON sintaticamente válido) e <code>JsonMappingException</code> (é JSON válido, mas não bate com a estrutura esperada pelo DTO — campo obrigatório faltando em record, tipo incompatível). Capture no nível da fronteira da aplicação e traduza para uma resposta de erro do seu domínio, preservando a causa original em vez de expor a stack trace do Jackson diretamente ao cliente.</p>
+
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 25.1 — Serializando e desserializando</h4><span class="exercise-tag m">médio</span></div>
         <p>Crie um record <code>LivroDTO(String titulo, String autor, int paginas)</code>. Usando <code>ObjectMapper</code> (biblioteca Jackson), serialize uma instância para JSON e imprima o resultado. Depois, desserialize uma <code>String</code> JSON de volta para <code>LivroDTO</code> e imprima os campos.</p>
@@ -80,6 +124,25 @@ System.out.println(json); <span class="com">// {"titulo":"O Alquimista","autor":
 
 <span class="cls">LivroDTO</span> devolta = mapper.readValue(json, <span class="cls">LivroDTO</span>.<span class="kw">class</span>);
 System.out.println(devolta.titulo() + <span class="str">" - "</span> + devolta.autor());</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 25.2 — Lista de DTOs e erro tratado</h4><span class="exercise-tag m">médio</span></div>
+        <p>Usando <code>TypeReference</code>, desserialize um JSON representando uma lista de <code>LivroDTO</code> para <code>List&lt;LivroDTO&gt;</code>. Depois, tente desserializar um JSON propositalmente malformado (uma vírgula sobrando) dentro de um <code>try/catch (JsonProcessingException e)</code> e imprima uma mensagem de erro do seu domínio, sem vazar a mensagem crua do Jackson.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">String</span> jsonLista = <span class="str">"""
+    [{"titulo":"1984","autor":"Orwell","paginas":328},
+     {"titulo":"Duna","autor":"Herbert","paginas":412}]
+    """</span>;
+List&lt;LivroDTO&gt; livros = mapper.readValue(jsonLista, <span class="kw">new</span> TypeReference&lt;List&lt;LivroDTO&gt;&gt;() {});
+
+<span class="kw">try</span> {
+    mapper.readValue(<span class="str">"{\"titulo\":,}"</span>, LivroDTO.<span class="kw">class</span>);
+} <span class="kw">catch</span> (JsonProcessingException e) {
+    System.out.println(<span class="str">"Não foi possível interpretar o JSON recebido."</span>);
+}</pre>
         </div>
       </div>
     </section>

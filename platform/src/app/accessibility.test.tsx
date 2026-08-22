@@ -15,7 +15,7 @@ describe('application accessibility', () => {
 
   it('has no automatically detectable accessibility violations', async () => {
     const { container } = render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
 
     const result = await axe.run(container, {
       rules: {
@@ -29,7 +29,7 @@ describe('application accessibility', () => {
 
   it('keeps the open study hub free of detectable accessibility violations', async () => {
     const { container } = render(<App course={course} />);
-    await screen.findByRole('heading', { level: 1, name: 'Introdução & ambiente' });
+    await screen.findByRole('heading', { level: 1, name: 'Terminal e shell — antes de instalar qualquer coisa' });
     fireEvent.click(screen.getByRole('button', { name: 'Central de estudos' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Domínio e erros' }));
     const result = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });

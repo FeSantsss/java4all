@@ -7,6 +7,8 @@
 
       <p><strong>Atributos</strong> (campos) guardam o estado do objeto. <strong>Métodos</strong> definem seu comportamento e podem receber parâmetros, retornar valores, ou apenas executar uma ação.</p>
 
+      <p>Vale nomear uma distinção que vai guiar boas decisões de design mais adiante: um <strong>método de consulta</strong> (<em>query</em>) só lê e devolve informação, sem alterar o estado do objeto (como <code>getSaldo()</code> abaixo); um <strong>método de comando</strong> (<em>command</em>) altera o estado e tipicamente não devolve o próprio valor consultável (como <code>depositar</code> e <code>sacar</code>). Misturar os dois no mesmo método — alterar estado <em>e</em> devolver um valor de consulta relevante — não é proibido, mas dificulta prever o que uma chamada faz só pelo nome.</p>
+
       <pre class="code"><span class="kw">public class</span> <span class="cls">ContaBancaria</span> {
     <span class="kw">double</span> saldo;
 

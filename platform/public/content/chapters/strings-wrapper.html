@@ -5,6 +5,18 @@
       <pre class="code">String nome = <span class="str">"  Ada Lovelace  "</span>;
 String normalizado = nome.trim().toLowerCase();
 <span class="kw">boolean</span> contemAda = normalizado.contains(<span class="str">"ada"</span>);</pre>
+      <h3>Métodos de consulta mais usados</h3>
+      <pre class="code">String texto = <span class="str">"Java, a linguagem"</span>;
+texto.length();                 <span class="com">// 17 -- quantidade de caracteres UTF-16</span>
+texto.isEmpty();                 <span class="com">// false -- length() == 0?</span>
+texto.isBlank();                 <span class="com">// false -- só espaços em branco (ou vazio)?</span>
+texto.charAt(<span class="num">0</span>);                  <span class="com">// 'J'</span>
+texto.indexOf(<span class="str">"linguagem"</span>);       <span class="com">// 8 -- posição onde começa, ou -1 se não encontrar</span>
+texto.contains(<span class="str">"Java"</span>);            <span class="com">// true</span>
+texto.startsWith(<span class="str">"Java"</span>);          <span class="com">// true</span>
+texto.endsWith(<span class="str">"agem"</span>);            <span class="com">// true</span>
+texto.substring(<span class="num">6</span>);                <span class="com">// "a linguagem" -- a partir do índice 6, até o fim</span></pre>
+      <div class="warn"><b><code>split</code> recebe uma expressão regular, não um texto literal.</b> <code>"1.2.3".split(".")</code> devolve um array <strong>vazio</strong>, porque <code>.</code> em regex significa "qualquer caractere" e casa com tudo — o resultado esperado exige <code>split("\\.")</code> (escapando o ponto) ou <code>Pattern.quote(".")</code>. Isso surpreende iniciantes justamente porque para textos comuns (sem caracteres especiais de regex) <code>split</code> se comporta como esperado, escondendo o problema até o primeiro delimitador especial.</div>
       <h3>Concatenação repetida</h3>
       <p>Em um laço grande, concatenar repetidamente pode criar muitos objetos temporários. Use <code>StringBuilder</code> quando estiver construindo texto incrementalmente.</p>
       <pre class="code">StringBuilder builder = <span class="kw">new</span> StringBuilder();
@@ -12,8 +24,30 @@ String normalizado = nome.trim().toLowerCase();
     builder.append(item).append(System.lineSeparator());
 }
 String resultado = builder.toString();</pre>
+      <p>Cada <code>+</code> entre <code>String</code>s dentro de um laço cria um novo objeto <code>String</code> a cada iteração, descartando o anterior — para poucas concatenações isso não importa, mas em um laço com centenas ou milhares de iterações o custo cresce de forma perceptível. <code>StringBuilder</code> mantém um buffer mutável interno e só produz o <code>String</code> final uma vez, no <code>toString()</code>.</p>
+      <h3>Text blocks (Java 15+)</h3>
+      <pre class="code">String json = <span class="str">"""
+    {
+      "nome": "Ada",
+      "ano": 1815
+    }"""</span>;
+<span class="com">// preserva quebras de linha e indentação relativa -- sem concatenar \n manualmente</span></pre>
       <h3>Wrappers e autoboxing</h3>
-      <p><code>Integer</code>, <code>Long</code>, <code>Double</code> e <code>Boolean</code> representam primitivos como objetos. São necessários em generics e podem ser <code>null</code>. A conversão automática entre <code>int</code> e <code>Integer</code> é conveniente, mas desempacotar <code>null</code> causa <code>NullPointerException</code>.</p>
+      <p><code>Integer</code>, <code>Long</code>, <code>Double</code> e <code>Boolean</code> representam primitivos como objetos. São necessários em generics (que não aceitam tipos primitivos diretamente) e podem ser <code>null</code> — algo que um <code>int</code> nunca pode. A conversão automática entre <code>int</code> e <code>Integer</code> chama-se <strong>autoboxing</strong> (empacotar) e <strong>unboxing</strong> (desempacotar).</p>
+      <pre class="code">Integer contador = <span class="num">0</span>;      <span class="com">// autoboxing: int literal empacotado em Integer</span>
+contador++;                <span class="com">// unboxing, incrementa, autoboxing de volta -- funciona, mas com custo</span>
+
+Integer valorNulo = <span class="kw">null</span>;
+<span class="kw">int</span> primitivo = valorNulo;  <span class="com">// NullPointerException no unboxing -- null não vira 0 magicamente</span></pre>
+      <div class="warn"><b>Desempacotar <code>null</code> lança <code>NullPointerException</code>, não zero.</b> É um dos bugs mais comuns ao migrar de <code>int</code> para <code>Integer</code> em campos opcionais (comum em entidades de banco, onde uma coluna pode ser <code>NULL</code>): o unboxing implícito (<code>Integer</code> usado onde um <code>int</code> é esperado, como numa comparação aritmética) falha silenciosamente até rodar com um valor ausente.</div>
+      <pre class="code"><span class="kw">int</span> valor = Integer.parseInt(<span class="str">"42"</span>);   <span class="com">// texto -> int primitivo</span>
+Integer objeto = Integer.valueOf(<span class="str">"42"</span>); <span class="com">// texto -> Integer (objeto)</span>
+Integer a = <span class="num">100</span>, b = <span class="num">100</span>;
+System.out.println(a == b); <span class="com">// true -- cache de Integer para valores entre -128 e 127</span>
+Integer c = <span class="num">200</span>, d = <span class="num">200</span>;
+System.out.println(c == d); <span class="com">// false -- fora do cache, são objetos distintos; use equals()</span></pre>
+      <p>A JVM mantém um cache de instâncias <code>Integer</code> para valores pequenos (-128 a 127) por otimização — isso faz <code>==</code> "parecer funcionar" para números pequenos e falhar de forma inconsistente para números maiores. A lição prática: nunca compare wrappers com <code>==</code>, sempre use <code>equals()</code> (ou <code>Objects.equals</code> se um dos lados pode ser <code>null</code>).</p>
       <div class="warn"><b>Dinheiro não é <code>double</code>.</b> Para valores monetários decimais exatos, estude <code>BigDecimal</code>, escala e modo de arredondamento.</div>
       <div class="exercise"><div class="exercise-head"><h4>Normalizador</h4><span class="exercise-tag f">Fundamento</span></div><p>Normalize nomes removendo espaços externos, recusando texto vazio e capitalizando cada palavra sem destruir acentos.</p></div>
+      <div class="exercise"><div class="exercise-head"><h4>split traiçoeiro</h4><span class="exercise-tag m">Diagnóstico</span></div><p>Rode <code>"1.2.3".split(".")</code> e imprima o tamanho do array resultante. Explique o resultado, depois corrija usando o escape correto para dividir por ponto literal.</p></div>
     </section>

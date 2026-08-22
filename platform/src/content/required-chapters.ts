@@ -377,9 +377,10 @@ const inputs: ChapterInput[] = [
     summary: 'Modele processos filhos como fronteiras externas: argumentos, streams, exit code, timeout e risco de shell.',
     why: 'Uma CLI Java muitas vezes precisa chamar outro programa: git, javac, uma ferramenta local ou um script controlado. Isso não é uma chamada de método. O processo filho tem ciclo de vida próprio, stdout, stderr, código de saída, bloqueios possíveis e riscos de injeção quando shell e texto livre entram na conversa.',
     prerequisites: ['json'], englishLevel: 1, curriculumOrder: 3,
-    objectives: ['Distinguir comando, argumento, shell e processo filho', 'Capturar stdout, stderr e exit code sem deadlock', 'Aplicar timeout e política de encerramento', 'Evitar command injection por concatenação de entrada'],
+    objectives: ['Distinguir comando, argumento, shell e processo filho', 'Conhecer os métodos centrais de ProcessBuilder e Process, não só um wrapper pronto', 'Capturar stdout, stderr e exit code sem deadlock, inclusive escrevendo em stdin', 'Aplicar timeout e política de encerramento', 'Evitar command injection por concatenação de entrada'],
     introducedConceptIds: ['processo-filho-contrato', 'stdout-stderr-exit-code', 'shell-quoting-injection', 'process-timeout-cancelamento'],
     usedConceptIds: ['stream-resource-lifecycle', 'cli-stdin-stdout', 'checked-unchecked-contrato'],
+    skipConceptQuizzes: true,
     analogyLimit: 'Processo filho lembra pedir trabalho a outro programa, mas ele não compartilha heap, exceções Java ou transação com o processo pai.',
     concepts: [
       ['Processo filho', 'ProcessBuilder inicia outro programa do sistema operacional. Ele recebe lista de argumentos, ambiente, diretório de trabalho e redirecionamentos; o resultado precisa ser observado por streams e exit code.'],
@@ -393,6 +394,33 @@ const inputs: ChapterInput[] = [
       description: 'O processo pai configura, inicia, consome saídas, espera término e transforma o resultado em contrato Java.',
       steps: ['montar lista comando + argumentos', 'definir diretório e ambiente mínimo', 'iniciar processo', 'drenar stdout e stderr', 'aguardar com timeout', 'ler exit code', 'devolver resultado tipado']
     }, {
+      id: 'process-api-builder-methods', type: 'table', authorship: 'authored', title: 'ProcessBuilder: os métodos que configuram o processo antes de iniciar',
+      headers: ['Método', 'O que faz'],
+      rows: [
+        ['command(List<String>) / command()', 'Define ou lê a lista comando+argumentos que será executada'],
+        ['directory(File)', 'Diretório de trabalho do filho -- sem isso, herda o diretório do processo pai'],
+        ['environment()', 'Map mutável das variáveis de ambiente -- por padrão já vem com cópia do ambiente do pai'],
+        ['redirectOutput/-Error/-Input(...)', 'Redireciona um stream para arquivo, para herdar do pai, ou mantém como pipe (padrão)'],
+        ['redirectErrorStream(true)', 'Funde stderr dentro do mesmo stream de stdout -- só uma leitura em vez de duas'],
+        ['inheritIO()', 'Atalho: os três streams passam direto para os do processo pai, sem você ler nada'],
+        ['start()', 'Inicia o processo de verdade -- tudo antes disso só configura, nada roda ainda']
+      ]
+    }, {
+      id: 'process-api-process-methods', type: 'table', authorship: 'authored', title: 'Process: os métodos que controlam e observam o processo depois de iniciado',
+      headers: ['Método', 'O que faz'],
+      rows: [
+        ['getOutputStream()', 'Stream para ESCREVER na entrada (stdin) do processo filho'],
+        ['getInputStream()', 'Stream para LER a saída padrão (stdout) do processo filho'],
+        ['getErrorStream()', 'Stream para LER a saída de erro (stderr) do processo filho'],
+        ['waitFor() / waitFor(timeout, unit)', 'Bloqueia até o processo terminar, ou até o timeout expirar'],
+        ['exitValue()', 'Devolve o exit code -- lança IllegalThreadStateException se o processo ainda não terminou'],
+        ['isAlive()', 'Verifica se o processo ainda está rodando, sem bloquear a thread atual'],
+        ['destroy() / destroyForcibly()', 'Pede encerramento normal (equivalente a SIGTERM) / força encerramento (SIGKILL)'],
+        ['pid()', 'Identificador do processo no sistema operacional (Java 9+, direto no Process)'],
+        ['onExit()', 'CompletableFuture<Process> que completa quando o processo termina -- reage sem bloquear'],
+        ['toHandle()', 'Devolve o ProcessHandle correspondente, para introspecção além do que Process oferece']
+      ]
+    }, {
       id: 'process-api-error', type: 'error-case', authorship: 'authored', title: 'O processo parece travado, mas o buffer encheu',
       scenario: 'Um comando escreve muito em stderr e o programa Java só chama waitFor sem consumir a saída.',
       symptom: 'O processo não termina ou parece congelado.',
@@ -401,8 +429,86 @@ const inputs: ChapterInput[] = [
       correction: 'Drenar os streams enquanto o processo executa ou redirecionar saída de forma controlada.',
       prevention: 'Todo wrapper de processo deve declarar política para stdout, stderr, tamanho máximo, timeout e exit code.'
     }, {
+      id: 'process-api-merge-streams', type: 'code', authorship: 'authored', language: 'java', caption: 'Correção mais simples: fundir stderr em stdout com redirectErrorStream(true)',
+      source: 'ProcessBuilder builder = new ProcessBuilder(command)\n    .redirectErrorStream(true); // stderr passa a sair pelo MESMO stream de stdout\nProcess process = builder.start();\n\n// uma leitura só resolve -- não existe mais um segundo stream para esquecer de drenar\nString saida = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);\nint exitCode = process.waitFor();',
+      explanation: ['`redirectErrorStream(true)` combina stdout e stderr num único stream, acessível só por `getInputStream()` -- elimina de vez o risco de esquecer de drenar um dos dois.', 'É a correção certa quando você não precisa distinguir "saída normal" de "diagnóstico" separadamente, só precisa capturar tudo o que o processo produziu.'],
+      commonMistakes: ['Usar essa opção quando o chamador realmente precisa diferenciar stdout de stderr (ex.: para decidir severidade) -- nesse caso, drene os dois separadamente em paralelo (próximo exemplo).']
+    }, {
+      id: 'process-api-drain-parallel', type: 'code', authorship: 'authored', language: 'java', caption: 'Quando stdout e stderr precisam continuar separados: drenar os dois em paralelo',
+      source: 'ExecutorService pool = Executors.newFixedThreadPool(2);\nProcess process = new ProcessBuilder(command).start();\ntry {\n    Future<String> stdout = pool.submit(() ->\n        new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8));\n    Future<String> stderr = pool.submit(() ->\n        new String(process.getErrorStream().readAllBytes(), StandardCharsets.UTF_8));\n    // as duas threads leem enquanto o processo ainda roda -- nenhum dos dois\n    // streams fica parado esperando alguém ler enquanto o outro enche o buffer.\n    int exitCode = process.waitFor();\n    return new ProcessResult(exitCode, stdout.get(), stderr.get());\n} finally {\n    pool.shutdown();\n}',
+      explanation: ['Ler stdout e stderr em threads separadas, ENQUANTO o processo ainda está rodando, é a correção real do deadlock descrito no caso de erro acima -- não existe um jeito seguro de ler os dois sequencialmente sem esse risco.', '`readAllBytes()` bloqueia a thread até o stream fechar (o processo terminar) -- por isso cada leitura precisa da própria thread, não pode rodar tudo na thread principal.'],
+      commonMistakes: ['Chamar `process.waitFor()` antes de começar a ler os streams -- é exatamente essa ordem que causa o deadlock.', 'Ler stdout até o fim e só depois começar a ler stderr -- se stderr encher o buffer nesse meio-tempo, o processo trava esperando você ler.']
+    }, {
       id: 'process-api-security', type: 'callout', authorship: 'authored', tone: 'security', title: 'Command injection começa como conveniência',
       body: 'Montar "sh -c " + textoDoUsuario permite que caracteres do shell mudem o comando executado. Para comandos conhecidos, passe cada argumento como item separado e valide allowlist de executáveis/opções.'
+    }, {
+      id: 'process-api-environment-directory', type: 'code', authorship: 'authored', language: 'java', caption: 'Ambiente e diretório de trabalho explícitos, não implícitos',
+      source: 'ProcessBuilder builder = new ProcessBuilder("git", "status");\nbuilder.directory(repositorioLocal.toFile());\n\n// Por padrão o processo filho herda TODAS as variáveis de ambiente do pai,\n// inclusive segredos (tokens, senhas em env vars). Filtre explicitamente:\nMap<String, String> ambiente = builder.environment();\nambiente.clear();\nambiente.put("PATH", System.getenv("PATH"));\nambiente.put("LC_ALL", "C");',
+      explanation: ['`directory(...)` define em qual diretório o processo filho roda; sem isso, ele herda o diretório de trabalho do processo pai, o que é surpreendente em uma CLI que aceita caminhos relativos.', '`environment()` devolve o Map mutável que o processo filho vai receber; por padrão ele já vem preenchido com uma cópia do ambiente do pai — herança total, não seleção.', 'Limpar o Map e repovoar só com o necessário evita vazar segredos do processo pai (tokens de API, senhas em variável de ambiente) para um processo filho que não precisa deles.'],
+      commonMistakes: ['Assumir que o processo filho começa com ambiente vazio por padrão — o contrário é verdade.', 'Nunca chamar `directory(...)` e descobrir em produção que o comando rodou na pasta errada.']
+    }, {
+      id: 'process-api-inherit-io', type: 'code', authorship: 'authored', language: 'java', caption: 'inheritIO(): quando você só quer repassar tudo para o terminal atual',
+      source: '// para uma ferramenta de desenvolvimento local -- não uma API server-side --\n// às vezes você só quer que o filho use o MESMO console do processo pai:\nProcess process = new ProcessBuilder("mvn", "test").inheritIO().start();\nint exitCode = process.waitFor();\n// stdout/stderr do Maven aparecem direto no seu terminal, sem você ler nada --\n// mas também sem nenhuma captura programática do que foi impresso.',
+      explanation: ['`inheritIO()` é um atalho para `redirectInput/-Output/-Error(Redirect.INHERIT)` nos três streams de uma vez -- o filho passa a compartilhar stdin/stdout/stderr do processo pai diretamente.', 'Só faz sentido quando ninguém precisa ler a saída programaticamente depois (uma ferramenta CLI interativa, por exemplo) -- para um wrapper que devolve `ProcessResult`, volte para os redirects explícitos.'],
+      commonMistakes: ['Usar inheritIO() numa API/servidor, onde não existe "terminal do usuário" nenhum para herdar -- a saída simplesmente se perde nos streams do processo servidor.']
+    }, {
+      id: 'process-api-stdin-limit', type: 'callout', authorship: 'authored', tone: 'warning', title: 'O wrapper mínimo não escreve em stdin do processo filho',
+      body: 'O `runCommand` mostrado só lê stdout e stderr — ele nunca escreve em `process.getOutputStream()`. Isso é intencional para comandos que não esperam entrada (git, javac, ferramentas de linha única), mas significa que um comando que aguarda entrada interativa vai bloquear até o timeout estourar, sem nenhuma mensagem clara do motivo. Quando o comando precisa de entrada, escreva no `OutputStream` do processo e feche-o (`close()`) para sinalizar fim de entrada (EOF) ao filho — sem esse `close()`, ele pode ficar esperando indefinidamente por mais dados.'
+    }, {
+      id: 'process-api-write-stdin', type: 'code', authorship: 'authored', language: 'java', caption: 'Escrevendo em stdin e sinalizando EOF com close()',
+      source: 'Process process = new ProcessBuilder("sort").start();\ntry (OutputStream stdin = process.getOutputStream()) {\n    stdin.write("banana\\nmaca\\nabacaxi\\n".getBytes(StandardCharsets.UTF_8));\n} // o try-with-resources fecha o stream ao sair do bloco -- é ESSE close()\n  // que sinaliza EOF ao processo filho; sem ele, "sort" nunca sabe que\n  // acabou de receber entrada e fica esperando mais linhas indefinidamente.\n\nString ordenado = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);\nprocess.waitFor();',
+      explanation: ['`getOutputStream()` devolve o stream que ESCREVE na entrada padrão do processo filho -- o nome é do ponto de vista do processo pai, por isso parece invertido à primeira vista.', '`sort` é um exemplo didático perfeito: ele só consegue ordenar depois de ver TODA a entrada, e só sabe que a entrada terminou quando o stream fecha (EOF) -- exatamente o comportamento que `close()` sinaliza.'],
+      commonMistakes: ['Escrever em stdin e esperar o processo responder sem nunca fechar o stream -- o processo trava esperando mais dados que nunca chegam.', 'Chamar `process.getInputStream().readAllBytes()` antes de fechar o stdin -- para um comando como `sort`, isso trava, porque ele não produziu saída nenhuma ainda.']
+    }, {
+      id: 'process-api-handle', type: 'callout', authorship: 'authored', tone: 'note', title: 'ProcessHandle: introspecção sem depender do objeto Process original',
+      body: '`ProcessHandle` (desde o Java 9, plenamente válido na baseline deste curso) complementa `Process` com introspecção: `process.pid()` devolve o identificador do sistema operacional, `process.info()` expõe comando, argumentos e instante de início quando o sistema operacional permite, e `process.onExit()` devolve um `CompletableFuture<Process>` que completa quando o processo termina — útil para reagir ao término sem bloquear em `waitFor()`. `ProcessHandle.allProcesses()` ainda lista processos do sistema mesmo que não tenham sido iniciados pela sua JVM, o que é diferente de qualquer coisa que `Process` sozinho oferece.'
+    }, {
+      id: 'process-api-handle-code', type: 'code', authorship: 'authored', language: 'java', caption: 'ProcessHandle na prática: introspecção e reação assíncrona ao término',
+      source: 'Process process = new ProcessBuilder("sleep", "5").start();\n\nlong pid = process.pid(); // Java 9+, direto no Process -- nao precisa de ProcessHandle so para isso\nProcessHandle handle = process.toHandle();\nhandle.info().command().ifPresent(cmd -> log.info("comando: {}", cmd));\nhandle.info().startInstant().ifPresent(inicio -> log.info("iniciado em: {}", inicio));\n\nprocess.onExit().thenAccept(finalizado ->\n    log.info("processo {} terminou com exit code {}", finalizado.pid(), finalizado.exitValue())\n); // nao bloqueia a thread atual -- reage quando o processo terminar, de forma assincrona',
+      explanation: ['`process.pid()` já resolve a maioria dos casos de "qual é o identificador desse processo" sem precisar de `ProcessHandle` -- ele existe direto em `Process` desde o Java 9.', '`handle.info()` devolve um `ProcessHandle.Info` com campos opcionais (`Optional`) -- o sistema operacional pode não expor comando/instante de início dependendo da plataforma e permissões, por isso os getters devolvem `Optional`, não o valor direto.', '`onExit()` devolve um `CompletableFuture<Process>` -- permite reagir ao término de vários processos concorrentemente, sem dedicar uma thread bloqueada em `waitFor()` para cada um.'],
+      commonMistakes: ['Chamar `waitFor()` quando `onExit().thenAccept(...)` resolveria sem bloquear nenhuma thread -- útil especialmente ao gerenciar vários processos filhos ao mesmo tempo.']
+    }, {
+      id: 'process-api-exercise-stdin', type: 'exercise', authorship: 'authored', title: 'Ordenando uma lista via stdin, com reação assíncrona ao término',
+      prompt: 'Escreva um método que inicia o processo `sort` (disponível em Linux/macOS; em Windows, adapte usando WSL ou substitua por outro filtro simples de texto), escreve uma lista de nomes na entrada padrão (um por linha), fecha o stdin corretamente para sinalizar EOF, lê a saída já ordenada, e usa `process.onExit()` para logar quando o processo terminou e qual foi o exit code -- sem bloquear a thread principal em `waitFor()` para isso.',
+      difficulty: 'intermediate',
+      criteria: ['A escrita em stdin usa try-with-resources ou close() explícito -- o processo nunca fica esperando entrada indefinidamente.', 'A leitura de stdout só acontece depois (ou em paralelo correto) do fechamento do stdin, nunca antes.', 'onExit() é usado para logar o término, em vez de um segundo waitFor() bloqueante.', 'O método funciona tanto para uma lista pequena quanto para uma lista grande o suficiente para testar se não há deadlock de buffer.']
+    }, {
+      id: 'process-api-exit-code-convention', type: 'table', authorship: 'authored', title: 'Convenção comum de exit code (não é garantia universal)',
+      headers: ['Código', 'Significado usual'],
+      rows: [['0', 'sucesso'], ['1', 'erro genérico da aplicação'], ['126', 'comando encontrado mas não executável (permissão)'], ['127', 'comando não encontrado'], ['130', 'processo encerrado por sinal (Ctrl+C / SIGINT)']],
+      caption: 'Convenção herdada de shells POSIX, não uma garantia da JVM: o programa chamado pode definir seus próprios códigos — a documentação dele é a fonte da verdade.'
+    }, {
+      id: 'process-api-concept-check-0', type: 'quiz', authorship: 'authored', conceptId: 'processo-filho',
+      prompt: 'Sua CLI Java precisa chamar `javac` para compilar um arquivo enviado pelo usuário. Qual abordagem é correta para modelar essa chamada?',
+      options: [
+        { id: 'process-api-concept-0-a', label: 'Tratar javac como processo filho: montar ProcessBuilder com lista de argumentos, aguardar o término e ler stdout/stderr/exit code, sem esperar que falhas apareçam como exceção Java.', correct: true, explanation: 'É exatamente o contrato do processo filho: ele tem ciclo de vida próprio e comunica resultado por stdout/stderr/exit code, não por exceções Java.' },
+        { id: 'process-api-concept-0-b', label: 'Chamar um método que executa javac e lança automaticamente uma RuntimeException se o exit code for diferente de zero, pois o processo compartilha o contrato de exceções da JVM.', correct: false, explanation: 'Processo filho não compartilha heap nem contrato de exceções com a JVM pai; exit code diferente de zero não vira exceção sozinho.' },
+        { id: 'process-api-concept-0-c', label: 'Usar reflection para carregar a classe interna do compilador dentro do próprio processo Java, evitando qualquer processo filho.', correct: false, explanation: 'Isso muda completamente o problema (embutir o compilador) e não é o que o capítulo ensina — o objetivo é chamar um programa externo com segurança.' }
+      ]
+    }, {
+      id: 'process-api-concept-check-1', type: 'quiz', authorship: 'authored', conceptId: 'stdout-stderr-e-exit-code',
+      prompt: 'Um comando externo grava um aviso em stderr mas retorna exit code 0. O que isso significa no contrato de processos?',
+      options: [
+        { id: 'process-api-concept-1-a', label: 'Não é necessariamente falha: cada programa define seu próprio significado para stderr e exit code; o wrapper deve preservar os dois, não interpretar automaticamente.', correct: true, explanation: 'stdout, stderr e exit code comunicam por convenção do programa chamado — nunca equivalem automaticamente a sucesso ou exceção Java.' },
+        { id: 'process-api-concept-1-b', label: 'É sempre falha, porque qualquer escrita em stderr equivale a lançar uma exceção unchecked em Java.', correct: false, explanation: 'stderr é só um canal de diagnóstico do processo filho; ele não tem nenhuma relação automática com exceções da JVM.' },
+        { id: 'process-api-concept-1-c', label: 'Pode ser ignorado com segurança, já que só o exit code importa e stderr nunca carrega informação relevante.', correct: false, explanation: 'Descartar stderr sem consumir pode inclusive causar o deadlock de buffer cheio descrito no caso de erro do capítulo.' }
+      ]
+    }, {
+      id: 'process-api-concept-check-2', type: 'quiz', authorship: 'authored', conceptId: 'shell-e-argumentos',
+      prompt: 'Você precisa executar `git log --oneline -n <quantidade>`, onde `<quantidade>` vem de um campo preenchido pelo usuário. Qual construção é segura?',
+      options: [
+        { id: 'process-api-concept-2-a', label: 'new ProcessBuilder("git", "log", "--oneline", "-n", quantidade) — cada argumento como item separado da lista, sem shell.', correct: true, explanation: 'A lista evita que o shell reinterprete caracteres da entrada do usuário; é exatamente a defesa contra command injection do capítulo.' },
+        { id: 'process-api-concept-2-b', label: 'new ProcessBuilder("sh", "-c", "git log --oneline -n " + quantidade) — mais simples, porque delega o parsing ao shell.', correct: false, explanation: 'Concatenar entrada do usuário dentro de um comando de shell é exatamente o padrão de command injection que o capítulo alerta para evitar.' },
+        { id: 'process-api-concept-2-c', label: 'String.format("git log --oneline -n %s", quantidade) passado como um único argumento do ProcessBuilder.', correct: false, explanation: 'Um único argumento com espaços não é reinterpretado como múltiplos argumentos pelo processo filho; o comando provavelmente falha ou se comporta de forma inesperada.' }
+      ]
+    }, {
+      id: 'process-api-concept-check-3', type: 'quiz', authorship: 'authored', conceptId: 'timeout-e-encerramento',
+      prompt: 'Um processo filho está rodando muito além do esperado e a thread principal está bloqueada em waitFor(). Qual sequência reflete a política correta descrita no capítulo?',
+      options: [
+        { id: 'process-api-concept-3-a', label: 'Chamar waitFor(timeout, unit); se não terminou, chamar destroy(); se ainda não terminou depois de um prazo curto, chamar destroyForcibly() e registrar o encerramento como falha.', correct: true, explanation: 'É a política de timeout e encerramento gradual descrita no capítulo: esperar com prazo, pedir encerramento normal e só então forçar.' },
+        { id: 'process-api-concept-3-b', label: 'Deixar o processo rodando indefinidamente, pois interromper um processo filho sempre corrompe seus arquivos de saída.', correct: false, explanation: 'Sem timeout, um processo travado bloqueia a aplicação indefinidamente; o capítulo exige uma deadline explícita.' },
+        { id: 'process-api-concept-3-c', label: 'Chamar System.exit() na JVM pai imediatamente, o que encerra o processo filho automaticamente e de forma segura em qualquer sistema operacional.', correct: false, explanation: 'Encerrar a própria JVM não é uma política de timeout do processo filho e não garante limpeza correta dos recursos dele.' }
+      ]
     }],
     code: ['Wrapper mínimo com argumentos separados, arquivos temporários e timeout', 'record ProcessResult(int exitCode, String stdout, String stderr) {}\n\nstatic ProcessResult runCommand(List<String> command, Duration timeout) throws IOException, InterruptedException {\n    Path stdoutFile = Files.createTempFile("stdout-", ".txt");\n    Path stderrFile = Files.createTempFile("stderr-", ".txt");\n    try {\n        Process process = new ProcessBuilder(command)\n            .redirectOutput(stdoutFile.toFile())\n            .redirectError(stderrFile.toFile())\n            .start();\n        boolean finished = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);\n        if (!finished) {\n            process.destroy();\n            if (!process.waitFor(200, TimeUnit.MILLISECONDS)) process.destroyForcibly();\n            throw new IllegalStateException("process timeout: " + command.get(0));\n        }\n        return new ProcessResult(\n            process.exitValue(),\n            Files.readString(stdoutFile, StandardCharsets.UTF_8),\n            Files.readString(stderrFile, StandardCharsets.UTF_8));\n    } finally {\n        Files.deleteIfExists(stdoutFile);\n        Files.deleteIfExists(stderrFile);\n    }\n}'],
     codeExplanation: { explanation: ['A lista command separa executável e argumentos sem pedir parsing ao shell.', 'Redirecionar stdout e stderr para arquivos evita depender de buffers de pipe para saídas maiores.', 'waitFor com timeout impede espera infinita e define política de encerramento antes de devolver exit code e diagnóstico.'], commonMistakes: ['Concatenar entrada de usuário em sh -c', 'Ignorar stderr e exit code', 'Esquecer cleanup dos arquivos temporários'] },
@@ -421,6 +527,7 @@ const inputs: ChapterInput[] = [
     objectives: ['Definir uma gramática pequena de comandos', 'Separar parsing, autorização, execução e relatório', 'Executar somente ações permitidas e reproduzíveis', 'Registrar evidência sem segredos nem caminho local'],
     introducedConceptIds: ['zenith-comando-deterministico'],
     usedConceptIds: ['processo-filho-contrato', 'stdout-stderr-exit-code', 'shell-quoting-injection', 'process-timeout-cancelamento', 'importacao-tolerante', 'relatorio-dados-deterministico'],
+    skipConceptQuizzes: true,
     analogyLimit: 'Chamar de assistente ajuda a dar forma ao projeto, mas nesta fase ele é uma CLI determinística, não IA, chatbot, agente autônomo ou executor irrestrito.',
     concepts: [
       ['Comandos permitidos', 'Cada comando tem nome, argumentos, validação e ação definida em código. Texto desconhecido falha com mensagem útil em vez de tentar adivinhar intenção.'],
@@ -450,6 +557,43 @@ const inputs: ChapterInput[] = [
         { requirement: 'Processo externo permitido', conceptIds: ['processo-filho-contrato', 'stdout-stderr-exit-code', 'process-timeout-cancelamento'], chapterIds: ['process-api-cli'], expectedEvidence: 'Teste com comando permitido, comando negado e processo lento.' },
         { requirement: 'Segurança de comandos', conceptIds: ['shell-quoting-injection'], chapterIds: ['process-api-cli'], expectedEvidence: 'Nenhum comando usa sh -c com entrada do usuário; allowlist revisável.' }
       ]
+    }, {
+      id: 'zenith-parser-example', type: 'code', authorship: 'authored', language: 'java', caption: 'Parser mínimo: texto vira comando tipado, ou falha antes de executar',
+      source: 'static ZenithCommand parse(String[] args) {\n    if (args.length == 0) {\n        throw new IllegalArgumentException("comando ausente: use validate-orders, sales-report ou tool-version");\n    }\n    return switch (args[0]) {\n        case "validate-orders" -> {\n            requireArgs(args, 3, "validate-orders <entrada.csv> <saida.json>");\n            yield new ValidateOrders(Path.of(args[1]), Path.of(args[2]));\n        }\n        case "sales-report" -> {\n            requireArgs(args, 3, "sales-report <entrada.csv> <saida.json>");\n            yield new SalesReport(Path.of(args[1]), Path.of(args[2]));\n        }\n        case "tool-version" -> {\n            requireArgs(args, 2, "tool-version <ferramenta>");\n            yield new ToolVersion(args[1]);\n        }\n        default -> throw new IllegalArgumentException("comando desconhecido: " + args[0]);\n    };\n}\n\nprivate static void requireArgs(String[] args, int esperado, String uso) {\n    if (args.length != esperado) {\n        throw new IllegalArgumentException("uso incorreto, esperado: " + uso);\n    }\n}',
+      explanation: ['O switch sobre args[0] só reconhece os três comandos definidos; qualquer outro texto cai no default e falha antes de tocar filesystem ou processo — é a camada Parser do modelo mental, provada em código.', 'requireArgs valida a quantidade de argumentos antes de construir o record, então um comando bem-formado nunca chega ao executor com dados incompletos.', 'O parser nunca decide política de allowlist nem executa nada — ele só transforma texto em um ZenithCommand tipado ou lança exceção, preservando a separação de camadas do pipeline.'],
+      commonMistakes: ['Deixar o parser chamar o executor diretamente, misturando camadas.', 'Aceitar qualquer string desconhecida como "melhor esforço" em vez de falhar explicitamente.', 'Validar argumentos depois de já ter iniciado alguma ação.']
+    }, {
+      id: 'zenith-concept-check-0', type: 'quiz', authorship: 'authored', conceptId: 'comandos-permitidos',
+      prompt: 'O usuário digita `zenith exportar-tudo`, um comando que não existe na lista implementada. Qual deve ser o comportamento do Zenith v0?',
+      options: [
+        { id: 'zenith-concept-0-a', label: 'Falhar imediatamente com mensagem clara de comando desconhecido, sem tentar adivinhar a intenção nem executar nada.', correct: true, explanation: 'Comandos permitidos têm nome, argumentos e ação definidos em código; texto desconhecido deve falhar com mensagem útil, não ser interpretado.' },
+        { id: 'zenith-concept-0-b', label: 'Tentar interpretar o texto como uma variação de um comando existente e executar o mais parecido.', correct: false, explanation: 'Adivinhar intenção contraria o princípio central do Zenith v0: previsibilidade acima de esperteza.' },
+        { id: 'zenith-concept-0-c', label: 'Executar o texto digitado diretamente como um comando de shell, já que veio do usuário confiável do terminal.', correct: false, explanation: 'Zenith v0 nunca executa texto livre como shell — todo comando passa por parsing e allowlist antes de qualquer execução.' }
+      ]
+    }, {
+      id: 'zenith-concept-check-1', type: 'quiz', authorship: 'authored', conceptId: 'camadas-do-zenith',
+      prompt: 'Uma regra decide se o usuário pode rodar `tool-version` para uma ferramenta específica. Em qual camada do pipeline essa decisão deve morar?',
+      options: [
+        { id: 'zenith-concept-1-a', label: 'Na policy: ela aplica a allowlist antes de qualquer execução; o executor só roda o que a policy já autorizou.', correct: true, explanation: 'No pipeline parser → policy → executor → reporter, autorização é responsabilidade exclusiva da policy.' },
+        { id: 'zenith-concept-1-b', label: 'No parser, já que ele é a primeira camada a tocar a entrada do usuário.', correct: false, explanation: 'O parser só reconhece e tipa o comando; ele não acessa filesystem nem decide autorização.' },
+        { id: 'zenith-concept-1-c', label: 'No reporter, porque é ele quem decide o que aparece na saída final para o usuário.', correct: false, explanation: 'O reporter só escreve saída e evidência depois que execução (já autorizada) terminou; ele não altera domínio nem decide política.' }
+      ]
+    }, {
+      id: 'zenith-concept-check-2', type: 'quiz', authorship: 'authored', conceptId: 'evidencia-reproduzivel',
+      prompt: 'Um teste do comando `sales-report` depende de baixar dados de um servidor remoto no momento da execução. Isso é compatível com o princípio de evidência reproduzível do Zenith v0?',
+      options: [
+        { id: 'zenith-concept-2-a', label: 'Não: evidência reproduzível exige fixtures locais e determinismo; dependência de rede no teste quebra a reprodutibilidade e o funcionamento offline.', correct: true, explanation: 'Fixtures, arquivos de exemplo, exit codes e relatórios devem permitir repetir o mesmo cenário sem internet, segredo ou estado escondido.' },
+        { id: 'zenith-concept-2-b', label: 'Sim, desde que o servidor remoto esteja no ar durante o CI.', correct: false, explanation: 'Depender de disponibilidade externa é exatamente o que quebra reprodutibilidade determinística.' },
+        { id: 'zenith-concept-2-c', label: 'Sim, porque qualquer chamada de rede é automaticamente determinística se usar HTTPS.', correct: false, explanation: 'HTTPS garante transporte seguro, não determinismo de conteúdo ou disponibilidade.' }
+      ]
+    }, {
+      id: 'zenith-concept-check-3', type: 'quiz', authorship: 'authored', conceptId: 'limite-consciente',
+      prompt: 'Alguém sugere adicionar ao Zenith v0 um comando `cleanup` que apaga arquivos temporários fora da pasta do projeto para "liberar espaço". Isso está de acordo com os limites conscientes definidos?',
+      options: [
+        { id: 'zenith-concept-3-a', label: 'Não: o escopo do v0 exclui explicitamente modificar ou apagar arquivos fora da pasta do projeto; esse comando exigiria escopo restrito e revisão explícita antes de existir.', correct: true, explanation: 'O limite consciente do capítulo é explícito: sem shell livre, sem rede, sem deletar arquivos e sem modificar diretórios fora da pasta do projeto.' },
+        { id: 'zenith-concept-3-b', label: 'Sim, contanto que o comando peça confirmação do usuário antes de apagar.', correct: false, explanation: 'Confirmação não substitui o limite de escopo definido; o comando ainda opera fora da pasta do projeto.' },
+        { id: 'zenith-concept-3-c', label: 'Sim, já que comandos de limpeza são sempre seguros por natureza.', correct: false, explanation: 'Apagar arquivos fora do escopo controlado é justamente o tipo de ação que o design do Zenith v0 evita por padrão.' }
+      ]
     }],
     code: ['Dispatcher pequeno, sem texto livre', 'sealed interface ZenithCommand permits ValidateOrders, SalesReport, ToolVersion {}\nrecord ValidateOrders(Path input, Path output) implements ZenithCommand {}\nrecord SalesReport(Path input, Path output) implements ZenithCommand {}\nrecord ToolVersion(String toolName) implements ZenithCommand {}\n\nstatic int execute(ZenithCommand command) {\n    return switch (command) {\n        case ValidateOrders task -> validateOrders(task.input(), task.output());\n        case SalesReport task -> generateSalesReport(task.input(), task.output());\n        case ToolVersion task -> printAllowedToolVersion(task.toolName());\n    };\n}'],
     codeExplanation: { explanation: ['A sealed interface limita os tipos de comando que o dispatcher aceita.', 'Cada record carrega argumentos já parseados e tipados.', 'O switch exaustivo impede que um comando novo seja esquecido silenciosamente.'], commonMistakes: ['Executar a linha digitada diretamente', 'Misturar parsing e regra dentro do switch', 'Adicionar comando que modifica arquivos fora do escopo sem política'] },
@@ -466,6 +610,37 @@ const inputs: ChapterInput[] = [
     prerequisites: ['jdbc', 'mini-financas-jdbc'], englishLevel: 1, curriculumOrder: 6,
     introducedConceptIds: [],
     usedConceptIds: ['jdbc-driver-connection', 'preparedstatement-parametro', 'resultset-mapeamento', 'jdbc-transacao-rollback', 'pool-conexao-backpressure', 'mvcc-isolamento-lock'],
+    skipConceptQuizzes: true,
+    semanticBlocks: [
+      { id: 'jdbc-under-the-hood-quiz-conexao', type: 'quiz', authorship: 'authored', conceptId: 'driver-e-conexao',
+        prompt: 'Sob alta carga, seu endpoint abre uma Connection nova a cada requisição e a fecha ao final do método. O que isso causa na prática?',
+        options: [
+          { id: 'jdbc-under-the-hood-quiz-conexao-a', label: 'Overhead de handshake/autenticação repetido a cada request, e risco de esgotar o limite de conexões do banco sob concorrência.', correct: true, explanation: 'Connection é uma sessão cara; sem pool, cada abertura paga esse custo e compete pelo limite de conexões do servidor.' },
+          { id: 'jdbc-under-the-hood-quiz-conexao-b', label: 'Nenhum problema — o driver JDBC já reutiliza conexões internamente sem configuração.', correct: false, explanation: 'O driver não faz pooling sozinho; isso é responsabilidade de um DataSource com pool (ex.: HikariCP).' },
+          { id: 'jdbc-under-the-hood-quiz-conexao-c', label: 'O try-with-resources já resolve o problema de desempenho automaticamente.', correct: false, explanation: 'try-with-resources garante fechamento correto, mas não evita o custo de abrir uma conexão nova a cada vez.' }
+        ] },
+      { id: 'jdbc-under-the-hood-quiz-prepared', type: 'quiz', authorship: 'authored', conceptId: 'preparedstatement',
+        prompt: 'Um endpoint de relatórios deixa o usuário escolher a coluna de ordenação e monta: stmt.setString(1, coluna) dentro de "ORDER BY ?". O que acontece ao executar?',
+        options: [
+          { id: 'jdbc-under-the-hood-quiz-prepared-a', label: 'O banco rejeita ou trata o parâmetro como valor literal, não como identificador de coluna — a ordenação dinâmica por parâmetro não funciona assim.', correct: true, explanation: 'Placeholders de PreparedStatement substituem apenas valores; nomes de coluna/tabela precisam vir de uma allowlist validada pela aplicação, nunca de um parâmetro.' },
+          { id: 'jdbc-under-the-hood-quiz-prepared-b', label: 'Funciona normalmente, PreparedStatement interpreta qualquer texto como parte da estrutura SQL.', correct: false, explanation: 'É exatamente o oposto: PreparedStatement existe para impedir que um valor seja interpretado como estrutura SQL.' },
+          { id: 'jdbc-under-the-hood-quiz-prepared-c', label: 'É equivalente a usar Statement com concatenação, então tanto faz.', correct: false, explanation: 'Não é equivalente — aqui o parâmetro simplesmente não cumpre o papel de identificador dinâmico; a diferença de segurança contra injeção em valores continua existindo.' }
+        ] },
+      { id: 'jdbc-under-the-hood-quiz-resultset', type: 'quiz', authorship: 'authored', conceptId: 'resultset-e-ownership',
+        prompt: 'Um método buscarTodos() retorna o ResultSet diretamente para a camada de serviço processar linha a linha, fora do try-with-resources que o abriu.',
+        options: [
+          { id: 'jdbc-under-the-hood-quiz-resultset-a', label: 'O Statement/Connection por trás do ResultSet ficam presos indefinidamente, arriscando esgotar o pool — o certo é mapear para uma lista de objetos antes de fechar.', correct: true, explanation: 'ResultSet é um cursor dependente do statement/conexão que o originou; expô-lo além do escopo de fechamento prolonga um recurso escasso sem contrato.' },
+          { id: 'jdbc-under-the-hood-quiz-resultset-b', label: 'Não há problema, ResultSet é independente da conexão que o criou.', correct: false, explanation: 'ResultSet é diretamente dependente do Statement e da Connection — fechá-los invalida o cursor.' },
+          { id: 'jdbc-under-the-hood-quiz-resultset-c', label: 'O Garbage Collector fecha o ResultSet automaticamente assim que ele sai de uso.', correct: false, explanation: 'Recursos JDBC (conexões de rede, cursores no servidor) não são liberados por GC — exigem fechamento explícito.' }
+        ] },
+      { id: 'jdbc-under-the-hood-quiz-transacao', type: 'quiz', authorship: 'authored', conceptId: 'transacao-e-erro',
+        prompt: 'Com autoCommit=true (o padrão), um método executa um UPDATE de débito e, em seguida, um UPDATE de crédito; o segundo lança SQLException.',
+        options: [
+          { id: 'jdbc-under-the-hood-quiz-transacao-a', label: 'O débito já foi confirmado permanentemente antes do erro — um rollback agora não desfaz mais nada; era preciso autoCommit(false) antes das duas operações.', correct: true, explanation: 'Com autoCommit=true, cada instrução SQL confirma sozinha, como se fosse sua própria transação — não existe uma unidade maior para reverter depois.' },
+          { id: 'jdbc-under-the-hood-quiz-transacao-b', label: 'Basta chamar connection.rollback() depois de capturar a exceção que os dois UPDATEs são desfeitos.', correct: false, explanation: 'rollback() só desfaz trabalho de uma transação ainda aberta; com autoCommit=true não há transação aberta abrangendo os dois UPDATEs.' },
+          { id: 'jdbc-under-the-hood-quiz-transacao-c', label: 'JDBC detecta automaticamente que as duas operações deveriam ser atômicas e as agrupa.', correct: false, explanation: 'JDBC não infere atomicidade — ela precisa ser declarada explicitamente com autoCommit(false)/commit()/rollback().' }
+        ] }
+    ],
     concepts: [
       ['Driver e conexão', 'O driver traduz a API JDBC para o protocolo do banco. Connection representa uma sessão cara e limitada; pools emprestam e devolvem conexões, não criam uma por query.'],
       ['PreparedStatement', 'Separa SQL de valores, reduz injeção e permite conversão tipada. Nomes de tabela não são parâmetros e exigem allowlist quando variáveis.'],
@@ -486,6 +661,37 @@ const inputs: ChapterInput[] = [
     prerequisites: ['http'], englishLevel: 1, curriculumOrder: 1,
     introducedConceptIds: ['curl-inspecao-http'],
     usedConceptIds: ['http-mensagem-recurso', 'http-metodo-semantica', 'http-status-classe', 'http-idempotencia-seguranca', 'http-header-body-negociacao'],
+    skipConceptQuizzes: true,
+    semanticBlocks: [
+      { id: 'http-wire-contract-quiz-request', type: 'quiz', authorship: 'authored', conceptId: 'request',
+        prompt: 'Um cliente chama GET /relatorios/exportar, que no servidor dispara o envio de um e-mail com o relatório em anexo a cada chamada.',
+        options: [
+          { id: 'http-wire-contract-quiz-request-a', label: 'Isso viola a semântica esperada de GET: o método é definido como seguro (sem efeito colateral relevante) e idempotente — disparar um efeito observável a cada chamada quebra essa expectativa para caches, retries e prefetch.', correct: true, explanation: 'GET deveria ser seguro/idempotente; um cliente, proxy ou ferramenta de prefetch pode repetir a chamada assumindo ausência de efeito colateral.' },
+          { id: 'http-wire-contract-quiz-request-b', label: 'Está correto, porque o body da resposta pode conter qualquer efeito desde que o status seja 200.', correct: false, explanation: 'O status de sucesso não legitima violar a semântica do método — GET não deveria ter efeito colateral relevante independentemente do status devolvido.' },
+          { id: 'http-wire-contract-quiz-request-c', label: 'Está correto, já que o target da URL já deixa claro que é uma ação de exportação.', correct: false, explanation: 'O nome do recurso na URL não muda o contrato do método HTTP escolhido — a ação de efeito colateral deveria usar POST.' }
+        ] },
+      { id: 'http-wire-contract-quiz-response', type: 'quiz', authorship: 'authored', conceptId: 'response',
+        prompt: 'Uma API devolve status 200 OK com um body {"erro": "saldo insuficiente"} para representar uma falha de regra de negócio.',
+        options: [
+          { id: 'http-wire-contract-quiz-response-a', label: 'O status deveria refletir a classe real do resultado (ex.: 4xx para erro do cliente/regra de negócio) — 200 com corpo de erro obriga todo cliente a inspecionar o body para saber se deu certo, quebrando convenções de cache, retry e monitoramento por status.', correct: true, explanation: 'Status comunica a classe do resultado antes mesmo de olhar o body; "sempre 200" esconde a falha de camadas que decidem só pelo código (proxies, métricas, retries automáticos).' },
+          { id: 'http-wire-contract-quiz-response-b', label: 'Está correto, porque o body sempre tem prioridade sobre o status para quem consome a API.', correct: false, explanation: 'Camadas intermediárias (cache, proxy, métricas) frequentemente decidem só pelo status, sem parsear o body — por isso o status precisa refletir a classe real do resultado.' },
+          { id: 'http-wire-contract-quiz-response-c', label: 'Está correto, desde que a documentação da API explique essa convenção.', correct: false, explanation: 'Documentar uma convenção que contraria a semântica HTTP não resolve o problema para ferramentas genéricas (proxies, caches, bibliotecas HTTP) que assumem o significado padrão dos status.' }
+        ] },
+      { id: 'http-wire-contract-quiz-idempotencia', type: 'quiz', authorship: 'authored', conceptId: 'metodos-e-idempotencia',
+        prompt: 'Um cliente envia PUT /contas/42 duas vezes seguidas (a segunda por timeout na primeira, sem confirmação de resposta). O servidor processa as duas.',
+        options: [
+          { id: 'http-wire-contract-quiz-idempotencia-a', label: 'Isso é seguro pela semântica de PUT: como é definido como idempotente, aplicar a mesma substituição completa duas vezes deve produzir o mesmo estado final.', correct: true, explanation: 'PUT é definido como idempotente — repetir a mesma requisição não deveria mudar o resultado final em relação a executá-la uma única vez.' },
+          { id: 'http-wire-contract-quiz-idempotencia-b', label: 'Isso é perigoso, porque PUT nunca deveria ser reenviado em caso de timeout.', correct: false, explanation: 'É justamente a idempotência de PUT que torna seguro reenviá-lo após um timeout sem confirmação — diferente de POST.' },
+          { id: 'http-wire-contract-quiz-idempotencia-c', label: 'Depende de o servidor implementar deduplicação explícita de requests, sem isso o reenvio é sempre inseguro.', correct: false, explanation: 'A garantia de idempotência de PUT decorre da própria semântica do método (substituição completa do recurso), não de uma deduplicação adicional.' }
+        ] },
+      { id: 'http-wire-contract-quiz-cache', type: 'quiz', authorship: 'authored', conceptId: 'cache-e-negociacao',
+        prompt: 'Um cliente envia GET com o header If-None-Match contendo o ETag da última resposta recebida, e o recurso não mudou desde então.',
+        options: [
+          { id: 'http-wire-contract-quiz-cache-a', label: 'O servidor pode responder 304 Not Modified, sem body, avisando que a versão em cache do cliente continua válida.', correct: true, explanation: 'ETag/If-None-Match formam o contrato de validação condicional: o servidor confirma que nada mudou sem reenviar a representação inteira.' },
+          { id: 'http-wire-contract-quiz-cache-b', label: 'O servidor é obrigado a reenviar o corpo completo sempre que um GET é feito, independentemente dos headers de cache.', correct: false, explanation: 'Isso ignora o propósito de ETag/If-None-Match, que existem exatamente para evitar reenviar um corpo que o cliente já tem.' },
+          { id: 'http-wire-contract-quiz-cache-c', label: 'If-None-Match só é respeitado por navegadores, nunca por APIs backend-to-backend.', correct: false, explanation: 'O mecanismo de validação condicional faz parte da semântica HTTP e vale para qualquer cliente HTTP compatível, não só navegadores.' }
+        ] }
+    ],
     codeExplanation: { explanation: ['curl -i mostra status line, headers e body, não apenas o conteúdo final.', 'Accept declara que o cliente prefere JSON como representação da resposta.', 'A URL identifica o recurso remoto inspecionado de forma reproduzível.'], commonMistakes: ['Testar só no navegador e não ver headers', 'Confundir Accept com Content-Type', 'Não registrar status e headers ao diagnosticar API'] },
     concepts: [
       ['Request', 'Method expressa a intenção; target identifica o recurso; headers carregam metadados; body carrega uma representação. URL e URI não são o servidor nem o recurso em si.'],
@@ -508,6 +714,37 @@ const inputs: ChapterInput[] = [
     prerequisites: ['http-wire-contract', 'json', 'excecoes'], englishLevel: 1, curriculumOrder: 2,
     introducedConceptIds: ['httpclient-reuso-timeout', 'http-response-bodyhandler', 'dto-mapping-fronteira'],
     usedConceptIds: ['http-status-classe', 'http-header-body-negociacao', 'serializacao-desserializacao', 'checked-unchecked-contrato'],
+    skipConceptQuizzes: true,
+    semanticBlocks: [
+      { id: 'java-httpclient-json-quiz-cliente', type: 'quiz', authorship: 'authored', conceptId: 'cliente-reutilizavel',
+        prompt: 'Um serviço cria um novo HttpClient dentro de cada método que faz uma chamada externa, em vez de reutilizar uma instância compartilhada.',
+        options: [
+          { id: 'java-httpclient-json-quiz-cliente-a', label: 'Desperdiça o pool de conexões e o reuso de configuração que HttpClient foi desenhado para oferecer — o cliente é imutável e seguro para reuso entre chamadas.', correct: true, explanation: 'HttpClient administra conexões reutilizáveis internamente; recriá-lo a cada chamada joga fora esse benefício e pode tornar timeouts/políticas inconsistentes entre chamadas.' },
+          { id: 'java-httpclient-json-quiz-cliente-b', label: 'É necessário, porque HttpClient não é thread-safe e não pode ser reutilizado entre chamadas.', correct: false, explanation: 'HttpClient é imutável após construído e seguro para uso concorrente — é exatamente por isso que reutilizá-lo é a prática recomendada.' },
+          { id: 'java-httpclient-json-quiz-cliente-c', label: 'Não faz diferença de desempenho, apenas de estilo de código.', correct: false, explanation: 'Faz diferença real: recriar o cliente descarta pooling de conexões e pode duplicar overhead de configuração/TLS a cada chamada.' }
+        ] },
+      { id: 'java-httpclient-json-quiz-timeout', type: 'quiz', authorship: 'authored', conceptId: 'request-e-timeout',
+        prompt: 'Uma chamada de pagamento estourou o request timeout configurado no HttpClient. O código assume que, como deu timeout, o pagamento não foi processado.',
+        options: [
+          { id: 'java-httpclient-json-quiz-timeout-a', label: 'É uma suposição perigosa: o timeout só informa que o cliente parou de esperar a resposta, não que o servidor não processou a operação — é preciso consultar o estado remoto antes de repetir.', correct: true, explanation: 'Timeout limita quanto tempo o cliente espera pela troca; ele não prova que o servidor não executou a operação do outro lado.' },
+          { id: 'java-httpclient-json-quiz-timeout-b', label: 'É uma suposição segura, porque connectTimeout garante que a conexão nunca chegou a ser estabelecida.', correct: false, explanation: 'O cenário descreve um timeout na troca da requisição já em andamento, não uma falha de conexão — a operação pode ter chegado ao servidor.' },
+          { id: 'java-httpclient-json-quiz-timeout-c', label: 'É uma suposição segura, porque toda API HTTP garante atomicidade entre requisição e efeito no servidor.', correct: false, explanation: 'HTTP não garante essa atomicidade — o efeito remoto pode ter ocorrido mesmo que a resposta nunca chegue ao cliente dentro do timeout.' }
+        ] },
+      { id: 'java-httpclient-json-quiz-response', type: 'quiz', authorship: 'authored', conceptId: 'response-e-bodyhandler',
+        prompt: 'Um código faz client.send(request, BodyHandlers.ofString()) e imediatamente desserializa response.body() como JSON, sem checar response.statusCode().',
+        options: [
+          { id: 'java-httpclient-json-quiz-response-a', label: 'É um erro comum: um 4xx/5xx pode devolver um corpo que não é o JSON esperado (uma página de erro HTML, por exemplo), quebrando a desserialização ou escondendo a causa real da falha.', correct: true, explanation: 'statusCode, headers e body são dados independentes — tratar o body como sucesso sem checar o status primeiro é a causa clássica de exceções de parsing confusas.' },
+          { id: 'java-httpclient-json-quiz-response-b', label: 'Não há problema, BodyHandlers.ofString() só entrega o body quando o status é 2xx.', correct: false, explanation: 'BodyHandlers entrega o body independentemente do status — a checagem do status é responsabilidade explícita de quem chama send().' },
+          { id: 'java-httpclient-json-quiz-response-c', label: 'Não há problema, o Jackson detecta automaticamente respostas de erro e lança uma exceção específica.', correct: false, explanation: 'Jackson só sabe o que você mandar desserializar; ele não sabe, por si, distinguir uma resposta de erro de uma resposta de sucesso.' }
+        ] },
+      { id: 'java-httpclient-json-quiz-jsonfronteira', type: 'quiz', authorship: 'authored', conceptId: 'json-de-fronteira',
+        prompt: 'O domínio interno da aplicação usa diretamente o record gerado a partir do JSON de uma API de terceiros, sem nenhum DTO intermediário.',
+        options: [
+          { id: 'java-httpclient-json-quiz-jsonfronteira-a', label: 'Acopla o domínio ao formato externo: qualquer mudança de campo, renomeação ou novo valor na API de terceiros passa a exigir mudança direta nas regras de negócio internas.', correct: true, explanation: 'Mapear para um DTO de fronteira tolerante e só então converter para o modelo interno é o que isola o domínio de mudanças no contrato externo.' },
+          { id: 'java-httpclient-json-quiz-jsonfronteira-b', label: 'É a abordagem recomendada, porque evita código duplicado entre DTO e domínio.', correct: false, explanation: 'A duplicação aparente entre DTO e domínio é o preço de manter os dois desacoplados — evitá-la acopla o domínio ao formato de uma API externa que você não controla.' },
+          { id: 'java-httpclient-json-quiz-jsonfronteira-c', label: 'Só é um problema se a API de terceiros usar XML em vez de JSON.', correct: false, explanation: 'O problema é de acoplamento entre camadas, independente do formato de serialização usado pela API externa.' }
+        ] }
+    ],
     concepts: [
       ['Cliente reutilizável', 'HttpClient é imutável depois de construído e administra conexões reutilizáveis. Criar um cliente por request desperdiça pooling e torna políticas inconsistentes.'],
       ['Request e timeout', 'Connect timeout limita estabelecimento da conexão; request timeout limita a troca específica. Nenhum deles prova que o servidor não executou a operação.'],
@@ -537,6 +774,37 @@ const inputs: ChapterInput[] = [
     prerequisites: ['java-httpclient-json'], englishLevel: 1, curriculumOrder: 3,
     introducedConceptIds: ['timeout-deadline-cancelamento-http', 'retry-backoff-jitter', 'rate-limit-paginacao', 'secrets-integracao'],
     usedConceptIds: ['http-idempotencia-seguranca', 'http-status-classe', 'httpclient-reuso-timeout', 'configuracao-externa', 'gitignore-secrets'],
+    skipConceptQuizzes: true,
+    semanticBlocks: [
+      { id: 'unreliable-api-client-quiz-timeout', type: 'quiz', authorship: 'authored', conceptId: 'timeout-deadline-e-cancelamento',
+        prompt: 'Um fluxo tenta uma chamada externa três vezes, cada uma com timeout de 5s, sem nenhum orçamento total de tempo — na pior hipótese, isso pode levar 15s+ para o usuário receber qualquer resposta.',
+        options: [
+          { id: 'unreliable-api-client-quiz-timeout-a', label: 'Falta um deadline (orçamento total) que as tentativas compartilhem — cada timeout individual limita uma etapa, mas não impede que a soma das tentativas exploda o tempo de resposta percebido pelo usuário.', correct: true, explanation: 'Timeout por etapa e deadline por operação são coisas diferentes: sem um orçamento total, retries somam tempo sem limite percebido pelo chamador original.' },
+          { id: 'unreliable-api-client-quiz-timeout-b', label: 'Não há problema, timeout de 5s por tentativa já garante um limite total de 5s.', correct: false, explanation: 'Um timeout de 5s se aplica a CADA tentativa individualmente — três tentativas podem somar até 15s sem nenhum limite agregado.' },
+          { id: 'unreliable-api-client-quiz-timeout-c', label: 'O problema só existiria se o retry não tivesse backoff.', correct: false, explanation: 'Backoff até pode piorar o tempo total (adiciona espera entre tentativas); o problema real é a ausência de um deadline agregado, com ou sem backoff.' }
+        ] },
+      { id: 'unreliable-api-client-quiz-retry', type: 'quiz', authorship: 'authored', conceptId: 'retry-com-backoff-e-jitter',
+        prompt: 'Um serviço de cobrança recebe timeout ao chamar o gateway de pagamento e automaticamente repete o mesmo POST, sem nenhuma chave de idempotência.',
+        options: [
+          { id: 'unreliable-api-client-quiz-retry-a', label: 'É perigoso: o timeout não prova que o gateway não processou o pagamento original — repetir um POST não-idempotente sem chave pode cobrar o cliente duas vezes.', correct: true, explanation: 'Retry só é seguro para operações idempotentes/seguras (GET) ou operações que aceitam uma chave de idempotência explícita — POST de cobrança sem essa proteção arrisca duplicar o efeito.' },
+          { id: 'unreliable-api-client-quiz-retry-b', label: 'É seguro, porque timeout sempre significa que a requisição nunca chegou ao servidor.', correct: false, explanation: 'Timeout significa que o cliente parou de esperar a resposta — não garante que o servidor não recebeu e processou a requisição.' },
+          { id: 'unreliable-api-client-quiz-retry-c', label: 'É seguro, desde que o retry use backoff exponencial com jitter.', correct: false, explanation: 'Backoff/jitter reduzem pressão sobre o servidor, mas não resolvem o risco de duplicar um efeito não-idempotente — isso exige uma chave de idempotência, não um espaçamento de tentativas.' }
+        ] },
+      { id: 'unreliable-api-client-quiz-ratelimit', type: 'quiz', authorship: 'authored', conceptId: 'rate-limiting-e-paginacao',
+        prompt: 'Uma API externa devolve 429 com header Retry-After: 30. O cliente ignora o header e tenta de novo imediatamente, em loop apertado.',
+        options: [
+          { id: 'unreliable-api-client-quiz-ratelimit-a', label: 'Isso ignora o contrato explícito do servidor sobre quando tentar de novo, provavelmente prolongando o bloqueio ou piorando o rate limit para todos os clientes daquela chave/IP.', correct: true, explanation: '429 + Retry-After é o servidor comunicando exatamente a capacidade disponível — ignorar esse sinal e insistir imediatamente tende a piorar a situação, não contorná-la.' },
+          { id: 'unreliable-api-client-quiz-ratelimit-b', label: 'Não há problema, 429 é só uma sugestão e pode ser ignorado com segurança.', correct: false, explanation: '429 com Retry-After é um contrato explícito de capacidade — ignorá-lo tende a manter ou agravar o bloqueio.' },
+          { id: 'unreliable-api-client-quiz-ratelimit-c', label: 'O problema só existiria se a API usasse paginação por offset em vez de cursor.', correct: false, explanation: 'Paginação por cursor/offset é uma questão de consistência de listagem, não relacionada ao contrato de rate limiting via 429/Retry-After.' }
+        ] },
+      { id: 'unreliable-api-client-quiz-secrets', type: 'quiz', authorship: 'authored', conceptId: 'autenticacao-e-secrets',
+        prompt: 'Uma chave de API é lida diretamente de uma constante String no código-fonte para simplificar o primeiro protótipo, "só para testar".',
+        options: [
+          { id: 'unreliable-api-client-quiz-secrets-a', label: 'É um risco real mesmo em protótipo: a chave entra no histórico do Git assim que commitada, e remover depois não apaga automaticamente cópias já clonadas/no reflog — o certo é usar variável de ambiente/secret store desde o início.', correct: true, explanation: 'Secrets no código-fonte viram parte permanente do histórico de versionamento assim que commitados — a correção correta é nunca hardcodá-los, nem "temporariamente".' },
+          { id: 'unreliable-api-client-quiz-secrets-b', label: 'É seguro desde que o repositório seja privado.', correct: false, explanation: 'Repositório privado reduz exposição externa, mas não elimina o risco de vazamento por qualquer colaborador, CI, fork ou futura mudança de visibilidade do repositório.' },
+          { id: 'unreliable-api-client-quiz-secrets-c', label: 'É seguro desde que a chave seja removida antes do deploy em produção.', correct: false, explanation: 'Remover a linha não apaga a chave do histórico de commits do Git — ela continua recuperável via git log/reflog mesmo depois de removida do arquivo atual.' }
+        ] }
+    ],
     concepts: [
       ['Timeout, deadline e cancelamento', 'Timeout limita uma etapa; deadline limita o orçamento total. Tentativas devem consumir o mesmo orçamento e propagar cancelamento.'],
       ['Retry com backoff e jitter', 'Repita somente falhas transitórias e operações seguras/idempotentes. Backoff reduz pressão; jitter evita clientes sincronizados.'],
@@ -557,6 +825,30 @@ const inputs: ChapterInput[] = [
     prerequisites: ['unreliable-api-client', 'testes'], englishLevel: 1, curriculumOrder: 4,
     introducedConceptIds: ['stub-http-deterministico', 'falha-parcial-cache-stale'],
     usedConceptIds: ['httpclient-reuso-timeout', 'http-response-bodyhandler', 'dto-mapping-fronteira', 'retry-backoff-jitter', 'rate-limit-paginacao', 'secrets-integracao'],
+    skipConceptQuizzes: true,
+    semanticBlocks: [
+      { id: 'pure-java-api-project-quiz-portas', type: 'quiz', authorship: 'authored', conceptId: 'portas-e-adapters',
+        prompt: 'O caso de uso do painel de clima chama HttpClient diretamente dentro da lógica de negócio, em vez de depender de uma interface própria implementada por um adapter HTTP.',
+        options: [
+          { id: 'pure-java-api-project-quiz-portas-a', label: 'Acopla a lógica de negócio a uma tecnologia concreta — trocar o cliente HTTP por um stub determinístico em teste (ou por outra biblioteca no futuro) exige mudar a lógica de negócio, não só o adapter.', correct: true, explanation: 'Depender de uma porta pequena (interface) e injetar adapters diferentes (HttpClient real, stub de teste) é o que torna o caso de uso testável e substituível sem tocar a regra de negócio.' },
+          { id: 'pure-java-api-project-quiz-portas-b', label: 'Não há problema, HttpClient já é uma abstração suficiente para qualquer teste.', correct: false, explanation: 'HttpClient concreto ainda exige rede/servidor real (ou um servidor stub) — uma porta própria permite substituir por um fake em memória quando fizer sentido.' },
+          { id: 'pure-java-api-project-quiz-portas-c', label: 'É a abordagem recomendada, porque reduz o número de classes do projeto.', correct: false, explanation: 'Reduzir classes não é o objetivo aqui — o objetivo é isolar a regra de negócio de uma dependência externa concreta para poder testá-la e substituí-la.' }
+        ] },
+      { id: 'pure-java-api-project-quiz-composicao', type: 'quiz', authorship: 'authored', conceptId: 'composicao-de-resultados',
+        prompt: 'O painel consulta clima e localização em duas APIs independentes. A API de localização falha; o código devolve uma lista vazia para "sem dados de localização".',
+        options: [
+          { id: 'pure-java-api-project-quiz-composicao-a', label: 'Isso perde informação real: lista vazia normalmente significa "consultei e não há nada", enquanto o caso aqui é "não consegui consultar" — os dois estados deveriam ser representáveis separadamente (ex.: parcial/indisponível).', correct: true, explanation: 'Falha parcial de uma das duas fontes independentes precisa ser um estado explícito, distinto de "sucesso com zero resultados" — misturar os dois esconde a causa real de quem consome o resultado.' },
+          { id: 'pure-java-api-project-quiz-composicao-b', label: 'É a forma correta, já que lista vazia é sempre a representação padrão de ausência de dados.', correct: false, explanation: 'Lista vazia representa "consultado com sucesso, zero itens" — não "falha ao consultar"; usar o mesmo valor para os dois casos remove informação do chamador.' },
+          { id: 'pure-java-api-project-quiz-composicao-c', label: 'Só seria um problema se as duas APIs falhassem ao mesmo tempo.', correct: false, explanation: 'O problema já existe com uma única API falhando — o estado parcial precisa ser distinguível de sucesso total, independente de quantas fontes falharam.' }
+        ] },
+      { id: 'pure-java-api-project-quiz-testes', type: 'quiz', authorship: 'authored', conceptId: 'testes-deterministicos',
+        prompt: 'A suíte de testes do projeto chama a API pública real de clima a cada execução, e falha esporadicamente quando a API está fora do ar ou lenta.',
+        options: [
+          { id: 'pure-java-api-project-quiz-testes-a', label: 'Os testes deveriam usar um HttpServer local controlado (stub), que reproduz status, atraso e payload de forma determinística — sem depender de internet nem de disponibilidade de terceiros.', correct: true, explanation: 'Um servidor stub local elimina a dependência de rede/disponibilidade externa e permite reproduzir exatamente os cenários de sucesso e falha que o teste precisa cobrir (timeout, 429, 500).' },
+          { id: 'pure-java-api-project-quiz-testes-b', label: 'É aceitável, desde que o timeout do teste seja aumentado o suficiente para tolerar lentidão da API real.', correct: false, explanation: 'Aumentar timeout não resolve a causa raiz — a suíte continua não-determinística e dependente de um serviço externo fora do controle do time.' },
+          { id: 'pure-java-api-project-quiz-testes-c', label: 'É aceitável, contanto que o teste rode só uma vez por dia em vez de a cada build.', correct: false, explanation: 'Reduzir a frequência não elimina a não-determinismo do teste — ele continua dependendo de uma API externa indisponível ou lenta em qualquer execução.' }
+        ] }
+    ],
     concepts: [
       ['Portas e adapters', 'O caso de uso depende de interfaces pequenas; HttpClient, arquivo e relógio são adapters substituíveis.'],
       ['Composição de resultados', 'Duas APIs possuem latência e falhas independentes. Modele parcial, indisponível e stale em vez de transformar tudo em null.'],
@@ -585,12 +877,46 @@ const inputs: ChapterInput[] = [
     objectives: ['Modelar recursos antes de endpoints soltos', 'Separar DTO público de Entity persistente', 'Publicar erros HTTP estáveis e úteis', 'Prever concorrência, idempotência e evolução de contrato'],
     introducedConceptIds: [],
     usedConceptIds: ['mvc-controller-binding', 'dto-entity-boundary-spring', 'bean-validation-boundary', 'controller-advice-problem-details', 'http-optimistic-concurrency', 'api-compatible-evolution'],
+    skipConceptQuizzes: true,
     concepts: [
       ['Modelagem de recurso', 'URI nomeia recursos; métodos expressam intenção. A representação pode mudar sem expor a entidade persistida.'],
       ['Request e response DTO', 'Request descreve entrada permitida; response descreve contrato publicado. Separá-los impede mass assignment e evolução acoplada ao banco.'],
       ['Erro técnico e de domínio', '422 pode expressar regra inválida; 409 conflito de estado; 503 dependência indisponível. Um Problem Details estável inclui type, title, status e correlação.'],
       ['Concorrência e idempotência', 'ETag/If-Match evita lost update; idempotency key torna criação repetida reconhecível sem confundir requisições distintas.']
     ],
+    semanticBlocks: [{
+      id: 'rest-resource-contracts-concept-check-0', type: 'quiz', authorship: 'authored', conceptId: 'modelagem-de-recurso',
+      prompt: 'Sua API de pedidos hoje devolve exatamente os campos da entidade JPA Pedido como resposta. O time de banco quer renomear uma coluna interna de auditoria. O que a modelagem de recurso correta evita aqui?',
+      options: [
+        { id: 'rest-resource-contracts-concept-0-a', label: 'Expor a Entity diretamente acopla o contrato público à estrutura de persistência -- renomear a coluna interna quebraria clientes que nunca deveriam conhecer esse detalhe.', correct: true, explanation: 'A representação publicada pode mudar de forma independente da entidade persistida exatamente por causa dessa separação.' },
+        { id: 'rest-resource-contracts-concept-0-b', label: 'Nada muda, porque JSON não se importa com nomes de coluna do banco.', correct: false, explanation: 'Se a Entity é serializada diretamente, o nome do campo JSON segue o nome do atributo Java, que por sua vez segue a coluna -- o acoplamento existe.' },
+        { id: 'rest-resource-contracts-concept-0-c', label: 'O problema só existe se a coluna for chave estrangeira.', correct: false, explanation: 'O acoplamento entre contrato público e persistência existe para qualquer campo exposto diretamente, não só chaves estrangeiras.' }
+      ]
+    }, {
+      id: 'rest-resource-contracts-concept-check-1', type: 'quiz', authorship: 'authored', conceptId: 'request-e-response-dto',
+      prompt: 'Um endpoint de atualização de perfil aceita o mesmo DTO usado para resposta, incluindo o campo role. Um usuário comum envia {"role": "ADMIN"} no corpo da requisição de atualização do próprio perfil. O que isso evidencia?',
+      options: [
+        { id: 'rest-resource-contracts-concept-1-a', label: 'Mass assignment: sem separar request DTO (o que o cliente pode definir) de response DTO (o que é publicado), campos sensíveis viram graváveis por acidente.', correct: true, explanation: 'Separar os dois DTOs impede exatamente essa classe de vulnerabilidade.' },
+        { id: 'rest-resource-contracts-concept-1-b', label: 'É seguro, porque o Spring ignora automaticamente campos que o cliente não deveria enviar.', correct: false, explanation: 'O Spring desserializa o que o DTO permitir -- se o campo existe no DTO de entrada, ele é aceito, não ignorado.' },
+        { id: 'rest-resource-contracts-concept-1-c', label: 'O problema é só de validação de formato do JSON, não de modelagem de contrato.', correct: false, explanation: 'O JSON está bem formado; o problema é o DTO de entrada permitir um campo que não deveria ser gravável pelo cliente.' }
+      ]
+    }, {
+      id: 'rest-resource-contracts-concept-check-2', type: 'quiz', authorship: 'authored', conceptId: 'erro-tecnico-e-de-dominio',
+      prompt: 'Uma tentativa de pagar um pedido já cancelado deveria retornar qual status, e por quê?',
+      options: [
+        { id: 'rest-resource-contracts-concept-2-a', label: '409 Conflict: o recurso existe e a requisição é sintaticamente válida, mas o estado atual do pedido é incompatível com a operação pedida.', correct: true, explanation: 'Conflito de estado é exatamente o caso de uso do 409, diferente de erro de validação (422) ou dependência indisponível (503).' },
+        { id: 'rest-resource-contracts-concept-2-b', label: '500, porque é um erro inesperado do servidor.', correct: false, explanation: 'Não é inesperado nem um erro do servidor -- é uma regra de negócio previsível sobre o estado do pedido.' },
+        { id: 'rest-resource-contracts-concept-2-c', label: '200 com uma mensagem de erro no corpo, para simplificar o cliente.', correct: false, explanation: 'Esconder um conflito de estado atrás de status 200 impede que clientes tratem o erro de forma programática pelo status HTTP.' }
+      ]
+    }, {
+      id: 'rest-resource-contracts-concept-check-3', type: 'quiz', authorship: 'authored', conceptId: 'concorrencia-e-idempotencia',
+      prompt: 'Dois clientes carregam a mesma versão de um pedido e ambos enviam PUT com edições diferentes, sem enviar If-Match. O que acontece, e qual mecanismo evitaria isso?',
+      options: [
+        { id: 'rest-resource-contracts-concept-3-a', label: 'Lost update: a segunda gravação sobrescreve silenciosamente a primeira; ETag/If-Match detectaria a versão desatualizada e recusaria a segunda escrita.', correct: true, explanation: 'Precondition baseada em ETag é exatamente o mecanismo que evita lost update em edições concorrentes.' },
+        { id: 'rest-resource-contracts-concept-3-b', label: 'Nada -- o banco de dados sempre resolve isso automaticamente com transações.', correct: false, explanation: 'Cada PUT é sua própria transação, bem-sucedida isoladamente; a transação não sabe que existia uma edição concorrente mais recente na intenção do cliente.' },
+        { id: 'rest-resource-contracts-concept-3-c', label: 'O problema só ocorre em bancos sem chave primária.', correct: false, explanation: 'Lost update é um problema de concorrência na aplicação/contrato HTTP, independente de a tabela ter chave primária.' }
+      ]
+    }],
     decision: 'Use PATCH quando o contrato define alteração parcial e semântica; não como “PUT menor”. Não exponha stack trace, entidade JPA ou segredo em respostas.',
     prediction: ['Dois clientes editam a mesma versão e ambos enviam PUT. Sem precondition, o que ocorre?', 'A última gravação pode sobrescrever silenciosamente a primeira: lost update.'],
     exercise: ['Contrato de pedidos', 'Desenhe endpoints e Problem Details para criar, pagar, cancelar e consultar pedido.', ['Estados inválidos não são representáveis por endpoint genérico.', 'Status e erros têm semântica.', 'Concorrência e repetição estão cobertas.']],
@@ -606,12 +932,46 @@ const inputs: ChapterInput[] = [
     objectives: ['Tratar OpenAPI como contrato verificável', 'Classificar breaking changes por impacto em cliente', 'Usar testes para travar request, response e erro', 'Planejar depreciação sem quebrar consumidores silenciosamente'],
     introducedConceptIds: ['contract-test-evolution', 'openapi-breaking-change', 'spring-rest-docs-contract'],
     usedConceptIds: ['openapi-documentation-contract', 'api-compatible-evolution', 'controller-advice-problem-details', 'frontend-api-error-state'],
+    skipConceptQuizzes: true,
     concepts: [
       ['API-first', 'O contrato permite discutir exemplos, erros, autenticação e compatibilidade antes da implementação. Não dispensa validação de comportamento.'],
       ['Evolução compatível', 'Adicionar campo opcional costuma ser compatível apenas se clientes toleram desconhecidos. Remover, renomear ou tornar obrigatório normalmente quebra consumidores.'],
       ['Camadas de teste', 'Unit testa regra; controller slice testa binding/HTTP; integração testa stack e banco; contrato testa expectativas entre consumidor e provedor.'],
       ['Versionamento', 'Prefira evolução aditiva e depreciação observável. Nova versão é necessária quando a semântica incompatível não pode coexistir com segurança.']
     ],
+    semanticBlocks: [{
+      id: 'api-contract-evolution-concept-check-0', type: 'quiz', authorship: 'authored', conceptId: 'api-first',
+      prompt: 'Um time escreve o OpenAPI do endpoint de pagamento, discute exemplos de erro com o time consumidor, e só depois implementa. Depois de implementado, eles consideram o trabalho de contrato encerrado. O que falta?',
+      options: [
+        { id: 'api-contract-evolution-concept-0-a', label: 'Testes que verifiquem que a implementação de fato produz a request/response descrita no OpenAPI -- API-first orienta o design, mas não substitui validar o comportamento real.', correct: true, explanation: 'Documentação escrita antes não garante que a implementação final ainda corresponde a ela; só teste de contrato comprova isso continuamente.' },
+        { id: 'api-contract-evolution-concept-0-b', label: 'Nada falta -- documentar antes já garante que a implementação vai seguir o contrato.', correct: false, explanation: 'Escrever o contrato primeiro orienta discussão, mas o código pode divergir dele sem que ninguém perceba sem teste.' },
+        { id: 'api-contract-evolution-concept-0-c', label: 'Só falta gerar um client SDK a partir do OpenAPI.', correct: false, explanation: 'Gerar SDK é conveniência de consumo; não verifica se a implementação honra o contrato documentado.' }
+      ]
+    }, {
+      id: 'api-contract-evolution-concept-check-1', type: 'quiz', authorship: 'authored', conceptId: 'evolucao-compativel',
+      prompt: 'Um campo status que hoje aceita 3 valores ganha um 4º valor novo. Um cliente antigo tem um switch exaustivo sobre esses 3 valores. Isso é uma evolução compatível?',
+      options: [
+        { id: 'api-contract-evolution-concept-1-a', label: 'Não necessariamente: um switch exaustivo (ou validação fechada) no cliente pode falhar ao receber o valor desconhecido -- a compatibilidade depende de como os consumidores tratam valores não previstos.', correct: true, explanation: 'Adicionar valor a um enum só é seguro se todo consumidor real tolera valores desconhecidos, o que nem sempre é verdade.' },
+        { id: 'api-contract-evolution-concept-1-b', label: 'Sim, sempre -- adicionar valor a um enum nunca quebra nada.', correct: false, explanation: 'Um switch exaustivo ou validação fechada no lado do cliente é exatamente o cenário em que isso quebra.' },
+        { id: 'api-contract-evolution-concept-1-c', label: 'Não, porque adicionar campo é sempre breaking change.', correct: false, explanation: 'Adicionar campo/valor opcional costuma ser compatível quando o cliente tolera desconhecidos -- o problema aqui é o switch exaustivo específico, não a regra geral.' }
+      ]
+    }, {
+      id: 'api-contract-evolution-concept-check-2', type: 'quiz', authorship: 'authored', conceptId: 'camadas-de-teste',
+      prompt: 'Um teste unitário do PedidoService passa, mas em produção o endpoint devolve um JSON com um campo a menos do que o documentado no OpenAPI. Qual camada de teste deveria ter pego isso antes?',
+      options: [
+        { id: 'api-contract-evolution-concept-2-a', label: 'Teste de contrato/controller slice sobre a representação HTTP publicada -- teste unitário de regra de negócio não verifica o formato da resposta serializada.', correct: true, explanation: 'Cada camada de teste tem um escopo diferente; só a camada que exercita a serialização HTTP pega esse tipo de regressão.' },
+        { id: 'api-contract-evolution-concept-2-b', label: 'Nenhuma camada de teste consegue pegar isso; só revisão manual do JSON resolve.', correct: false, explanation: 'Teste de contrato automatizado é exatamente feito para pegar esse tipo de regressão sem depender de revisão manual.' },
+        { id: 'api-contract-evolution-concept-2-c', label: 'Teste de integração com banco de dados, porque o problema está na persistência.', correct: false, explanation: 'O problema está na serialização da resposta HTTP, não na camada de persistência.' }
+      ]
+    }, {
+      id: 'api-contract-evolution-concept-check-3', type: 'quiz', authorship: 'authored', conceptId: 'versionamento',
+      prompt: 'Um time quer renomear um campo obrigatório do contrato público, algo que nenhum cliente conseguiria tolerar sem quebrar. Qual caminho é o recomendado?',
+      options: [
+        { id: 'api-contract-evolution-concept-3-a', label: 'Tratar como mudança incompatível de verdade: nova versão (ou campo aditivo + depreciação observável do antigo), não uma renomeação silenciosa na mesma versão.', correct: true, explanation: 'Renomear campo obrigatório é o tipo de mudança que normalmente quebra consumidores e exige o caminho de versionamento/depreciação.' },
+        { id: 'api-contract-evolution-concept-3-b', label: 'Renomear direto, já que é só um nome de campo.', correct: false, explanation: 'Um nome de campo obrigatório faz parte do contrato publicado; renomeá-lo silenciosamente quebra todo cliente que depende do nome antigo.' },
+        { id: 'api-contract-evolution-concept-3-c', label: 'Versionar toda mudança interna do sistema, não só as que afetam o contrato publicado.', correct: false, explanation: 'Versionar por toda mudança interna é o excesso oposto -- só mudanças que afetam o contrato publicado justificam nova versão.' }
+      ]
+    }],
     decision: 'Não versione por toda mudança interna. Também não prometa compatibilidade sem executar diff do OpenAPI, testes de consumidor e janela de depreciação.',
     prediction: ['Adicionar enum novo é sempre compatível?', 'Não. Clientes com switch exaustivo ou validação fechada podem falhar; valores desconhecidos exigem política.'],
     exercise: ['Revisão de breaking changes', 'Compare duas versões de contrato e classifique mudanças de campo, enum, status e autenticação.', ['Cada classificação considera clientes reais.', 'Há estratégia de depreciação.', 'Testes impedem regressão do contrato.']],

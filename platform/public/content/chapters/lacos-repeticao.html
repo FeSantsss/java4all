@@ -8,7 +8,26 @@
     <span class="kw">if</span> (i % <span class="num">2</span> != <span class="num">0</span>) <span class="kw">continue</span>;
     soma += i;
 }</pre>
-      <h3>Erros de fronteira</h3>
-      <p>Os bugs mais comuns são começar uma posição tarde, terminar uma posição cedo ou usar <code>&lt;=</code> quando o limite é exclusivo. Simule à mão a primeira e a última iteração. Para coleções indexadas de tamanho <code>n</code>, índices válidos normalmente vão de <code>0</code> a <code>n - 1</code>.</p>
-      <div class="exercise"><div class="exercise-head"><h4>Sentinela e validação</h4><span class="exercise-tag f">Fundamento</span></div><p>Leia números até receber zero. Ignore negativos, some positivos e conte quantos foram aceitos. Teste: zero como primeiro valor, apenas negativos e uma sequência mista.</p></div>
+      <h3>Erros de fronteira (off-by-one)</h3>
+      <p>Os bugs mais comuns são começar uma posição tarde, terminar uma posição cedo ou usar <code>&lt;=</code> quando o limite é exclusivo. Simule à mão a primeira e a última iteração. Para coleções indexadas de tamanho <code>n</code>, índices válidos normalmente vão de <code>0</code> a <code>n - 1</code>:</p>
+      <pre class="code"><span class="kw">int</span>[] valores = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= valores.length; i++) { <span class="com">// erro: &lt;= permite i = 3, índice inexistente</span>
+    System.out.println(valores[i]);    <span class="com">// ArrayIndexOutOfBoundsException na última iteração</span>
+}</pre>
+      <h3>break e continue não são a mesma coisa</h3>
+      <pre class="code"><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">3</span>) <span class="kw">continue</span>; <span class="com">// pula só esta iteração, o laço continua</span>
+    <span class="kw">if</span> (i == <span class="num">5</span>) <span class="kw">break</span>;    <span class="com">// encerra o laço inteiro, imediatamente</span>
+    System.out.println(i); <span class="com">// imprime 1, 2, 4</span>
+}</pre>
+      <p><code>continue</code> pula o restante do corpo e volta para a condição do laço (avançando para a próxima iteração); <code>break</code> sai do laço por completo, como se a condição tivesse se tornado falsa. Confundir os dois é um erro lógico silencioso: o laço roda, só que menos vezes (ou mais) do que o pretendido.</p>
+      <h3>Laços aninhados</h3>
+      <pre class="code"><span class="kw">for</span> (<span class="kw">int</span> linha = <span class="num">0</span>; linha &lt; <span class="num">3</span>; linha++) {
+    <span class="kw">for</span> (<span class="kw">int</span> coluna = <span class="num">0</span>; coluna &lt; <span class="num">3</span>; coluna++) {
+        System.out.print(linha == coluna ? <span class="str">"X"</span> : <span class="str">"."</span>);
+    }
+    System.out.println();
+}</pre>
+      <p>Em laços aninhados, <code>break</code>/<code>continue</code> só afetam o laço mais interno onde aparecem — sair do laço externo a partir do interno exige uma variável de controle (uma flag booleana) ou reestruturar a lógica em um método com <code>return</code>. Não existe "break duplo" nativo em Java sem rótulo (<em>labeled break</em>), e mesmo esse recurso deve ser usado com parcimônia por reduzir a legibilidade.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Sentinela e validação</h4><span class="exercise-tag f">Fundamento</span></div><p>Leia números até receber zero. Ignore negativos, some positivos e conte quantos foram aceitos. Teste: zero como primeiro valor, apenas negativos e uma sequência mista. Depois, escreva um laço que imprime os índices válidos de um array de tamanho 5 e explique por que usar <code>&lt;=</code> no limite seria um erro.</p></div>
     </section>

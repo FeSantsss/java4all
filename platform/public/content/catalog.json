@@ -2,64 +2,71 @@
   "version": 1,
   "chapters": [
     {
-      "id": "intro",
+      "id": "terminal-shell-fundamentos",
       "index": 0,
+      "title": "Terminal e shell — antes de instalar qualquer coisa",
+      "phaseId": "start",
+      "phaseTitle": "Comece aqui"
+    },
+    {
+      "id": "intro",
+      "index": 1,
       "title": "Introdução & ambiente",
       "phaseId": "start",
       "phaseTitle": "Comece aqui"
     },
     {
       "id": "primeiro-programa",
-      "index": 1,
+      "index": 2,
       "title": "Primeiro programa: escrever, compilar e executar",
       "phaseId": "start",
       "phaseTitle": "Comece aqui"
     },
     {
       "id": "variaveis-tipos",
-      "index": 2,
+      "index": 3,
       "title": "Variáveis, tipos, memória e conversões",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "operadores-expressoes",
-      "index": 3,
+      "index": 4,
       "title": "Operadores, expressões e precedência",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "controle-fluxo",
-      "index": 4,
+      "index": 5,
       "title": "Decisões: if, else e switch",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "lacos-repeticao",
-      "index": 5,
+      "index": 6,
       "title": "Repetição: while, for e controle de laços",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "arrays-matrizes",
-      "index": 6,
+      "index": 7,
       "title": "Arrays, matrizes e raciocínio por índice",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "strings-wrapper",
-      "index": 7,
+      "index": 8,
       "title": "String, imutabilidade e classes wrapper",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "metodos-escopo",
-      "index": 8,
+      "index": 9,
       "title": "Métodos, parâmetros, retorno e escopo",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
@@ -69,123 +76,123 @@
       "title": "Entrada pelo console, parsing e validação",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem",
-      "index": 9
+      "index": 10
     },
     {
       "id": "logica-programacao",
-      "index": 10,
+      "index": 11,
       "title": "Lógica de Programação & Pensamento Algorítmico",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "mini-caixa-eletronico",
-      "index": 11,
+      "index": 12,
       "title": "Mini-projeto: caixa eletrônico no terminal",
       "phaseId": "fundamentals",
       "phaseTitle": "Fundamentos da linguagem"
     },
     {
       "id": "classes",
-      "index": 12,
+      "index": 13,
       "title": "Classes e objetos",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "atributos",
-      "index": 13,
+      "index": 14,
       "title": "Atributos e métodos",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "construtores",
-      "index": 14,
+      "index": 15,
       "title": "Construtores",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "encapsulamento",
-      "index": 15,
+      "index": 16,
       "title": "Encapsulamento",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "static",
-      "index": 16,
+      "index": 17,
       "title": "static, final e this",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "heranca",
-      "index": 17,
+      "index": 18,
       "title": "Herança",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "polimorfismo",
-      "index": 18,
+      "index": 19,
       "title": "Polimorfismo",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "abstracao",
-      "index": 19,
+      "index": 20,
       "title": "Classes abstratas",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "interfaces",
-      "index": 20,
+      "index": 21,
       "title": "Interfaces",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "mini-biblioteca-cli",
-      "index": 21,
+      "index": 22,
       "title": "Mini-projeto: biblioteca orientada a objetos",
       "phaseId": "oop",
       "phaseTitle": "Orientação a objetos"
     },
     {
       "id": "pacotes",
-      "index": 22,
+      "index": 23,
       "title": "Pacotes & organização de projeto",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "excecoes",
-      "index": 23,
+      "index": 24,
       "title": "Exceções",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "colecoes",
-      "index": 24,
+      "index": 25,
       "title": "Coleções & ArrayList",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "generics",
-      "index": 25,
+      "index": 26,
       "title": "Generics",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "javamoderno",
-      "index": 26,
+      "index": 27,
       "title": "Java moderno: Optional, var, Date/Time",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
@@ -195,46 +202,46 @@
       "title": "Java 21: records, sealed types, pattern matching e virtual threads",
       "phaseId": "core",
       "phaseTitle": "Java essencial",
-      "index": 27
+      "index": 28
     },
     {
       "id": "streams",
-      "index": 28,
+      "index": 29,
       "title": "Lambdas & Streams",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "java-io",
-      "index": 29,
+      "index": 30,
       "title": "Arquivos, Paths e Java I/O",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "mini-analisador-vendas",
-      "index": 30,
+      "index": 31,
       "title": "Mini-projeto: analisador de vendas com Streams",
       "phaseId": "core",
       "phaseTitle": "Java essencial"
     },
     {
       "id": "big-o",
-      "index": 31,
+      "index": 32,
       "title": "Complexidade de Algoritmos (Big O)",
       "phaseId": "algorithms",
       "phaseTitle": "Raciocínio algorítmico"
     },
     {
       "id": "recursao",
-      "index": 32,
+      "index": 33,
       "title": "Recursão",
       "phaseId": "algorithms",
       "phaseTitle": "Raciocínio algorítmico"
     },
     {
       "id": "ordenacao-busca",
-      "index": 33,
+      "index": 34,
       "title": "Algoritmos de Ordenação & Busca",
       "phaseId": "algorithms",
       "phaseTitle": "Raciocínio algorítmico"
@@ -244,102 +251,102 @@
       "title": "Estruturas e algoritmos essenciais na prática",
       "phaseId": "algorithms",
       "phaseTitle": "Raciocínio algorítmico",
-      "index": 34
+      "index": 35
     },
     {
       "id": "git",
-      "index": 35,
+      "index": 36,
       "title": "Git & fluxo de trabalho",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "build",
-      "index": 36,
+      "index": 37,
       "title": "Maven & Gradle",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "anotacoes",
-      "index": 37,
+      "index": 38,
       "title": "Anotações & Reflection",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "json",
-      "index": 38,
+      "index": 39,
       "title": "JSON & serialização",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "logging",
-      "index": 39,
+      "index": 40,
       "title": "Logging & configuração externa",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "mini-importador-pedidos",
-      "index": 40,
+      "index": 41,
       "title": "Mini-projeto: importador de pedidos",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "solid",
-      "index": 41,
+      "index": 42,
       "title": "SOLID & boas práticas",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "di",
-      "index": 42,
+      "index": 43,
       "title": "Injeção de dependência (na mão)",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "padroes",
-      "index": 43,
+      "index": 44,
       "title": "Padrões de projeto essenciais",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "clean-code",
-      "index": 44,
+      "index": 45,
       "title": "Clean Code & Refatoração",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "projetospring",
-      "index": 45,
+      "index": 46,
       "title": "Projeto final — mini-framework pré-Spring",
       "phaseId": "engineering-foundation",
       "phaseTitle": "Base profissional"
     },
     {
       "id": "http",
-      "index": 46,
+      "index": 47,
       "title": "HTTP & APIs REST",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
     },
     {
       "id": "sql",
-      "index": 47,
+      "index": 48,
       "title": "SQL — fundamentos de banco relacional",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
     },
     {
       "id": "postgres",
-      "index": 48,
+      "index": 49,
       "title": "PostgreSQL na prática",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
@@ -349,32 +356,32 @@
       "title": "PostgreSQL avançado: planos, MVCC, isolamento e locks",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring",
-      "index": 49
+      "index": 50
     },
     {
       "id": "migrations",
-      "index": 50,
+      "index": 51,
       "title": "Migrations — versionando o schema",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
     },
     {
       "id": "jdbc",
-      "index": 51,
+      "index": 52,
       "title": "JDBC & banco de dados",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
     },
     {
       "id": "mini-financas-jdbc",
-      "index": 52,
+      "index": 53,
       "title": "Mini-projeto: finanças pessoais com PostgreSQL",
       "phaseId": "web-data",
       "phaseTitle": "Web e banco antes do Spring"
     },
     {
       "id": "spring-core",
-      "index": 53,
+      "index": 54,
       "title": "Spring Core — IoC/DI oficial",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
@@ -384,32 +391,32 @@
       "title": "Spring Boot por dentro: bootstrap, auto-configuração e configuração tipada",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa",
-      "index": 54
+      "index": 55
     },
     {
       "id": "devtools",
-      "index": 55,
+      "index": 56,
       "title": "Spring Boot DevTools",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "lombok",
-      "index": 56,
+      "index": 57,
       "title": "Lombok — eliminando boilerplate",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "spring-mvc",
-      "index": 57,
+      "index": 58,
       "title": "Spring Web / MVC — controllers REST",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "spring-jpa",
-      "index": 58,
+      "index": 59,
       "title": "Spring Data JPA — repositories & relacionamentos",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
@@ -419,25 +426,25 @@
       "title": "JPA profundo e transações Spring",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa",
-      "index": 59
+      "index": 60
     },
     {
       "id": "dto-mapping",
-      "index": 60,
+      "index": 61,
       "title": "DTO Mapping — Entity ≠ DTO",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "validacao-erros",
-      "index": 61,
+      "index": 62,
       "title": "Bean Validation & tratamento global de erros",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "paginacao-swagger",
-      "index": 62,
+      "index": 63,
       "title": "Paginação, filtros & documentação com Swagger",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
@@ -447,67 +454,67 @@
       "title": "Contratos HTTP: idempotência, concorrência e evolução de APIs",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa",
-      "index": 63
+      "index": 64
     },
     {
       "id": "n-mais-1",
-      "index": 64,
+      "index": 65,
       "title": "O problema N+1",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "cors-rate-limit",
-      "index": 65,
+      "index": 66,
       "title": "CORS & rate limiting",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "mini-helpdesk-api",
-      "index": 66,
+      "index": 67,
       "title": "Mini-projeto: API de help desk com Spring",
       "phaseId": "spring",
       "phaseTitle": "Spring: primeira API completa"
     },
     {
       "id": "testes",
-      "index": 67,
+      "index": 68,
       "title": "Testes unitários",
       "phaseId": "testing",
       "phaseTitle": "Testes depois da aplicação"
     },
     {
       "id": "mockito",
-      "index": 68,
+      "index": 69,
       "title": "Mockito — Mocks & Dublês de Teste",
       "phaseId": "testing",
       "phaseTitle": "Testes depois da aplicação"
     },
     {
       "id": "mini-reservas-testadas",
-      "index": 69,
+      "index": 70,
       "title": "Mini-projeto: motor de reservas guiado por testes",
       "phaseId": "testing",
       "phaseTitle": "Testes depois da aplicação"
     },
     {
       "id": "projeto",
-      "index": 70,
+      "index": 71,
       "title": "Projeto final — sistema de biblioteca",
       "phaseId": "testing",
       "phaseTitle": "Testes depois da aplicação"
     },
     {
       "id": "autenticacao-conceitos",
-      "index": 71,
+      "index": 72,
       "title": "Autenticação: sessão vs JWT vs OAuth2",
       "phaseId": "security",
       "phaseTitle": "Segurança da API"
     },
     {
       "id": "spring-security",
-      "index": 72,
+      "index": 73,
       "title": "Spring Security na prática",
       "phaseId": "security",
       "phaseTitle": "Segurança da API"
@@ -517,46 +524,46 @@
       "title": "OAuth 2.0, OpenID Connect e Resource Server seguros",
       "phaseId": "security",
       "phaseTitle": "Segurança da API",
-      "index": 73
+      "index": 74
     },
     {
       "id": "https",
-      "index": 74,
+      "index": 75,
       "title": "HTTPS & certificados",
       "phaseId": "security",
       "phaseTitle": "Segurança da API"
     },
     {
       "id": "mini-auth-rbac",
-      "index": 75,
+      "index": 76,
       "title": "Mini-projeto: autenticação e autorização por papéis",
       "phaseId": "security",
       "phaseTitle": "Segurança da API"
     },
     {
       "id": "docker-conceitos",
-      "index": 76,
+      "index": 77,
       "title": "Docker — conceitos & instalação",
       "phaseId": "containers",
       "phaseTitle": "Docker e ambiente reproduzível"
     },
     {
       "id": "dockerfile",
-      "index": 77,
+      "index": 78,
       "title": "Dockerfile & multi-stage build",
       "phaseId": "containers",
       "phaseTitle": "Docker e ambiente reproduzível"
     },
     {
       "id": "compose",
-      "index": 78,
+      "index": 79,
       "title": "Docker Compose — app + banco juntos",
       "phaseId": "containers",
       "phaseTitle": "Docker e ambiente reproduzível"
     },
     {
       "id": "testcontainers",
-      "index": 79,
+      "index": 80,
       "title": "Testcontainers & banco de teste isolado",
       "phaseId": "integration-testing",
       "phaseTitle": "Testes de integração reais"
@@ -566,25 +573,25 @@
       "title": "Estratégia de testes: slices, contratos, concorrência e qualidade",
       "phaseId": "integration-testing",
       "phaseTitle": "Testes de integração reais",
-      "index": 80
+      "index": 81
     },
     {
       "id": "nosql",
-      "index": 81,
+      "index": 82,
       "title": "NoSQL — conceitos & quando usar",
       "phaseId": "advanced-data",
       "phaseTitle": "NoSQL, cache e hospedagem"
     },
     {
       "id": "mongodb",
-      "index": 82,
+      "index": 83,
       "title": "MongoDB na prática",
       "phaseId": "advanced-data",
       "phaseTitle": "NoSQL, cache e hospedagem"
     },
     {
       "id": "redis",
-      "index": 83,
+      "index": 84,
       "title": "Redis — cache & estruturas em memória",
       "phaseId": "advanced-data",
       "phaseTitle": "NoSQL, cache e hospedagem"
@@ -594,46 +601,46 @@
       "title": "MongoDB e Redis operacionais: índices, consistência, persistência e escala",
       "phaseId": "advanced-data",
       "phaseTitle": "NoSQL, cache e hospedagem",
-      "index": 84
+      "index": 85
     },
     {
       "id": "hospedagem-db",
-      "index": 85,
+      "index": 86,
       "title": "Onde hospedar o banco: dev, teste & produção",
       "phaseId": "advanced-data",
       "phaseTitle": "NoSQL, cache e hospedagem"
     },
     {
       "id": "resilience",
-      "index": 86,
-      "title": "Circuit Breaker com Resilience4j",
+      "index": 87,
+      "title": "Resiliência com Resilience4j: Circuit Breaker, Retry, Bulkhead e Rate Limiter",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado"
     },
     {
       "id": "webclient",
-      "index": 87,
-      "title": "WebClient & RestTemplate — consumindo APIs externas",
+      "index": 88,
+      "title": "WebClient, RestClient & RestTemplate — consumindo APIs externas",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado"
     },
     {
       "id": "spring-aop",
-      "index": 88,
+      "index": 89,
       "title": "Spring AOP — formalizando o dynamic proxy",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado"
     },
     {
       "id": "spring-cache",
-      "index": 89,
+      "index": 90,
       "title": "Spring Cache Abstraction",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado"
     },
     {
       "id": "actuator",
-      "index": 90,
+      "index": 91,
       "title": "Spring Boot Actuator & health checks",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado"
@@ -643,25 +650,25 @@
       "title": "Observabilidade com logs, métricas, traces e SLOs",
       "phaseId": "spring-advanced",
       "phaseTitle": "Spring avançado",
-      "index": 91
+      "index": 92
     },
     {
       "id": "secrets",
-      "index": 92,
+      "index": 93,
       "title": "Variáveis de ambiente & secrets em produção",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
     },
     {
       "id": "cicd",
-      "index": 93,
+      "index": 94,
       "title": "CI/CD com GitHub Actions",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
     },
     {
       "id": "praticas-producao",
-      "index": 94,
+      "index": 95,
       "title": "Práticas de produção: parity, backup, feature flags & versionamento",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
@@ -671,53 +678,53 @@
       "title": "Hardening, entrega segura e recuperação operacional",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy",
-      "index": 95
+      "index": 96
     },
     {
       "id": "deploy-backend",
-      "index": 96,
+      "index": 97,
       "title": "Deploy do back-end em produção",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
     },
     {
       "id": "spring-profiles",
-      "index": 97,
+      "index": 98,
       "title": "Spring Profiles avançado",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
     },
     {
       "id": "mini-deploy-observavel",
-      "index": 98,
+      "index": 99,
       "title": "Mini-projeto: deploy reproduzível e observável",
       "phaseId": "production",
       "phaseTitle": "Produção, CI/CD e deploy"
     },
     {
       "id": "threads",
-      "index": 99,
+      "index": 100,
       "title": "Threads & concorrência",
       "phaseId": "messaging",
       "phaseTitle": "Mensageria depois do monólito"
     },
     {
       "id": "mensageria",
-      "index": 100,
+      "index": 101,
       "title": "Mensageria — conceitos",
       "phaseId": "messaging",
       "phaseTitle": "Mensageria depois do monólito"
     },
     {
       "id": "kafka",
-      "index": 101,
+      "index": 102,
       "title": "Kafka na prática",
       "phaseId": "messaging",
       "phaseTitle": "Mensageria depois do monólito"
     },
     {
       "id": "spring-kafka",
-      "index": 102,
+      "index": 103,
       "title": "Spring Kafka — integração",
       "phaseId": "messaging",
       "phaseTitle": "Mensageria depois do monólito"
@@ -727,53 +734,53 @@
       "title": "Kafka confiável: schemas, retries, DLT, outbox e exactly-once",
       "phaseId": "messaging",
       "phaseTitle": "Mensageria depois do monólito",
-      "index": 103
+      "index": 104
     },
     {
       "id": "pilares-profundo",
-      "index": 104,
+      "index": 105,
       "title": "Os 4 Pilares da POO — Aprofundamento Unificado",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "di-ioc-profundo",
-      "index": 105,
+      "index": 106,
       "title": "Injeção de Dependência, IoC & Ciclo de Vida de Beans — Aprofundamento",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "jvm-profundo",
-      "index": 106,
+      "index": 107,
       "title": "JVM, Bytecode e Gerenciamento de Memória — Aprofundamento",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "debugging",
-      "index": 107,
+      "index": 108,
       "title": "Técnicas de Debugging na Prática",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "concorrencia-profunda",
-      "index": 108,
+      "index": 109,
       "title": "Concorrência, Threads, Race Conditions & Assíncrono — Aprofundamento",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "arquitetura-software",
-      "index": 109,
+      "index": 110,
       "title": "Arquitetura de Software",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "ddd",
-      "index": 110,
+      "index": 111,
       "title": "Domain-Driven Design (DDD)",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
@@ -783,11 +790,11 @@
       "title": "DDD estratégico, context mapping e integração entre domínios",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos",
-      "index": 111
+      "index": 112
     },
     {
       "id": "sistemas-distribuidos",
-      "index": 112,
+      "index": 113,
       "title": "Sistemas Distribuídos: CAP & trade-offs de arquitetura sênior",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
@@ -797,60 +804,60 @@
       "title": "Consistência distribuída: CAP correto, PACELC, tempo e resiliência",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos",
-      "index": 113
+      "index": 114
     },
     {
       "id": "event-driven-profundo",
-      "index": 114,
+      "index": 115,
       "title": "Arquitetura Event-Driven & Internals do Kafka — Aprofundamento",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "testes-integracao-avancados",
-      "index": 115,
+      "index": 116,
       "title": "Testes de Integração Avançados: @SpringBootTest, @DataJpaTest & Testcontainers com Kafka",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "mini-pedidos-eventos",
-      "index": 116,
+      "index": 117,
       "title": "Mini-projeto: pedidos orientados a eventos",
       "phaseId": "architecture",
       "phaseTitle": "Arquitetura e sistemas distribuídos"
     },
     {
       "id": "estruturas-avancadas",
-      "index": 117,
+      "index": 118,
       "title": "Estruturas de Dados Avançadas",
       "phaseId": "advanced-algorithms",
       "phaseTitle": "Estruturas avançadas"
     },
     {
       "id": "code-review-adr",
-      "index": 118,
+      "index": 119,
       "title": "Code Review & Architecture Decision Records",
       "phaseId": "team",
       "phaseTitle": "Trabalho profissional em equipe"
     },
     {
       "id": "agile",
-      "index": 119,
+      "index": 120,
       "title": "Metodologias Ágeis: Scrum & Kanban",
       "phaseId": "team",
       "phaseTitle": "Trabalho profissional em equipe"
     },
     {
       "id": "conectando-front-back",
-      "index": 120,
+      "index": 121,
       "title": "Conectando front-end e back-end",
       "phaseId": "integration",
       "phaseTitle": "Integração com front-end"
     },
     {
       "id": "auth-front-ts",
-      "index": 121,
+      "index": 122,
       "title": "Autenticação no front & pincelada de TypeScript",
       "phaseId": "integration",
       "phaseTitle": "Integração com front-end"
@@ -860,39 +867,39 @@
       "title": "Front-end aplicado: estado, formulários, acessibilidade e testes",
       "phaseId": "integration",
       "phaseTitle": "Integração com front-end",
-      "index": 122
+      "index": 123
     },
     {
       "id": "websockets",
-      "index": 123,
+      "index": 124,
       "title": "WebSockets — quando HTTP não basta",
       "phaseId": "integration",
       "phaseTitle": "Integração com front-end"
     },
     {
       "id": "deploy-frontend",
-      "index": 124,
+      "index": 125,
       "title": "Deploy do front-end & monorepo vs poli-repo",
       "phaseId": "integration",
       "phaseTitle": "Integração com front-end"
     },
     {
       "id": "mapa-sistema",
-      "index": 125,
+      "index": 126,
       "title": "Glossário & mapa do sistema completo",
       "phaseId": "finish",
       "phaseTitle": "Projeto integrador e revisão"
     },
     {
       "id": "projeto-integrador",
-      "index": 126,
+      "index": 127,
       "title": "Projeto final — sistema completo de ponta a ponta",
       "phaseId": "finish",
       "phaseTitle": "Projeto integrador e revisão"
     },
     {
       "id": "quiz",
-      "index": 127,
+      "index": 128,
       "title": "Quiz de revisão",
       "phaseId": "finish",
       "phaseTitle": "Projeto integrador e revisão"

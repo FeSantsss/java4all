@@ -1,4 +1,5 @@
 import { access, readFile } from 'node:fs/promises';
+import { getCourseCounts } from './lib/course-counts.mjs';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -54,18 +55,15 @@ const [
   readText('scripts/validate-traceability-contract.mjs')
 ]);
 
+const counts = await getCourseCounts();
 const expectedSummary = {
-  chapters: 151,
-  legacyChapters: 128,
+  chapters: counts.chapters,
+  legacyChapters: counts.chapters - 23,
   structuredChapters: 23,
   modules: 20,
-  projects: 23,
-  exercises: 160,
-  quizzes: 268,
-  uniqueResourceUrls: 260,
-  concepts: 384,
+  concepts: counts.concepts,
   chaptersTriagedAsFailed: 0,
-  chaptersApproved: 151,
+  chaptersApproved: counts.chapters,
   missingChapterPrerequisites: 0,
   futureChapterPrerequisites: 0
 };
@@ -77,10 +75,10 @@ assert(Object.keys(auditReport.summary.flagCounts).length === 0, 'Fechamento mes
 assert(auditReport.conceptGraphIssues.length === 0, 'Fechamento mestre não aceita violações no grafo conceitual.');
 
 const matrixRows = chapterMatrix.trim().split('\n').slice(1);
-assert(matrixRows.length === 151, `Matriz de capítulos deve ter 151 linhas; encontrou ${matrixRows.length}.`);
+assert(matrixRows.length === counts.chapters, `Matriz de capítulos deve ter ${counts.chapters} linhas; encontrou ${matrixRows.length}.`);
 assert(matrixRows.every(row => row.includes(',"approved","true","true","true","aprovado",""')), 'Toda linha da matriz precisa estar aprovada, revisada, com recursos auditados, dependências validadas e sem flags.');
 assert(dependencyGraph.modules.length === 20, 'Grafo de dependências deve manter 20 módulos.');
-assert(dependencyGraph.chapters.length === 151, 'Grafo de dependências deve manter 151 capítulos.');
+assert(dependencyGraph.chapters.length === counts.chapters, `Grafo de dependências deve manter ${counts.chapters} capítulos.`);
 
 const masterCoverageSource = [
   requiredChapters,

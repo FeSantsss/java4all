@@ -100,6 +100,23 @@ const chapterRows = chapters.map(chapter => {
   if (futurePrerequisites.length) flags.push('pre-requisito-futuro');
 
   const declaredAuditStatus = chapter.audit?.status ?? 'pending';
+  // depthReviewed NÃO é mais um espelho de audit.status -- audit.status é
+  // autodeclarado pelo autor e a triagem estrutural acima só invalida por
+  // flags de forma (falta quiz, pré-requisito futuro etc.), nunca por
+  // profundidade de conteúdo real. depthReviewed agora exige também uma
+  // EditorialReview rastreável (todo requiredTopic com evidenceBlocks reais e
+  // sem openIssues). Isso é aditivo: NÃO reabre chaptersTriagedAsFailed/status
+  // retroativamente para os capítulos já aprovados sob o contrato anterior --
+  // apenas marca, de forma visível e honesta, quais capítulos têm essa camada
+  // de rastreabilidade e quais ainda não passaram por ela (a maioria, hoje).
+  // Ver docs/internal/content-rewrite/editorial-contract.md.
+  const editorialReview = chapter.editorialReview;
+  const hasTraceableEditorialReview = Boolean(
+    editorialReview
+    && editorialReview.requiredTopics.length > 0
+    && editorialReview.requiredTopics.every(topic => (editorialReview.evidenceBlocks?.[topic] ?? []).length > 0)
+    && editorialReview.openIssues.length === 0
+  );
   const triageStatus = declaredAuditStatus === 'approved' && flags.length
     ? 'aprovacao-invalida'
     : flags.length ? 'reprovado-na-triagem'
@@ -128,7 +145,8 @@ const chapterRows = chapters.map(chapter => {
     flags,
     generatedCompatibilityBlocks: generatedCompatibilityBlocks.length,
     declaredAuditStatus,
-    depthReviewed: declaredAuditStatus === 'approved',
+    depthReviewed: declaredAuditStatus === 'approved' && hasTraceableEditorialReview,
+    hasTraceableEditorialReview,
     resourcesAuditedForRelevance: chapter.resources.length > 0 && chapter.resources.every(resource => resource.auditStatus === 'approved'),
     dependenciesValidated: missingPrerequisites.length === 0 && futurePrerequisites.length === 0,
     status: triageStatus
@@ -159,6 +177,7 @@ const summary = {
   concepts: generated.concepts.length,
   chaptersTriagedAsFailed: chapterRows.filter(chapter => chapter.status === 'reprovado-na-triagem').length,
   chaptersApproved: chapterRows.filter(chapter => chapter.declaredAuditStatus === 'approved' && chapter.status !== 'aprovacao-invalida').length,
+  chaptersWithTraceableEditorialReview: chapterRows.filter(chapter => chapter.hasTraceableEditorialReview).length,
   missingChapterPrerequisites: chapterEdges.filter(edge => edge.missing).length,
   futureChapterPrerequisites: chapterEdges.filter(edge => edge.future).length,
   flagCounts: Object.fromEntries([...new Set(chapterRows.flatMap(chapter => chapter.flags))].sort().map(flag => [

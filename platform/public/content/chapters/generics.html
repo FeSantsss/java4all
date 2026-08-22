@@ -47,6 +47,41 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
     <span class="kw">return</span> maior;
 }</pre>
 
+      <h3>Generics são invariantes — <code>List&lt;Object&gt;</code> não é <code>List&lt;String&gt;</code></h3>
+      <pre class="code"><span class="kw">String</span>[] textos = <span class="kw">new</span> <span class="kw">String</span>[3];
+<span class="kw">Object</span>[] objetos = textos; <span class="com">// arrays são COVARIANTES -- compila (e pode explodir em runtime)</span>
+objetos[<span class="num">0</span>] = <span class="num">42</span>; <span class="com">// ArrayStoreException em runtime -- o array "lembra" que é de String</span>
+
+List&lt;<span class="kw">String</span>&gt; listaTextos = <span class="kw">new</span> ArrayList&lt;&gt;();
+<span class="com">// List&lt;Object&gt; listaObjetos = listaTextos; // ❌ NÃO compila -- generics são INVARIANTES</span></pre>
+      <p>Diferente de arrays (que são covariantes — <code>String[]</code> pode ser tratado como <code>Object[]</code>, com risco de estourar em runtime), tipos genéricos são <strong>invariantes</strong>: <code>List&lt;String&gt;</code> e <code>List&lt;Object&gt;</code> não têm nenhuma relação de subtipo entre si, mesmo <code>String</code> sendo subtipo de <code>Object</code>. Isso não é uma limitação arbitrária — é o que evita exatamente o mesmo problema do array acima, mas detectado em <strong>compilação</strong> em vez de estourar em runtime. Quando você realmente precisa dessa flexibilidade (aceitar <code>List</code> de qualquer subtipo), é para isso que existem os wildcards, a seguir.</p>
+
+      <h3>Múltiplos bounds</h3>
+      <pre class="code"><span class="com">// T precisa satisfazer AMBOS os contratos -- Comparable primeiro, interfaces depois, separados por &amp;</span>
+<span class="kw">public static</span> &lt;T <span class="kw">extends</span> Comparable&lt;T&gt; &amp; java.io.Serializable&gt; T <span class="fn">maiorSerializavel</span>(List&lt;T&gt; lista) {
+    <span class="kw">return</span> lista.stream().max(Comparable::compareTo).orElseThrow();
+}</pre>
+      <p>Um parâmetro de tipo pode exigir múltiplos contratos com <code>&amp;</code> — no máximo uma classe (que deve vir primeiro, se houver) e quantas interfaces forem necessárias. Isso é menos comum no dia a dia, mas aparece quando um método realmente precisa de duas capacidades independentes do mesmo tipo.</p>
+
+      <h3>Varargs genéricos e heap pollution</h3>
+      <pre class="code"><span class="annotation">@SafeVarargs</span> <span class="com">// promessa do autor: este método não faz nada inseguro com o array varargs</span>
+<span class="kw">public static</span> &lt;T&gt; List&lt;T&gt; <span class="fn">listaDe</span>(T... itens) {
+    <span class="kw">return</span> Arrays.asList(itens);
+}
+
+List&lt;<span class="kw">String</span>&gt; nomes = listaDe(<span class="str">"Ana"</span>, <span class="str">"Bruno"</span>); <span class="com">// funciona bem para o uso comum</span></pre>
+      <div class="warn"><b>Heap pollution:</b> por baixo, um parâmetro varargs genérico (<code>T...</code>) cria um array — e arrays genéricos reificados não existem (é o mesmo motivo de <code>new T[]</code> não compilar, a seguir). O compilador cria um <code>Object[]</code> internamente e finge que é <code>T[]</code>, emitindo um aviso de "unchecked generic array creation". <strong>Heap pollution</strong> é quando essa premissa se quebra — uma variável de um tipo genérico aponta para um objeto de tipo diferente do esperado, gerando <code>ClassCastException</code> mais tarde, longe de onde o problema realmente começou. A anotação <code>@SafeVarargs</code> só deve ser usada quando o autor do método <strong>garante</strong> que o array varargs não é exposto nem alterado de forma insegura — ela silencia o aviso, não corrige um método que de fato faz algo perigoso com o array.</div>
+
+      <h3>Por que <code>new T()</code> e <code>new T[10]</code> não compilam</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Fabrica</span>&lt;T&gt; {
+    <span class="com">// T item = new T();       // ❌ erro de compilação -- T não existe em runtime (type erasure)</span>
+    <span class="com">// T[] itens = new T[10];  // ❌ erro de compilação -- mesmo motivo</span>
+
+    <span class="com">// soluções reais: receber uma fábrica, ou aceitar Object[] com cast documentado</span>
+    <span class="kw">public</span> T <span class="fn">criar</span>(Supplier&lt;T&gt; fabrica) { <span class="kw">return</span> fabrica.get(); } <span class="com">// delega a criação para quem sabe o tipo real</span>
+}</pre>
+      <p>Como <code>T</code> não é <strong>reificável</strong> (não existe como informação de tipo em runtime, por causa do <em>type erasure</em> visto acima), o compilador não tem como saber qual construtor chamar em <code>new T()</code>, nem qual tipo de array criar em <code>new T[10]</code> — ambos exigiriam informação que já foi apagada. A solução usual é receber um <code>Supplier&lt;T&gt;</code> (ou uma referência de construtor, <code>Classe::new</code>) e delegar a criação para quem efetivamente conhece o tipo concreto.</p>
+
       <h3>Wildcards: ? extends e ? super</h3>
       <pre class="code"><span class="com">// ? extends Number: o tipo exato é desconhecido, mas produz valores como Number</span>
 <span class="kw">static double</span> <span class="fn">somarTodos</span>(List&lt;? <span class="kw">extends</span> Number&gt; numeros) {
@@ -109,6 +144,26 @@ caixaDeTexto.guardar(<span class="str">"segredo"</span>);
     }
 }
 <span class="com">// uso: repo.buscarIguais(livroProcurado);</span></pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 12.3 — Invariância na prática</h4><span class="exercise-tag m">médio</span></div>
+        <p>Escreva um método <code>somarTodos(List&lt;? extends Number&gt; numeros)</code> que soma qualquer <code>List</code> de subtipo de <code>Number</code>. Depois, tente (e explique por que não compila) escrever uma versão que recebesse <code>List&lt;Number&gt;</code> diretamente e chamá-la com uma <code>List&lt;Integer&gt;</code>.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">static double</span> <span class="fn">somarTodos</span>(List&lt;? <span class="kw">extends</span> Number&gt; numeros) {
+    <span class="kw">double</span> soma = 0;
+    <span class="kw">for</span> (Number n : numeros) soma += n.doubleValue();
+    <span class="kw">return</span> soma;
+}
+
+List&lt;<span class="kw">Integer</span>&gt; inteiros = List.of(1, 2, 3);
+somarTodos(inteiros); <span class="com">// funciona -- List&lt;Integer&gt; é aceita por List&lt;? extends Number&gt;</span>
+
+<span class="com">// static double somarTodosRigido(List&lt;Number&gt; numeros) { ... }
+// somarTodosRigido(inteiros); // NÃO compila -- List&lt;Integer&gt; não é List&lt;Number&gt;,
+// generics são invariantes; só o wildcard aceita subtipos</span></pre>
         </div>
       </div>
     </section>

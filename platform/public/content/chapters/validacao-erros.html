@@ -12,10 +12,10 @@
       <h3>Bean Validation — seu @NaoNulo, oficial</h3>
       <p>Lembra do <code>@NaoNulo</code> que você construiu no exercício 20.1? Isso é exatamente o Bean Validation, versão oficial e madura.</p>
       <pre class="code"><span class="kw">public record</span> <span class="cls">LivroDTO</span>(
-    <span class="annotation">@NotBlank</span>(message = <span class="str">"Título é obrigatório"</span>)
+    <span class="annotation">@NotBlank</span>(message = <span class="str">"Título obrigatório"</span>)
     <span class="kw">String</span> titulo,
 
-    <span class="annotation">@Positive</span>(message = <span class="str">"Páginas deve ser maior que zero"</span>)
+    <span class="annotation">@Positive</span>(message = <span class="str">"Páginas deve ser um valor positivo"</span>)
     <span class="kw">int</span> paginas,
 
     <span class="annotation">@Email</span>
@@ -39,34 +39,42 @@
       </tbody></table>
 
       <h3>@ControllerAdvice — centralizando o tratamento de erro</h3>
-      <p>Sem isso, cada controller precisaria de seu próprio <code>try/catch</code> repetido. Um <code>@ControllerAdvice</code> intercepta exceções lançadas em <strong>qualquer</strong> controller da aplicação, um único lugar para decidir como cada tipo de erro vira resposta HTTP.</p>
+      <p>Sem isso, cada controller precisaria de seu próprio <code>try/catch</code> repetido. Um <code>@ControllerAdvice</code> intercepta exceções lançadas em <strong>qualquer</strong> controller da aplicação, um único lugar para decidir como cada tipo de erro vira resposta HTTP — usando <code>ProblemDetail</code>, o formato padronizado da <a href="https://www.rfc-editor.org/rfc/rfc9457" target="_blank" rel="noopener">RFC 9457</a> para erros HTTP, em vez de inventar um DTO de erro próprio que cada cliente da API precisaria aprender do zero.</p>
 
       <pre class="code"><span class="annotation">@ControllerAdvice</span>
 <span class="kw">public class</span> <span class="cls">GlobalExceptionHandler</span> {
 
     <span class="annotation">@ExceptionHandler</span>(<span class="cls">ItemIndisponivelException</span>.<span class="kw">class</span>) <span class="com">// sua exceção do capítulo 17!</span>
-    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarItemIndisponivel</span>(<span class="cls">ItemIndisponivelException</span> e) {
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.CONFLICT) <span class="com">// 409</span>
-            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"ITEM_INDISPONIVEL"</span>, e.getMessage()));
+    <span class="kw">public</span> ProblemDetail <span class="fn">tratarItemIndisponivel</span>(<span class="cls">ItemIndisponivelException</span> e) {
+        ProblemDetail problema = ProblemDetail.forStatus(HttpStatus.CONFLICT); <span class="com">// 409</span>
+        problema.setTitle(<span class="str">"Item indisponível"</span>);
+        problema.setDetail(e.getMessage());
+        problema.setProperty(<span class="str">"codigo"</span>, <span class="str">"item.indisponivel"</span>);
+        <span class="kw">return</span> problema;
     }
 
     <span class="annotation">@ExceptionHandler</span>(MethodArgumentNotValidException.<span class="kw">class</span>) <span class="com">// disparada por @Valid quando falha</span>
-    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarValidacao</span>(MethodArgumentNotValidException e) {
-        <span class="kw">String</span> mensagens = e.getBindingResult().getFieldErrors().stream()
+    <span class="kw">public</span> ProblemDetail <span class="fn">tratarValidacao</span>(MethodArgumentNotValidException e) {
+        ProblemDetail problema = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST); <span class="com">// 400</span>
+        problema.setTitle(<span class="str">"Dados inválidos"</span>);
+        problema.setProperty(<span class="str">"codigo"</span>, <span class="str">"validacao.campo-invalido"</span>);
+        problema.setProperty(<span class="str">"erros"</span>, e.getBindingResult().getFieldErrors().stream()
             .map(erro -&gt; erro.getField() + <span class="str">": "</span> + erro.getDefaultMessage())
-            .collect(Collectors.joining(<span class="str">"; "</span>)); <span class="com">// streams, capítulo 13</span>
-        <span class="kw">return</span> ResponseEntity.badRequest() <span class="com">// 400</span>
-            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"VALIDACAO"</span>, mensagens));
+            .toList()); <span class="com">// streams, capítulo 13</span>
+        <span class="kw">return</span> problema;
     }
 
     <span class="annotation">@ExceptionHandler</span>(<span class="cls">Exception</span>.<span class="kw">class</span>) <span class="com">// rede de segurança -- NUNCA deixe stack trace vazar</span>
-    <span class="kw">public</span> ResponseEntity&lt;<span class="cls">ErroDTO</span>&gt; <span class="fn">tratarErroGenerico</span>(<span class="cls">Exception</span> e) {
-        <span class="kw">return</span> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) <span class="com">// 500</span>
-            .body(<span class="kw">new</span> <span class="cls">ErroDTO</span>(<span class="str">"ERRO_INTERNO"</span>, <span class="str">"Algo deu errado. Tente novamente."</span>));
+    <span class="kw">public</span> ProblemDetail <span class="fn">tratarErroGenerico</span>(<span class="cls">Exception</span> e) {
+        ProblemDetail problema = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR); <span class="com">// 500</span>
+        problema.setTitle(<span class="str">"Erro interno"</span>);
+        problema.setDetail(<span class="str">"Algo deu errado. Tente novamente."</span>);
+        problema.setProperty(<span class="str">"codigo"</span>, <span class="str">"erro.interno"</span>);
+        <span class="kw">return</span> problema;
     }
-}
+}</pre>
 
-<span class="kw">public record</span> <span class="cls">ErroDTO</span>(<span class="kw">String</span> codigo, <span class="kw">String</span> mensagem) {}</pre>
+      <p><code>ProblemDetail</code> traz de fábrica os campos padronizados pela RFC (<code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>) e ainda permite <code>setProperty(...)</code> para estender com campos próprios do seu domínio (<code>codigo</code>, <code>erros</code>) — um cliente HTTP genérico já sabe interpretar os campos padrão sem nem conhecer sua API específica, exatamente o ganho de usar um formato interoperável em vez de um <code>record</code> de erro inventado.</p>
 
       <div class="secret">Repare que os <code>@ExceptionHandler</code> mais específicos deveriam vir antes do genérico — exatamente a mesma regra dos blocos <code>catch</code> em cascata do capítulo 10 (exercício 10.2), só que agora aplicada a nível de aplicação inteira em vez de um único método. O <code>@ControllerAdvice</code> é, no fundo, um dynamic proxy interceptando exceções não capturadas — o mesmo mecanismo do capítulo 20.</div>
 
@@ -76,7 +84,7 @@
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 48.1 — Validação + erro end-to-end</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Adicione validação Bean Validation ao <code>LivroDTO</code> (título obrigatório, páginas positivas). Escreva um <code>@ControllerAdvice</code> tratando <code>MethodArgumentNotValidException</code> (400) e <code>ItemIndisponivelException</code> (409), mais um handler genérico para <code>Exception</code> (500, sem vazar detalhes internos).</p>
+        <p>Adicione validação Bean Validation ao <code>LivroDTO</code> (título obrigatório, páginas positivas). Escreva um <code>@ControllerAdvice</code> tratando <code>MethodArgumentNotValidException</code> (400) e <code>ItemIndisponivelException</code> (409), mais um handler genérico para <code>Exception</code> (500, sem vazar detalhes internos) — todos devolvendo <code>ProblemDetail</code>.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
           <p>Ver o <code>GlobalExceptionHandler</code> completo acima — cobre exatamente os três casos pedidos.</p>

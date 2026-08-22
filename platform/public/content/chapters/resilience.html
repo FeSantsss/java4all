@@ -1,9 +1,9 @@
 <section class="section tk-spring" id="resilience">
-      <div class="section-head"><span class="section-num">55</span><h2 class="section-title">Circuit Breaker com Resilience4j</h2></div>
+      <div class="section-head"><span class="section-num">55</span><h2 class="section-title">Resiliência com Resilience4j: Circuit Breaker, Retry, Bulkhead e Rate Limiter</h2></div>
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a> (dynamic proxy)</div>
       </div>
 
@@ -35,7 +35,95 @@
 
       <div class="secret">Assim como <code>@Transactional</code> (capítulo 33) e <code>@PreAuthorize</code> (capítulo 52), <code>@CircuitBreaker</code> funciona via dynamic proxy (capítulo 20) — o método real só é chamado através de um wrapper que monitora falhas e decide se deve ou não deixar a chamada passar. É o mesmo mecanismo de interceptação reaparecendo pela quarta vez no curso, cada vez resolvendo um problema transversal diferente (transação, autorização, resiliência) sem espalhar código repetido em cada método de negócio.</div>
 
-      <div class="study-tip">Não confunda circuit breaker com retry simples. Retry tenta de novo assumindo que a falha é passageira; circuit breaker existe justamente para <strong>parar</strong> de tentar quando fica claro que o problema é persistente — tentar repetidamente contra um serviço já sobrecarregado só piora a situação dele. As duas técnicas costumam ser combinadas: algumas tentativas de retry, e se continuar falhando, o circuito abre.</div>
+      <h3>Configuração real: parâmetros que decidem o comportamento, não só "ativar"</h3>
+      <p><code>@CircuitBreaker(name = "servico-pagamento")</code> sozinho usa valores padrão que raramente são os certos para o seu caso. O nome da instância (<code>servico-pagamento</code>) conecta a anotação a uma configuração explícita:</p>
+      <pre class="code">resilience4j:
+  circuitbreaker:
+    instances:
+      servico-pagamento:
+        sliding-window-type: COUNT_BASED       <span class="com"># ou TIME_BASED (janela por tempo, não por quantidade de chamadas)</span>
+        sliding-window-size: <span class="num">10</span>              <span class="com"># quantas chamadas recentes entram na janela avaliada</span>
+        minimum-number-of-calls: <span class="num">5</span>            <span class="com"># não decide nada com menos de 5 chamadas na janela</span>
+        failure-rate-threshold: <span class="num">50</span>           <span class="com"># % de falhas na janela que abre o circuito</span>
+        wait-duration-in-open-state: <span class="num">30</span>s      <span class="com"># quanto tempo fica aberto antes de testar de novo</span>
+        permitted-number-of-calls-in-half-open-state: <span class="num">3</span> <span class="com"># chamadas de teste no estado meio-aberto</span></pre>
+      <p><code>sliding-window-size</code>/<code>minimum-number-of-calls</code> evitam que 2 falhas em 2 chamadas (100%!) abram o circuito precocemente — a janela precisa de uma amostra mínima antes de decidir. <code>failure-rate-threshold</code> é a métrica de decisão real: com os valores acima, o circuito só abre se pelo menos 50% das últimas 10 chamadas (com no mínimo 5 avaliadas) falharem.</p>
+
+      <h3>Retry como padrão próprio — não é "tentar de novo" ingênuo</h3>
+      <p>Retry merece sua própria anotação e configuração, separada do circuit breaker:</p>
+      <pre class="code"><span class="annotation">@Retry</span>(name = <span class="str">"servico-pagamento"</span>, fallbackMethod = <span class="str">"pagamentoIndisponivel"</span>)
+<span class="annotation">@CircuitBreaker</span>(name = <span class="str">"servico-pagamento"</span>, fallbackMethod = <span class="str">"pagamentoIndisponivel"</span>)
+<span class="kw">public</span> <span class="cls">RespostaPagamento</span> <span class="fn">processar</span>(<span class="cls">Pagamento</span> pagamento) {
+    <span class="kw">return</span> clienteHttp.chamarServicoExterno(pagamento);
+}</pre>
+      <pre class="code">resilience4j:
+  retry:
+    instances:
+      servico-pagamento:
+        max-attempts: <span class="num">3</span>
+        wait-duration: <span class="num">500</span>ms
+        enable-exponential-backoff: <span class="kw">true</span>       <span class="com"># 500ms, depois ~1s, depois ~2s -- não martela o serviço já fraco</span>
+        exponential-backoff-multiplier: <span class="num">2</span>
+        retry-exceptions:
+          - java.net.ConnectException          <span class="com"># falha de rede: vale tentar de novo</span>
+        ignore-exceptions:
+          - com.exemplo.ValidacaoException <span class="com"># erro do cliente: repetir não muda nada</span></pre>
+      <div class="warn"><b>A ordem de aplicação dos decoradores não é a ordem das anotações no código — é fixa e documentada pelo Resilience4j:</b> <code>Retry ( CircuitBreaker ( RateLimiter ( TimeLimiter ( Bulkhead ( chamada real ) ) ) ) )</code>. <code>Retry</code> é a camada mais externa. Isso importa na prática: se o circuito está <strong>aberto</strong>, cada nova tentativa do <code>Retry</code> é barrada instantaneamente pelo <code>CircuitBreaker</code> (que já está por dentro dele) — o <code>Retry</code> não ignora o circuito aberto, ele só volta a tentar vezes suficientes para <em>observar</em> que o circuito continua aberto. Sem entender essa ordem fixa, é fácil esperar comportamento diferente do que o Resilience4j realmente executa.</div>
+
+      <h3>Bulkhead: isolando o dano de uma dependência lenta</h3>
+      <p>Circuit breaker reage a <em>falhas</em>. Bulkhead protege contra um problema diferente: uma dependência lenta (não necessariamente falhando) que consome tantas threads/conexões simultâneas que acaba faminta o resto da aplicação — o nome vem dos compartimentos estanques de um navio: um alagamento fica contido numa seção, sem afundar o navio inteiro.</p>
+      <pre class="code">resilience4j:
+  bulkhead:
+    instances:
+      servico-pagamento:
+        max-concurrent-calls: <span class="num">10</span>    <span class="com"># no máximo 10 chamadas simultâneas a este serviço</span>
+        max-wait-duration: <span class="num">0</span>         <span class="com"># chamada além do limite falha na hora, não espera fila</span></pre>
+      <p>Existem duas implementações: <code>SemaphoreBulkhead</code> (o padrão, mostrado acima — limita concorrência sem trocar de thread) e <code>ThreadPoolBulkhead</code> (isola a chamada num pool de threads dedicado e separado do resto da aplicação, com <code>max-thread-pool-size</code>/<code>core-thread-pool-size</code>/<code>queue-capacity</code> próprios). Use <code>ThreadPoolBulkhead</code> quando quiser que uma dependência lenta nunca consiga consumir threads que o resto da aplicação precisa.</p>
+
+      <h3>Rate Limiter: protegendo o outro lado (e sua própria cota) de você mesmo</h3>
+      <p>Bulkhead limita <strong>concorrência</strong> (quantas chamadas simultâneas); Rate Limiter limita <strong>taxa</strong> (quantas chamadas por período de tempo, mesmo que nenhuma seja concorrente). É a diferença entre "não deixo 10 pessoas entrarem juntas" e "não deixo mais de 100 pessoas entrarem por hora" — proteções diferentes, para problemas diferentes. Rate Limiter é essencial quando a API externa tem cota contratual (ex.: 100 requisições/minuto) e estourá-la gera erro 429 ou até suspensão da conta:</p>
+      <pre class="code">resilience4j:
+  ratelimiter:
+    instances:
+      servico-pagamento:
+        limit-for-period: <span class="num">10</span>        <span class="com"># no máximo 10 chamadas por período</span>
+        limit-refresh-period: <span class="num">1</span>s      <span class="com"># o período se renova a cada 1 segundo</span>
+        timeout-duration: <span class="num">0</span>           <span class="com"># chamada além do limite falha na hora (RequestNotPermitted)</span></pre>
+
+      <h3>Classificação de falha: nem toda exceção deveria contar contra o circuito</h3>
+      <p>Se <code>@CircuitBreaker</code> conta <em>qualquer</em> exceção como falha, um cliente enviando dados inválidos repetidamente (erro do <strong>cliente</strong>, não do serviço externo) pode abrir o circuito para todo mundo — um efeito colateral injusto e perigoso. <code>ignore-exceptions</code> (visto na configuração de Retry acima) também se aplica ao circuit breaker: exceções de validação de domínio não deveriam contar como sinal de que o serviço externo está com problema. Reserve a contagem de falha para o que de fato indica indisponibilidade real: timeout, erro de conexão, <code>5xx</code> do serviço remoto.</p>
+
+      <h3>Composição na prática</h3>
+      <pre class="code"><span class="annotation">@Retry</span>(name = <span class="str">"servico-pagamento"</span>)
+<span class="annotation">@CircuitBreaker</span>(name = <span class="str">"servico-pagamento"</span>, fallbackMethod = <span class="str">"pagamentoIndisponivel"</span>)
+<span class="annotation">@Bulkhead</span>(name = <span class="str">"servico-pagamento"</span>)
+<span class="kw">public</span> <span class="cls">RespostaPagamento</span> <span class="fn">processar</span>(<span class="cls">Pagamento</span> pagamento) {
+    <span class="kw">return</span> clienteHttp.chamarServicoExterno(pagamento);
+}</pre>
+      <p>Combinar os três não é redundância — cada um resolve um problema diferente: <code>Bulkhead</code> evita que essa dependência específica esgote threads/conexões do resto da aplicação; <code>CircuitBreaker</code> para de insistir quando fica claro que o serviço está indisponível; <code>Retry</code> absorve falhas passageiras antes de qualquer um dos outros dois entrar em ação. Nem todo método precisa dos três — comece pelo que resolve o problema real observado (ver seção de observabilidade a seguir), não por "aplicar tudo por precaução".</p>
+
+      <h3>Observabilidade: veja o estado do circuito, não adivinhe</h3>
+      <p>Resilience4j publica métricas via Micrometer, expostas pelo Actuator (capítulo de Observabilidade aprofunda o Actuator em si):</p>
+      <pre class="code">management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers,retries,bulkheads,ratelimiters,metrics</pre>
+      <p>Com isso, <code>/actuator/circuitbreakers</code> lista o estado atual de cada instância nomeada, e métricas como <code>resilience4j.circuitbreaker.calls</code>/<code>resilience4j.circuitbreaker.state</code> ficam disponíveis para dashboards. Descobrir que um circuito está preso em "aberto" olhando um dashboard é muito mais rápido do que descobrir isso por reclamação de usuário.</p>
+
+      <h3>Testando resiliência: forçando o circuito a abrir sem esperar falhas reais</h3>
+      <pre class="code"><span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveChamarFallbackQuandoCircuitoAberto</span>() {
+    <span class="cls">CircuitBreaker</span> circuitBreaker = circuitBreakerRegistry.circuitBreaker(<span class="str">"servico-pagamento"</span>);
+    circuitBreaker.transitionToOpenState(); <span class="com">// muda o estado direto -- o teste não precisa de falhas reais</span>
+
+    <span class="cls">RespostaPagamento</span> resposta = pagamentoServico.processar(pagamento);
+
+    assertThat(resposta.status()).isEqualTo(<span class="str">"INDISPONIVEL"</span>); <span class="com">// fallback foi chamado, não o serviço real</span>
+}</pre>
+      <p><code>CircuitBreakerRegistry</code> permite forçar o estado diretamente (<code>transitionToOpenState()</code>/<code>transitionToClosedState()</code>) — um teste determinístico não deveria depender de gerar falhas reais repetidas só para observar o circuito abrir.</p>
+
+      <div class="study-tip">Não confunda circuit breaker com retry simples. Retry tenta de novo assumindo que a falha é passageira; circuit breaker existe justamente para <strong>parar</strong> de tentar quando fica claro que o problema é persistente — tentar repetidamente contra um serviço já sobrecarregado só piora a situação dele. Comece configurando um só padrão (geralmente circuit breaker) com valores conservadores, meça o comportamento real em produção, e só então adicione retry/bulkhead/rate limiter conforme o problema observado justificar — não os quatro de uma vez em todo método.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 55.1 — Protegendo uma chamada externa</h4><span class="exercise-tag m">médio</span></div>
@@ -54,6 +142,15 @@
         <span class="kw">return</span> 25.00; <span class="com">// valor padrão -- melhor que travar o checkout inteiro</span>
     }
 }</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 55.2 — Por que o Retry não "furou" o circuito aberto</h4><span class="exercise-tag d">difícil</span></div>
+        <p><code>ServicoFrete.calcularFrete</code> está anotado com <code>@Retry(name = "servico-frete", maxAttempts = 3)</code> e <code>@CircuitBreaker(name = "servico-frete")</code>. O circuito já está aberto (falhas recentes ultrapassaram o threshold). Um novo pedido chama <code>calcularFrete</code>. Quantas vezes o serviço HTTP real de frete é efetivamente chamado, e por quê?</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><strong>Zero vezes.</strong> A ordem fixa de decoradores do Resilience4j coloca <code>Retry</code> por fora e <code>CircuitBreaker</code> por dentro dele (<code>Retry(CircuitBreaker(...))</code>). Com o circuito aberto, cada uma das até 3 tentativas do <code>Retry</code> é interceptada pelo <code>CircuitBreaker</code>, que devolve <code>CallNotPermittedException</code> instantaneamente, sem nunca chegar a chamar <code>clienteHttp.consultarFreteExterno(cep)</code>. O fallback é chamado ao final das tentativas esgotadas, mas o serviço externo real nunca é tocado enquanto o circuito estiver aberto.</p>
         </div>
       </div>
     </section>

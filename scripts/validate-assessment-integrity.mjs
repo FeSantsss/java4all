@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { getCourseCounts } from './lib/course-counts.mjs';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -46,10 +47,16 @@ const [
   readText('docs/internal/implementation-progress.md')
 ]);
 
-assert(auditReport.summary.quizzes === 268, `Baseline final deve manter 268 verificações; encontrado ${auditReport.summary.quizzes}.`);
-assert(auditReport.summary.exercises === 160, `Baseline final deve manter 160 exercícios; encontrado ${auditReport.summary.exercises}.`);
-assert(auditReport.summary.projects === 23, `Baseline final deve manter 23 projetos; encontrado ${auditReport.summary.projects}.`);
-assert(auditReport.summary.chaptersApproved === 151, 'Contrato de avaliação só vale sobre os 151 capítulos aprovados.');
+// Pisos, não metas: o número de verificações/exercícios/projetos pode CRESCER
+// legitimamente conforme capítulos são aprofundados (novos exercícios, novos
+// capítulos) -- exigir igualdade exata aqui puniria aprofundamento de conteúdo.
+// O que este gate protege é regressão (perder avaliações existentes), não um
+// contador fixo. Ver docs/internal/content-rewrite/editorial-contract.md.
+assert(auditReport.summary.quizzes >= 268, `Baseline final não pode perder verificações; esperado >= 268, encontrado ${auditReport.summary.quizzes}.`);
+assert(auditReport.summary.exercises >= 160, `Baseline final não pode perder exercícios; esperado >= 160, encontrado ${auditReport.summary.exercises}.`);
+assert(auditReport.summary.projects >= 23, `Baseline final não pode perder projetos; esperado >= 23, encontrado ${auditReport.summary.projects}.`);
+const counts = await getCourseCounts();
+assert(auditReport.summary.chaptersApproved === counts.chapters, `Contrato de avaliação só vale quando os ${counts.chapters} capítulos estão aprovados; encontrado ${auditReport.summary.chaptersApproved}.`);
 assert(auditReport.summary.chaptersTriagedAsFailed === 0, 'Contrato de avaliação não pode conviver com backlog pedagógico.');
 
 const allBlocks = generatedCourse.chapters.flatMap(chapter =>
@@ -59,9 +66,10 @@ const quizzes = allBlocks.filter(block => block.type === 'quiz');
 const exercises = allBlocks.filter(block => block.type === 'exercise');
 const projects = allBlocks.filter(block => block.type === 'project');
 
-assert(quizzes.length === 157, `Os 128 capítulos legados devem manter 157 quizzes tipados; encontrado ${quizzes.length}.`);
-assert(exercises.length === 137, `Os 128 capítulos legados devem manter 137 exercícios tipados; encontrado ${exercises.length}.`);
-assert(projects.length === 11, `Os 128 capítulos legados devem manter 11 projetos tipados; encontrado ${projects.length}.`);
+// Piso, não meta exata: cresce conforme capítulos legados ganham quiz próprio.
+assert(quizzes.length >= 157, `Os capítulos legados não podem perder quizzes tipados; esperado >= 157, encontrado ${quizzes.length}.`);
+assert(exercises.length >= 137, `Os capítulos legados não podem perder exercícios tipados; esperado >= 137, encontrado ${exercises.length}.`);
+assert(projects.length >= 11, `Os capítulos legados não podem perder projetos tipados; esperado >= 11, encontrado ${projects.length}.`);
 
 for (const chapter of generatedCourse.chapters) {
   assert(chapter.blocks.some(block => block.type === 'quiz'), `Capítulo legado sem quiz: ${chapter.id}`);

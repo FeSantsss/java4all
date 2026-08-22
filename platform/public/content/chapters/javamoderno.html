@@ -26,7 +26,37 @@ resultado.ifPresent(u -&gt; System.out.println(u.getNome()));
 
       <div class="secret"><code>Optional&lt;T&gt;</code> representa zero ou um resultado. Antes de escolher entre <code>orElse</code>, <code>orElseGet</code>, <code>map</code> e <code>orElseThrow</code>, decida o contrato do chamador: usar um padrão, transformar o valor, propagar ausência ou considerar a ausência uma falha.</div>
 
-      <div class="warn"><b>Optional não é substituto universal de <code>null</code>.</b> Seu uso principal é o retorno que pode não produzir valor. Em campos, parâmetros ou coleções, costuma aumentar estados e camadas sem esclarecer o contrato. Uma coleção vazia já representa “nenhum elemento”; <code>List&lt;Optional&lt;T&gt;&gt;</code> normalmente mistura duas ausências diferentes sem necessidade.</div>
+      <h3>A API completa do Optional, método a método</h3>
+      <pre class="code">Optional&lt;<span class="cls">Usuario</span>&gt; presente = Optional.of(usuario);       <span class="com">// exige valor não-null -- lança NPE se receber null</span>
+Optional&lt;<span class="cls">Usuario</span>&gt; vazio = Optional.empty();               <span class="com">// representa explicitamente "nenhum valor"</span>
+Optional&lt;<span class="cls">Usuario</span>&gt; talvez = Optional.ofNullable(usuarioOuNull); <span class="com">// aceita null -- vira Optional.empty() quando recebe null</span>
+
+presente.isPresent();  <span class="com">// true -- tem valor?</span>
+presente.isEmpty();    <span class="com">// false -- é a negação de isPresent(), só mais legível em alguns contextos</span></pre>
+      <pre class="code">presente.ifPresent(u -&gt; System.out.println(u.getNome()));           <span class="com">// executa só se houver valor; não faz nada se vazio</span>
+
+presente.ifPresentOrElse(
+    u -&gt; System.out.println(<span class="str">"Encontrado: "</span> + u.getNome()),
+    () -&gt; System.out.println(<span class="str">"Nenhum usuário"</span>)                <span class="com">// executa só se VAZIO -- o "senão" que ifPresent sozinho não tem</span>
+);</pre>
+      <pre class="code">Optional&lt;<span class="kw">String</span>&gt; nome = presente.map(<span class="cls">Usuario</span>::getNome); <span class="com">// transforma o valor SE presente; continua Optional.empty() se vazio</span>
+
+Optional&lt;<span class="cls">Usuario</span>&gt; encontrado = presente.filter(u -&gt; u.isAtivo()); <span class="com">// vira Optional.empty() se o valor presente não satisfizer o predicado</span>
+
+<span class="com">// flatMap evita Optional&lt;Optional&lt;T&gt;&gt; quando a função já devolve um Optional</span>
+Optional&lt;<span class="cls">Endereco</span>&gt; endereco = presente.flatMap(<span class="cls">Usuario</span>::buscarEnderecoPrincipal); <span class="com">// buscarEnderecoPrincipal() já retorna Optional&lt;Endereco&gt;</span></pre>
+      <pre class="code"><span class="cls">Usuario</span> a = presente.orElse(<span class="cls">Usuario</span>.ANONIMO);            <span class="com">// valor padrão -- SEMPRE avaliado, mesmo se presente já tiver valor</span>
+<span class="cls">Usuario</span> b = presente.orElseGet(() -&gt; criarUsuarioPadrao()); <span class="com">// padrão preguiçoso -- só executa o Supplier se realmente vazio</span>
+<span class="cls">Usuario</span> c = presente.orElseThrow();                       <span class="com">// lança NoSuchElementException se vazio (sem mensagem customizada)</span>
+<span class="cls">Usuario</span> d = presente.orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">UsuarioNaoEncontradoException</span>(id)); <span class="com">// exceção customizada</span>
+
+<span class="com">// stream() -- ponte para compor com pipelines de Stream, tratando ausência como zero elementos</span>
+List&lt;<span class="cls">Usuario</span>&gt; usuarios = List.of(presente, vazio).stream()
+    .flatMap(Optional::stream) <span class="com">// achata: Optional presente vira 1 elemento, vazio vira 0</span>
+    .toList();</pre>
+      <div class="warn"><b><code>orElse</code> vs <code>orElseGet</code>:</b> <code>orElse(valorPadrao)</code> <strong>sempre</strong> avalia <code>valorPadrao</code> — mesmo quando o <code>Optional</code> já tem um valor presente e o padrão será descartado. Se calcular o padrão for caro (uma consulta ao banco, uma chamada de rede), isso desperdiça trabalho. <code>orElseGet(() -&gt; ...)</code> recebe um <code>Supplier</code> e só o executa quando realmente precisa — prefira <code>orElseGet</code> sempre que o valor padrão não for um literal ou constante já calculada.</div>
+
+      <div class="warn"><b>Optional não é substituto universal de <code>null</code>.</b> Seu uso principal é o retorno que pode não produzir valor. Em campos, parâmetros ou coleções, costuma aumentar estados e camadas sem esclarecer o contrato. Uma coleção vazia já representa “nenhum elemento”; <code>List&lt;Optional&lt;T&gt;&gt;</code> normalmente mistura duas ausências diferentes sem necessidade. E <code>optional.get()</code> sem checagem prévia (<code>isPresent()</code>, ou melhor, sem nunca precisar checar por já usar <code>map</code>/<code>orElseThrow</code>) é um <em>code smell</em>: se a presença não está provada pelo fluxo do código, é exatamente o mesmo risco do <code>null</code> que o <code>Optional</code> deveria eliminar.</div>
 
       <h3>var — inferência de tipo local</h3>
       <pre class="code">var lista = <span class="kw">new</span> ArrayList&lt;<span class="cls">Livro</span>&gt;(); <span class="com">// o compilador infere: List&lt;Livro&gt;... na verdade ArrayList&lt;Livro&gt;</span>

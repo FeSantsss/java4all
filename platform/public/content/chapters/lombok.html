@@ -7,7 +7,7 @@
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#encapsulamento">04 · Encapsulamento</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a></div>
       </div>
 
-      <p>Lembra de escrever getters, setters, construtores e <code>equals</code>/<code>hashCode</code>/<code>toString</code> na mão nos capítulos 04 e 05? Isso é exatamente o que <strong>Lombok</strong> gera automaticamente — sem reflection em runtime, direto no bytecode durante a compilação.</p>
+      <p>Lembra de escrever getters, setters, construtores e <code>equals</code>/<code>hashCode</code>/<code>toString</code> na mão nos capítulos 04 e 05? Isso é exatamente o que <strong>Lombok</strong> gera automaticamente, sem reflection em runtime — a geração acontece durante a compilação, antes de existir qualquer <code>.class</code>.</p>
 
       <div class="code-toggle-bar">
         <button class="ct-btn bad active">❌ Sem Lombok</button>
@@ -42,22 +42,66 @@
     <span class="kw">private String</span> titulo;
     <span class="kw">private int</span> paginas;
 }
-<span class="com">// 8 linhas, mesmo resultado -- o código "chato" nunca existiu de verdade
-// no .java, mas existe no .class compilado final</span></pre>
+<span class="com">// 8 linhas, mesmo resultado -- o código "chato" nunca existiu no .java
+// que você escreveu, mas o compilador o insere na árvore da classe
+// antes de gerar o .class -- por isso ele aparece ao decompilar</span></pre>
       </div>
+
+      <h3>Instalando: Maven, Gradle e o annotation processor</h3>
+      <pre class="code"><span class="com">&lt;!-- pom.xml --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+    &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+    &lt;scope&gt;provided&lt;/scope&gt; <span class="com">&lt;!-- só precisa em compilação -- não deveria estar no runtime/jar final --&gt;</span>
+&lt;/dependency&gt;</pre>
+      <pre class="code"><span class="com">// build.gradle.kts</span>
+dependencies {
+    compileOnly(<span class="str">"org.projectlombok:lombok:1.18.32"</span>)
+    annotationProcessor(<span class="str">"org.projectlombok:lombok:1.18.32"</span>) <span class="com">// registra o Lombok como annotation processor no build do Gradle</span>
+    testCompileOnly(<span class="str">"org.projectlombok:lombok:1.18.32"</span>)
+    testAnnotationProcessor(<span class="str">"org.projectlombok:lombok:1.18.32"</span>)
+}</pre>
+      <p>No Maven, <code>scope=provided</code> já é suficiente porque o plugin de compilação descobre annotation processors automaticamente no classpath de compilação. No Gradle, é preciso declarar explicitamente tanto <code>compileOnly</code> (para o código enxergar as anotações) quanto <code>annotationProcessor</code> (para o processador rodar de fato durante a compilação) — esquecer a segunda linha é a causa mais comum de "Lombok não funciona" em projetos Gradle. A IDE também precisa de um plugin/suporte a annotation processing habilitado para exibir os métodos gerados sem sublinhar como erro.</p>
 
       <h3>Anotações mais usadas</h3>
       <table class="cmp">
         <tbody><tr><th>Anotação</th><th>Gera</th></tr>
-        <tr><td><code>@Getter</code>/<code>@Setter</code></td><td>Getters/setters de todos os campos (ou de um específico, aplicado no campo)</td></tr>
+        <tr><td><code>@Getter</code>/<code>@Setter</code></td><td>Getters/setters de todos os campos (ou de um específico, aplicado no campo). <code>@Setter(AccessLevel.PROTECTED)</code> restringe a visibilidade do método gerado.</td></tr>
         <tr><td><code>@NoArgsConstructor</code></td><td>Construtor vazio</td></tr>
         <tr><td><code>@AllArgsConstructor</code></td><td>Construtor com todos os campos</td></tr>
-        <tr><td><code>@Data</code></td><td>Combo: Getter + Setter + EqualsAndHashCode + ToString + construtor com campos <code>final</code></td></tr>
-        <tr><td><code>@Builder</code></td><td>Gera o Builder Pattern inteiro (capítulo 09) automaticamente</td></tr>
+        <tr><td><code>@RequiredArgsConstructor</code></td><td>Construtor apenas com os campos <code>final</code> (ou <code>@NonNull</code>) — a forma mais usada em injeção de dependência via construtor (capítulo 22), pois não força passar campos com valor default</td></tr>
+        <tr><td><code>@Data</code></td><td>Combo: Getter + Setter + EqualsAndHashCode + ToString + <code>@RequiredArgsConstructor</code></td></tr>
+        <tr><td><code>@Value</code></td><td>A versão <strong>imutável</strong> de <code>@Data</code>: classe e campos <code>final</code> por padrão, sem setters, com <code>@AllArgsConstructor</code></td></tr>
+        <tr><td><code>@Builder</code></td><td>Gera o Builder Pattern inteiro (capítulo 09) automaticamente. <code>@Singular</code> em um campo de coleção gera métodos para adicionar itens um a um ao builder.</td></tr>
+        <tr><td><code>@With</code></td><td>Gera um método <code>withCampo(novoValor)</code> que devolve uma <strong>nova</strong> instância com aquele campo alterado — útil em classes imutáveis (<code>@Value</code>), no mesmo espírito do <code>transladar(...)</code> de <code>Ponto</code> (capítulo 04)</td></tr>
         <tr><td><code>@Slf4j</code></td><td>Injeta um <code>Logger</code> pronto (capítulo 27), sem precisar declarar manualmente</td></tr>
       </tbody></table>
+      <pre class="code"><span class="annotation">@Value</span> <span class="com">// imutável: campos final, sem setters, equals/hashCode/toString incluídos</span>
+<span class="kw">public class</span> <span class="cls">Dinheiro</span> {
+    BigDecimal valor;
+    String moeda;
+}
+<span class="cls">Dinheiro</span> d = <span class="kw">new</span> <span class="cls">Dinheiro</span>(<span class="kw">new</span> BigDecimal(<span class="str">"10.00"</span>), <span class="str">"BRL"</span>);
 
-      <div class="secret">Diferente do Jackson (reflection em runtime) e do Spring (reflection + proxies em runtime), o Lombok atua em <strong>tempo de compilação</strong>, via uma API do compilador Java chamada Annotation Processing — ele literalmente reescreve o <code>.class</code> gerado, adicionando os métodos como se você os tivesse digitado. É por isso que, ao decompilar uma classe com <code>@Getter</code>, você vê os métodos <code>getX()</code> normalmente, mesmo nunca tendo escrito essa palavra no <code>.java</code>.</div>
+<span class="annotation">@With</span>
+<span class="kw">public class</span> <span class="cls">Pedido</span> {
+    <span class="kw">private final String</span> status;
+    <span class="kw">public</span> <span class="fn">Pedido</span>(<span class="kw">String</span> status) { <span class="kw">this</span>.status = status; }
+}
+<span class="cls">Pedido</span> confirmado = pedidoOriginal.withStatus(<span class="str">"CONFIRMADO"</span>); <span class="com">// nova instância, pedidoOriginal continua intacto</span></pre>
+
+      <h3>delombok: vendo o código real que o Lombok gera</h3>
+      <pre class="code">./mvnw lombok:delombok -Dlombok.copyJavadoc=<span class="kw">false</span> -DoutputDirectory=target/delombok</pre>
+      <p><strong>Delombok</strong> materializa, em arquivos <code>.java</code> reais dentro de <code>target/delombok</code>, exatamente o código que o Lombok insere na AST durante a compilação normal — getters, setters, construtores, tudo escrito por extenso. É a ferramenta certa para tirar a dúvida "o que exatamente essa anotação está gerando aqui?" sem depender só do plugin da IDE, e é útil para depurar um comportamento inesperado (por exemplo, conferir se <code>@EqualsAndHashCode</code> realmente incluiu um campo que você não esperava).</p>
+
+      <h3>lombok.config: regras de projeto para o Lombok</h3>
+      <pre class="code"><span class="com"># lombok.config, na raiz do módulo</span>
+config.stopBubbling = true
+lombok.equalsAndHashCode.callSuper = warn <span class="com"># avisa se @EqualsAndHashCode não considerar explicitamente a superclasse</span>
+lombok.anyConstructor.addConstructorProperties = true</pre>
+      <p>Um arquivo <code>lombok.config</code> permite fixar convenções de projeto (nível de acesso padrão, comportamento de <code>callSuper</code>, avisos habilitados) sem repetir configuração em cada anotação — útil em times grandes para manter consistência sobre como equals/hashCode/toString se comportam em hierarquias com herança.</p>
+
+      <div class="secret">Diferente do Jackson (reflection em runtime) e do Spring (reflection + proxies em runtime), o Lombok atua em <strong>tempo de compilação</strong> — mas de um jeito mais invasivo do que o mecanismo público de Annotation Processing (<code>javax.annotation.processing</code>) foi projetado para permitir. A API padrão de annotation processors só pode <em>gerar novos arquivos-fonte</em> a partir de anotações; ela não tem permissão para alterar a árvore sintática (AST) de uma classe já existente. O Lombok contorna isso: ele se registra como um annotation processor (é assim que <code>javac</code> o carrega e o executa durante a compilação), mas, uma vez dentro do processo, usa APIs <strong>internas e não documentadas</strong> do compilador (o pacote <code>com.sun.source</code>/a árvore interna do <code>javac</code>) para modificar diretamente a AST da sua classe <em>antes</em> dela ser convertida em bytecode — inserindo os métodos <code>getX()</code>, construtores etc. como se você os tivesse digitado no <code>.java</code>. O <code>.class</code> final reflete essa AST já modificada; o Lombok não "reescreve o `.class`" depois de pronto, ele muda o que o compilador vai transformar em `.class`. Essa dependência de internals do compilador é também por que, historicamente, cada nova versão do JDK exige uma atualização do Lombok e por que algumas IDEs precisam de um plugin específico para exibir os métodos gerados no editor.</div>
 
       <div class="warn"><b>@Data em entidades JPA é uma armadilha comum:</b> o <code>equals</code>/<code>hashCode</code> gerado usa <strong>todos</strong> os campos por padrão, incluindo relacionamentos — o que pode disparar carregamento LAZY inesperado (capítulo 46) ou comparações incorretas antes do <code>id</code> ser gerado pelo banco. Para entidades JPA, prefira anotações específicas (<code>@Getter</code>, <code>@Setter</code>) e escreva <code>equals</code>/<code>hashCode</code> manualmente baseado só no <code>id</code>, como você já fez no exercício 5.2.</div>
 
@@ -79,6 +123,26 @@
         <span class="kw">if</span> (paginas &gt; 0) <span class="kw">this</span>.paginas = paginas;
     }
 }</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 68.2 — @RequiredArgsConstructor em um @Service</h4><span class="exercise-tag m">médio</span></div>
+        <p>Reescreva uma classe <code>PedidoServico</code> com dois campos <code>final</code> (<code>NotificadorEmprestimo notificador</code> e <code>Logger log</code>, este último gerado por <code>@Slf4j</code>) usando <code>@RequiredArgsConstructor</code> em vez de escrever o construtor manualmente. Explique por que essa combinação é o padrão mais comum em classes <code>@Service</code> do Spring — e por que <code>@Data</code> seria uma escolha ruim aqui.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="annotation">@Service</span>
+<span class="annotation">@RequiredArgsConstructor</span>
+<span class="annotation">@Slf4j</span>
+<span class="kw">public class</span> <span class="cls">PedidoServico</span> {
+    <span class="kw">private final</span> <span class="cls">NotificadorEmprestimo</span> notificador; <span class="com">// campo final -- @RequiredArgsConstructor gera o construtor com ele</span>
+
+    <span class="kw">public void</span> <span class="fn">finalizar</span>(<span class="cls">Pedido</span> pedido) {
+        log.info(<span class="str">"Finalizando pedido {}"</span>, pedido.getId());
+        notificador.notificar(<span class="str">"Pedido confirmado"</span>);
+    }
+}</pre>
+          <p style="margin-top:12px"><code>@RequiredArgsConstructor</code> gera exatamente o construtor que a injeção via construtor (capítulo 22) precisa, sem boilerplate — e nada mais: sem getters/setters desnecessários para um serviço sem estado exposto. <code>@Data</code> seria ruim aqui porque gera setters (um <code>@Service</code> não deveria expor mutação de suas próprias dependências) e um <code>equals</code>/<code>hashCode</code> que não fazem sentido para uma classe de comportamento sem identidade de valor.</p>
         </div>
       </div>
     </section>

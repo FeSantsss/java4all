@@ -12,11 +12,34 @@ String nome = <span class="str">"Felipy"</span>;</pre>
       <h3>Valor primitivo versus referência</h3>
       <p>Uma variável primitiva contém o próprio valor. Uma variável de referência aponta para um objeto ou contém <code>null</code>. Copiar um primitivo copia o valor; copiar uma referência faz duas variáveis apontarem inicialmente para o mesmo objeto.</p>
       <div class="warn"><b><code>null</code> não significa vazio nem zero.</b> Significa ausência de referência. Tentar acessar um membro por uma referência nula causa <code>NullPointerException</code>.</div>
+      <h3>Literais e sufixos</h3>
+      <pre class="code"><span class="kw">long</span> populacao = <span class="num">8_100_000_000L</span>;  <span class="com">// sufixo L -- sem ele, o literal seria interpretado como int e estouraria</span>
+<span class="kw">float</span> aproximado = <span class="num">3.14f</span>;      <span class="com">// sufixo f -- literais decimais são double por padrão</span>
+<span class="kw">double</span> preciso = <span class="num">3.14</span>;          <span class="com">// sem sufixo: double</span>
+<span class="kw">char</span> inicial = <span class="str">'A'</span>;             <span class="com">// aspas simples -- um único caractere</span>
+<span class="kw">int</span> hexadecimal = <span class="num">0xFF</span>;        <span class="com">// 255 em hexadecimal</span></pre>
+      <p>Sublinhados em literais numéricos (<code>8_100_000_000L</code>) existem só para legibilidade humana — o compilador os ignora. Sem o sufixo <code>L</code>, um literal inteiro grande demais para <code>int</code> nem compila: o compilador primeiro tenta encaixá-lo como <code>int</code> (32 bits) antes de saber que você queria um <code>long</code>.</p>
+      <h3>Overflow: quando o tipo não cabe o valor</h3>
+      <pre class="code"><span class="kw">int</span> maximo = Integer.MAX_VALUE;  <span class="com">// 2147483647</span>
+<span class="kw">int</span> estourado = maximo + <span class="num">1</span>;    <span class="com">// vira -2147483648 -- NÃO lança exceção, apenas "roda" o valor</span></pre>
+      <p>Aritmética com tipos inteiros primitivos <strong>não</strong> lança exceção em overflow — o valor simplesmente dá a volta (wraps around) para o outro extremo da faixa representável. Isso é uma fonte real de bugs silenciosos em cálculos com <code>int</code> quando o resultado pode ultrapassar ~2,1 bilhões; nesses casos, use <code>long</code> desde o início do cálculo, não só no resultado.</p>
+      <h3>Divisão inteira e promoção numérica</h3>
+      <pre class="code"><span class="kw">int</span> a = <span class="num">5</span>;
+<span class="kw">int</span> b = <span class="num">2</span>;
+<span class="kw">System.out.println</span>(a / b);         <span class="com">// 2 -- divisão inteira descarta o resto, não arredonda</span>
+<span class="kw">System.out.println</span>(a / <span class="num">2.0</span>);      <span class="com">// 2.5 -- um operando double "promove" o outro para double</span>
+<span class="kw">System.out.println</span>((<span class="kw">double</span>) a / b); <span class="com">// 2.5 -- cast antes da divisão, não depois</span></pre>
+      <p>Quando os dois operandos de uma divisão são inteiros, o resultado é inteiro — a parte fracionária é descartada (truncamento em direção a zero, não arredondamento). Essa é a causa mais comum do bug "por que minha média deu 2 em vez de 2.5": basta um dos dois operandos ser <code>double</code> para a expressão inteira ser <strong>promovida</strong> a <code>double</code> antes da divisão acontecer.</p>
+      <h3><code>var</code> não é tipagem dinâmica</h3>
+      <pre class="code"><span class="kw">var</span> quantidade = <span class="num">10</span>;      <span class="com">// o compilador INFERE int a partir do literal -- e trava nesse tipo</span>
+<span class="com">// quantidade = "dez";     // erro de compilação: quantidade continua sendo int</span></pre>
+      <p><code>var</code> pede ao compilador para inferir o tipo a partir do valor inicial — a variável continua estaticamente tipada exatamente como se você tivesse escrito o tipo por extenso. A IDE mostrar o tipo inferido ao lado não é "mágica de tipagem dinâmica": é apenas o compilador revelando o que já decidiu na primeira linha. Depois de inicializada, o tipo não muda.</p>
       <h3>Conversão e perda</h3>
       <pre class="code"><span class="kw">int</span> pequeno = <span class="num">10</span>;
-<span class="kw">long</span> ampliado = pequeno;       <span class="com">// widening: seguro</span>
+<span class="kw">long</span> ampliado = pequeno;       <span class="com">// widening: seguro, sem perda de informação</span>
 <span class="kw">double</span> media = <span class="num">7.9</span>;
-<span class="kw">int</span> truncado = (<span class="kw">int</span>) media; <span class="com">// narrowing: vira 7, não arredonda</span></pre>
-      <p>Variáveis locais precisam ser inicializadas antes do uso. Campos de objetos recebem valores padrão, mas depender disso sem intenção explícita reduz clareza.</p>
-      <div class="exercise"><div class="exercise-head"><h4>Preveja antes de executar</h4><span class="exercise-tag f">Fundamento</span></div><p>Explique o valor e o tipo de cada expressão: <code>5 / 2</code>, <code>5 / 2.0</code>, <code>(double) 5 / 2</code> e <code>(int) 5.9</code>.</p></div>
+<span class="kw">int</span> truncado = (<span class="kw">int</span>) media; <span class="com">// narrowing: vira 7, não arredonda -- descarta a parte decimal</span></pre>
+      <p><strong>Widening</strong> (de um tipo menor para um maior compatível, como <code>int</code> → <code>long</code>) acontece automaticamente e nunca perde informação. <strong>Narrowing</strong> (o caminho inverso) exige um cast explícito porque pode perder dados — o compilador força você a reconhecer esse risco escrevendo <code>(int)</code> na frente.</p>
+      <p>Variáveis locais precisam ser inicializadas antes do uso — o compilador recusa compilar uma leitura de variável local sem valor atribuído. Campos de objetos recebem valores padrão automaticamente (0, false, null conforme o tipo), mas depender disso sem inicialização explícita reduz a clareza de quem lê o código depois.</p>
+      <div class="exercise"><div class="exercise-head"><h4>Preveja antes de executar</h4><span class="exercise-tag f">Fundamento</span></div><p>Explique o valor e o tipo de cada expressão: <code>5 / 2</code>, <code>5 / 2.0</code>, <code>(double) 5 / 2</code> e <code>(int) 5.9</code>. Depois preveja o resultado de <code>Integer.MAX_VALUE + 1</code> e explique por que não é uma exceção.</p></div>
     </section>

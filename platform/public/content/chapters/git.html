@@ -58,6 +58,58 @@ git merge feature/emprestimo      <span class="com"># traz as mudanças de volta
         </ul>
       </div>
 
+      <h3>O modelo mental completo: working tree → staging → commit → branch → remote</h3>
+      <pre class="code">working tree            <span class="com"># os arquivos como você vê no disco agora</span>
+    ↓ git add
+staging area / index    <span class="com"># o que ENTRARÁ no próximo commit (uma "prévia" do commit)</span>
+    ↓ git commit
+commit local             <span class="com"># snapshot permanente no histórico DESTE repositório</span>
+    ↓ git push
+remote (origin)          <span class="com"># cópia do histórico em outro lugar (GitHub, GitLab...) -- não sincroniza sozinho</span></pre>
+      <p>Cada seta acima é uma ação explícita, nunca automática: editar um arquivo não move nada para staging; <code>git add</code> não cria um commit; <code>git commit</code> não envia nada para o remoto. Entender essas quatro paradas resolve a maior parte da confusão de iniciante sobre "por que minha mudança não apareceu no GitHub".</p>
+
+      <h3>Remoto: clone, fetch, pull e push</h3>
+      <pre class="code">git clone &lt;url-do-repositorio-remoto&gt;   <span class="com"># copia um repositório remoto inteiro (histórico + branches) para sua máquina</span>
+
+git remote -v              <span class="com"># lista os remotos configurados -- "origin" é o nome convencional do remoto principal</span>
+git fetch origin           <span class="com"># baixa commits/branches novos do remoto SEM mesclar no seu branch atual</span>
+git pull origin main       <span class="com"># equivale a: git fetch + git merge (ou rebase, se configurado) -- baixa E mescla</span>
+git push origin feature/x  <span class="com"># envia seus commits locais da branch feature/x para o remoto</span></pre>
+      <div class="secret"><code>fetch</code> e <code>pull</code> são frequentemente confundidos: <code>fetch</code> só atualiza sua visão do remoto (branches como <code>origin/main</code>), sem tocar no seu trabalho local — é seguro rodar a qualquer momento. <code>pull</code> já tenta mesclar essa atualização no seu branch atual, o que pode gerar conflito imediatamente. Em caso de dúvida sobre o estado do remoto, prefira <code>fetch</code> primeiro e decidir conscientemente como integrar, em vez de <code>pull</code> direto.</div>
+
+      <h3>Desfazendo mudanças: restore, revert e reset</h3>
+      <pre class="code">git restore arquivo.java            <span class="com"># descarta mudanças NÃO commitadas no working tree (volta ao último commit)</span>
+git restore --staged arquivo.java   <span class="com"># tira do staging sem descartar a mudança no arquivo</span>
+
+git revert &lt;hash-do-commit&gt;         <span class="com"># cria um NOVO commit que desfaz o efeito de um commit antigo -- preserva histórico, seguro em branch compartilhada</span>
+
+git reset --soft &lt;hash&gt;             <span class="com"># move o branch para outro commit, mantém staging e working tree intactos</span>
+git reset --mixed &lt;hash&gt;            <span class="com"># (padrão) também desfaz o staging, mas preserva o working tree</span>
+git reset --hard &lt;hash&gt;             <span class="com"># descarta staging E working tree -- PERDE mudanças não commitadas, sem confirmação</span></pre>
+      <div class="warn"><b><code>reset --hard</code> é destrutivo e o Git não pede confirmação.</b> Ele reescreve para onde o branch aponta e descarta qualquer mudança não commitada no caminho — não há lixeira. Prefira <code>git revert</code> em qualquer branch que outras pessoas já possam ter baixado: ele preserva o histórico e nunca reescreve commits existentes, apenas adiciona um novo que desfaz o anterior. Reserve <code>reset --hard</code> para o seu próprio trabalho local ainda não compartilhado.</div>
+
+      <h3>Guardando trabalho em progresso: stash</h3>
+      <pre class="code">git stash                    <span class="com"># guarda mudanças não commitadas de lado e limpa o working tree</span>
+git stash list                <span class="com"># lista os stashes guardados</span>
+git stash pop                 <span class="com"># reaplica o stash mais recente E remove da lista</span>
+git stash apply                <span class="com"># reaplica sem remover -- útil para aplicar o mesmo stash em mais de um lugar</span></pre>
+      <p><code>stash</code> resolve o caso "preciso trocar de branch agora, mas não quero commitar isto ainda nem perder o progresso" — guarda o estado do working tree/staging de lado, disponível para recuperar depois, em qualquer branch.</p>
+
+      <h3>reflog: a rede de segurança contra "eu perdi meu commit"</h3>
+      <pre class="code">git reflog   <span class="com"># histórico de TODOS os pontos para onde HEAD já apontou nesta máquina -- inclusive commits "perdidos" por reset --hard</span>
+git checkout &lt;hash-do-reflog&gt;   <span class="com"># volta a enxergar um commit que um reset --hard parecia ter apagado</span></pre>
+      <p>Um <code>reset --hard</code> ou uma branch deletada por engano raramente apaga o commit de verdade imediatamente — o Git mantém um registro local (<code>reflog</code>) de para onde <code>HEAD</code> apontou, geralmente por semanas, mesmo que nenhum branch aponte mais para aquele commit. Antes de assumir que um commit se perdeu para sempre, confira o <code>reflog</code>.</p>
+
+      <h3>Tags: marcando um ponto específico do histórico</h3>
+      <pre class="code">git tag v1.0.0                 <span class="com"># marca o commit atual com uma tag leve</span>
+git tag -a v1.0.0 -m "Release 1.0.0"  <span class="com"># tag anotada -- guarda autor, data e mensagem, recomendada para releases</span>
+git push origin v1.0.0          <span class="com"># tags não são enviadas ao remoto automaticamente com push comum</span></pre>
+      <p>Uma <strong>tag</strong> marca permanentemente um commit específico — tipicamente usada para releases (<code>v1.0.0</code>, <code>v2.1.3</code>). Diferente de uma branch, uma tag não se move conforme novos commits são adicionados.</p>
+
+      <h3>Detached HEAD: quando você não está "em cima" de nenhum branch</h3>
+      <pre class="code">git checkout &lt;hash-de-um-commit-antigo&gt;   <span class="com"># HEAD passa a apontar direto para um commit, não para um branch</span></pre>
+      <div class="warn"><b>Detached HEAD não é um erro, mas exige cuidado.</b> Nesse estado, novos commits ainda funcionam, mas não pertencem a nenhum branch — se você trocar de branch sem antes criar um novo branch a partir dali (<code>git checkout -b nome-do-branch</code>), esses commits ficam sem uma referência apontando para eles e dependem do <code>reflog</code> para serem recuperados. Útil para inspecionar um estado antigo do projeto; perigoso para trabalhar de verdade sem criar um branch primeiro.</div>
+
       <h3>Pull Request — a unidade social do trabalho em equipe</h3>
       <p>Um <strong>Pull Request</strong> (PR) é um pedido para mesclar sua branch na branch principal, geralmente com revisão de código de outra pessoa antes de aceitar. É a prática padrão em qualquer time — mesmo sozinho, vale simular esse fluxo para manter <code>main</code> sempre funcional.</p>
 
@@ -88,6 +140,15 @@ git commit -m "Adiciona esqueleto de SmsServico"
 
 git checkout main
 git merge feature/notificacao-sms</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 29.2 — Desfazer com segurança</h4><span class="exercise-tag m">médio</span></div>
+        <p>No mesmo repositório, faça uma mudança qualquer no arquivo e rode <code>git stash</code>. Confirme com <code>git status</code> que o working tree está limpo. Recupere a mudança com <code>git stash pop</code>. Em seguida, faça um commit "errado" de propósito e desfaça-o com <code>git revert</code> (não <code>reset --hard</code>) — explique por que <code>revert</code> foi a escolha certa aqui, mesmo trabalhando sozinho.</p>
+        <button class="reveal-btn">Ver critérios</button>
+        <div class="solution">
+          <p><code>git revert</code> cria um novo commit que desfaz o anterior, preservando o histórico completo — útil como hábito mesmo sozinho, porque documenta a correção em vez de apagar rastro do que aconteceu. <code>reset --hard</code> reescreveria o histórico e descartaria o commit por completo, o que é arriscado assim que o commit já foi enviado (<code>push</code>) para um remoto compartilhado com outras pessoas.</p>
         </div>
       </div>
     </section>

@@ -2,52 +2,1034 @@
   "version": 1,
   "phase": 5,
   "concepts": [
-    {"id":"path-filesystem","name":"Path, filesystem e caminho portável","aliases":["Path","filesystem"],"introducedIn":"java-io","reinforcedIn":["mini-importador-pedidos","process-api-cli"],"prerequisiteConceptIds":["classpath-compilacao"],"commonConfusions":["tratar caminho como String comum","assumir separador fixo do sistema"],"outcomes":["montar caminhos portáveis e distinguir caminho, arquivo e diretório"]},
-    {"id":"byte-char-charset","name":"Bytes, caracteres e Charset","aliases":["UTF-8","encoding"],"introducedIn":"java-io","reinforcedIn":["json","mini-importador-pedidos"],"prerequisiteConceptIds":["string-imutavel"],"commonConfusions":["achar que texto é byte sem codificação","confiar no charset padrão da máquina"],"outcomes":["declarar charset e diagnosticar texto corrompido"]},
-    {"id":"stream-resource-lifecycle","name":"Streams de dados e ciclo de recurso","aliases":["InputStream","Reader","try-with-resources"],"introducedIn":"java-io","reinforcedIn":["process-api-cli","mini-importador-pedidos"],"prerequisiteConceptIds":["try-resource-lifecycle"],"commonConfusions":["achar que GC fecha arquivo","carregar arquivo grande por conveniência"],"outcomes":["fechar recurso e escolher leitura total ou incremental"]},
-    {"id":"files-nio-atomicidade","name":"Files/NIO e operações de arquivo","aliases":["Files","NIO.2"],"introducedIn":"java-io","reinforcedIn":["mini-importador-pedidos"],"prerequisiteConceptIds":["path-filesystem","checked-unchecked-contrato"],"commonConfusions":["assumir atomicidade universal","ignorar falhas parciais de cópia/move"],"outcomes":["escolher create/read/write/move/copy com política de falha"]},
-    {"id":"csv-fronteira-textual","name":"CSV como fronteira textual limitada","aliases":["CSV","delimited text"],"introducedIn":"mini-analisador-vendas","reinforcedIn":["mini-importador-pedidos"],"prerequisiteConceptIds":["byte-char-charset","map-flatmap-cardinalidade"],"commonConfusions":["usar split simples para todo CSV","misturar parsing com regra de negócio"],"outcomes":["definir contrato de colunas, aspas, separador e rejeição"]},
-    {"id":"relatorio-dados-deterministico","name":"Relatório determinístico","aliases":["export","report"],"introducedIn":"mini-analisador-vendas","reinforcedIn":["mini-importador-pedidos","zenith-cli-inicial"],"prerequisiteConceptIds":["reduce-collect-contrato"],"commonConfusions":["deixar ordem dependente de HashMap","não registrar critério de desempate"],"outcomes":["produzir saída ordenada e reproduzível"]},
-    {"id":"json-formato-contrato","name":"JSON como contrato de fronteira","aliases":["JSON"],"introducedIn":"json","reinforcedIn":["mini-importador-pedidos"],"prerequisiteConceptIds":["record-text-block-base","byte-char-charset"],"commonConfusions":["confundir JSON com objeto Java","concatenar JSON manualmente"],"outcomes":["separar representação externa do modelo interno"]},
-    {"id":"serializacao-desserializacao","name":"Serialização e desserialização","aliases":["serialization","deserialization"],"introducedIn":"json","reinforcedIn":["mini-importador-pedidos"],"prerequisiteConceptIds":["json-formato-contrato","checked-unchecked-contrato"],"commonConfusions":["achar que desserializar valida domínio automaticamente","serializar entidade interna por conveniência"],"outcomes":["converter DTO com validação explícita e falha observável"]},
-    {"id":"jackson-introspeccao-records","name":"Jackson, propriedades e records","aliases":["ObjectMapper","JavaBeans"],"introducedIn":"json","reinforcedIn":["mini-importador-pedidos"],"prerequisiteConceptIds":["json-formato-contrato","record-invariante-copia"],"commonConfusions":["achar que getter getX é obrigatório para record","perder invariantes ao criar objeto vazio"],"outcomes":["mapear propriedades sem acoplar contrato externo ao domínio"]},
-    {"id":"processo-filho-contrato","name":"Processo filho como fronteira externa","aliases":["Process","ProcessBuilder"],"introducedIn":"process-api-cli","reinforcedIn":["zenith-cli-inicial"],"prerequisiteConceptIds":["stream-resource-lifecycle","cli-stdin-stdout"],"commonConfusions":["achar que processo é método Java","ignorar exit code"],"outcomes":["executar comando com argumentos, streams, timeout e código de saída"]},
-    {"id":"stdout-stderr-exit-code","name":"stdout, stderr e exit code","aliases":["standard streams","exit status"],"introducedIn":"process-api-cli","reinforcedIn":["zenith-cli-inicial"],"prerequisiteConceptIds":["processo-filho-contrato"],"commonConfusions":["tratar stderr como exceção Java","ignorar saída de erro quando exit code é zero"],"outcomes":["capturar resultado tipado sem perder diagnóstico"]},
-    {"id":"shell-quoting-injection","name":"Shell, quoting e command injection","aliases":["shell expansion","command injection"],"introducedIn":"process-api-cli","reinforcedIn":["zenith-cli-inicial"],"prerequisiteConceptIds":["processo-filho-contrato"],"commonConfusions":["passar comando inteiro como string única","juntar entrada do usuário em shell"],"outcomes":["evitar shell quando possível e passar argumentos separados"]},
-    {"id":"process-timeout-cancelamento","name":"Timeout e encerramento de processo","aliases":["destroy","destroyForcibly","deadline"],"introducedIn":"process-api-cli","reinforcedIn":["zenith-cli-inicial"],"prerequisiteConceptIds":["stdout-stderr-exit-code"],"commonConfusions":["esperar indefinidamente","matar processo sem política de cleanup"],"outcomes":["limitar execução e declarar política de encerramento"]},
-    {"id":"importacao-tolerante","name":"Importação tolerante a registros inválidos","aliases":["partial success","rejection report"],"introducedIn":"mini-importador-pedidos","reinforcedIn":["zenith-cli-inicial"],"prerequisiteConceptIds":["csv-fronteira-textual","serializacao-desserializacao","files-nio-atomicidade"],"commonConfusions":["abortar tudo por uma linha ruim sem contrato","ignorar rejeições silenciosamente"],"outcomes":["separar aceitos, rejeitados e falhas fatais"]},
-    {"id":"zenith-comando-deterministico","name":"Zenith inicial: comandos determinísticos","aliases":["Zenith CLI"],"introducedIn":"zenith-cli-inicial","reinforcedIn":[],"prerequisiteConceptIds":["processo-filho-contrato","relatorio-dados-deterministico","importacao-tolerante"],"commonConfusions":["prometer linguagem natural aberta","executar comando arbitrário"],"outcomes":["criar interface textual restrita, auditável e reproduzível"]}
+    {
+      "id": "path-filesystem",
+      "name": "Path, filesystem e caminho portável",
+      "aliases": [
+        "Path",
+        "filesystem"
+      ],
+      "introducedIn": "java-io",
+      "reinforcedIn": [
+        "mini-importador-pedidos",
+        "process-api-cli"
+      ],
+      "prerequisiteConceptIds": [
+        "classpath-compilacao"
+      ],
+      "commonConfusions": [
+        "tratar caminho como String comum",
+        "assumir separador fixo do sistema"
+      ],
+      "outcomes": [
+        "montar caminhos portáveis e distinguir caminho, arquivo e diretório"
+      ]
+    },
+    {
+      "id": "byte-char-charset",
+      "name": "Bytes, caracteres e Charset",
+      "aliases": [
+        "UTF-8",
+        "encoding"
+      ],
+      "introducedIn": "java-io",
+      "reinforcedIn": [
+        "json",
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "string-imutavel"
+      ],
+      "commonConfusions": [
+        "achar que texto é byte sem codificação",
+        "confiar no charset padrão da máquina"
+      ],
+      "outcomes": [
+        "declarar charset e diagnosticar texto corrompido"
+      ]
+    },
+    {
+      "id": "stream-resource-lifecycle",
+      "name": "Streams de dados e ciclo de recurso",
+      "aliases": [
+        "InputStream",
+        "Reader",
+        "try-with-resources"
+      ],
+      "introducedIn": "java-io",
+      "reinforcedIn": [
+        "process-api-cli",
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "try-resource-lifecycle"
+      ],
+      "commonConfusions": [
+        "achar que GC fecha arquivo",
+        "carregar arquivo grande por conveniência"
+      ],
+      "outcomes": [
+        "fechar recurso e escolher leitura total ou incremental"
+      ]
+    },
+    {
+      "id": "files-nio-atomicidade",
+      "name": "Files/NIO e operações de arquivo",
+      "aliases": [
+        "Files",
+        "NIO.2"
+      ],
+      "introducedIn": "java-io",
+      "reinforcedIn": [
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "path-filesystem",
+        "checked-unchecked-contrato"
+      ],
+      "commonConfusions": [
+        "assumir atomicidade universal",
+        "ignorar falhas parciais de cópia/move"
+      ],
+      "outcomes": [
+        "escolher create/read/write/move/copy com política de falha"
+      ]
+    },
+    {
+      "id": "csv-fronteira-textual",
+      "name": "CSV como fronteira textual limitada",
+      "aliases": [
+        "CSV",
+        "delimited text"
+      ],
+      "introducedIn": "mini-analisador-vendas",
+      "reinforcedIn": [
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "byte-char-charset",
+        "map-flatmap-cardinalidade"
+      ],
+      "commonConfusions": [
+        "usar split simples para todo CSV",
+        "misturar parsing com regra de negócio"
+      ],
+      "outcomes": [
+        "definir contrato de colunas, aspas, separador e rejeição"
+      ]
+    },
+    {
+      "id": "relatorio-dados-deterministico",
+      "name": "Relatório determinístico",
+      "aliases": [
+        "export",
+        "report"
+      ],
+      "introducedIn": "mini-analisador-vendas",
+      "reinforcedIn": [
+        "mini-importador-pedidos",
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "reduce-collect-contrato"
+      ],
+      "commonConfusions": [
+        "deixar ordem dependente de HashMap",
+        "não registrar critério de desempate"
+      ],
+      "outcomes": [
+        "produzir saída ordenada e reproduzível"
+      ]
+    },
+    {
+      "id": "json-formato-contrato",
+      "name": "JSON como contrato de fronteira",
+      "aliases": [
+        "JSON"
+      ],
+      "introducedIn": "json",
+      "reinforcedIn": [
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "record-text-block-base",
+        "byte-char-charset"
+      ],
+      "commonConfusions": [
+        "confundir JSON com objeto Java",
+        "concatenar JSON manualmente"
+      ],
+      "outcomes": [
+        "separar representação externa do modelo interno"
+      ]
+    },
+    {
+      "id": "serializacao-desserializacao",
+      "name": "Serialização e desserialização",
+      "aliases": [
+        "serialization",
+        "deserialization"
+      ],
+      "introducedIn": "json",
+      "reinforcedIn": [
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "json-formato-contrato",
+        "checked-unchecked-contrato"
+      ],
+      "commonConfusions": [
+        "achar que desserializar valida domínio automaticamente",
+        "serializar entidade interna por conveniência"
+      ],
+      "outcomes": [
+        "converter DTO com validação explícita e falha observável"
+      ]
+    },
+    {
+      "id": "jackson-introspeccao-records",
+      "name": "Jackson, propriedades e records",
+      "aliases": [
+        "ObjectMapper",
+        "JavaBeans"
+      ],
+      "introducedIn": "json",
+      "reinforcedIn": [
+        "mini-importador-pedidos"
+      ],
+      "prerequisiteConceptIds": [
+        "json-formato-contrato",
+        "record-invariante-copia"
+      ],
+      "commonConfusions": [
+        "achar que getter getX é obrigatório para record",
+        "perder invariantes ao criar objeto vazio"
+      ],
+      "outcomes": [
+        "mapear propriedades sem acoplar contrato externo ao domínio"
+      ]
+    },
+    {
+      "id": "processo-filho-contrato",
+      "name": "Processo filho como fronteira externa",
+      "aliases": [
+        "Process",
+        "ProcessBuilder"
+      ],
+      "introducedIn": "process-api-cli",
+      "reinforcedIn": [
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "stream-resource-lifecycle",
+        "cli-stdin-stdout"
+      ],
+      "commonConfusions": [
+        "achar que processo é método Java",
+        "ignorar exit code"
+      ],
+      "outcomes": [
+        "executar comando com argumentos, streams, timeout e código de saída"
+      ]
+    },
+    {
+      "id": "stdout-stderr-exit-code",
+      "name": "stdout, stderr e exit code",
+      "aliases": [
+        "standard streams",
+        "exit status"
+      ],
+      "introducedIn": "process-api-cli",
+      "reinforcedIn": [
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "processo-filho-contrato"
+      ],
+      "commonConfusions": [
+        "tratar stderr como exceção Java",
+        "ignorar saída de erro quando exit code é zero"
+      ],
+      "outcomes": [
+        "capturar resultado tipado sem perder diagnóstico"
+      ]
+    },
+    {
+      "id": "shell-quoting-injection",
+      "name": "Shell, quoting e command injection",
+      "aliases": [
+        "shell expansion",
+        "command injection"
+      ],
+      "introducedIn": "process-api-cli",
+      "reinforcedIn": [
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "processo-filho-contrato"
+      ],
+      "commonConfusions": [
+        "passar comando inteiro como string única",
+        "juntar entrada do usuário em shell"
+      ],
+      "outcomes": [
+        "evitar shell quando possível e passar argumentos separados"
+      ]
+    },
+    {
+      "id": "process-timeout-cancelamento",
+      "name": "Timeout e encerramento de processo",
+      "aliases": [
+        "destroy",
+        "destroyForcibly",
+        "deadline"
+      ],
+      "introducedIn": "process-api-cli",
+      "reinforcedIn": [
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "stdout-stderr-exit-code"
+      ],
+      "commonConfusions": [
+        "esperar indefinidamente",
+        "matar processo sem política de cleanup"
+      ],
+      "outcomes": [
+        "limitar execução e declarar política de encerramento"
+      ]
+    },
+    {
+      "id": "importacao-tolerante",
+      "name": "Importação tolerante a registros inválidos",
+      "aliases": [
+        "partial success",
+        "rejection report"
+      ],
+      "introducedIn": "mini-importador-pedidos",
+      "reinforcedIn": [
+        "zenith-cli-inicial"
+      ],
+      "prerequisiteConceptIds": [
+        "csv-fronteira-textual",
+        "serializacao-desserializacao",
+        "files-nio-atomicidade"
+      ],
+      "commonConfusions": [
+        "abortar tudo por uma linha ruim sem contrato",
+        "ignorar rejeições silenciosamente"
+      ],
+      "outcomes": [
+        "separar aceitos, rejeitados e falhas fatais"
+      ]
+    },
+    {
+      "id": "zenith-comando-deterministico",
+      "name": "Zenith inicial: comandos determinísticos",
+      "aliases": [
+        "Zenith CLI"
+      ],
+      "introducedIn": "zenith-cli-inicial",
+      "reinforcedIn": [],
+      "prerequisiteConceptIds": [
+        "processo-filho-contrato",
+        "relatorio-dados-deterministico",
+        "importacao-tolerante"
+      ],
+      "commonConfusions": [
+        "prometer linguagem natural aberta",
+        "executar comando arbitrário"
+      ],
+      "outcomes": [
+        "criar interface textual restrita, auditável e reproduzível"
+      ]
+    }
   ],
   "chapters": {
     "java-io": {
-      "order":0,"objectives":["Distinguir caminho, arquivo, diretório, byte, caractere e charset","Escolher leitura total ou incremental pelo tamanho e ciclo de vida","Usar Files/NIO com tratamento explícito de IOException","Gravar saídas sem depender de caminhos ou charset da máquina"],"whyItExists":"Depois de exceções, coleções, streams e Java moderno, o aluno pode atravessar a fronteira entre memória e sistema de arquivos sem misturar parsing, regra e recurso aberto.","prerequisiteChapterIds":["java-21-profundo"],"introducedConceptIds":["path-filesystem","byte-char-charset","stream-resource-lifecycle","files-nio-atomicidade"],"usedConceptIds":["try-resource-lifecycle","checked-unchecked-contrato","pipeline-lazy-terminal"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"java-io-intuition","type":"intuition","authorship":"authored","title":"Arquivo é fronteira, não variável grande","body":"Quando o programa lê um arquivo, ele conversa com um recurso externo que pode não existir, mudar, estar bloqueado, usar outro charset ou ser grande demais para memória.","analogyLimit":"Pensar em arquivo como caderno ajuda pouco: o filesystem tem permissões, nomes relativos, links, concorrência e falhas parciais."}],
-      "appendBlocks":[{"id":"java-io-model","type":"mental-model","authorship":"authored","title":"Do caminho ao valor confiável","body":"A fronteira começa no Path, passa por bytes ou caracteres, produz texto ou objetos e só então entra na regra de negócio.","flow":["Path identifica localização","Files abre recurso","Charset transforma bytes em caracteres","parser transforma texto em valores","validação decide se o valor serve","try-with-resources encerra o recurso"],"ownership":["filesystem pertence ao ambiente","recurso aberto pertence ao bloco que o abriu","valor validado pertence ao domínio"]},{"id":"java-io-quiz","type":"quiz","authorship":"authored","conceptId":"stream-resource-lifecycle","prompt":"Qual escolha é mais segura para processar um arquivo de log muito grande?","options":[{"id":"java-io-q-a","label":"Usar Files.lines em try-with-resources e processar linha a linha.","correct":true,"explanation":"O stream mantém recurso aberto e precisa ser fechado; linha a linha evita carregar tudo na memória."},{"id":"java-io-q-b","label":"Usar readAllLines sempre, porque é mais moderno.","correct":false,"explanation":"readAllLines materializa todo o conteúdo e pode estourar memória em arquivos grandes."},{"id":"java-io-q-c","label":"Confiar no garbage collector para fechar o arquivo.","correct":false,"explanation":"GC não é contrato de fechamento de recurso externo; fechamento deve ser explícito."}]}],
-      "codeExplanations":{"java-io-code-5":{"explanation":["Path.of monta partes do caminho sem acoplar o exemplo ao separador do sistema.","Files.exists consulta o filesystem; não transforma o Path em garantia de existência futura."],"commonMistakes":["Concatenar caminho com barra fixa","Gravar caminho absoluto da máquina local"]},"java-io-code-9":{"explanation":["readString e writeString trabalham com texto completo.","StandardCharsets.UTF_8 torna a leitura e escrita reproduzíveis."],"commonMistakes":["Confiar no charset padrão","Usar API textual para arquivo binário"]},"java-io-code-13":{"explanation":["readAllLines materializa tudo e serve para entradas pequenas.","Files.lines produz stream lazy ligado a recurso aberto, por isso fica dentro do try-with-resources."],"commonMistakes":["Usar readAllLines para arquivo grande","Retornar Stream de um método depois de fechar o recurso"]},"java-io-code-17":{"explanation":["IOException é traduzida para exceção de aplicação com contexto do arquivo.","A causa original é preservada no construtor para diagnóstico."],"commonMistakes":["Capturar IOException e retornar lista vazia","Perder a causa original ao lançar outra exceção"]},"java-io-code-21":{"explanation":["createDirectories prepara a pasta de saída de forma idempotente.","Escrever temporário e mover reduz a chance de expor relatório parcial."],"commonMistakes":["Assumir que diretório já existe","Prometer atomicidade universal sem verificar filesystem/opções"]}},
-      "resources":[{"id":"java-io-files-api","type":"reference","title":"Files API — Java 21","url":"https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Files.html","reinforces":"Define leitura, escrita, cópia, movimentação, criação e observações de atomicidade/falha.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"java-io-charset-api","type":"reference","title":"StandardCharsets API — Java 21","url":"https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/charset/StandardCharsets.html","reinforces":"Fornece charsets obrigatórios como UTF-8 para contratos textuais portáveis.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"foundation","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "order": 0,
+      "objectives": [
+        "Distinguir caminho, arquivo, diretório, byte, caractere e charset",
+        "Escolher leitura total ou incremental pelo tamanho e ciclo de vida",
+        "Usar Files/NIO com tratamento explícito de IOException",
+        "Gravar saídas sem depender de caminhos ou charset da máquina"
+      ],
+      "whyItExists": "Depois de exceções, coleções, streams e Java moderno, o aluno pode atravessar a fronteira entre memória e sistema de arquivos sem misturar parsing, regra e recurso aberto.",
+      "prerequisiteChapterIds": [
+        "java-21-profundo"
+      ],
+      "introducedConceptIds": [
+        "path-filesystem",
+        "byte-char-charset",
+        "stream-resource-lifecycle",
+        "files-nio-atomicidade"
+      ],
+      "usedConceptIds": [
+        "try-resource-lifecycle",
+        "checked-unchecked-contrato",
+        "pipeline-lazy-terminal"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "java-io-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Arquivo é fronteira, não variável grande",
+          "body": "Quando o programa lê um arquivo, ele conversa com um recurso externo que pode não existir, mudar, estar bloqueado, usar outro charset ou ser grande demais para memória.",
+          "analogyLimit": "Pensar em arquivo como caderno ajuda pouco: o filesystem tem permissões, nomes relativos, links, concorrência e falhas parciais."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "java-io-model",
+          "type": "mental-model",
+          "authorship": "authored",
+          "title": "Do caminho ao valor confiável",
+          "body": "A fronteira começa no Path, passa por bytes ou caracteres, produz texto ou objetos e só então entra na regra de negócio.",
+          "flow": [
+            "Path identifica localização",
+            "Files abre recurso",
+            "Charset transforma bytes em caracteres",
+            "parser transforma texto em valores",
+            "validação decide se o valor serve",
+            "try-with-resources encerra o recurso"
+          ],
+          "ownership": [
+            "filesystem pertence ao ambiente",
+            "recurso aberto pertence ao bloco que o abriu",
+            "valor validado pertence ao domínio"
+          ]
+        },
+        {
+          "id": "java-io-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "stream-resource-lifecycle",
+          "prompt": "Qual escolha é mais segura para processar um arquivo de log muito grande?",
+          "options": [
+            {
+              "id": "java-io-q-a",
+              "label": "Usar Files.lines em try-with-resources e processar linha a linha.",
+              "correct": true,
+              "explanation": "O stream mantém recurso aberto e precisa ser fechado; linha a linha evita carregar tudo na memória."
+            },
+            {
+              "id": "java-io-q-b",
+              "label": "Usar readAllLines sempre, porque é mais moderno.",
+              "correct": false,
+              "explanation": "readAllLines materializa todo o conteúdo e pode estourar memória em arquivos grandes."
+            },
+            {
+              "id": "java-io-q-c",
+              "label": "Confiar no garbage collector para fechar o arquivo.",
+              "correct": false,
+              "explanation": "GC não é contrato de fechamento de recurso externo; fechamento deve ser explícito."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "java-io-code-5": {
+          "explanation": [
+            "Path.of monta partes do caminho sem acoplar o exemplo ao separador do sistema.",
+            "Files.exists consulta o filesystem; não transforma o Path em garantia de existência futura."
+          ],
+          "commonMistakes": [
+            "Concatenar caminho com barra fixa",
+            "Gravar caminho absoluto da máquina local"
+          ]
+        },
+        "java-io-code-9": {
+          "explanation": [
+            "readString e writeString trabalham com texto completo.",
+            "StandardCharsets.UTF_8 torna a leitura e escrita reproduzíveis."
+          ],
+          "commonMistakes": [
+            "Confiar no charset padrão",
+            "Usar API textual para arquivo binário"
+          ]
+        },
+        "java-io-code-13": {
+          "explanation": [
+            "readAllLines materializa tudo e serve para entradas pequenas.",
+            "Files.lines produz stream lazy ligado a recurso aberto, por isso fica dentro do try-with-resources."
+          ],
+          "commonMistakes": [
+            "Usar readAllLines para arquivo grande",
+            "Retornar Stream de um método depois de fechar o recurso"
+          ]
+        },
+        "java-io-code-17": {
+          "explanation": [
+            "IOException é traduzida para exceção de aplicação com contexto do arquivo.",
+            "A causa original é preservada no construtor para diagnóstico."
+          ],
+          "commonMistakes": [
+            "Capturar IOException e retornar lista vazia",
+            "Perder a causa original ao lançar outra exceção"
+          ]
+        },
+        "java-io-code-21": {
+          "explanation": [
+            "createDirectories prepara a pasta de saída de forma idempotente.",
+            "Escrever temporário e mover reduz a chance de expor relatório parcial."
+          ],
+          "commonMistakes": [
+            "Assumir que diretório já existe",
+            "Prometer atomicidade universal sem verificar filesystem/opções"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "java-io-files-api",
+          "type": "reference",
+          "title": "Files API — Java 21",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Files.html",
+          "reinforces": "Define leitura, escrita, cópia, movimentação, criação e observações de atomicidade/falha.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "java-io-charset-api",
+          "type": "reference",
+          "title": "StandardCharsets API — Java 21",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/charset/StandardCharsets.html",
+          "reinforces": "Fornece charsets obrigatórios como UTF-8 para contratos textuais portáveis.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "foundation",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "mini-analisador-vendas": {
-      "order":1,"objectives":["Ler dataset textual pequeno e declarado","Comparar laços e Streams por evidência","Gerar métricas com desempate e ordem determinística","Separar parsing, consulta e relatório"],"whyItExists":"O projeto transforma streams e I/O em uma ferramenta reproduzível: dados entram por arquivo, consultas viram relatório e cada decisão precisa sobreviver a dataset vazio, duplicidade e ordem instável.","prerequisiteChapterIds":["java-io"],"introducedConceptIds":["csv-fronteira-textual","relatorio-dados-deterministico"],"usedConceptIds":["pipeline-lazy-terminal","reduce-collect-contrato","files-nio-atomicidade","java-time-semantica"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"vendas-intuition","type":"intuition","authorship":"authored","title":"Relatório bom é repetível","body":"Se duas execuções com os mesmos dados produzem rankings em ordem diferente, o relatório não é uma evidência confiável. Defina ordenação, desempate e tratamento de ausências antes da API de Stream.","analogyLimit":"Ranking parece lista simples, mas sem desempate estável ele vira comportamento acidental da estrutura usada."}],
-      "appendBlocks":[{"id":"vendas-table","type":"table","authorship":"authored","title":"Contrato mínimo do dataset","headers":["Campo","Tipo esperado","Falha planejada"],"rows":[["idVenda","texto não vazio","linha rejeitada"],["data","LocalDate ISO","linha rejeitada com número"],["categoria/produto","texto normalizado","categoria desconhecida explícita"],["valor","BigDecimal positivo","linha rejeitada"]]},{"id":"vendas-quiz","type":"quiz","authorship":"authored","conceptId":"relatorio-dados-deterministico","prompt":"Dois produtos empataram em receita. O que torna o ranking reprodutível?","options":[{"id":"vendas-q-a","label":"Declarar desempate, por exemplo receita desc e nome asc.","correct":true,"explanation":"A ordem deixa de depender do acaso da estrutura ou da ordem de entrada."},{"id":"vendas-q-b","label":"Usar HashMap, porque ele sempre ordena chaves alfabeticamente.","correct":false,"explanation":"HashMap não promete ordem de iteração."},{"id":"vendas-q-c","label":"Rodar o relatório várias vezes e escolher a saída mais bonita.","correct":false,"explanation":"Repetição não define contrato; apenas esconde a instabilidade."}]}],
-      "codeExplanations":{"mini-analisador-vendas-code-5":{"explanation":["O exemplo declara cabeçalho e linhas em formato CSV mínimo.","O contrato permite split simples somente porque proíbe vírgula dentro de campo."],"commonMistakes":["Generalizar split para qualquer CSV real","Não fixar charset e formato monetário"]}},
-      "quizRationales":{"mini-analisador-vendas:0":["Pipeline sem efeitos compartilhados preserva determinismo e materializa resultado explicitamente.","Mutar lista externa em parallelStream cria condição de corrida e resultado não determinístico.","Stream consumido por terminal não pode ser reutilizado; crie outro pipeline a partir da fonte."]},
-      "resources":[{"id":"vendas-streams-dev","type":"guide","title":"dev.java: Stream API","url":"https://dev.java/learn/api/streams/","reinforces":"Base oficial para operações de agregação, coleta e pipeline usadas no projeto.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"vendas-comparator-api","type":"reference","title":"Comparator API — Java 21","url":"https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html","reinforces":"Define composição de critérios de ordenação e desempate.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "order": 1,
+      "objectives": [
+        "Ler dataset textual pequeno e declarado",
+        "Comparar laços e Streams por evidência",
+        "Gerar métricas com desempate e ordem determinística",
+        "Separar parsing, consulta e relatório"
+      ],
+      "whyItExists": "O projeto transforma streams e I/O em uma ferramenta reproduzível: dados entram por arquivo, consultas viram relatório e cada decisão precisa sobreviver a dataset vazio, duplicidade e ordem instável.",
+      "prerequisiteChapterIds": [
+        "java-io"
+      ],
+      "introducedConceptIds": [
+        "csv-fronteira-textual",
+        "relatorio-dados-deterministico"
+      ],
+      "usedConceptIds": [
+        "pipeline-lazy-terminal",
+        "reduce-collect-contrato",
+        "files-nio-atomicidade",
+        "java-time-semantica"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "vendas-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Relatório bom é repetível",
+          "body": "Se duas execuções com os mesmos dados produzem rankings em ordem diferente, o relatório não é uma evidência confiável. Defina ordenação, desempate e tratamento de ausências antes da API de Stream.",
+          "analogyLimit": "Ranking parece lista simples, mas sem desempate estável ele vira comportamento acidental da estrutura usada."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "vendas-table",
+          "type": "table",
+          "authorship": "authored",
+          "title": "Contrato mínimo do dataset",
+          "headers": [
+            "Campo",
+            "Tipo esperado",
+            "Falha planejada"
+          ],
+          "rows": [
+            [
+              "idVenda",
+              "texto não vazio",
+              "linha rejeitada"
+            ],
+            [
+              "data",
+              "LocalDate ISO",
+              "linha rejeitada com número"
+            ],
+            [
+              "categoria/produto",
+              "texto normalizado",
+              "categoria desconhecida explícita"
+            ],
+            [
+              "valor",
+              "BigDecimal positivo",
+              "linha rejeitada"
+            ]
+          ]
+        },
+        {
+          "id": "vendas-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "relatorio-dados-deterministico",
+          "prompt": "Dois produtos empataram em receita. O que torna o ranking reprodutível?",
+          "options": [
+            {
+              "id": "vendas-q-a",
+              "label": "Declarar desempate, por exemplo receita desc e nome asc.",
+              "correct": true,
+              "explanation": "A ordem deixa de depender do acaso da estrutura ou da ordem de entrada."
+            },
+            {
+              "id": "vendas-q-b",
+              "label": "Usar HashMap, porque ele sempre ordena chaves alfabeticamente.",
+              "correct": false,
+              "explanation": "HashMap não promete ordem de iteração."
+            },
+            {
+              "id": "vendas-q-c",
+              "label": "Rodar o relatório várias vezes e escolher a saída mais bonita.",
+              "correct": false,
+              "explanation": "Repetição não define contrato; apenas esconde a instabilidade."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "mini-analisador-vendas-code-5": {
+          "explanation": [
+            "O exemplo declara cabeçalho e linhas em formato CSV mínimo.",
+            "O contrato permite split simples somente porque proíbe vírgula dentro de campo."
+          ],
+          "commonMistakes": [
+            "Generalizar split para qualquer CSV real",
+            "Não fixar charset e formato monetário"
+          ]
+        }
+      },
+      "quizRationales": {
+        "mini-analisador-vendas:0": [
+          "Pipeline sem efeitos compartilhados preserva determinismo e materializa resultado explicitamente.",
+          "Mutar lista externa em parallelStream cria condição de corrida e resultado não determinístico.",
+          "Stream consumido por terminal não pode ser reutilizado; crie outro pipeline a partir da fonte."
+        ]
+      },
+      "resources": [
+        {
+          "id": "vendas-streams-dev",
+          "type": "guide",
+          "title": "dev.java: Stream API",
+          "url": "https://dev.java/learn/api/streams/",
+          "reinforces": "Base oficial para operações de agregação, coleta e pipeline usadas no projeto.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "vendas-comparator-api",
+          "type": "reference",
+          "title": "Comparator API — Java 21",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html",
+          "reinforces": "Define composição de critérios de ordenação e desempate.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "json": {
-      "order":2,"objectives":["Distinguir objeto Java, texto JSON e contrato externo","Serializar e desserializar DTOs sem validar domínio automaticamente","Entender Jackson por propriedades, construtores, records e falhas","Evitar vazar modelo interno ou segredo no JSON"],"whyItExists":"Depois de arquivos e relatórios, o curso precisa de um formato estruturado de troca. JSON entra como contrato textual entre fronteiras, não como mágica do Spring.","prerequisiteChapterIds":["mini-analisador-vendas"],"introducedConceptIds":["json-formato-contrato","serializacao-desserializacao","jackson-introspeccao-records"],"usedConceptIds":["record-invariante-copia","byte-char-charset","checked-unchecked-contrato"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"json-intuition","type":"intuition","authorship":"authored","title":"JSON é texto com forma combinada","body":"Um objeto Java vive em memória com métodos, tipos e invariantes. JSON é uma representação textual de dados. Converter entre os dois exige contrato de campos, tipos, ausências e falhas.","analogyLimit":"Envelope ajuda a pensar em transporte, mas JSON não preserva métodos, identidade de objeto, tipos Java genéricos nem regras de domínio."}],
-      "appendBlocks":[{"id":"json-comparison","type":"comparison","authorship":"authored","title":"Três camadas que não devem se misturar","criteria":["responsabilidade","exemplo","erro comum"],"alternatives":[{"name":"DTO externo","values":["formato publicado","PedidoJson","expor entidade JPA ou domínio interno"],"useWhen":"representar entrada/saída de fronteira","avoidWhen":"guardar regra de negócio"},{"name":"Domínio","values":["invariante e comportamento","Pedido","aceitar estado só porque JSON veio assim"],"useWhen":"decidir regras do sistema","avoidWhen":"depender de Jackson ou annotations de API"},{"name":"Mapper","values":["conversão controlada","toDomain/toDto","copiar campos sem validar ausência"],"useWhen":"atravessar fronteira","avoidWhen":"esconder falha como null"}]},{"id":"json-quiz","type":"quiz","authorship":"authored","conceptId":"serializacao-desserializacao","prompt":"Desserializar JSON para um DTO prova que o pedido é válido para o domínio?","options":[{"id":"json-q-a","label":"Não; prova apenas que o texto coube no formato esperado pelo mapper.","correct":true,"explanation":"Validação de domínio precisa ocorrer depois, com regras explícitas e mensagens úteis."},{"id":"json-q-b","label":"Sim; Jackson executa automaticamente todas as regras de negócio.","correct":false,"explanation":"Jackson converte dados; regras de domínio pertencem ao código do domínio."},{"id":"json-q-c","label":"Sim, desde que o JSON esteja em UTF-8.","correct":false,"explanation":"Charset correto evita corrupção textual, mas não valida regras como valor positivo ou estado permitido."}]}],
-      "codeExplanations":{"json-code-5":{"explanation":["LivroDTO é contrato de fronteira, não necessariamente o domínio inteiro.","ObjectMapper transforma o valor em texto JSON conforme propriedades do record."],"commonMistakes":["Serializar entidade interna por conveniência","Achar que JSON carrega métodos Java"]},"json-code-8":{"explanation":["readValue usa o tipo alvo para construir um DTO a partir do texto.","A conversão bem-sucedida ainda precisa de validação de domínio."],"commonMistakes":["Aceitar DTO desserializado como regra válida","Tratar erro de parsing como null"]},"json-code-12":{"explanation":["Classe JavaBeans expõe propriedade por getter/setter e construtor acessível.","Esse modelo é útil para DTOs mutáveis, mas pode enfraquecer invariantes se usado como domínio."],"commonMistakes":["Achar que setter valida automaticamente regra de negócio","Exigir JavaBeans quando record resolve melhor o contrato"]},"json-code-14":{"explanation":["@JsonIgnore e @JsonProperty ajustam o contrato externo.","Anotações não substituem revisão de compatibilidade nem política de dados sensíveis."],"commonMistakes":["Renomear campo publicado sem migração","Confiar em anotação para esconder segredo em qualquer contexto"]},"json-code-17":{"explanation":["Records expõem acessores com o nome do componente, e versões modernas do Jackson entendem esse modelo.","Construtor canônico ainda deve proteger invariantes quando o record representa valor de domínio."],"commonMistakes":["Chamar acessores de record de getTitulo","Achar que record torna componentes internos profundamente imutáveis"]}},
-      "resources":[{"id":"json-jackson-records","type":"reference","title":"Jackson Databind README","url":"https://github.com/FasterXML/jackson-databind","reinforces":"Documenta ObjectMapper, data binding, POJOs, records e fluxo de conversão.","language":"en","publisher":"FasterXML","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"json-rfc8259","type":"reference","title":"RFC 8259: The JavaScript Object Notation Data Interchange Format","url":"https://www.rfc-editor.org/rfc/rfc8259","reinforces":"Define JSON como formato textual de intercâmbio, valores, objetos, arrays e strings.","language":"en","publisher":"IETF","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "order": 2,
+      "objectives": [
+        "Distinguir objeto Java, texto JSON e contrato externo",
+        "Serializar e desserializar DTOs sem validar domínio automaticamente",
+        "Entender Jackson por propriedades, construtores, records e falhas",
+        "Evitar vazar modelo interno ou segredo no JSON"
+      ],
+      "whyItExists": "Depois de arquivos e relatórios, o curso precisa de um formato estruturado de troca. JSON entra como contrato textual entre fronteiras, não como mágica do Spring.",
+      "prerequisiteChapterIds": [
+        "mini-analisador-vendas"
+      ],
+      "introducedConceptIds": [
+        "json-formato-contrato",
+        "serializacao-desserializacao",
+        "jackson-introspeccao-records"
+      ],
+      "usedConceptIds": [
+        "record-invariante-copia",
+        "byte-char-charset",
+        "checked-unchecked-contrato"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "json-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "JSON é texto com forma combinada",
+          "body": "Um objeto Java vive em memória com métodos, tipos e invariantes. JSON é uma representação textual de dados. Converter entre os dois exige contrato de campos, tipos, ausências e falhas.",
+          "analogyLimit": "Envelope ajuda a pensar em transporte, mas JSON não preserva métodos, identidade de objeto, tipos Java genéricos nem regras de domínio."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "json-comparison",
+          "type": "comparison",
+          "authorship": "authored",
+          "title": "Três camadas que não devem se misturar",
+          "criteria": [
+            "responsabilidade",
+            "exemplo",
+            "erro comum"
+          ],
+          "alternatives": [
+            {
+              "name": "DTO externo",
+              "values": [
+                "formato publicado",
+                "PedidoJson",
+                "expor entidade JPA ou domínio interno"
+              ],
+              "useWhen": "representar entrada/saída de fronteira",
+              "avoidWhen": "guardar regra de negócio"
+            },
+            {
+              "name": "Domínio",
+              "values": [
+                "invariante e comportamento",
+                "Pedido",
+                "aceitar estado só porque JSON veio assim"
+              ],
+              "useWhen": "decidir regras do sistema",
+              "avoidWhen": "depender de Jackson ou annotations de API"
+            },
+            {
+              "name": "Mapper",
+              "values": [
+                "conversão controlada",
+                "toDomain/toDto",
+                "copiar campos sem validar ausência"
+              ],
+              "useWhen": "atravessar fronteira",
+              "avoidWhen": "esconder falha como null"
+            }
+          ]
+        },
+        {
+          "id": "json-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "serializacao-desserializacao",
+          "prompt": "Desserializar JSON para um DTO prova que o pedido é válido para o domínio?",
+          "options": [
+            {
+              "id": "json-q-a",
+              "label": "Não; prova apenas que o texto coube no formato esperado pelo mapper.",
+              "correct": true,
+              "explanation": "Validação de domínio precisa ocorrer depois, com regras explícitas e mensagens úteis."
+            },
+            {
+              "id": "json-q-b",
+              "label": "Sim; Jackson executa automaticamente todas as regras de negócio.",
+              "correct": false,
+              "explanation": "Jackson converte dados; regras de domínio pertencem ao código do domínio."
+            },
+            {
+              "id": "json-q-c",
+              "label": "Sim, desde que o JSON esteja em UTF-8.",
+              "correct": false,
+              "explanation": "Charset correto evita corrupção textual, mas não valida regras como valor positivo ou estado permitido."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "json-code-5": {
+          "explanation": [
+            "LivroDTO é contrato de fronteira, não necessariamente o domínio inteiro.",
+            "ObjectMapper transforma o valor em texto JSON conforme propriedades do record."
+          ],
+          "commonMistakes": [
+            "Serializar entidade interna por conveniência",
+            "Achar que JSON carrega métodos Java"
+          ]
+        },
+        "json-code-8": {
+          "explanation": [
+            "readValue usa o tipo alvo para construir um DTO a partir do texto.",
+            "A conversão bem-sucedida ainda precisa de validação de domínio."
+          ],
+          "commonMistakes": [
+            "Aceitar DTO desserializado como regra válida",
+            "Tratar erro de parsing como null"
+          ]
+        },
+        "json-code-12": {
+          "explanation": [
+            "Classe JavaBeans expõe propriedade por getter/setter e construtor acessível.",
+            "Esse modelo é útil para DTOs mutáveis, mas pode enfraquecer invariantes se usado como domínio."
+          ],
+          "commonMistakes": [
+            "Achar que setter valida automaticamente regra de negócio",
+            "Exigir JavaBeans quando record resolve melhor o contrato"
+          ]
+        },
+        "json-code-14": {
+          "explanation": [
+            "@JsonIgnore e @JsonProperty ajustam o contrato externo.",
+            "Anotações não substituem revisão de compatibilidade nem política de dados sensíveis."
+          ],
+          "commonMistakes": [
+            "Renomear campo publicado sem migração",
+            "Confiar em anotação para esconder segredo em qualquer contexto"
+          ]
+        },
+        "json-code-17": {
+          "explanation": [
+            "Records expõem acessores com o nome do componente, e versões modernas do Jackson entendem esse modelo.",
+            "Construtor canônico ainda deve proteger invariantes quando o record representa valor de domínio."
+          ],
+          "commonMistakes": [
+            "Chamar acessores de record de getTitulo",
+            "Achar que record torna componentes internos profundamente imutáveis"
+          ]
+        },
+        "json-code-20": {
+          "explanation": [
+            "Por padrão, Jackson ignora campos desconhecidos do JSON de entrada silenciosamente -- não lança exceção."
+          ]
+        },
+        "json-code-21": {
+          "explanation": [
+            "FAIL_ON_UNKNOWN_PROPERTIES torna o mapeamento estrito -- útil para contratos internos onde um campo extra pode indicar um erro de nome no DTO."
+          ],
+          "commonMistakes": [
+            "Assumir que o Jackson sempre valida a forma exata do JSON por padrão"
+          ]
+        },
+        "json-code-24": {
+          "explanation": [
+            "Um DTO Java comum não distingue campo ausente de campo presente com valor null -- os dois viram null no objeto Java."
+          ],
+          "commonMistakes": [
+            "Tratar ausência e null como o mesmo caso quando o contrato (ex.: PATCH parcial) precisa diferenciá-los"
+          ]
+        },
+        "json-code-27": {
+          "explanation": [
+            "Sem registrar o JavaTimeModule, tipos de java.time falham ao serializar/desserializar -- o Spring Boot já registra automaticamente, Jackson isolado não."
+          ],
+          "commonMistakes": [
+            "Usar LocalDate/LocalDateTime sem registrar o módulo em um ObjectMapper standalone"
+          ]
+        },
+        "json-code-30": {
+          "explanation": [
+            "List<T>.class não existe por causa do type erasure -- TypeReference preserva o tipo genérico via subclasse anônima."
+          ],
+          "commonMistakes": [
+            "Tentar usar List<BookDTO>.class diretamente (não compila)"
+          ]
+        },
+        "json-code-33": {
+          "explanation": [
+            "JsonProcessingException é a superclasse comum de JsonParseException (texto inválido) e JsonMappingException (estrutura incompatível com o DTO)."
+          ],
+          "commonMistakes": [
+            "Deixar a stack trace do Jackson vazar direto para o cliente da API"
+          ]
+        }
+      },
+      "resources": [
+        {
+          "id": "json-jackson-records",
+          "type": "reference",
+          "title": "Jackson Databind README",
+          "url": "https://github.com/FasterXML/jackson-databind",
+          "reinforces": "Documenta ObjectMapper, data binding, POJOs, records e fluxo de conversão.",
+          "language": "en",
+          "publisher": "FasterXML",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "json-rfc8259",
+          "type": "reference",
+          "title": "RFC 8259: The JavaScript Object Notation Data Interchange Format",
+          "url": "https://www.rfc-editor.org/rfc/rfc8259",
+          "reinforces": "Define JSON como formato textual de intercâmbio, valores, objetos, arrays e strings.",
+          "language": "en",
+          "publisher": "IETF",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     },
     "mini-importador-pedidos": {
-      "order":4,"objectives":["Importar CSV com sucesso parcial explícito","Validar dados antes de construir domínio","Gerar relatório JSON de aceitos e rejeitados","Distinguir erro de registro e falha fatal de ambiente"],"whyItExists":"Este projeto une I/O, CSV, JSON, exceções, coleções e Java moderno numa ferramenta profissional pequena: processar dados ruins sem corromper o resultado nem esconder evidência.","prerequisiteChapterIds":["process-api-cli","json"],"introducedConceptIds":["importacao-tolerante"],"usedConceptIds":["files-nio-atomicidade","json-formato-contrato","serializacao-desserializacao","relatorio-dados-deterministico","java-time-semantica"],"generateCompatibilityQuizzes":false,
-      "prependBlocks":[{"id":"importador-intuition","type":"intuition","authorship":"authored","title":"Nem todo erro tem o mesmo destino","body":"Uma linha com data inválida pode virar rejeição e permitir continuar. Um diretório de saída sem permissão impede entregar o resultado inteiro. O importador precisa separar erro de registro, erro de contrato e falha fatal.","analogyLimit":"Peneira ajuda a pensar em rejeições, mas uma importação real também precisa preservar contexto, ordem, relatório e falhas do ambiente."}],
-      "appendBlocks":[{"id":"importador-flow","type":"diagram","authorship":"authored","title":"Pipeline de importação seguro","description":"Cada etapa recebe uma entrada simples e devolve sucesso, rejeição ou falha com contexto.","steps":["abrir arquivo com charset declarado","ler linha com número","parsear campos conforme contrato","validar regras de domínio","agregar aceitos e rejeições","ordenar relatório","gravar JSON em saída temporária e mover quando aplicável"]},{"id":"importador-quiz","type":"quiz","authorship":"authored","conceptId":"importacao-tolerante","prompt":"Qual situação deve abortar o importador inteiro, em vez de apenas rejeitar uma linha?","options":[{"id":"importador-q-a","label":"Não conseguir gravar o relatório final no diretório de saída exigido.","correct":true,"explanation":"Sem saída confiável, o contrato de entrega não pode ser cumprido."},{"id":"importador-q-b","label":"Uma linha contém data em formato inválido previsto no contrato.","correct":false,"explanation":"Se o contrato prevê sucesso parcial, essa linha vira rejeição com contexto."},{"id":"importador-q-c","label":"Um pedido repetido aparece no arquivo.","correct":false,"explanation":"Duplicidade pode ser rejeição de registro quando a política foi definida."}]}],
-      "codeExplanations":{"mini-importador-pedidos-code-11":{"explanation":["O relatório separa metadados, contagens, valor total e rejeições.","Valor monetário sai como texto para preservar escala e evitar ambiguidade de ponto flutuante."],"commonMistakes":["Misturar rejeições com stack trace","Emitir valor monetário como double sem contrato"]}},
-      "quizRationales":{"mini-importador-pedidos:0":["A política preserva contexto e permite sucesso parcial quando o contrato autoriza.","Ignorar exceção remove evidência e pode gerar relatório falso.","Importar parte de uma linha cria estado ambíguo e viola o contrato do registro."]},
-      "resources":[{"id":"importador-files-api","type":"reference","title":"Files API — Java 21","url":"https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Files.html","reinforces":"Base para leitura, escrita e movimentação segura de arquivos do importador.","language":"en","publisher":"Oracle","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"},{"id":"importador-jackson","type":"reference","title":"Jackson Databind README","url":"https://github.com/FasterXML/jackson-databind","reinforces":"ObjectMapper para escrever relatório JSON a partir de DTOs.","language":"en","publisher":"FasterXML","official":true,"expectedLevel":"intermediate","verifiedAt":"2026-08-22","auditStatus":"approved"}],"audit":{"status":"approved","sourceKind":"legacy-html","reviewedAt":"2026-08-22"}
+      "order": 4,
+      "objectives": [
+        "Importar CSV com sucesso parcial explícito",
+        "Validar dados antes de construir domínio",
+        "Gerar relatório JSON de aceitos e rejeitados",
+        "Distinguir erro de registro e falha fatal de ambiente"
+      ],
+      "whyItExists": "Este projeto une I/O, CSV, JSON, exceções, coleções e Java moderno numa ferramenta profissional pequena: processar dados ruins sem corromper o resultado nem esconder evidência.",
+      "prerequisiteChapterIds": [
+        "process-api-cli",
+        "json"
+      ],
+      "introducedConceptIds": [
+        "importacao-tolerante"
+      ],
+      "usedConceptIds": [
+        "files-nio-atomicidade",
+        "json-formato-contrato",
+        "serializacao-desserializacao",
+        "relatorio-dados-deterministico",
+        "java-time-semantica"
+      ],
+      "generateCompatibilityQuizzes": false,
+      "prependBlocks": [
+        {
+          "id": "importador-intuition",
+          "type": "intuition",
+          "authorship": "authored",
+          "title": "Nem todo erro tem o mesmo destino",
+          "body": "Uma linha com data inválida pode virar rejeição e permitir continuar. Um diretório de saída sem permissão impede entregar o resultado inteiro. O importador precisa separar erro de registro, erro de contrato e falha fatal.",
+          "analogyLimit": "Peneira ajuda a pensar em rejeições, mas uma importação real também precisa preservar contexto, ordem, relatório e falhas do ambiente."
+        }
+      ],
+      "appendBlocks": [
+        {
+          "id": "importador-flow",
+          "type": "diagram",
+          "authorship": "authored",
+          "title": "Pipeline de importação seguro",
+          "description": "Cada etapa recebe uma entrada simples e devolve sucesso, rejeição ou falha com contexto.",
+          "steps": [
+            "abrir arquivo com charset declarado",
+            "ler linha com número",
+            "parsear campos conforme contrato",
+            "validar regras de domínio",
+            "agregar aceitos e rejeições",
+            "ordenar relatório",
+            "gravar JSON em saída temporária e mover quando aplicável"
+          ]
+        },
+        {
+          "id": "importador-quiz",
+          "type": "quiz",
+          "authorship": "authored",
+          "conceptId": "importacao-tolerante",
+          "prompt": "Qual situação deve abortar o importador inteiro, em vez de apenas rejeitar uma linha?",
+          "options": [
+            {
+              "id": "importador-q-a",
+              "label": "Não conseguir gravar o relatório final no diretório de saída exigido.",
+              "correct": true,
+              "explanation": "Sem saída confiável, o contrato de entrega não pode ser cumprido."
+            },
+            {
+              "id": "importador-q-b",
+              "label": "Uma linha contém data em formato inválido previsto no contrato.",
+              "correct": false,
+              "explanation": "Se o contrato prevê sucesso parcial, essa linha vira rejeição com contexto."
+            },
+            {
+              "id": "importador-q-c",
+              "label": "Um pedido repetido aparece no arquivo.",
+              "correct": false,
+              "explanation": "Duplicidade pode ser rejeição de registro quando a política foi definida."
+            }
+          ]
+        }
+      ],
+      "codeExplanations": {
+        "mini-importador-pedidos-code-11": {
+          "explanation": [
+            "O relatório separa metadados, contagens, valor total e rejeições.",
+            "Valor monetário sai como texto para preservar escala e evitar ambiguidade de ponto flutuante."
+          ],
+          "commonMistakes": [
+            "Misturar rejeições com stack trace",
+            "Emitir valor monetário como double sem contrato"
+          ]
+        }
+      },
+      "quizRationales": {
+        "mini-importador-pedidos:0": [
+          "A política preserva contexto e permite sucesso parcial quando o contrato autoriza.",
+          "Ignorar exceção remove evidência e pode gerar relatório falso.",
+          "Importar parte de uma linha cria estado ambíguo e viola o contrato do registro."
+        ]
+      },
+      "resources": [
+        {
+          "id": "importador-files-api",
+          "type": "reference",
+          "title": "Files API — Java 21",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Files.html",
+          "reinforces": "Base para leitura, escrita e movimentação segura de arquivos do importador.",
+          "language": "en",
+          "publisher": "Oracle",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        },
+        {
+          "id": "importador-jackson",
+          "type": "reference",
+          "title": "Jackson Databind README",
+          "url": "https://github.com/FasterXML/jackson-databind",
+          "reinforces": "ObjectMapper para escrever relatório JSON a partir de DTOs.",
+          "language": "en",
+          "publisher": "FasterXML",
+          "official": true,
+          "expectedLevel": "intermediate",
+          "verifiedAt": "2026-08-22",
+          "auditStatus": "approved"
+        }
+      ],
+      "audit": {
+        "status": "approved",
+        "sourceKind": "legacy-html",
+        "reviewedAt": "2026-08-22"
+      }
     }
   }
 }

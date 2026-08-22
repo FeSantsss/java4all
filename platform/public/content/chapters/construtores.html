@@ -7,6 +7,8 @@
 
       <p>Um <strong>construtor</strong> é um método especial, com o mesmo nome da classe e sem tipo de retorno, executado automaticamente no <code>new</code>. Ele existe para garantir que todo objeto nasça em um estado válido, em vez de depender que alguém lembre de preencher cada atributo depois.</p>
 
+      <p>O termo técnico para essa garantia é <strong>invariante</strong>: uma regra que deve permanecer verdadeira durante toda a vida do objeto (por exemplo, "saldo nunca é negativo", "titular nunca é vazio"). Um construtor que aceita qualquer valor sem validar deixa a porta aberta para um <strong>objeto parcialmente válido</strong> — instanciado com sucesso, mas já nascendo em um estado que a classe deveria ter recusado. Validar no construtor (lançando exceção ou normalizando o valor, como no exercício abaixo) é a primeira e mais barata linha de defesa contra esse problema — bem mais barata do que descobrir o estado inválido três chamadas de método depois.</p>
+
       <pre class="code"><span class="kw">public class</span> <span class="cls">Cafe</span> {
     <span class="kw">String</span> tipo;
     <span class="kw">boolean</span> comAcucar;

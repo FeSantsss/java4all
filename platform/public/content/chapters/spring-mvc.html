@@ -3,7 +3,7 @@
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
-        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
+        <div class="time-est">⏱ <b>~3h30</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">43 · Spring Core</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; APIs REST</a>, <a class="prereq-tag" href="#json">25 · JSON &amp; serialização</a></div>
       </div>
 
@@ -55,14 +55,87 @@
 
       <div class="analogy">Um controller é o "recepcionista" da sua aplicação — ele não sabe cozinhar (regra de negócio) nem sabe onde os ingredientes estão guardados (banco de dados). Ele só recebe o pedido do cliente HTTP, entende o que foi pedido (via <code>@PathVariable</code>/<code>@RequestBody</code>), repassa para quem sabe fazer (o <code>@Service</code>) e devolve a resposta formatada certinha. Se seu controller tem lógica de negócio complexa dentro, ele deixou de ser recepcionista e virou o cozinheiro — sinal de que essa lógica deveria estar no Service (mesma lição de SRP do capítulo 16).</div>
 
-      <div class="secret">Repare que <code>@RestController</code> nunca "sabe" que existe JSON explicitamente no código — você retorna objetos Java normais (<code>LivroDTO</code>, <code>List&lt;LivroDTO&gt;</code>) e o Spring, por trás dos panos, usa o Jackson (capítulo 25) automaticamente para serializar, baseado no <code>Content-Type</code> negociado com o cliente. É por isso que entender getters/records + Jackson <em>antes</em> deste capítulo evita achar essa conversão mágica.</div>
+      <h3>O que acontece antes do seu controller: DispatcherServlet</h3>
+      <p>O método do controller acima não é chamado diretamente pelo servidor HTTP — várias peças nomeadas decidem, em sequência, que aquele método específico deve rodar e como transformar o retorno dele em resposta HTTP:</p>
+      <pre class="code"><span class="com">1. Requisição HTTP chega no servlet container embarcado (Tomcat, por padrao)
+2. Passa pela cadeia de Filter do servlet (ex.: filtros do Spring Security, se presentes)
+3. Chega ao DispatcherServlet -- o "front controller" unico que o Spring Boot
+   registra para tratar todas as requisicoes da aplicacao
+4. DispatcherServlet pergunta a um HandlerMapping qual metodo de controller
+   combina com o verbo HTTP + caminho + cabecalhos desta requisicao
+5. DispatcherServlet entrega essa decisao a um HandlerAdapter, que sabe
+   invocar aquele metodo especifico: resolve @PathVariable, @RequestParam,
+   @RequestBody (via HttpMessageConverter) e monta os argumentos do metodo
+6. O metodo do controller roda e devolve um objeto Java (ou ResponseEntity)
+7. HandlerAdapter escolhe, por content negotiation (cabecalho Accept), um
+   HttpMessageConverter para serializar o retorno -- o do Jackson e o
+   padrao para JSON, mas e so um entre varios conversores possiveis
+8. Se uma excecao for lancada em qualquer ponto, ela vai para um
+   HandlerExceptionResolver -- e aqui que @ControllerAdvice/@ExceptionHandler
+   entram (capitulo 45, Validacao e tratamento de erros)
+9. A resposta volta pela cadeia de Filter ate o cliente</span></pre>
+      <p>Duas peças merecem nome porque costumam aparecer como "mágica" em tutoriais copiados: <strong><code>HandlerMapping</code></strong> é quem decide <em>qual</em> método atende a requisição (o "roteador"); <strong><code>HandlerAdapter</code></strong> é quem sabe <em>como</em> invocar esse método específico, incluindo resolver seus parâmetros. Sem esses nomes, é fácil achar que o <code>DispatcherServlet</code> "sabe" chamar qualquer controller sozinho — na verdade ele delega as duas decisões (qual método, como invocá-lo) para peças substituíveis, o que é o que permite o Spring suportar controllers anotados, funcionais (<code>RouterFunction</code>) e outros estilos ao mesmo tempo.</p>
+
+      <div class="secret">Repare que <code>@RestController</code> nunca "sabe" que existe JSON explicitamente no código — você retorna objetos Java normais (<code>LivroDTO</code>, <code>List&lt;LivroDTO&gt;</code>) e quem decide a serialização é a etapa 7 do fluxo acima: <strong>content negotiation</strong> baseada no cabeçalho <code>Accept</code> da requisição, seguida da escolha de um <code>HttpMessageConverter</code> compatível. O <code>MappingJackson2HttpMessageConverter</code> (Jackson, capítulo 25) é o conversor padrão auto-configurado para JSON — mas é plugável: uma API que também precisasse devolver XML registraria outro <code>HttpMessageConverter</code> para isso, sem o controller saber ou se importar. É por isso que entender getters/records + Jackson <em>antes</em> deste capítulo evita achar essa conversão mágica.</div>
+
+      <h3>Tratamento de exceção: quem decide a resposta de erro</h3>
+      <p>Quando um método de controller lança uma exceção (de validação, de domínio, ou inesperada), ela não vira uma resposta HTTP sozinha — ela é entregue a um <code>HandlerExceptionResolver</code>, e <code>@ControllerAdvice</code>/<code>@ExceptionHandler</code> são a forma declarativa de configurar esse resolver para decidir status, corpo e cabeçalhos por tipo de exceção, num único lugar central em vez de <code>try/catch</code> repetido em cada controller. O capítulo <a href="#validacao-erros">45 · Validação e tratamento de erros</a> aprofunda esse mecanismo com um <code>GlobalExceptionHandler</code> completo — aqui basta saber que ele se encaixa exatamente na etapa 8 do fluxo do <code>DispatcherServlet</code> acima, não em algum lugar separado e desconectado.</p>
+
+      <h3>Multipart: recebendo arquivos</h3>
+      <p>Nem todo corpo de requisição é JSON. Upload de arquivo usa <code>multipart/form-data</code>, e o Spring resolve isso com <code>MultipartFile</code>:</p>
+      <pre class="code"><span class="annotation">@PostMapping</span>(value = <span class="str">"/{id}/capa"</span>, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+<span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">enviarCapa</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id,
+        <span class="annotation">@RequestPart</span>(<span class="str">"arquivo"</span>) MultipartFile arquivo) <span class="kw">throws</span> IOException {
+    <span class="kw">if</span> (!<span class="str">"image/png"</span>.equals(arquivo.getContentType())) { <span class="com">// nunca confie cegamente no Content-Type declarado pelo cliente</span>
+        <span class="kw">throw new</span> <span class="cls">ArquivoInvalidoException</span>(arquivo.getContentType());
+    }
+    servico.salvarCapa(id, arquivo.getBytes(), arquivo.getOriginalFilename());
+    <span class="kw">return</span> ResponseEntity.noContent().build();
+}</pre>
+      <div class="warn">O <code>Content-Type</code> de um <code>MultipartFile</code> é declarado pelo <strong>cliente</strong> — validá-lo é uma checagem de conveniência, não uma prova de segurança. Para conteúdo que importa de verdade, valide também o próprio conteúdo do arquivo (assinatura de bytes, tamanho real) e configure limites no servidor (<code>spring.servlet.multipart.max-file-size</code>, <code>max-request-size</code>) — sem isso, um upload gigante ou malformado vira um vetor de negação de serviço ou de arquivo malicioso disfarçado.</div>
+
+      <h3>Testando de verdade: @WebMvcTest e MockMvc</h3>
+      <p>O exercício deste capítulo sempre pediu testes MockMvc — aqui está o exemplo real, não apenas a menção:</p>
+      <pre class="code"><span class="annotation">@WebMvcTest</span>(LivroController.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cls">LivroControllerTest</span> {
+
+    <span class="annotation">@Autowired</span> MockMvc mockMvc;
+    <span class="annotation">@MockBean</span> LivroServico servico; <span class="com">// troca o Service real -- este teste não usa banco nem regra de negócio real</span>
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveRetornarLivrosComoJson</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        when(servico.listarTodos()).thenReturn(List.of(<span class="kw">new</span> <span class="cls">LivroDTO</span>(<span class="str">1L</span>, <span class="str">"Duna"</span>, <span class="str">412</span>)));
+
+        mockMvc.perform(get(<span class="str">"/livros"</span>))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(<span class="str">"$[0].titulo"</span>).value(<span class="str">"Duna"</span>));
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveRetornar404QuandoLivroNaoExiste</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        when(servico.buscarPorId(<span class="str">99L</span>)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get(<span class="str">"/livros/99"</span>))
+            .andExpect(status().isNotFound());
+    }
+}</pre>
+      <p><code>@WebMvcTest</code> sobe só a camada web (o <code>DispatcherServlet</code>, <code>HandlerMapping</code>/<code>HandlerAdapter</code>, os <code>HttpMessageConverter</code>) em vez do <code>ApplicationContext</code> inteiro — <code>@MockBean</code> substitui o <code>LivroServico</code> real por um dublê configurável, então o teste não depende de banco de dados nem de regra de negócio de verdade. <code>MockMvc</code> simula a requisição HTTP inteira (roteamento, binding de parâmetros, serialização da resposta) sem abrir uma porta de rede real — é por isso que esses testes rodam em milissegundos, mesmo exercitando o mesmo caminho que o <code>DispatcherServlet</code> percorre em produção.</p>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 44.1 — Controller completo de Livro</h4><span class="exercise-tag m">médio</span></div>
-        <p>Sem copiar o exemplo, implemente um <code>AutorController</code> com listar, buscar, criar e deletar. A criação deve retornar 201 com <code>Location</code>; busca ausente retorna 404; deleção inexistente também possui contrato explícito. Escreva testes MockMvc para cada status.</p>
+        <p>Sem copiar o exemplo, implemente um <code>AutorController</code> com listar, buscar, criar e deletar. A criação deve retornar 201 com <code>Location</code>; busca ausente retorna 404; deleção inexistente também possui contrato explícito. Escreva testes <code>@WebMvcTest</code>/<code>MockMvc</code> para cada status, seguindo o exemplo desta seção.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
           <p>Critérios: controller não contém regra de negócio; usa DTO; constrói <code>Location</code> a partir da requisição; converte ausência em 404; valida o corpo; e os testes verificam status, header e JSON. Compare uma solução com <code>ResponseEntity.of(optional)</code> e outra com exceção de domínio traduzida globalmente.</p>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 44.2 — Onde cada peça decide o quê</h4><span class="exercise-tag f">fácil</span></div>
+        <p>Para a requisição <code>GET /livros/7</code> com cabeçalho <code>Accept: application/json</code>, liste em ordem: qual peça decide que <code>buscarPorId</code> é o método certo, qual peça invoca esse método e resolve o <code>@PathVariable</code>, e qual peça decide como serializar o <code>LivroDTO</code> de volta. Explique por que trocar essas três respostas por "o Spring faz tudo isso" perde exatamente a informação que este capítulo ensina.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p><code>HandlerMapping</code> decide que <code>buscarPorId</code> combina com <code>GET /livros/7</code>. <code>HandlerAdapter</code> invoca <code>buscarPorId</code>, resolvendo <code>id=7</code> a partir do <code>@PathVariable</code>. A escolha do <code>HttpMessageConverter</code> (Jackson, por content negotiation com o <code>Accept: application/json</code>) decide como o <code>LivroDTO</code> devolvido vira o corpo JSON da resposta. "O Spring faz tudo isso" esconde que são três decisões distintas, cada uma numa peça substituível — é essa substituibilidade que permite, por exemplo, adicionar suporte a XML sem tocar no controller.</p>
         </div>
       </div>
     </section>

@@ -3,70 +3,171 @@
       <div class="topic-meta">
         <span class="tech-badge tech-security">Spring Security</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~3h30</b> de estudo + prática (o mais denso do curso — respire fundo)</div>
+        <div class="time-est">⏱ <b>~4h30</b> de estudo + prática (o mais denso do curso — respire fundo)</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#autenticacao-conceitos">51 · Autenticação conceitos</a>, <a class="prereq-tag" href="#spring-mvc">44 · Spring Web/MVC</a>, <a class="prereq-tag" href="#anotacoes">20 · Anotações &amp; Reflection</a> (dynamic proxy)</div>
       </div>
 
       <p>Spring Security é notoriamente a parte do ecossistema Spring com curva de aprendizado mais íngreme — não porque seja mal desenhado, mas porque resolve um problema genuinamente complexo (autenticação + autorização) de forma extremamente configurável.</p>
 
-      <div class="analogy">Pense no Spring Security como um segurança de prédio em duas etapas: primeiro ele confere seu documento na entrada (<strong>autenticação</strong> — "quem é você?"), depois confere se seu crachá te dá acesso àquele andar específico (<strong>autorização</strong> — "você pode estar aqui?"). Toda a configuração deste capítulo é, no fundo, decidir as regras dessas duas perguntas.</div>
+      <div class="analogy">Pense no Spring Security como um segurança de prédio em duas etapas: primeiro ele confere seu documento na entrada (<strong>autenticação</strong> — "quem é você?"), depois confere se seu crachá te dá acesso àquele andar específico (<strong>autorização</strong> — "você pode estar aqui?"). Mas um segurança de verdade não decide isso sozinho, na hora, olhando pra sua cara: ele segue um processo — confere o documento com um sistema central, recebe de volta uma confirmação com seu nível de acesso, e só então libera a catraca. É exatamente esse processo, com peças que têm nome, que a próxima seção desmonta.</div>
 
-      <h3>Filter Chain — onde a mágica acontece antes do seu controller</h3>
-      <p>Toda requisição HTTP passa por uma cadeia de <em>filtros</em> antes de chegar ao seu <code>@RestController</code>. O Spring Security se insere nessa cadeia, interceptando a requisição para validar autenticação <strong>antes</strong> mesmo do controller ser chamado.</p>
+      <h3>Anatomia real: da requisição ao SecurityContext</h3>
+      <p>É tentador tratar Spring Security como uma caixa-preta que "só funciona" depois de configurada — mas os quatro erros mais comuns em produção (exemplo copiado que não compila, <code>@PreAuthorize</code> ignorado, JWT verificado do jeito errado, autorização que vaza informação) vêm exatamente de pular esta parte. O fluxo completo, do primeiro byte da requisição até a decisão de autorizar ou não:</p>
+      <pre class="code"><span class="com">1. Requisição HTTP chega no servlet container (Tomcat embarcado)
+2. DelegatingFilterProxy entrega a requisição para o FilterChainProxy do Spring Security
+3. FilterChainProxy roda a cadeia de filtros de segurança, em ordem fixa e documentada
+4. Um filtro de autenticação extrai as credenciais da requisição
+   (formulário, cabeçalho Authorization: Bearer, ou seu próprio filtro customizado)
+   e monta um Authentication ainda NÃO autenticado (só principal + credentials)
+5. O filtro chama authenticationManager.authenticate(authentication)
+6. AuthenticationManager (implementação padrão: ProviderManager) percorre uma lista
+   de AuthenticationProvider e delega ao primeiro que suporta aquele tipo de Authentication
+7. DaoAuthenticationProvider chama UserDetailsService.loadUserByUsername(...)
+   para carregar o usuário, e compara a senha via PasswordEncoder.matches(...)
+8. Se válido: devolve um Authentication AUTENTICADO, agora com authorities
+   (GrantedAuthority) preenchidas -- se inválido: lança AuthenticationException
+9. O Authentication autenticado é guardado no SecurityContext,
+   dentro do SecurityContextHolder (por padrão, um ThreadLocal por requisição)
+10. O restante da cadeia (e depois o controller) lê esse SecurityContext
+    para decidir autorização -- esse contexto alimenta authentication.principal
+    usado em @PreAuthorize("#id == authentication.principal.id")</span></pre>
+      <p>Duas peças merecem destaque porque aparecem sozinhas, sem explicação, em código copiado da internet: o <strong><code>AuthenticationManager</code></strong> é a interface com um único método (<code>authenticate</code>); <strong><code>ProviderManager</code></strong> é a implementação padrão do Spring Security para ela, e só delega — quem de fato valida é um <strong><code>AuthenticationProvider</code></strong> específico (o mais comum sendo <code>DaoAuthenticationProvider</code>, que por sua vez depende de um <code>UserDetailsService</code> seu). Sem esse encadeamento nomeado, é fácil achar que "o Spring valida a senha magicamente" — na verdade, cada elo é uma peça substituível, e é exatamente essa substituibilidade que permite plugar JWT, OAuth2, LDAP ou qualquer outro mecanismo sem reescrever o resto.</p>
 
-      <pre class="code"><span class="annotation">@Configuration</span>
-<span class="annotation">@EnableWebSecurity</span>
-<span class="kw">public class</span> <span class="cls">SecurityConfig</span> {
+      <div class="warn"><b>Login implementado direto no controller, sem passar por esse fluxo, é o erro mais comum em projetos que "funcionam mas não são Spring Security de verdade":</b> chamar <code>usuarioRepository.findByEmail(...)</code> e <code>passwordEncoder.matches(...)</code> manualmente dentro do controller até autentica o usuário, mas nunca cria um <code>Authentication</code> real, nunca populam authorities corretamente para <code>@PreAuthorize</code>, e duplicam uma lógica que o framework já resolve — testada, mantida e revisada por milhares de projetos. A seção seguinte mostra o jeito correto: implementar <code>UserDetailsService</code> e deixar o <code>AuthenticationManager</code> fazer o trabalho.</div>
 
-    <span class="annotation">@Bean</span>
-    <span class="kw">public</span> SecurityFilterChain <span class="fn">filterChain</span>(HttpSecurity http) <span class="kw">throws</span> <span class="cls">Exception</span> {
-        <span class="kw">return</span> http
-            .csrf(csrf -&gt; csrf.disable()) <span class="com">// desabilitado para APIs stateless com JWT (explicado abaixo)</span>
-            .sessionManagement(s -&gt; s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) <span class="com">// sem sessão!</span>
-            .authorizeHttpRequests(auth -&gt; auth
-                .requestMatchers(<span class="str">"/auth/login"</span>, <span class="str">"/auth/registrar"</span>).permitAll() <span class="com">// público</span>
-                .requestMatchers(HttpMethod.GET, <span class="str">"/livros/**"</span>).permitAll() <span class="com">// leitura pública</span>
-                .requestMatchers(<span class="str">"/admin/**"</span>).hasRole(<span class="str">"ADMIN"</span>)       <span class="com">// só admin</span>
-                .anyRequest().authenticated()                       <span class="com">// resto exige login</span>
-            )
-            .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.<span class="kw">class</span>) <span class="com">// seu filtro JWT customizado</span>
+      <h3>UserDetailsService e DaoAuthenticationProvider: o login de verdade</h3>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">BibliotecaUserDetailsService</span> <span class="kw">implements</span> UserDetailsService {
+    <span class="kw">private final</span> <span class="cls">UsuarioRepository</span> usuarioRepository;
+
+    <span class="kw">public</span> <span class="fn">BibliotecaUserDetailsService</span>(<span class="cls">UsuarioRepository</span> usuarioRepository) {
+        <span class="kw">this</span>.usuarioRepository = usuarioRepository;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="kw">public</span> UserDetails <span class="fn">loadUserByUsername</span>(<span class="kw">String</span> email) <span class="kw">throws</span> UsernameNotFoundException {
+        <span class="cls">Usuario</span> usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -&gt; <span class="kw">new</span> UsernameNotFoundException(<span class="str">"email não encontrado: "</span> + email));
+        <span class="kw">return</span> User.builder()
+            .username(usuario.getEmail())
+            .password(usuario.getSenha()) <span class="com">// já é o hash BCrypt -- nunca a senha crua</span>
+            .authorities(<span class="str">"ROLE_"</span> + usuario.getRole())
             .build();
     }
 }</pre>
+      <p>Com um bean <code>UserDetailsService</code> e um bean <code>PasswordEncoder</code> presentes, o Spring Boot <strong>auto-configura</strong> um <code>DaoAuthenticationProvider</code> que os conecta — na maioria dos casos você nunca precisa declarar esse provider manualmente. O que ainda precisa de um bean explícito é o <code>AuthenticationManager</code>, para poder injetá-lo onde for autenticar de fato:</p>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> AuthenticationManager <span class="fn">authenticationManager</span>(AuthenticationConfiguration config) <span class="kw">throws</span> <span class="cls">Exception</span> {
+    <span class="kw">return</span> config.getAuthenticationManager(); <span class="com">// devolve o ProviderManager já montado com o DaoAuthenticationProvider</span>
+}</pre>
+      <p>E o endpoint de login passa a autenticar de verdade, em vez de comparar hash manualmente:</p>
+      <pre class="code"><span class="annotation">@PostMapping</span>(<span class="str">"/auth/login"</span>)
+<span class="kw">public</span> ResponseEntity&lt;<span class="cls">TokenDTO</span>&gt; <span class="fn">login</span>(<span class="annotation">@RequestBody</span> <span class="cls">LoginDTO</span> dto) {
+    <span class="cls">Authentication</span> autenticado = authenticationManager.authenticate(
+        <span class="kw">new</span> UsernamePasswordAuthenticationToken(dto.email(), dto.senha())
+    ); <span class="com">// lança BadCredentialsException se inválido -- não retorna boolean</span>
+    <span class="kw">return</span> ResponseEntity.ok(<span class="kw">new</span> <span class="cls">TokenDTO</span>(jwtServico.gerarToken(autenticado)));
+}</pre>
+      <div class="secret">Note a diferença de contrato: o <code>authenticationManager.authenticate(...)</code> não devolve <code>true</code>/<code>false</code> como o <code>passwordEncoder.matches(...)</code> manual — ele devolve um <code>Authentication</code> autenticado em caso de sucesso, ou <strong>lança</strong> <code>AuthenticationException</code> (por exemplo <code>BadCredentialsException</code>) em caso de falha. Isso significa que credenciais inválidas viram um erro tratado por um <code>@ExceptionHandler</code> (ou pelo <code>AuthenticationEntryPoint</code>, visto adiante) — não um <code>if</code> manual no controller.</div>
 
-      <h3>Gerando e validando o JWT</h3>
+      <h3>Emitindo e validando o JWT com Resource Server (caminho recomendado)</h3>
+      <p>O <code>JwtServico</code> agora emite o token a partir do <code>Authentication</code> devolvido pelo <code>AuthenticationManager</code>, não a partir da entidade <code>Usuario</code> diretamente — reforçando que quem autoriza é o <code>SecurityContext</code>, não o banco de dados direto:</p>
       <pre class="code"><span class="annotation">@Service</span>
 <span class="kw">public class</span> <span class="cls">JwtServico</span> {
     <span class="kw">private final</span> <span class="kw">String</span> chaveSecreta = <span class="str">"..."</span>; <span class="com">// NUNCA hardcoded de verdade -- vem de variável de ambiente (capítulo 27!)</span>
 
-    <span class="kw">public</span> <span class="kw">String</span> <span class="fn">gerarToken</span>(<span class="cls">Usuario</span> usuario) {
+    <span class="kw">public</span> <span class="kw">String</span> <span class="fn">gerarToken</span>(<span class="cls">Authentication</span> autenticado) {
+        <span class="kw">String</span> authorities = autenticado.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.joining(<span class="str">","</span>));
         <span class="kw">return</span> Jwts.builder()
-            .subject(usuario.getEmail())
-            .claim(<span class="str">"role"</span>, usuario.getRole())
+            .subject(autenticado.getName())
+            .claim(<span class="str">"role"</span>, authorities)
             .issuedAt(<span class="kw">new</span> Date())
             .expiration(<span class="kw">new</span> Date(System.currentTimeMillis() + 3600_000)) <span class="com">// 1 hora</span>
             .signWith(chaveComoBytes())
             .compact();
     }
-
-    <span class="kw">public boolean</span> <span class="fn">validar</span>(<span class="kw">String</span> token) {
-        <span class="kw">try</span> {
-            Jwts.parser().verifyWith(chaveComoBytes()).build().parseSignedClaims(token);
-            <span class="kw">return true</span>;
-        } <span class="kw">catch</span> (JwtException e) { <span class="com">// expirado, assinatura inválida, malformado...</span>
-            <span class="kw">return false</span>;
-        }
-    }
 }</pre>
+      <p>Para <strong>validar</strong> esse token nas requisições seguintes, o caminho recomendado não é escrever seu próprio filtro (isso vem no laboratório avançado, adiante) — é usar o suporte nativo de <strong>OAuth2 Resource Server</strong> do Spring Security, o mesmo mecanismo battle-tested que valida tokens emitidos por provedores externos no capítulo de OIDC:</p>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> SecurityFilterChain <span class="fn">filterChain</span>(HttpSecurity http) <span class="kw">throws</span> <span class="cls">Exception</span> {
+    <span class="kw">return</span> http
+        .csrf(csrf -&gt; csrf.disable()) <span class="com">// ver seção CSRF abaixo -- a razão certa, não "porque é API"</span>
+        .sessionManagement(s -&gt; s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -&gt; auth
+            .requestMatchers(<span class="str">"/auth/login"</span>, <span class="str">"/auth/registrar"</span>).permitAll()
+            .requestMatchers(HttpMethod.GET, <span class="str">"/livros/**"</span>).permitAll()
+            .requestMatchers(<span class="str">"/admin/**"</span>).hasRole(<span class="str">"ADMIN"</span>)
+            .anyRequest().authenticated()
+        )
+        .exceptionHandling(ex -&gt; ex
+            .authenticationEntryPoint((req, res, e) -&gt; res.sendError(HttpStatus.UNAUTHORIZED.value()))
+            .accessDeniedHandler((req, res, e) -&gt; res.sendError(HttpStatus.FORBIDDEN.value()))
+        )
+        .oauth2ResourceServer(oauth -&gt; oauth.jwt(jwt -&gt; jwt
+            .decoder(jwtDecoder())
+            .jwtAuthenticationConverter(jwtAuthenticationConverter())
+        ))
+        .build();
+}
 
-      <h3>Autorização com @PreAuthorize</h3>
-      <pre class="code"><span class="annotation">@PreAuthorize</span>(<span class="str">"hasRole('ADMIN')"</span>) <span class="com">// checa ANTES do método executar -- outro dynamic proxy, capítulo 20!</span>
+<span class="annotation">@Bean</span>
+<span class="kw">public</span> JwtDecoder <span class="fn">jwtDecoder</span>() {
+    <span class="com">// HMAC (chave simétrica) só faz sentido aqui porque ESTA aplicação
+    // emite e valida o próprio token. Quando o emissor é externo (capítulo
+    // de OIDC), a validação usa chaves assimétricas publicadas via JWK Set --
+    // o mecanismo de assinatura muda, mas o encaixe na filter chain, via
+    // oauth2ResourceServer().jwt(...), é o mesmo dos dois lados.</span>
+    <span class="kw">return</span> NimbusJwtDecoder.withSecretKey(chaveComoBytes()).build();
+}
+
+<span class="annotation">@Bean</span>
+<span class="kw">public</span> JwtAuthenticationConverter <span class="fn">jwtAuthenticationConverter</span>() {
+    <span class="kw">var</span> authoritiesConverter = <span class="kw">new</span> JwtGrantedAuthoritiesConverter();
+    authoritiesConverter.setAuthorityPrefix(<span class="str">"ROLE_"</span>);
+    authoritiesConverter.setAuthoritiesClaimName(<span class="str">"role"</span>); <span class="com">// mesmo nome de claim usado em gerarToken</span>
+    <span class="kw">var</span> converter = <span class="kw">new</span> JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+    <span class="kw">return</span> converter;
+}</pre>
+      <p>Usar <code>oauth2ResourceServer(...)</code> em vez de um filtro escrito à mão traz de graça: validação de expiração e assinatura já testada, conversão de claims em <code>GrantedAuthority</code> configurável sem reescrever nada, e o mesmo modelo mental do capítulo seguinte de OIDC — trocar apenas o <code>JwtDecoder</code> (de chave simétrica para JWK Set assíncrono) é o suficiente para migrar de "emito meu próprio token" para "confio num provedor de identidade externo", sem tocar no resto da configuração.</p>
+
+      <h3>Laboratório avançado: escrevendo seu próprio filtro JWT</h3>
+      <p>Entender <em>como</em> um filtro de autenticação funciona por dentro vale a pena — mas o código abaixo é material de estudo, não o caminho recomendado para produção (a seção anterior já resolve o problema de forma testada e mantida pelo próprio Spring Security):</p>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">JwtAuthFilter</span> <span class="kw">extends</span> OncePerRequestFilter {
+    <span class="annotation">@Override</span>
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            <span class="kw">throws</span> ServletException, IOException {
+        <span class="kw">String</span> header = req.getHeader(<span class="str">"Authorization"</span>);
+        <span class="kw">if</span> (header != <span class="kw">null</span> &amp;&amp; header.startsWith(<span class="str">"Bearer "</span>)) {
+            <span class="kw">String</span> token = header.substring(<span class="str">7</span>);
+            <span class="kw">if</span> (jwtServico.validar(token)) {
+                <span class="com">// aqui você mesmo montaria o Authentication e o colocaria
+                // no SecurityContextHolder -- exatamente o passo que
+                // oauth2ResourceServer().jwt() já faz por você</span>
+            }
+        }
+        chain.doFilter(req, res);
+    }
+}
+<span class="com">// registro manual, se optar por este caminho em vez do Resource Server:
+// .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)</span></pre>
+      <div class="warn">Um filtro customizado escrito à mão não valida issuer, audience nem algoritmo de assinatura por padrão — cada uma dessas checagens fica por sua conta, e esquecer qualquer uma delas é uma vulnerabilidade real. É exatamente esse tipo de detalhe que o <code>oauth2ResourceServer().jwt()</code> resolve de fábrica.</div>
+
+      <h3>Autorização com @PreAuthorize (agora com method security habilitada)</h3>
+      <pre class="code"><span class="annotation">@Configuration</span>
+<span class="annotation">@EnableWebSecurity</span>
+<span class="annotation">@EnableMethodSecurity</span> <span class="com">// sem esta anotação, @PreAuthorize é ignorado silenciosamente -- erro clássico</span>
+<span class="kw">public class</span> <span class="cls">SecurityConfig</span> { <span class="com">/* beans da seção anterior */</span> }</pre>
+      <pre class="code"><span class="annotation">@PreAuthorize</span>(<span class="str">"hasRole('ADMIN')"</span>) <span class="com">// checa ANTES do método executar -- via dynamic proxy, capítulo 20!</span>
 <span class="annotation">@DeleteMapping</span>(<span class="str">"/livros/{id}"</span>)
 <span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">deletar</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id) { ... }
 
 <span class="annotation">@PreAuthorize</span>(<span class="str">"#id == authentication.principal.id"</span>) <span class="com">// só o PRÓPRIO usuário pode editar seu perfil</span>
 <span class="annotation">@PutMapping</span>(<span class="str">"/usuarios/{id}"</span>)
 <span class="kw">public</span> ResponseEntity&lt;<span class="kw">Void</span>&gt; <span class="fn">atualizar</span>(<span class="annotation">@PathVariable</span> <span class="kw">Long</span> id, ...) { ... }</pre>
+      <p><code>@PreAuthorize</code> é implementado com o mesmo mecanismo de proxy dinâmico usado por <code>@Transactional</code> e <code>@Cacheable</code> — e por isso herda a mesma limitação: chamar o método anotado de <em>dentro</em> da mesma classe (self-invocation) passa por cima do proxy e ignora a checagem de autorização silenciosamente. O capítulo de Spring AOP detalha esse mecanismo com profundidade; aqui basta lembrar que <code>@PreAuthorize</code> só protege chamadas que passam pelo proxy, ou seja, chamadas vindas de fora da classe.</p>
 
       <h3>Codificando senhas — nunca em texto puro</h3>
       <pre class="code"><span class="annotation">@Bean</span>
@@ -75,30 +176,77 @@
 }
 
 <span class="com">// ao registrar:</span>
-usuario.setSenha(passwordEncoder.encode(senhaDigitada));
+usuario.setSenha(passwordEncoder.encode(senhaDigitada));</pre>
+      <div class="secret">BCrypt é deliberadamente <strong>lento</strong> — e isso é uma característica de segurança, não um defeito de performance. Um hash rápido (como MD5 ou SHA-1 puro) permite testar um volume enorme de senhas por segundo contra um vazamento de banco; o <strong>work factor</strong> (fator de custo) do BCrypt existe justamente para encarecer cada tentativa o suficiente para inviabilizar força bruta em massa. Quantas tentativas por segundo isso permite depende inteiramente do hardware do atacante e do work factor escolhido — nunca cite um número absoluto como verdade universal (hardware evolui, GPUs e ASICs mudam a conta). Se precisar decidir o work factor certo para seu caso, <strong>meça</strong> o custo no seu próprio hardware (<code>new BCryptPasswordEncoder(strength)</code>, padrão <code>10</code>) em vez de confiar numa cifra genérica.</div>
 
-<span class="com">// ao logar:</span>
-<span class="kw">if</span> (passwordEncoder.matches(senhaDigitada, usuario.getSenha())) { <span class="com">// compara hash, nunca a senha crua</span>
-    <span class="com">// gera o JWT</span>
+      <h3>CSRF: a pergunta certa antes de desabilitar</h3>
+      <p>CSRF (<em>Cross-Site Request Forgery</em>) explora o fato de que o navegador envia certas credenciais <strong>automaticamente</strong>, mesmo quando a requisição parte de outra origem — induzindo uma ação indesejada em nome de um usuário já autenticado. A pergunta certa antes de desabilitar a proteção não é "minha API é stateless?" — é: <strong>"as credenciais desta requisição são enviadas automaticamente pelo navegador?"</strong></p>
+      <p>Um token no cabeçalho <code>Authorization: Bearer ...</code> precisa ser colocado ali <em>explicitamente</em> por código seu (JavaScript, app mobile); o navegador nunca o anexa sozinho como faz com cookies. Por isso esse cenário — exatamente o desta configuração — não é vulnerável a CSRF, e <code>csrf().disable()</code> é seguro aqui. Mas no momento em que o token passa a viver num cookie (por exemplo, para reduzir exposição a XSS via <code>localStorage</code>) ou a aplicação volta a usar sessão tradicional, a resposta muda: cookies <strong>são</strong> enviados automaticamente, e desabilitar CSRF nessa configuração reabre exatamente o buraco que a proteção existia para fechar.</p>
+
+      <h3>401 vs 403: AuthenticationEntryPoint e AccessDeniedHandler</h3>
+      <p>Os dois handlers configurados na <code>SecurityFilterChain</code> acima respondem perguntas diferentes, e confundi-los é um erro comum: <code>AuthenticationEntryPoint</code> responde quando <strong>ninguém está autenticado</strong> — 401 Unauthorized, "eu não sei quem você é". <code>AccessDeniedHandler</code> responde quando alguém <strong>está</strong> autenticado, mas não tem permissão suficiente — 403 Forbidden, "eu sei quem você é, e a resposta é não". Devolver 403 para uma requisição sem token nenhum vaza a existência de um recurso protegido para quem nem deveria saber que ele existe; devolver 401 para um usuário autenticado mas sem a role certa é tecnicamente incorreto, porque ele se autenticou com sucesso — o problema é autorização, não identidade.</p>
+
+      <h3>Sessão, fixação e logout — mesmo numa aplicação majoritariamente stateless</h3>
+      <p>Nem toda aplicação Spring Security é JWT puro; é comum conviver com sessão tradicional em partes da aplicação (um painel administrativo renderizado no servidor, por exemplo). Dois cuidados mínimos quando há sessão: <strong>fixação de sessão</strong> — um atacante tenta fazer a vítima autenticar usando um identificador de sessão que ele já conhece de antemão; o Spring Security já troca o identificador de sessão automaticamente após autenticação bem-sucedida por padrão, mas vale saber que a configuração existe (<code>sessionManagement().sessionFixation().changeSessionId()</code>). E <strong>logout</strong> precisa invalidar a sessão de fato, não só esquecer o token no cliente:</p>
+      <pre class="code">.logout(logout -&gt; logout
+    .logoutUrl(<span class="str">"/auth/logout"</span>)
+    .invalidateHttpSession(<span class="kw">true</span>) <span class="com">// destrói a sessão no servidor, não só remove o cookie no navegador</span>
+)</pre>
+
+      <h3>Testando segurança: spring-security-test e MockMvc</h3>
+      <p>Um módulo de segurança sem teste automatizado é uma promessa não verificada — e o Spring oferece <code>spring-security-test</code> (escopo <code>test</code>) exatamente para simular autenticação sem precisar de senha real, banco ou token JWT válido em cada teste:</p>
+      <pre class="code"><span class="annotation">@WebMvcTest</span>(LivroController.<span class="kw">class</span>)
+<span class="annotation">@Import</span>(SecurityConfig.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cls">LivroControllerSecurityTest</span> {
+
+    <span class="annotation">@Autowired</span> MockMvc mockMvc;
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">devePermitirLeituraSemAutenticacao</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        mockMvc.perform(get(<span class="str">"/livros/1"</span>))
+            .andExpect(status().isOk());
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="kw">void</span> <span class="fn">deveRecusarExclusaoSemAutenticacao</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        mockMvc.perform(delete(<span class="str">"/livros/1"</span>))
+            .andExpect(status().isUnauthorized()); <span class="com">// 401: ninguém autenticado</span>
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="annotation">@WithMockUser</span>(roles = <span class="str">"LEITOR"</span>)
+    <span class="kw">void</span> <span class="fn">deveRecusarExclusaoSemRoleAdmin</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        mockMvc.perform(delete(<span class="str">"/livros/1"</span>).with(csrf()))
+            .andExpect(status().isForbidden()); <span class="com">// 403: autenticado, mas sem permissão</span>
+    }
+
+    <span class="annotation">@Test</span>
+    <span class="annotation">@WithMockUser</span>(roles = <span class="str">"ADMIN"</span>)
+    <span class="kw">void</span> <span class="fn">devePermitirExclusaoComRoleAdmin</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+        mockMvc.perform(delete(<span class="str">"/livros/1"</span>).with(csrf()))
+            .andExpect(status().isNoContent());
+    }
 }</pre>
-
-      <div class="secret">BCrypt é deliberadamente <strong>lento</strong> — e isso é uma característica de segurança, não um defeito de performance. Um hash rápido (como MD5 ou SHA-1 puro) permite que um atacante teste bilhões de senhas por segundo em um vazamento de banco; BCrypt limita isso a milhares por segundo, tornando ataques de força bruta impraticáveis mesmo com hardware potente. O "custo computacional" é o próprio mecanismo de defesa.</div>
+      <p><code>@WithMockUser</code> injeta um <code>Authentication</code> já autenticado direto no <code>SecurityContext</code> do teste, sem passar pelo <code>AuthenticationManager</code> nem por uma senha real — é isso que torna esses testes rápidos e determinísticos. Note como os quatro testes acima exercitam exatamente os quatro cenários que o <code>AuthenticationEntryPoint</code>/<code>AccessDeniedHandler</code> e o <code>@PreAuthorize</code> foram configurados para diferenciar: público, não autenticado, autenticado sem permissão, e autorizado.</p>
 
       <div class="rules-box">
         <h4>Regras de ouro</h4>
         <ul>
-          <li>Nunca guarde senha em texto puro, nem "só criptografada" (reversível) — sempre hash unidirecional com BCrypt ou equivalente.</li>
+          <li>Nunca guarde senha em texto puro, nem "só criptografada" (reversível) — sempre hash unidirecional com BCrypt ou equivalente, e nunca cite um número absoluto de tentativas/segundo como se fosse garantia — meça no seu hardware.</li>
+          <li>Login autentica de verdade através do <code>AuthenticationManager</code> (via <code>UserDetailsService</code>/<code>DaoAuthenticationProvider</code>) — nunca compare hash manualmente dentro do controller.</li>
+          <li><code>@EnableMethodSecurity</code> é obrigatório para <code>@PreAuthorize</code> funcionar — sem ela, a anotação é silenciosamente ignorada.</li>
+          <li>Prefira <code>oauth2ResourceServer().jwt(...)</code> a um filtro JWT escrito à mão — ele já valida assinatura, algoritmo e expiração de forma testada.</li>
           <li>A chave secreta do JWT nunca vai no código-fonte — sempre variável de ambiente (capítulo 27), diferente entre dev e produção.</li>
-          <li>Tokens JWT deveriam ter expiração curta (minutos/poucas horas) — combine com um <em>refresh token</em> de vida mais longa para renovar sem exigir login constante.</li>
-          <li><code>csrf().disable()</code> só é seguro em APIs verdadeiramente stateless (JWT, sem cookies de sessão) — nunca desabilite CSRF em uma aplicação que usa sessão tradicional.</li>
+          <li><code>csrf().disable()</code> só é seguro quando as credenciais NÃO são enviadas automaticamente pelo navegador (Bearer token) — nunca desabilite CSRF numa aplicação que usa cookie de sessão.</li>
+          <li>Teste 401 (não autenticado) e 403 (autenticado sem permissão) explicitamente e em separado — são cenários diferentes, não intercambiáveis.</li>
         </ul>
       </div>
 
-      <div class="study-tip">Spring Security tem uma curva de aprendizado real — não se cobre entender tudo na primeira leitura. Comece implementando só o fluxo básico (registrar → gerar hash BCrypt → login → gerar JWT → validar JWT em requisições seguintes) funcionando ponta a ponta em um projeto de brinquedo, antes de se preocupar com <code>@PreAuthorize</code> refinado ou OAuth2. Segurança se aprende construindo camada por camada, exatamente como você fez com o resto deste curso.</div>
+      <div class="study-tip">Spring Security tem uma curva de aprendizado real — não se cobre entender tudo na primeira leitura. Comece implementando só o fluxo básico (registrar → hash BCrypt → login via <code>AuthenticationManager</code> → gerar JWT → validar via <code>oauth2ResourceServer</code>) funcionando ponta a ponta em um projeto de brinquedo, antes de se preocupar com <code>@PreAuthorize</code> refinado, sessões ou OAuth2. Segurança se aprende construindo camada por camada, exatamente como você fez com o resto deste curso.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 52.1 — Fluxo de autenticação completo</h4><span class="exercise-tag d">difícil</span></div>
-        <p>Desenhe (em pseudo-código ou texto estruturado) o fluxo completo de registro e login para o sistema de biblioteca: endpoint de registro que faz hash da senha com BCrypt antes de salvar; endpoint de login que valida a senha e gera um JWT; e a configuração de <code>SecurityFilterChain</code> liberando <code>/auth/**</code> publicamente e exigindo autenticação para <code>/livros/**</code> em métodos que não sejam GET.</p>
+        <p>Desenhe (em pseudo-código ou texto estruturado) o fluxo completo de registro e login para o sistema de biblioteca: endpoint de registro que faz hash da senha com BCrypt antes de salvar; endpoint de login que autentica via <code>AuthenticationManager</code> e gera um JWT a partir do <code>Authentication</code> resultante; e a configuração de <code>SecurityFilterChain</code> liberando <code>/auth/**</code> publicamente e exigindo autenticação para <code>/livros/**</code> em métodos que não sejam GET.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
 <pre class="code"><span class="annotation">@PostMapping</span>(<span class="str">"/auth/registrar"</span>)
@@ -110,18 +258,25 @@ usuario.setSenha(passwordEncoder.encode(senhaDigitada));
 
 <span class="annotation">@PostMapping</span>(<span class="str">"/auth/login"</span>)
 <span class="kw">public</span> ResponseEntity&lt;<span class="cls">TokenDTO</span>&gt; <span class="fn">login</span>(<span class="annotation">@RequestBody</span> <span class="cls">LoginDTO</span> dto) {
-    <span class="cls">Usuario</span> usuario = usuarioRepository.findByEmail(dto.email())
-        .orElseThrow(() -&gt; <span class="kw">new</span> <span class="cls">CredenciaisInvalidasException</span>());
-    <span class="kw">if</span> (!passwordEncoder.matches(dto.senha(), usuario.getSenha())) {
-        <span class="kw">throw new</span> <span class="cls">CredenciaisInvalidasException</span>();
-    }
-    <span class="kw">return</span> ResponseEntity.ok(<span class="kw">new</span> <span class="cls">TokenDTO</span>(jwtServico.gerarToken(usuario)));
+    <span class="cls">Authentication</span> autenticado = authenticationManager.authenticate(
+        <span class="kw">new</span> UsernamePasswordAuthenticationToken(dto.email(), dto.senha())
+    ); <span class="com">// AuthenticationException (ex: BadCredentialsException) se inválido</span>
+    <span class="kw">return</span> ResponseEntity.ok(<span class="kw">new</span> <span class="cls">TokenDTO</span>(jwtServico.gerarToken(autenticado)));
 }</pre>
 <pre class="code">.authorizeHttpRequests(auth -&gt; auth
     .requestMatchers(<span class="str">"/auth/**"</span>).permitAll()
     .requestMatchers(HttpMethod.GET, <span class="str">"/livros/**"</span>).permitAll()
     .anyRequest().authenticated()
 )</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 52.2 — Testando 401 e 403 separadamente</h4><span class="exercise-tag d">difícil</span></div>
+        <p>Escreva os testes de <code>MockMvc</code> para o endpoint <code>DELETE /livros/{id}</code> (protegido por <code>@PreAuthorize("hasRole('ADMIN')")</code>): um caso sem nenhuma autenticação, um caso autenticado com <code>@WithMockUser(roles = "LEITOR")</code>, e um caso autenticado com <code>@WithMockUser(roles = "ADMIN")</code>. Explique por que os dois primeiros casos não podem compartilhar o mesmo código de status esperado.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Sem autenticação, o <code>AuthenticationEntryPoint</code> responde <strong>401</strong> — a requisição nem chega a ser avaliada por <code>@PreAuthorize</code>, porque não há <code>Authentication</code> nenhuma no <code>SecurityContext</code>. Com <code>@WithMockUser(roles = "LEITOR")</code>, existe autenticação, mas <code>@PreAuthorize("hasRole('ADMIN')")</code> nega o acesso — o <code>AccessDeniedHandler</code> responde <strong>403</strong>. Compartilhar o mesmo status para os dois casos esconderia a diferença real entre "eu não sei quem você é" e "eu sei quem você é, e não pode" — exatamente a distinção que a seção de 401 vs 403 deste capítulo formaliza.</p>
         </div>
       </div>
     </section>

@@ -1,9 +1,9 @@
 <section class="section tk-spring" id="webclient">
-      <div class="section-head"><span class="section-num">69</span><h2 class="section-title">WebClient &amp; RestTemplate — consumindo APIs externas</h2></div>
+      <div class="section-head"><span class="section-num">69</span><h2 class="section-title">WebClient, RestClient &amp; RestTemplate — consumindo APIs externas</h2></div>
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
-        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <b>Intermediário</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h30</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a>, <a class="prereq-tag" href="#resilience">55 · Resilience4j</a></div>
       </div>
 
@@ -46,12 +46,116 @@
 
       <div class="secret"><code>WebClient</code> retorna <code>Mono&lt;T&gt;</code> ou <code>Flux&lt;T&gt;</code> e preserva I/O não bloqueante enquanto a cadeia inteira permanece reativa. Chamar <code>.block()</code> transforma a fronteira em síncrona e não deve ocorrer em uma thread de event loop. Para uma aplicação MVC síncrona, <code>RestClient</code> costuma comunicar melhor a intenção; para WebFlux, componha o <code>Mono</code> sem bloquear.</div>
 
+      <h3>RestClient — a opção moderna para MVC síncrono, na prática</h3>
+      <p>As duas seções acima já disseram que <code>RestClient</code> costuma comunicar melhor a intenção numa aplicação MVC síncrona — mas dizer isso sem mostrar código deixa a recomendação abstrata. Aqui está o mesmo <code>CepServico</code> com <code>RestClient</code>:</p>
+      <pre class="code"><span class="annotation">@Service</span>
+<span class="kw">public class</span> <span class="cls">CepServico</span> {
+    <span class="kw">private final</span> RestClient restClient;
+
+    <span class="kw">public</span> <span class="fn">CepServico</span>(RestClient.Builder builder) {
+        <span class="kw">this</span>.restClient = builder.baseUrl(<span class="str">"https://viacep.com.br"</span>).build();
+    }
+
+    <span class="annotation">@CircuitBreaker</span>(name = <span class="str">"cep-servico"</span>, fallbackMethod = <span class="str">"enderecoFallback"</span>) <span class="com">// capítulo 55!</span>
+    <span class="kw">public</span> <span class="cls">EnderecoDTO</span> <span class="fn">buscarEndereco</span>(<span class="kw">String</span> cep) {
+        <span class="kw">return</span> restClient.get()
+            .uri(<span class="str">"/ws/{cep}/json"</span>, cep)
+            .retrieve()
+            .body(<span class="cls">EnderecoDTO</span>.<span class="kw">class</span>); <span class="com">// já é síncrono -- sem .block(), sem Mono</span>
+    }
+
+    <span class="kw">public</span> <span class="cls">EnderecoDTO</span> <span class="fn">enderecoFallback</span>(<span class="kw">String</span> cep, <span class="cls">Throwable</span> t) {
+        <span class="kw">return new</span> <span class="cls">EnderecoDTO</span>(<span class="str">"Endereço indisponível"</span>);
+    }
+}</pre>
+      <p>Mesmo formato fluente do <code>WebClient</code> (<code>.get().uri(...).retrieve()</code>), mas <code>.body(Class)</code> já devolve o objeto direto — não existe <code>Mono</code> nem <code>.block()</code> nessa API porque ela nunca foi reativa: é síncrona desde a primeira chamada, disponível desde o Spring Framework 6.1. Para um <code>@RestController</code> tradicional (não WebFlux), essa é a opção que expressa a intenção real do código sem carregar a bagagem reativa que a aplicação não usa.</p>
+
+      <h3>Request factories e connection pooling: quem realmente abre a conexão TCP</h3>
+      <p><code>WebClient</code>/<code>RestClient</code> não abrem uma conexão nova para cada chamada por padrão — por trás da API fluente existe uma <code>ClientHttpRequestFactory</code> (para <code>RestClient</code>/<code>RestTemplate</code>) ou um <code>ClientHttpConnector</code> (para <code>WebClient</code>) que reaproveita conexões TCP/TLS de um pool. Sem pooling, cada chamada pagaria o custo de handshake TCP+TLS do zero — caro o suficiente para dominar a latência de chamadas pequenas e frequentes.</p>
+      <pre class="code"><span class="annotation">@Bean</span>
+<span class="kw">public</span> RestClient.Builder <span class="fn">restClientBuilder</span>() {
+    <span class="kw">var</span> factory = <span class="kw">new</span> JdkClientHttpRequestFactory(); <span class="com">// usa java.net.http.HttpClient por baixo</span>
+    factory.setReadTimeout(Duration.ofSeconds(<span class="num">3</span>));
+    <span class="kw">return</span> RestClient.builder().requestFactory(factory);
+}</pre>
+      <p>Trocar a <code>ClientHttpRequestFactory</code> (por exemplo, para <code>HttpComponentsClientHttpRequestFactory</code>, baseada no Apache HttpClient5) dá controle explícito sobre tamanho do pool de conexões, timeout de conexão vs. timeout de leitura, e keep-alive — decisões que, deixadas no padrão, a aplicação nunca escolheu conscientemente.</p>
+
+      <h3>Interceptors: injetando comportamento transversal em toda chamada</h3>
+      <p>Adicionar um cabeçalho de autenticação, logar toda requisição/resposta ou medir latência não deveria ser responsabilidade de cada método que usa o client — interceptors resolvem isso uma vez, para todas as chamadas daquele client:</p>
+      <pre class="code"><span class="cls">RestClient</span> restClient = RestClient.builder()
+    .baseUrl(<span class="str">"https://viacep.com.br"</span>)
+    .requestInterceptor((request, body, execution) -&gt; {
+        request.getHeaders().add(<span class="str">"Authorization"</span>, <span class="str">"Bearer "</span> + tokenServico.tokenAtual()); <span class="com">// capítulo 52!</span>
+        <span class="kw">long</span> inicio = System.currentTimeMillis();
+        <span class="kw">try</span> {
+            <span class="kw">return</span> execution.execute(request, body);
+        } <span class="kw">finally</span> {
+            log.info(<span class="str">"{} {} levou {}ms"</span>, request.getMethod(), request.getURI(), System.currentTimeMillis() - inicio);
+        }
+    })
+    .build();</pre>
+      <p>O equivalente reativo em <code>WebClient</code> é <code>ExchangeFilterFunction</code> — mesma ideia (interceptar antes/depois da chamada real), API adaptada ao mundo <code>Mono</code>/<code>Flux</code>.</p>
+
+      <h3>Status handling: decidir o que 4xx/5xx significam para o seu domínio</h3>
+      <p>Por padrão, um <code>4xx</code>/<code>5xx</code> vira uma exceção genérica (<code>RestClientResponseException</code>/<code>WebClientResponseException</code>) sem significado de domínio. <code>.onStatus(...)</code> deixa você decidir explicitamente:</p>
+      <pre class="code"><span class="kw">return</span> restClient.get()
+    .uri(<span class="str">"/ws/{cep}/json"</span>, cep)
+    .retrieve()
+    .onStatus(HttpStatusCode::is4xxClientError, (request, response) -&gt; {
+        <span class="kw">throw new</span> <span class="cls">CepInvalidoException</span>(cep); <span class="com">// erro de domínio -- CEP não existe, não falha do serviço</span>
+    })
+    .onStatus(HttpStatusCode::is5xxServerError, (request, response) -&gt; {
+        <span class="kw">throw new</span> <span class="cls">ServicoExternoIndisponivelException</span>(); <span class="com">// falha real para o CircuitBreaker</span>
+    })
+    .body(<span class="cls">EnderecoDTO</span>.<span class="kw">class</span>);</pre>
+      <div class="warn">Diferenciar 4xx de 5xx aqui não é só estilo — é o que faz o <code>@CircuitBreaker</code> funcionar corretamente. Um CEP inválido (4xx, erro do <em>chamador</em>) não deveria contar como falha do serviço externo e abrir o circuito para todo mundo; um 5xx real (erro do <em>serviço</em>) deveria. Sem essa distinção, alguém digitando CEPs errados repetidamente derruba a disponibilidade da funcionalidade para todos os outros usuários.</div>
+
+      <h3>Testando sem depender do serviço externo real</h3>
+      <pre class="code"><span class="cls">MockRestServiceServer</span> servidorMock;
+<span class="cls">CepServico</span> cepServico;
+
+<span class="annotation">@BeforeEach</span>
+<span class="kw">void</span> <span class="fn">configurar</span>() {
+    RestClient.Builder builder = RestClient.builder().baseUrl(<span class="str">"https://viacep.com.br"</span>);
+    servidorMock = MockRestServiceServer.bindTo(builder).build();
+    cepServico = <span class="kw">new</span> <span class="cls">CepServico</span>(builder);
+}
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveRetornarRespostaComSucesso</span>() {
+    servidorMock.expect(requestTo(<span class="str">"/ws/01001000/json"</span>))
+        .andRespond(withSuccess(<span class="str">"{\"cep\":\"01001-000\",\"logradouro\":\"Rua Augusta\"}"</span>, MediaType.APPLICATION_JSON));
+
+    <span class="cls">EnderecoDTO</span> endereco = cepServico.buscarEndereco(<span class="str">"01001000"</span>);
+
+    assertThat(endereco.logradouro()).isEqualTo(<span class="str">"Rua Augusta"</span>);
+}
+
+<span class="annotation">@Test</span>
+<span class="kw">void</span> <span class="fn">deveLancarExcecaoQuandoCepNaoExiste</span>() {
+    servidorMock.expect(requestTo(<span class="str">"/ws/00000000/json"</span>))
+        .andRespond(withStatus(HttpStatus.NOT_FOUND));
+
+    assertThatThrownBy(() -&gt; cepServico.buscarEndereco(<span class="str">"00000000"</span>))
+        .isInstanceOf(<span class="cls">CepInvalidoException</span>.<span class="kw">class</span>);
+}</pre>
+      <p><code>MockRestServiceServer</code> (do próprio Spring, sem biblioteca externa) intercepta a chamada HTTP real antes que ela saia da JVM — o teste roda sem rede, sem depender do ViaCEP estar no ar, e ainda assim exercita o <code>RestClient</code>/<code>ClientHttpRequestFactory</code> reais, não um mock do seu próprio código.</p>
+
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 72.1 — Consumindo uma API externa protegida</h4><span class="exercise-tag m">médio</span></div>
         <p>Escreva um <code>CepServico</code> usando <code>WebClient</code> para consultar a API pública ViaCEP, protegido por <code>@CircuitBreaker</code> com um fallback retornando um endereço genérico "indisponível" em caso de falha.</p>
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
           <p>Inclua timeout de conexão e resposta, mapeamento de 4xx/5xx, circuit breaker e teste com servidor HTTP simulado. O fallback não deve transformar CEP inválido em sucesso; falha funcional e indisponibilidade transitória precisam de resultados diferentes. Em MVC síncrono, apresente também a versão com <code>RestClient</code>.</p>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 72.2 — Por que 4xx não deveria abrir o circuito</h4><span class="exercise-tag d">difícil</span></div>
+        <p>No <code>CepServico</code> com <code>@CircuitBreaker</code>, um usuário mal-intencionado envia 50 CEPs inválidos seguidos, cada um recebendo 404 do ViaCEP. Sem <code>.onStatus(...)</code> diferenciando 4xx de 5xx, o que acontece com o circuito, e por que isso prejudica outros usuários que nem enviaram CEP nenhum inválido? Escreva a correção com <code>MockRestServiceServer</code> provando que um 404 não conta como falha do circuito, mas um 500 conta.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Sem diferenciar status, qualquer exceção lançada pelo client (inclusive a genérica de um 404) é contada como falha pelo <code>@CircuitBreaker</code> — 50 CEPs inválidos seguidos podem sozinhos ultrapassar o <code>failure-rate-threshold</code> e abrir o circuito, fazendo o fallback "Endereço indisponível" ser devolvido também para usuários com CEP válido, que não têm nada a ver com o problema. A correção usa <code>.onStatus(is4xxClientError, ...)</code> lançando <code>CepInvalidoException</code> (registrada em <code>ignore-exceptions</code> na configuração do circuit breaker) e <code>.onStatus(is5xxServerError, ...)</code> lançando uma exceção que conta como falha de verdade. Dois testes com <code>MockRestServiceServer</code> — um respondendo 404, outro 500 — comprovam que só o segundo incrementa a contagem de falha do circuito.</p>
         </div>
       </div>
     </section>

@@ -7,6 +7,17 @@
 
       <p>Arrays em Java têm tamanho fixo. Na prática, o dia a dia pede estruturas que crescem e encolhem — é para isso que existe o <strong>Java Collections Framework</strong>. As três interfaces mais usadas são <code>List</code>, <code>Set</code> e <code>Map</code>.</p>
 
+      <h3>A hierarquia por trás das três interfaces</h3>
+      <pre class="code">Iterable&lt;E&gt;                       <span class="com">// só garante "posso percorrer com for-each"</span>
+  └── Collection&lt;E&gt;                <span class="com">// add, remove, size, contains -- contrato comum</span>
+        ├── List&lt;E&gt;                <span class="com">// ordem de inserção + acesso por índice + duplicatas permitidas</span>
+        ├── Set&lt;E&gt;                 <span class="com">// sem duplicatas -- ordem depende da implementação</span>
+        └── Queue&lt;E&gt;                <span class="com">// fila -- foco em inserir de um lado e remover do outro</span>
+              └── Deque&lt;E&gt;          <span class="com">// fila de duas pontas -- pilha ou fila, dependendo do uso</span>
+
+Map&lt;K,V&gt;                           <span class="com">// NÃO estende Collection -- guarda pares chave/valor, não elementos soltos</span></pre>
+      <p><code>List</code>, <code>Set</code> e <code>Queue</code> compartilham o contrato de <code>Collection</code> (que por sua vez só promete ser <code>Iterable</code>, ou seja, percorrível em um <code>for-each</code>). <code>Map</code> é deliberadamente <strong>separado</strong> dessa hierarquia — ele não guarda "elementos", guarda associações chave→valor, e por isso não tem <code>add</code> nem é percorrido diretamente em um <code>for-each</code> (você percorre <code>map.entrySet()</code>, <code>map.keySet()</code> ou <code>map.values()</code>, que <em>essas</em> sim são <code>Collection</code>).</p>
+
       <h3>List e ArrayList</h3>
       <pre class="code">List&lt;<span class="kw">String</span>&gt; nomes = <span class="kw">new</span> ArrayList&lt;&gt;(); <span class="com">// programe contra a interface, instancie a implementação</span>
 nomes.add(<span class="str">"Ana"</span>);
@@ -49,6 +60,18 @@ Set&lt;<span class="kw">String</span>&gt; ordenado = <span class="kw">new</span>
 Set&lt;<span class="kw">String</span>&gt; insercao = <span class="kw">new</span> LinkedHashSet&lt;&gt;(tags); <span class="com">// mantém ordem de inserção</span></pre>
       <p><code>HashSet</code> usa o contrato de igualdade para impedir duplicatas; <code>TreeSet</code> usa comparação. Se a comparação retornar zero para objetos que <code>equals</code> considera diferentes, os dois conjuntos podem discordar sobre o que é duplicado. Defina conscientemente a noção de identidade de cada estrutura.</p>
 
+      <h3>Queue e Deque — filas em duas variações</h3>
+      <pre class="code">Queue&lt;<span class="kw">String</span>&gt; fila = <span class="kw">new</span> LinkedList&lt;&gt;(); <span class="com">// LinkedList implementa tanto List quanto Deque</span>
+fila.offer(<span class="str">"primeiro"</span>);  <span class="com">// insere no fim -- offer não lança exceção se falhar (retorna false)</span>
+fila.offer(<span class="str">"segundo"</span>);
+System.out.println(fila.peek());  <span class="com">// "primeiro" -- consulta a cabeça SEM remover; null se vazia</span>
+System.out.println(fila.poll());  <span class="com">// "primeiro" -- remove e devolve a cabeça; null se vazia (não lança exceção)</span>
+
+Deque&lt;<span class="kw">String</span>&gt; pilha = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+pilha.push(<span class="str">"A"</span>); pilha.push(<span class="str">"B"</span>);  <span class="com">// push insere no início</span>
+System.out.println(pilha.pop());          <span class="com">// "B" -- pop remove do início -- comportamento de PILHA (LIFO)</span></pre>
+      <p><code>Queue</code> modela FIFO (o primeiro que entra é o primeiro que sai) — <code>offer</code>/<code>poll</code>/<code>peek</code> devolvem um valor de sinalização (<code>false</code>/<code>null</code>) em vez de lançar exceção quando a operação não é possível, o que os torna mais previsíveis que os métodos "estritos" equivalentes (<code>add</code>/<code>remove</code>/<code>element</code>, que lançam exceção). <code>Deque</code> ("double-ended queue") permite inserir e remover dos <strong>dois</strong> lados — por isso serve tanto como fila quanto como pilha (LIFO, com <code>push</code>/<code>pop</code>). <code>ArrayDeque</code> costuma ser a escolha padrão para pilha/fila em memória; evite usar a classe legada <code>Stack</code> (sincronizada, mais lenta, e tecnicamente uma subclasse de <code>Vector</code> por razões históricas).</p>
+
       <h3>Map — pares chave/valor</h3>
       <pre class="code">Map&lt;<span class="kw">String</span>, <span class="kw">Double</span>&gt; precos = <span class="kw">new</span> HashMap&lt;&gt;();
 precos.put(<span class="str">"café"</span>, 8.5);
@@ -83,16 +106,19 @@ produtos.sort(<span class="kw">new</span> Comparator&lt;<span class="cls">Compar
       <div class="secret">Use <code>Comparable</code> quando existe uma ordem "óbvia e única" para o tipo (números por valor, datas cronologicamente). Use <code>Comparator</code> quando precisar de várias formas de ordenar o mesmo tipo dependendo do contexto — e prefira <code>Comparator</code> mesmo assim quando a ordenação for uma decisão de "quem está usando a lista", não do objeto em si, para não acoplar a classe a uma única forma de comparação.</div>
 
       <table class="cmp">
-        <tbody><tr><th>Implementação</th><th>Ordem</th><th>Permite duplicata?</th><th>Quando usar</th></tr>
-        <tr><td><code>ArrayList</code></td><td>Inserção</td><td>Sim</td><td>Acesso por índice frequente, uso geral</td></tr>
-        <tr><td><code>LinkedList</code></td><td>Inserção</td><td>Sim</td><td>Muitas inserções/remoções nas pontas</td></tr>
-        <tr><td><code>HashSet</code></td><td>Nenhuma garantida</td><td>Não</td><td>Checar existência rapidamente, sem ordem</td></tr>
-        <tr><td><code>TreeSet</code></td><td>Ordenada</td><td>Não</td><td>Precisa de ordem + sem duplicata</td></tr>
-        <tr><td><code>HashMap</code></td><td>Nenhuma garantida</td><td>Chaves não</td><td>Uso geral chave→valor</td></tr>
-        <tr><td><code>LinkedHashMap</code></td><td>Inserção</td><td>Chaves não</td><td>Precisa lembrar ordem de inserção</td></tr>
+        <tbody><tr><th>Implementação</th><th>Ordem</th><th>Permite duplicata?</th><th>Permite null?</th><th>Acesso por índice</th><th>Inserir/remover no meio</th></tr>
+        <tr><td><code>ArrayList</code></td><td>Inserção</td><td>Sim</td><td>Sim</td><td>O(1)</td><td>O(n) -- desloca elementos</td></tr>
+        <tr><td><code>LinkedList</code></td><td>Inserção</td><td>Sim</td><td>Sim</td><td>O(n) -- percorre nó a nó</td><td>O(1) uma vez já no nó, O(n) para achar o nó</td></tr>
+        <tr><td><code>HashSet</code></td><td>Nenhuma garantida</td><td>Não</td><td>Um null</td><td>—</td><td>O(1) amortizado</td></tr>
+        <tr><td><code>TreeSet</code></td><td>Ordenada</td><td>Não</td><td>NÃO permite null (NPE)</td><td>—</td><td>O(log n)</td></tr>
+        <tr><td><code>HashMap</code></td><td>Nenhuma garantida</td><td>Chaves não</td><td>Uma chave null; valores null OK</td><td>—</td><td>O(1) amortizado</td></tr>
+        <tr><td><code>TreeMap</code></td><td>Ordenada por chave</td><td>Chaves não</td><td>NÃO permite chave null (NPE)</td><td>—</td><td>O(log n)</td></tr>
+        <tr><td><code>LinkedHashMap</code></td><td>Inserção</td><td>Chaves não</td><td>Uma chave null; valores null OK</td><td>—</td><td>O(1) amortizado</td></tr>
       </tbody></table>
+      <div class="secret"><b>O mito de que "LinkedList é melhor para inserir/remover"</b> só é verdade se você <em>já está</em> no nó certo (via <code>ListIterator</code>) — na prática, para inserir/remover em uma posição por <em>índice</em>, o custo de <strong>percorrer</strong> até lá em uma <code>LinkedList</code> é O(n), exatamente como deslocar elementos em uma <code>ArrayList</code>. Somado a isso, <code>ArrayList</code> tem muito melhor localidade de cache (os elementos ficam contíguos em memória), o que na prática a torna mais rápida que <code>LinkedList</code> na maioria dos casos reais, mesmo em inserção/remoção — o cenário onde <code>LinkedList</code> genuinamente vence é quando você já navega com um <code>Iterator</code>/<code>ListIterator</code> e insere/remove ali mesmo, sem re-percorrer. Na dúvida, <code>ArrayList</code> é o padrão certo; meça antes de trocar por <code>LinkedList</code> alegando performance.</div>
+      <div class="warn"><b>Políticas de <code>null</code> divergem entre implementações — e isso quebra código na troca de uma pela outra.</b> <code>ArrayList</code>/<code>HashMap</code> aceitam <code>null</code> tranquilamente; <code>TreeSet</code>/<code>TreeMap</code> lançam <code>NullPointerException</code> ao tentar inserir <code>null</code>, porque precisam comparar o valor para posicioná-lo e não há "menor ou maior que null" definido. Trocar silenciosamente um <code>HashMap</code> por um <code>TreeMap</code> (por exemplo, para ganhar ordenação) pode quebrar em produção exatamente no primeiro <code>null</code> que aparecer.</div>
 
-      <div class="callout"><b>Modificável não é o mesmo que profundamente imutável.</b> <code>List.of(...)</code> e <code>List.copyOf(...)</code> não permitem adicionar, remover ou substituir posições, mas os objetos armazenados ainda podem mudar se forem mutáveis. <code>Collections.unmodifiableList(lista)</code> cria uma visão: mudanças feitas na lista original continuam visíveis nela.</div>
+      <div class="callout"><b>Modificável não é o mesmo que profundamente imutável.</b> <code>List.of(...)</code> e <code>List.copyOf(...)</code> não permitem adicionar, remover ou substituir posições, mas os objetos armazenados ainda podem mudar se forem mutáveis. <code>Collections.unmodifiableList(lista)</code> cria uma visão: mudanças feitas na lista original continuam visíveis nela. Além disso, as fábricas <code>List.of(...)</code>/<code>Set.of(...)</code>/<code>Map.of(...)</code> <strong>não aceitam <code>null</code></strong> como elemento, chave ou valor — lançam <code>NullPointerException</code> na criação, diferente de <code>ArrayList</code>/<code>HashMap</code> mutáveis.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 11.1 — Carrinho de compras</h4><span class="exercise-tag f">fácil</span></div>
@@ -148,6 +174,23 @@ Iterator&lt;<span class="kw">Integer</span>&gt; it = numeros.iterator();
     <span class="kw">if</span> (it.next() % 2 == 0) it.remove();
 }</pre>
           <p style="margin-top:12px">O for-each usa um <code>Iterator</code> por baixo dos panos. Muitas coleções implementam detecção <em>fail-fast</em> de alterações estruturais por meio de um contador interno, frequentemente chamado <code>modCount</code>. Alterar a coleção fora do próprio iterator pode invalidar essa contagem e lançar a exceção. Isso ajuda a revelar uso incorreto, mas não oferece sincronização nem segurança entre threads.</p>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 11.4 — Fila de atendimento com Deque</h4><span class="exercise-tag m">médio</span></div>
+        <p>Modele uma fila de atendimento com <code>Deque&lt;String&gt;</code> (não <code>Queue</code> puro): clientes normais entram no fim com <code>offerLast</code>, mas um cliente prioritário deve furar a fila com <code>offerFirst</code>. Atenda sempre pela frente com <code>pollFirst</code>. Teste: fila vazia (o que <code>pollFirst</code> devolve?), um cliente prioritário chegando no meio do atendimento, e a fila esvaziando por completo.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code">Deque&lt;<span class="kw">String</span>&gt; atendimento = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+atendimento.offerLast(<span class="str">"Ana"</span>);
+atendimento.offerLast(<span class="str">"Bruno"</span>);
+atendimento.offerFirst(<span class="str">"Prioridade: Carla"</span>); <span class="com">// fura a fila</span>
+
+System.out.println(atendimento.pollFirst()); <span class="com">// "Prioridade: Carla"</span>
+System.out.println(atendimento.pollFirst()); <span class="com">// "Ana"</span>
+System.out.println(atendimento.pollFirst()); <span class="com">// "Bruno"</span>
+System.out.println(atendimento.pollFirst()); <span class="com">// null -- fila vazia, pollFirst não lança exceção</span></pre>
         </div>
       </div>
     </section>

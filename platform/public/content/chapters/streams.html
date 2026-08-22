@@ -24,6 +24,14 @@
 
 System.out.println(soma2.aplicar(2, 3)); <span class="com">// 5</span></pre>
 
+      <h3>Captura de variáveis: lambda precisa de "effectively final"</h3>
+      <pre class="code"><span class="kw">int</span> limite = <span class="num">10</span>; <span class="com">// effectively final -- sem reatribuição posterior</span>
+Predicate&lt;<span class="kw">Integer</span>&gt; abaixoDoLimite = n -&gt; n &lt; limite; <span class="com">// a lambda CAPTURA "limite" do escopo ao redor</span>
+
+<span class="com">// int contador = 0;
+// Runnable incrementar = () -&gt; contador++; // ❌ NÃO compila: contador é reatribuída, não é effectively final</span></pre>
+      <p>Uma lambda pode <strong>capturar</strong> variáveis locais do escopo onde foi criada, mas só se elas forem <em>effectively final</em> — nunca reatribuídas depois da inicialização, mesmo sem a palavra-chave <code>final</code> explícita. Isso não é uma limitação arbitrária: a lambda pode ser executada mais tarde, possivelmente em outra thread, e permitir reatribuição criaria ambiguidade sobre qual valor ela deveria enxergar. Se você precisa de um contador mutável através de chamadas, use um array de um elemento, uma classe wrapper, ou (melhor ainda) repense para uma solução sem estado mutável compartilhado — o problema volta com força total quando chega em concorrência.</p>
+
       <h3>As interfaces funcionais prontas do java.util.function</h3>
       <table class="cmp">
         <tbody><tr><th>Interface</th><th>Assinatura</th><th>Uso típico</th></tr>
@@ -62,6 +70,26 @@ Map&lt;<span class="kw">String</span>, List&lt;<span class="cls">Livro</span>&gt
 
       <div class="warn"><b>Streams não substituem loops sempre:</b> para lógica simples e sequencial, um <code>for</code> tradicional costuma ser mais legível e até mais rápido (sem overhead de boxing/lambdas). Streams brilham quando há uma cadeia real de transformações (filtrar → mapear → agrupar → coletar) que ficaria confusa em loops aninhados.</div>
 
+      <h3>Mais operações intermediárias: distinct, limit, skip, takeWhile, dropWhile</h3>
+      <pre class="code">List&lt;<span class="kw">Integer</span>&gt; numeros = List.of(1, 2, 2, 3, 4, 4, 5, 1, 9, 2);
+
+numeros.stream().distinct().toList();          <span class="com">// [1, 2, 3, 4, 5, 9] -- remove duplicatas por equals(), preserva 1ª ocorrência</span>
+numeros.stream().limit(3).toList();            <span class="com">// [1, 2, 2] -- só os 3 primeiros elementos do encounter order</span>
+numeros.stream().skip(3).toList();             <span class="com">// [3, 4, 4, 5, 1, 9, 2] -- pula os 3 primeiros</span>
+
+numeros.stream().takeWhile(n -&gt; n &lt; 4).toList(); <span class="com">// [1, 2, 2, 3] -- para na PRIMEIRA falha, mesmo que apareça n&lt;4 depois</span>
+numeros.stream().dropWhile(n -&gt; n &lt; 4).toList(); <span class="com">// [4, 4, 5, 1, 9, 2] -- descarta até a primeira falha, mantém o resto</span></pre>
+      <p><code>takeWhile</code>/<code>dropWhile</code> são frequentemente confundidos com <code>filter</code>: a diferença é que eles avaliam a condição <strong>na ordem</strong> e param/começam na primeira falha — repare que <code>takeWhile(n -&gt; n &lt; 4)</code> não inclui o <code>1</code> que aparece depois do <code>9</code>, porque já tinha parado antes. <code>filter</code> avaliaria cada elemento independentemente e incluiria esse <code>1</code>.</p>
+
+      <h3>Consultas curto-circuito: anyMatch, allMatch, noneMatch, findFirst, findAny</h3>
+      <pre class="code"><span class="kw">boolean</span> temGrande = livros.stream().anyMatch(l -&gt; l.getPaginas() &gt; 500);   <span class="com">// para no PRIMEIRO true encontrado</span>
+<span class="kw">boolean</span> todosGrandes = livros.stream().allMatch(l -&gt; l.getPaginas() &gt; 100); <span class="com">// para no PRIMEIRO false encontrado</span>
+<span class="kw">boolean</span> nenhumVazio = livros.stream().noneMatch(l -&gt; l.getPaginas() == 0);  <span class="com">// para no PRIMEIRO true encontrado (inverte)</span>
+
+Optional&lt;<span class="cls">Livro</span>&gt; primeiro = livros.stream().filter(l -&gt; l.getPaginas() &gt; 300).findFirst(); <span class="com">// respeita encounter order</span>
+Optional&lt;<span class="cls">Livro</span>&gt; qualquer = livros.stream().filter(l -&gt; l.getPaginas() &gt; 300).findAny();   <span class="com">// pode ignorar ordem -- mais rápido em stream paralelo</span></pre>
+      <p>Essas cinco operações são <strong>curto-circuito</strong>: não precisam processar o stream inteiro para responder — <code>anyMatch</code> para assim que encontra o primeiro <code>true</code>, sem avaliar o restante. Todas devolvem <code>Optional</code> (no caso de <code>findFirst</code>/<code>findAny</code>) ou <code>boolean</code>, nunca lançam exceção por stream vazio: um <code>allMatch</code> em stream vazio devolve <code>true</code> (vacuously true — não há nenhum contraexemplo).</p>
+
       <h3>map, flatMap e cardinalidade</h3>
       <p><code>map</code> produz um resultado para cada elemento recebido. Se a função já devolve vários elementos ou outro contexto, <code>map</code> cria uma camada aninhada; <code>flatMap</code> transforma e achata uma camada. Antes de escolher, escreva a cardinalidade: um-para-um, um-para-zero-ou-um, ou um-para-muitos.</p>
       <div class="warn"><b>Pipeline não é lugar para mutação escondida.</b> Não altere a fonte nem estado externo dentro de <code>map</code>/<code>filter</code>. Além de dificultar testes, interferência pode produzir resultado não especificado. Crie e consuma o stream no mesmo fluxo; depois de uma operação terminal ele não pode ser reutilizado.</div>
@@ -73,6 +101,26 @@ Map&lt;<span class="kw">String</span>, List&lt;<span class="cls">Livro</span>&gt
 <span class="com">// a identidade 0 e a soma são associativas para este resultado sequencial</span></pre>
 
       <p><code>reduce</code> combina elementos num único valor. A identidade precisa ser neutra e a operação precisa respeitar o contrato, especialmente se um dia o pipeline for paralelo. Para acumular em um contêiner mutável, como <code>List</code> ou <code>Map</code>, prefira <code>collect</code> e um coletor adequado em vez de mutar uma lista externa dentro de <code>reduce</code>.</p>
+
+      <h3>Collectors avançados: partitioningBy e toMap</h3>
+      <pre class="code">Map&lt;<span class="kw">Boolean</span>, List&lt;<span class="cls">Livro</span>&gt;&gt; particionado = livros.stream()
+    .collect(Collectors.partitioningBy(l -&gt; l.getPaginas() &gt; 300)); <span class="com">// as duas chaves true/false sempre existem</span>
+List&lt;<span class="cls">Livro</span>&gt; grandes = particionado.get(<span class="kw">true</span>);
+List&lt;<span class="cls">Livro</span>&gt; pequenos = particionado.get(<span class="kw">false</span>); <span class="com">// devolve lista vazia quando não há elementos, não devolve null</span>
+
+Map&lt;<span class="kw">String</span>, <span class="kw">Integer</span>&gt; paginasPorTitulo = livros.stream()
+    .collect(Collectors.toMap(<span class="cls">Livro</span>::getTitulo, <span class="cls">Livro</span>::getPaginas));
+<span class="com">// se dois livros tiverem o MESMO título, toMap lança IllegalStateException por padrão --
+// resolva com um terceiro argumento (BinaryOperator) dizendo o que fazer no conflito:</span>
+Map&lt;<span class="kw">String</span>, <span class="kw">Integer</span>&gt; semConflito = livros.stream()
+    .collect(Collectors.toMap(<span class="cls">Livro</span>::getTitulo, <span class="cls">Livro</span>::getPaginas, (existente, novo) -&gt; existente)); <span class="com">// mantém o primeiro quando a chave se repete</span></pre>
+      <p><code>partitioningBy</code> é um caso especial de <code>groupingBy</code> com uma condição <code>boolean</code>: sempre produz exatamente duas entradas (<code>true</code>/<code>false</code>), mesmo que uma fique vazia — diferente de <code>groupingBy</code>, que só cria chaves para valores que realmente apareceram. <code>toMap</code> exige que você pense em <strong>chaves duplicadas</strong> desde o início: sem uma função de merge, uma chave repetida lança exceção em vez de sobrescrever silenciosamente (comportamento deliberadamente diferente de <code>Map.put</code>, que sobrescreve sem avisar).</p>
+
+      <h3>parallelStream: nem sempre mais rápido</h3>
+      <pre class="code"><span class="kw">long</span> total = numeros.parallelStream() <span class="com">// divide o trabalho entre threads do ForkJoinPool comum</span>
+    .filter(n -&gt; n % 2 == 0)
+    .count();</pre>
+      <div class="warn"><b>Paralelizar tem custo — meça antes de usar.</b> <code>parallelStream()</code> divide o trabalho entre threads do <code>ForkJoinPool</code> comum (compartilhado com o resto da aplicação, inclusive outros usos de <code>parallelStream</code>), o que introduz overhead de particionamento e sincronização. Para coleções pequenas ou operações rápidas por elemento, esse overhead costuma ser <strong>maior</strong> que o ganho, tornando o pipeline paralelo mais lento que o sequencial. Além disso, a operação precisa ser <em>non-interfering</em> e, se usar <code>reduce</code>/<code>collect</code>, a função de combinação precisa ser associativa — efeitos colaterais compartilhados (escrever em uma lista externa, por exemplo) produzem resultado incorreto ou race condition quando paralelizados, mesmo que funcionassem "por sorte" sequencialmente. Nunca troque <code>stream()</code> por <code>parallelStream()</code> sem medir com dados e carga representativos.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 13.1 — Pipeline básico</h4><span class="exercise-tag m">médio</span></div>
@@ -99,6 +147,20 @@ Map&lt;<span class="kw">String</span>, List&lt;<span class="cls">Livro</span>&gt
     .max(Map.Entry.comparingByValue())
     .map(Map.Entry::getKey)
     .orElse(<span class="str">"nenhum"</span>);</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 13.3 — Curto-circuito e partição</h4><span class="exercise-tag m">médio</span></div>
+        <p>Dada uma <code>List&lt;Livro&gt;</code>: (1) verifique com <code>anyMatch</code> se existe algum livro com mais de 400 páginas; (2) particione a lista em "grandes" (&gt;300 páginas) e "pequenos" com <code>partitioningBy</code>; (3) explique por que <code>particionado.get(false)</code> nunca lança exceção, mesmo se todos os livros forem grandes.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+<pre class="code"><span class="kw">boolean</span> temExtenso = livros.stream().anyMatch(l -&gt; l.getPaginas() &gt; 400);
+
+Map&lt;<span class="kw">Boolean</span>, List&lt;<span class="cls">Livro</span>&gt;&gt; particionado = livros.stream()
+    .collect(Collectors.partitioningBy(l -&gt; l.getPaginas() &gt; 300));
+List&lt;<span class="cls">Livro</span>&gt; pequenos = particionado.get(<span class="kw">false</span>);</pre>
+          <p style="margin-top:12px"><code>partitioningBy</code> sempre inicializa as duas chaves (<code>true</code> e <code>false</code>) com uma lista, mesmo vazia — diferente de um <code>Map</code> comum onde uma chave sem valor associado simplesmente não existe. Por isso <code>get(false)</code> nunca devolve <code>null</code> nesse coletor específico.</p>
         </div>
       </div>
     </section>

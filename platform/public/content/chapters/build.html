@@ -52,17 +52,85 @@ dependencies {
 
       <pre class="code">./gradlew build   <span class="com"># compila, testa e empacota</span>
 ./gradlew test    <span class="com"># só roda os testes</span>
-./gradlew run     <span class="com"># executa a aplicação (com o plugin "application")</span></pre>
+./gradlew run     <span class="com"># executa a aplicação (com o plugin "application")</span>
+./gradlew tasks   <span class="com"># lista as tasks disponíveis no projeto</span></pre>
+
+      <h3>Configurations do Gradle: implementation, api, compileOnly, runtimeOnly</h3>
+      <pre class="code">dependencies {
+    implementation(<span class="str">"com.fasterxml.jackson.core:jackson-databind:2.17.0"</span>) <span class="com">// disponível em compilação e runtime do PRÓPRIO módulo; NÃO vaza para quem depende dele</span>
+    api(<span class="str">"org.slf4j:slf4j-api:2.0.13"</span>)                              <span class="com">// como implementation, mas VAZA para o classpath de quem depende deste módulo</span>
+    compileOnly(<span class="str">"org.projectlombok:lombok:1.18.32"</span>)                <span class="com">// só em compilação -- não entra no runtime nem no artefato final</span>
+    runtimeOnly(<span class="str">"com.h2database:h2:2.2.224"</span>)                       <span class="com">// só em runtime -- não precisa estar disponível para compilar</span>
+    testImplementation(<span class="str">"org.junit.jupiter:junit-jupiter:5.10.0"</span>)     <span class="com">// só no classpath de teste, equivalente a scope=test do Maven</span>
+}</pre>
+      <p>A distinção <code>implementation</code> vs. <code>api</code> existe para controlar <strong>vazamento de classpath</strong> em projetos multi-módulo: se o módulo A usa <code>implementation</code> para uma biblioteca, um módulo B que depende de A não enxerga essa biblioteca automaticamente — só se A declarar como <code>api</code>. Isso deixa explícito o que faz parte do "contrato público" do módulo A e o que é detalhe de implementação interna, reduzindo recompilações desnecessárias quando um detalhe interno muda.</p>
+
+      <h3>Grafo de tasks e cache incremental</h3>
+      <p>Gradle modela o build como um <strong>grafo de tasks</strong> com dependências entre si (a task <code>test</code> depende de <code>compileJava</code>, que depende de <code>processResources</code>, etc.) — ao rodar <code>./gradlew build</code>, o Gradle calcula quais tasks realmente precisam rodar. Se as entradas de uma task (código-fonte, classpath, configuração) não mudaram desde a última execução, Gradle pode pular a task inteira (marcada <code>UP-TO-DATE</code>) ou reaproveitar resultado de um cache local/remoto — essa é a origem real de builds incrementais mais rápidas, não uma propriedade mágica da ferramenta em si.</p>
 
       <table class="cmp">
         <tbody><tr><th></th><th>Maven</th><th>Gradle</th></tr>
-        <tr><td>Formato</td><td>XML declarativo (<code>pom.xml</code>)</td><td>Script (Groovy ou Kotlin DSL)</td></tr>
-        <tr><td>Verbosidade</td><td>Mais verboso</td><td>Mais enxuto</td></tr>
-        <tr><td>Velocidade de build</td><td>Boa</td><td>Geralmente mais rápido (cache incremental)</td></tr>
-        <tr><td>Onde aparece mais</td><td>Projetos corporativos legados, Spring Initializr (opção padrão)</td><td>Projetos Android, projetos novos que priorizam flexibilidade</td></tr>
+        <tr><td>Formato</td><td>XML declarativo (<code>pom.xml</code>)</td><td>Script/DSL (Groovy ou Kotlin)</td></tr>
+        <tr><td>Modelo de execução</td><td>Lifecycle fixo de phases predefinidas</td><td>Grafo de tasks configurável, com cache incremental explícito</td></tr>
+        <tr><td>Onde aparece mais</td><td>Projetos corporativos legados, Spring Initializr (opção padrão)</td><td>Projetos Android (oficial), projetos que precisam de lógica de build customizada</td></tr>
       </tbody></table>
+      <div class="secret">Evite comparar Maven e Gradle por slogans ("Gradle é sempre mais rápido", "Maven é só para legado") — a diferença real de desempenho depende de cache (frio vs. quente), tamanho do projeto, paralelismo configurado e da própria lógica de build escrita. Um projeto Gradle mal configurado (sem aproveitar cache/incrementalidade) pode ser mais lento que um Maven equivalente. O critério de escolha real costuma ser: convenção fixa e previsibilidade (Maven) vs. necessidade de lógica de build customizada e flexibilidade (Gradle) — não velocidade genérica.</div>
 
       <div class="secret">O <strong>Spring Initializr</strong> (start.spring.io) — a ferramenta oficial para criar um projeto Spring Boot do zero — pergunta logo na primeira tela "Maven ou Gradle?". Tudo que você configurar ali vira exatamente um <code>pom.xml</code> ou <code>build.gradle</code> como os de cima, com as dependências do Spring já declaradas. Entender a estrutura desses arquivos <em>antes</em> de ver o Spring Initializr transforma aquela tela de "mágica" em "ah, é só isso".</div>
+
+      <h3>Estrutura padrão de diretórios (Maven e Gradle compartilham a convenção)</h3>
+      <pre class="code">projeto/
+├── pom.xml (ou build.gradle.kts)
+├── src/
+│   ├── main/
+│   │   ├── java/        <span class="com"># código de produção</span>
+│   │   └── resources/   <span class="com"># application.properties, arquivos estáticos</span>
+│   └── test/
+│       ├── java/        <span class="com"># testes</span>
+│       └── resources/   <span class="com"># configuração específica de teste</span>
+└── target/ (ou build/)  <span class="com"># artefatos gerados -- fica de fora do controle de versão</span></pre>
+      <p>Essa convenção ("convention over configuration") é o que permite rodar <code>mvn test</code> em qualquer projeto Maven sem configurar onde estão as fontes — a ferramenta já sabe procurar em <code>src/main/java</code> e <code>src/test/java</code>. Fugir dessa convenção é possível, mas exige configuração explícita e reduz a portabilidade entre projetos.</p>
+
+      <h3>Lifecycle: phase e goal (Maven)</h3>
+      <p>O Maven organiza a build em um <strong>lifecycle</strong> — uma sequência ordenada de <strong>phases</strong> (<code>validate</code> → <code>compile</code> → <code>test</code> → <code>package</code> → <code>verify</code> → <code>install</code> → <code>deploy</code>). Rodar uma phase executa <strong>todas as phases anteriores</strong> automaticamente: <code>mvn package</code> primeiro compila e testa, sem precisar rodar cada uma manualmente. Uma <strong>goal</strong> é uma tarefa concreta de um plugin (ex.: <code>compiler:compile</code>), amarrada a uma phase.</p>
+      <pre class="code">mvn compile     <span class="com"># só compila (fase compile)</span>
+mvn test        <span class="com"># compila + roda testes (fase test, que já inclui compile)</span>
+mvn package     <span class="com"># compila + testa + empacota .jar (fase package)</span>
+mvn install     <span class="com"># compila, testa, empacota e instala o artefato no repositório LOCAL (~/.m2), disponível a outros projetos na máquina</span>
+mvn verify      <span class="com"># roda verificações adicionais (ex.: testes de integração) além do package</span>
+mvn clean       <span class="com"># apaga target/ -- não faz parte do lifecycle padrão, é encadeável: mvn clean install</span></pre>
+
+      <h3>Dependências transitivas, exclusões e dependencyManagement</h3>
+      <p>Quando você declara uma dependência, o Maven também baixa <strong>as dependências dela</strong> (transitivas), recursivamente. Isso costuma ser conveniente, mas pode trazer uma versão de biblioteca que conflita com outra parte do projeto — o Maven resolve o conflito por uma regra de proximidade (<em>dependency mediation</em>), nem sempre a que você esperaria.</p>
+      <pre class="code">mvn dependency:tree  <span class="com"># mostra a árvore completa, incluindo transitivas -- o primeiro passo para diagnosticar conflito de versão</span></pre>
+      <pre class="code">&lt;dependency&gt;
+    &lt;groupId&gt;com.exemplo&lt;/groupId&gt;
+    &lt;artifactId&gt;lib-x&lt;/artifactId&gt;
+    &lt;version&gt;2.0&lt;/version&gt;
+    &lt;exclusions&gt;
+        &lt;exclusion&gt; <span class="com">&lt;!-- remove uma transitiva específica que conflita com outra versão já usada --&gt;</span>
+            &lt;groupId&gt;com.outra&lt;/groupId&gt;
+            &lt;artifactId&gt;lib-y&lt;/artifactId&gt;
+        &lt;/exclusion&gt;
+    &lt;/exclusions&gt;
+&lt;/dependency&gt;
+
+&lt;dependencyManagement&gt; <span class="com">&lt;!-- centraliza a VERSÃO sem declarar a dependência em si -- um BOM (Bill of Materials) faz isso em escala --&gt;</span>
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;3.5.0&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;</pre>
+      <p><code>dependencyManagement</code> declara <strong>versões</strong> centralizadas sem forçar a dependência em todo módulo — cada módulo ainda precisa declarar a dependência (sem versão, herdando a do management). Um <strong>BOM</strong> (Bill of Materials, como <code>spring-boot-dependencies</code>) é um <code>pom</code> especial cheio de entradas de <code>dependencyManagement</code>, garantindo que todas as bibliotecas de um ecossistema (Spring, por exemplo) usem versões compatíveis entre si sem você precisar declarar cada uma manualmente.</p>
+
+      <h3>Maven Wrapper: build reproduzível sem "funciona na minha máquina"</h3>
+      <pre class="code">./mvnw clean install   <span class="com"># usa a versão do Maven declarada no projeto, baixando-a se necessário -- não depende do Maven instalado globalmente</span></pre>
+      <p>O <strong>Maven Wrapper</strong> (<code>mvnw</code>/<code>mvnw.cmd</code>, gerados por <code>mvn wrapper:wrapper</code>) fixa a versão exata do Maven usada pelo projeto, commitada no repositório. Isso resolve o problema clássico de "funciona aqui, não funciona no CI" causado por duas máquinas com versões diferentes do Maven instaladas globalmente — prefira sempre <code>./mvnw</code> a um <code>mvn</code> global em projetos reais.</p>
 
       <h3>Escopos de dependência (Maven) e por que importam</h3>
       <pre class="code">&lt;scope&gt;compile&lt;/scope&gt;  <span class="com">&lt;!-- padrão: disponível em compilação, teste e runtime --&gt;</span>
@@ -98,6 +166,15 @@ dependencies {
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;</pre>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 19.2 — Diagnosticando conflito de versão</h4><span class="exercise-tag m">médio</span></div>
+        <p>No <code>pom.xml</code> do exercício anterior, adicione uma dependência qualquer que você saiba que traz transitivas (por exemplo, uma lib de JSON). Rode <code>mvn dependency:tree</code> e identifique pelo menos uma dependência transitiva na árvore. Explique, em texto, o que você faria se essa transitiva trouxesse uma versão de uma biblioteca que conflita com uma dependência direta do seu projeto.</p>
+        <button class="reveal-btn">Ver critérios</button>
+        <div class="solution">
+          <p><code>mvn dependency:tree</code> mostra a árvore completa; conflitos aparecem como a mesma <code>groupId:artifactId</code> em versões diferentes, resolvidos pelo Maven por proximidade (a declaração mais "perto" da raiz do projeto vence). Para resolver conscientemente: declare a versão desejada diretamente no seu <code>pom.xml</code> (que sempre vence por estar mais próxima) ou use <code>&lt;exclusions&gt;</code> na dependência que traz a versão indesejada.</p>
         </div>
       </div>
     </section>

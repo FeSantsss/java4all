@@ -3,7 +3,7 @@
       <div class="topic-meta">
         <span class="tech-badge tech-security">Segurança</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
-        <div class="time-est">⏱ <b>~1h30</b> de estudo</div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-mvc">44 · Spring Web/MVC</a>, <a class="prereq-tag" href="#http">26 · HTTP &amp; REST</a></div>
       </div>
 
@@ -37,6 +37,22 @@
 }</pre>
 
       <div class="warn"><b>Não trate <code>allowedOrigins("*")</code> como padrão de produção.</b> O wildcard permite leitura por qualquer origem em requisições sem credenciais; navegadores não permitem combiná-lo com credenciais. Para cookies ou autorização entre origens, liste origens confiáveis explicitamente, processe CORS antes do Spring Security e mantenha CSRF coerente com o modelo de autenticação.</div>
+
+      <h3>O preflight: a requisição OPTIONS que o navegador manda sozinho</h3>
+      <p>Para requisições "não simples" (método diferente de GET/POST/HEAD básicos, <code>Content-Type</code> diferente de formulário comum, ou qualquer cabeçalho customizado como <code>Authorization</code>), o navegador <strong>nunca</strong> envia a requisição real primeiro — ele manda uma requisição <code>OPTIONS</code> de sondagem, chamada <em>preflight</em>, perguntando se a requisição real seria permitida:</p>
+      <pre class="code"><span class="com">// preflight -- o navegador gera isso sozinho, antes do seu código rodar:</span>
+OPTIONS /livros HTTP/1.1
+Origin: http://localhost:3000
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type, authorization
+
+<span class="com">// resposta do Spring (CorsConfig acima já gera isso):</span>
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: content-type, authorization
+Access-Control-Allow-Credentials: true</pre>
+      <p>Só depois que o preflight responde com os cabeçalhos <code>Access-Control-Allow-*</code> compatíveis, o navegador dispara a requisição <code>POST</code> real — e mesmo essa resposta real precisa trazer <code>Access-Control-Allow-Origin</code> de volta, ou o navegador bloqueia o JavaScript de ler o corpo da resposta (mesmo que a requisição tenha chegado e sido processada pelo servidor). É por isso que abrir as ferramentas de desenvolvedor do navegador durante um erro de CORS geralmente mostra <strong>duas</strong> requisições na aba de rede — o preflight <code>OPTIONS</code> e a requisição real — e o problema pode estar em qualquer uma das duas.</p>
 
       <h3>Rate Limiting — primeira linha de defesa contra abuso</h3>
       <p>Antes mesmo de autenticação (próximo capítulo), uma API pública precisa se proteger contra excesso de requisições — seja abuso deliberado ou um bug em algum cliente fazendo requisição em loop infinito.</p>

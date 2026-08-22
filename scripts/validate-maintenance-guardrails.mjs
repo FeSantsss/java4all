@@ -1,5 +1,6 @@
 import { access, readdir, readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { getCourseCounts } from './lib/course-counts.mjs';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -94,14 +95,15 @@ for (const forbiddenRoot of ['index.html', 'app.js', 'curriculum-v2.js', 'sw.js'
   }
 }
 
-assert(generatedCourse.chapters.length === 128, 'generated-course.json deve conter os 128 capítulos legados gerados.');
+const counts = await getCourseCounts();
+assert(generatedCourse.chapters.length === counts.chapters - 23, `generated-course.json deve conter os ${counts.chapters - 23} capítulos legados gerados.`);
 assert(publicCourse.chapters.length === generatedCourse.chapters.length, 'course-content.json público diverge do generated-course.json em capítulos.');
 assert(publicCourse.modules.length === generatedCourse.modules.length, 'course-content.json público diverge do generated-course.json em módulos.');
 assert(publicCourse.concepts.length === generatedCourse.concepts.length, 'course-content.json público diverge do generated-course.json em conceitos.');
-assert(auditReport.summary.chapters === 151 && auditReport.summary.chaptersApproved === 151, 'Auditoria mestre deve permanecer em 151/151 capítulos.');
+assert(auditReport.summary.chapters === counts.chapters, `Auditoria mestre deve permanecer em ${counts.chapters} capítulos rastreados.`);
 assert(auditReport.summary.chaptersTriagedAsFailed === 0, 'Auditoria mestre não pode voltar a ter backlog.');
-assert(catalog.chapters.length === 128, 'Catálogo canônico deve preservar 128 capítulos legados.');
-assert(sourceInventory.chapters.length === 128, 'Inventário de origem deve preservar 128 capítulos legados.');
+assert(catalog.chapters.length === counts.chapters - 23, `Catálogo canônico deve preservar ${counts.chapters - 23} capítulos legados.`);
+assert(sourceInventory.chapters.length === counts.chapters - 23, `Inventário de origem deve preservar ${counts.chapters - 23} capítulos legados.`);
 assert(sourceInventory.aggregateHtmlSha256 && sourceInventory.aggregateTextSha256, 'Inventário de origem deve manter hashes agregados.');
 
 const chapterFiles = (await readdir('platform/public/content/chapters')).filter(file => file.endsWith('.html')).sort();

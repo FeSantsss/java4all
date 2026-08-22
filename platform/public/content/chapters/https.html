@@ -2,8 +2,8 @@
       <div class="section-head"><span class="section-num">53</span><h2 class="section-title">HTTPS &amp; certificados</h2></div>
       <div class="topic-meta">
         <span class="tech-badge tech-security">Segurança</span>
-        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
-        <div class="time-est">⏱ <b>~1h</b> de estudo</div>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#autenticacao-conceitos">51 · Autenticação conceitos</a></div>
       </div>
 
@@ -14,7 +14,43 @@
       <h3>Como funciona, em conceito</h3>
       <p>HTTPS usa <strong>TLS</strong> (Transport Layer Security) para criptografar a comunicação entre cliente e servidor. Um <strong>certificado digital</strong> — emitido por uma Autoridade Certificadora (CA) confiável — prova que o servidor é realmente quem diz ser, evitando que alguém finja ser sua API (ataque conhecido como <em>man-in-the-middle</em>).</p>
 
-      <div class="secret">A boa notícia: você quase nunca precisa configurar certificados manualmente hoje em dia. Provedores modernos de deploy (Railway, Render, Vercel — que você vai usar em capítulos futuros) já entregam HTTPS automaticamente, renovando certificados sozinhos via Let's Encrypt, de graça. A configuração manual de certificado só volta a ser sua responsabilidade em cenários de infraestrutura própria (VPS, servidor dedicado).</div>
+      <h3>O handshake: como cliente e servidor combinam uma chave sem nunca enviá-la pela rede</h3>
+      <p>Criptografia assimétrica (chave pública/privada) é cara demais para cifrar toda a conversa — por isso o TLS só usa isso no início, para negociar com segurança uma chave simétrica bem mais rápida que vai proteger o resto da sessão:</p>
+      <pre class="code"><span class="com">1. Cliente envia ClientHello: versoes de TLS suportadas, algoritmos de cifra
+   propostos e um numero aleatorio
+2. Servidor responde com ServerHello: versao/algoritmo escolhidos, outro
+   numero aleatorio, e o CERTIFICADO do servidor (contem a chave publica dele)
+3. Cliente valida o certificado (proxima secao -- cadeia de confianca) e usa
+   informacoes trocadas para as duas partes derivarem a MESMA chave simetrica,
+   sem que essa chave em si jamais trafegue pela rede
+4. O restante da comunicacao usa essa chave simetrica -- rapida o
+   suficiente para cifrar cada request/response sem custo perceptivel</span></pre>
+      <p>Note a divisão de trabalho: a parte assimétrica (certificado, chave pública) só serve para provar identidade e combinar uma chave com segurança; a parte simétrica é quem de fato cifra o tráfego. É a mesma divisão de papéis do <code>JwtDecoder</code> do capítulo 52 — HMAC (simétrico) é rápido mas exige segredo compartilhado; assinatura assimétrica (JWK) é mais cara, mas prova identidade sem compartilhar segredo nenhum. TLS 1.3 (padrão atual) reduziu esse handshake para uma única ida-e-volta (1-RTT), tornando a conexão inicial mais rápida que nas versões anteriores.</p>
+
+      <h3>Cadeia de confiança: por que seu navegador confia num certificado que nunca viu antes</h3>
+      <p>Uma CA não assina o certificado do seu servidor diretamente com a chave raiz dela — essa chave raiz fica guardada offline, isolada, porque se vazasse comprometeria a confiança de <em>todos</em> os certificados que aquela CA já emitiu. Em vez disso, a cadeia funciona em camadas:</p>
+      <ul style="color:var(--ink-dim)">
+        <li><strong>Root CA</strong> — a chave mais protegida, raramente usada diretamente; seu certificado já vem pré-instalado no sistema operacional/navegador como confiável.</li>
+        <li><strong>Intermediate CA</strong> — certificado assinado pela root, usado no dia a dia para assinar certificados de servidores. Se um intermediate for comprometido, só ele (não a root) precisa ser revogado.</li>
+        <li><strong>Leaf (seu servidor)</strong> — o certificado do seu domínio, assinado por um intermediate.</li>
+      </ul>
+      <p>Quando o cliente recebe o certificado do servidor (etapa 2 do handshake), ele sobe essa cadeia — verifica que o leaf foi assinado por um intermediate confiável, que por sua vez foi assinado por uma root que já está na lista de confiança do sistema — até fechar a cadeia num ponto em que já confia. Se qualquer elo dessa cadeia não puder ser validado, o navegador mostra o aviso de "conexão não é segura" que todo mundo já viu ao menos uma vez.</p>
+
+      <h3>Self-signed vs. certificado de CA real</h3>
+      <p>Um certificado <strong>self-signed</strong> é assinado pela própria chave privada do servidor, sem nenhuma CA envolvida — não existe cadeia até uma root confiável, então clientes rejeitam por padrão (o aviso de "certificado inválido"). Isso não é um bug do navegador: sem CA, não há como um terceiro provar que aquele servidor é realmente quem diz ser. Self-signed serve para desenvolvimento local (<code>localhost</code>) e testes internos onde você mesmo controla os dois lados da conexão — nunca para tráfego público de produção.</p>
+      <div class="secret">A boa notícia: você quase nunca precisa configurar certificados manualmente hoje em dia. Provedores modernos de deploy (Railway, Render, Vercel — que você vai usar em capítulos futuros) já entregam HTTPS automaticamente, renovando certificados sozinhos via Let's Encrypt (uma CA gratuita e automatizada, sem intervenção manual), de graça. A configuração manual de certificado só volta a ser sua responsabilidade em cenários de infraestrutura própria (VPS, servidor dedicado).</div>
+
+      <h3>HSTS: fechando a porta do primeiro acesso em HTTP puro</h3>
+      <p>Mesmo com HTTPS configurado, um usuário que digita <code>meusite.com</code> (sem <code>https://</code>) no navegador faz a primeira requisição em HTTP puro — um atacante na mesma rede poderia interceptar esse primeiro pedido e forçar a conversa a continuar em HTTP (um <em>downgrade attack</em>), mesmo que o servidor sempre redirecione para HTTPS depois. O cabeçalho <code>Strict-Transport-Security</code> (HSTS) resolve isso:</p>
+      <pre class="code">Strict-Transport-Security: max-age=<span class="num">31536000</span>; includeSubDomains</pre>
+      <p>Depois da <strong>primeira</strong> visita HTTPS bem-sucedida, o navegador memoriza esse cabeçalho e nunca mais tenta HTTP puro para aquele domínio (nem se o usuário digitar <code>http://</code> ou clicar um link antigo) durante o <code>max-age</code> informado — o redirecionamento acontece localmente no navegador, sem nem chegar a fazer a requisição insegura. <code>includeSubDomains</code> estende a mesma regra a todos os subdomínios.</p>
+
+      <h3>Onde o TLS termina: load balancer/proxy vs. aplicação</h3>
+      <p>Na maioria dos deploys em produção, sua aplicação Spring Boot <strong>não</strong> é quem descriptografa o tráfego TLS — quem faz isso é uma camada na borda (load balancer, reverse proxy, API gateway, CDN). Esse padrão se chama <strong>terminação de TLS</strong>:</p>
+      <pre class="code"><span class="com">Cliente --HTTPS (cifrado)--> Load Balancer/Proxy --HTTP (texto puro)--> Aplicacao
+                              (TLS termina aqui)      (rede interna/privada)</span></pre>
+      <p>O tráfego chega cifrado até o load balancer; dali para a aplicação, dentro da rede privada/VPC, costuma seguir como HTTP simples — o que só é aceitável porque esse segmento interno não está exposto à internet pública. Essa terminação centralizada tem vantagens reais: um único lugar para configurar e renovar certificado (em vez de um por instância da aplicação), e o trabalho pesado de criptografia/descriptografia sai da sua aplicação. A alternativa é <strong>TLS ponta a ponta</strong> (a aplicação também termina TLS, ou o proxy só repassa o tráfego cifrado sem descriptografar — <em>TLS passthrough</em>): mais defesa em profundidade, mas exige gerenciar certificado em cada instância da aplicação também.</p>
+      <div class="warn">Se o TLS termina antes da sua aplicação, o Spring Boot recebe a requisição como HTTP puro — sem o cabeçalho <code>X-Forwarded-Proto: https</code> (que o proxy adiciona informando o esquema original), seu código pode achar erroneamente que a conexão nunca foi HTTPS, gerando redirecionamentos incorretos ou cookies <code>Secure</code> nunca enviados. Configure <code>server.forward-headers-strategy=native</code> (ou <code>framework</code>) para o Spring Boot confiar nesses cabeçalhos <code>X-Forwarded-*</code> vindos do proxy.</div>
 
       <h3>Onde HTTPS se conecta com o resto do que você já aprendeu</h3>
       <ul style="color:var(--ink-dim)">
@@ -31,6 +67,15 @@
         <button class="reveal-btn">Ver solução</button>
         <div class="solution">
           <p>Mesmo com senha protegida por BCrypt no banco e o JWT assinado corretamente, se a <strong>conexão</strong> não for HTTPS, o token em si viaja em texto puro em toda requisição subsequente — qualquer pessoa capturando o tráfego de rede (ex: em um Wi-Fi público) pode copiar esse token e reutilizá-lo para se passar pelo usuário até o token expirar, sem nunca precisar saber a senha. HTTPS protege o <em>transporte</em>; BCrypt e assinatura JWT protegem o <em>conteúdo</em> — os dois são necessários, um não substitui o outro.</p>
+        </div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head"><h4>Exercício 53.2 — Diagnosticando um redirecionamento que nunca termina</h4><span class="exercise-tag m">médio</span></div>
+        <p>Sua aplicação Spring Boot está atrás de um load balancer que termina TLS e repassa as requisições como HTTP puro. Você configurou um filtro que redireciona toda requisição HTTP para HTTPS. Em produção, os usuários relatam um loop infinito de redirecionamento. Explique a causa mais provável e a correção.</p>
+        <button class="reveal-btn">Ver solução</button>
+        <div class="solution">
+          <p>Como o TLS termina no load balancer, a aplicação sempre recebe a requisição como HTTP puro — sem confiar no cabeçalho <code>X-Forwarded-Proto</code>, o filtro de redirecionamento acha que <strong>toda</strong> requisição (mesmo as que chegaram como HTTPS no cliente) precisa ser redirecionada, criando um loop. A correção é configurar <code>server.forward-headers-strategy=native</code> para o Spring Boot reconhecer <code>X-Forwarded-Proto: https</code> enviado pelo load balancer e tratar a requisição como já estando em HTTPS.</p>
         </div>
       </div>
     </section>

@@ -39,12 +39,14 @@
         <tr><td>Uso comum</td><td>Aplicações web tradicionais, monolito com front renderizado no servidor</td><td>API + front separados (SPA), mobile, microsserviços</td></tr>
       </tbody></table>
 
-      <h3>OAuth2 — delegando autenticação para terceiros</h3>
-      <p>"Entrar com Google/GitHub" é OAuth2 na prática: sua aplicação nunca vê a senha do usuário — o Google autentica, e devolve para sua aplicação um token comprovando "esse usuário se autenticou com sucesso, aqui está o e-mail dele".</p>
+      <h3>OAuth2 — delegando autorização para terceiros</h3>
+      <p>OAuth2 é um framework de <strong>autorização</strong>, não de autenticação: ele resolve "esta aplicação pode acessar tal recurso, com tal permissão", sem a aplicação nunca precisar ver a senha do usuário. Isso é uma distinção importante, fácil de errar: OAuth2 sozinho não define um jeito padrão de responder "quem é esse usuário" — ele só prova que um acesso foi autorizado.</p>
 
-      <div class="secret">Isso é o mesmo princípio de injeção de dependência do capítulo 22, só que aplicado à confiança: em vez da sua aplicação implementar (e ser responsável por) toda a lógica de autenticação, ela <strong>delega</strong> essa responsabilidade para um provedor especializado (Google, GitHub), assim como <code>PedidoServico</code> delegava a criação do <code>Notificador</code> para quem "montava" a aplicação. Você confia na abstração, não precisa reimplementar a parte difícil.</div>
+      <div class="warn"><b>"Entrar com Google/GitHub" não é OAuth2 puro — é OAuth2 + uma camada de identidade em cima.</b> Quem de fato padroniza "esse usuário se autenticou com sucesso, aqui está o e-mail dele" é o <strong>OpenID Connect (OIDC)</strong>, tema do próximo capítulo: uma extensão construída sobre o OAuth2 especificamente para resolver autenticação e identidade, devolvendo um token de identidade além do token de autorização. Chamar OAuth2 de "protocolo de autenticação" mistura as duas camadas e é um erro comum mesmo em material técnico publicado.</div>
 
-      <div class="study-tip">Para o primeiro projeto real, comece com JWT simples (usuário/senha próprios, sem OAuth2) — é suficiente para entender o fluxo completo de autenticação sem a complexidade extra de configurar um provedor externo. Adicione "login com Google" depois, quando o fluxo básico já estiver sólido.</div>
+      <div class="secret">Isso é o mesmo princípio de injeção de dependência do capítulo 22, só que aplicado à confiança: em vez da sua aplicação implementar (e ser responsável por) toda a lógica de autorização — e, com OIDC por cima, de identidade —, ela <strong>delega</strong> essa responsabilidade para um provedor especializado (Google, GitHub), assim como <code>PedidoServico</code> delegava a criação do <code>Notificador</code> para quem "montava" a aplicação. Você confia na abstração, não precisa reimplementar a parte difícil.</div>
+
+      <div class="study-tip">Para o primeiro projeto real, comece com JWT simples (usuário/senha próprios, sem OAuth2/OIDC) — é suficiente para entender o fluxo completo de autenticação sem a complexidade extra de configurar um provedor externo. Adicione OAuth2 + OpenID Connect depois, quando o fluxo básico já estiver sólido.</div>
 
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 51.1 — Decodificando um JWT</h4><span class="exercise-tag f">fácil</span></div>

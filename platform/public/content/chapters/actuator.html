@@ -2,8 +2,8 @@
       <div class="section-head"><span class="section-num">56</span><h2 class="section-title">Spring Boot Actuator &amp; health checks</h2></div>
       <div class="topic-meta">
         <span class="tech-badge tech-devops">DevOps</span>
-        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i></i><i></i></span> <b>Iniciante-Intermediário</b></div>
-        <div class="time-est">⏱ <b>~1h</b> de estudo + prática</div>
+        <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i></i></span> <b>Intermediário</b></div>
+        <div class="time-est">⏱ <b>~2h</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#spring-core">43 · Spring Core</a>, <a class="prereq-tag" href="#compose">32 · Docker Compose</a></div>
       </div>
 
@@ -51,7 +51,43 @@ services:
         <tr><td><code>/actuator/loggers</code></td><td>Ver e <strong>alterar</strong> nível de log em runtime, sem reiniciar</td></tr>
       </tbody></table>
 
-      <div class="warn"><b>Nunca exponha o Actuator completo publicamente sem proteção</b> — endpoints como <code>/actuator/env</code> podem vazar variáveis de ambiente (incluindo secrets, capítulo seguinte). Em produção, restrinja quais endpoints ficam expostos e proteja-os atrás de autenticação (capítulo 52), geralmente liberando só <code>/actuator/health</code> publicamente para health checks de infraestrutura.</div>
+      <h3>Exposição: só o que você decide, nunca "tudo por padrão"</h3>
+      <p>Por padrão, o Spring Boot expõe muito pouco via HTTP (na prática, só <code>/actuator/health</code>) — cada endpoint adicional precisa ser incluído explicitamente:</p>
+      <pre class="code">management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers <span class="com"># explícito -- nunca "*" em produção</span></pre>
+      <p><code>include: "*"</code> expõe absolutamente tudo, inclusive endpoints perigosos como <code>/actuator/heapdump</code> (baixa um dump completo da memória do processo — que pode conter senhas, tokens ou dados de sessão que estavam em variáveis Java no momento da captura) e <code>/actuator/shutdown</code> (se habilitado, encerra a aplicação para qualquer requisição, sem autenticação nenhuma por padrão). Liste exatamente os endpoints que precisam estar acessíveis, nunca o coringa.</p>
+
+      <h3>HealthIndicator customizado: seu próprio critério de "saudável"</h3>
+      <p>O Actuator já verifica banco e disco automaticamente, mas uma dependência específica do seu domínio (o serviço de pagamento externo do capítulo 55, por exemplo) precisa de um indicador próprio:</p>
+      <pre class="code"><span class="annotation">@Component</span>
+<span class="kw">public class</span> <span class="cls">ServicoPagamentoHealthIndicator</span> <span class="kw">implements</span> HealthIndicator {
+    <span class="annotation">@Override</span>
+    <span class="kw">public</span> Health <span class="fn">health</span>() {
+        <span class="kw">try</span> {
+            clienteHttp.verificarDisponibilidade(); <span class="com">// chamada leve e rápida, não a operação de negócio inteira</span>
+            <span class="kw">return</span> Health.up().build();
+        } <span class="kw">catch</span> (Exception e) {
+            <span class="kw">return</span> Health.down().withDetail(<span class="str">"erro"</span>, e.getMessage()).build();
+        }
+    }
+}</pre>
+      <p>Esse indicador passa a compor automaticamente <code>/actuator/health</code> — se o serviço de pagamento cair, o status geral da aplicação reflete isso, mesmo com banco e disco saudáveis.</p>
+
+      <h3>Micrometer: o mecanismo real por trás de /actuator/metrics</h3>
+      <p><code>/actuator/metrics</code> não coleta métricas sozinho — quem faz isso é o <strong>Micrometer</strong>, a fachada de métricas que o Spring Boot já traz e conecta automaticamente a contadores de requisição, latência, uso de JVM/threads/GC. Sem nomear o Micrometer, é fácil achar que "o Actuator mede tudo magicamente" — na prática, o Actuator só expõe via HTTP o que o Micrometer já vinha coletando por trás.</p>
+
+      <h3>Readiness e liveness: dois sinais diferentes, uma confusão comum</h3>
+      <pre class="code">management:
+  endpoint:
+    health:
+      probes:
+        enabled: true <span class="com"># habilita /actuator/health/liveness e /actuator/health/readiness</span></pre>
+      <p><strong>Liveness</strong> responde se o processo precisa ser reiniciado — não deveria cair só porque uma dependência externa está indisponível. <strong>Readiness</strong> responde se a instância pode receber tráfego agora. Misturar as duas transforma uma falha temporária de banco em uma tempestade de reinícios: se o orquestrador (Kubernetes) reinicia o processo achando que ele está morto, mas o problema real era só o banco fora do ar, o restart não resolve nada e ainda derruba conexões saudáveis em andamento.</p>
+
+      <div class="warn"><b>Nunca exponha o Actuator completo publicamente sem proteção</b> — endpoints como <code>/actuator/env</code> podem vazar variáveis de ambiente (incluindo secrets, capítulo seguinte), <code>/actuator/heapdump</code> pode vazar dados sensíveis em memória, e <code>/actuator/shutdown</code> pode derrubar a aplicação sem autenticação. Em produção, restrinja quais endpoints ficam expostos e proteja-os atrás de autenticação (capítulo 52), geralmente liberando só <code>/actuator/health</code> publicamente para health checks de infraestrutura.</div>
 
       <div class="study-tip">Habilite o Actuator desde o primeiro dia do projeto, mesmo antes de precisar dele — é mais fácil configurar corretamente (incluindo o que deve ou não ficar público) desde o início do que descobrir em produção, sob pressão, que um endpoint sensível estava exposto o tempo todo.</div>
 

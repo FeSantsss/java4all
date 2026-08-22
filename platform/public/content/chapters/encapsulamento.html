@@ -69,6 +69,28 @@
 
       <div class="secret">Imutabilidade exige olhar também para campos que referenciam objetos mutáveis. Um campo <code>final</code> não pode apontar para outro objeto depois, mas o objeto já apontado ainda pode mudar. Neste exemplo, os campos são números primitivos, então não existe conteúdo interno mutável exposto.</div>
 
+      <h3>O vazamento mais comum: expor um array (ou outro objeto mutável interno) por getter</h3>
+      <pre class="code"><span class="kw">public class</span> <span class="cls">Turma</span> {
+    <span class="kw">private final String</span>[] alunos = <span class="kw">new</span> <span class="kw">String</span>[3];
+    <span class="kw">private int</span> quantidade;
+
+    <span class="com">// ❌ vazamento: quem chama getAlunos() recebe a REFERÊNCIA do array interno</span>
+    <span class="kw">public String</span>[] <span class="fn">getAlunos</span>() { <span class="kw">return</span> alunos; }
+}
+
+<span class="cls">Turma</span> turma = <span class="kw">new</span> <span class="cls">Turma</span>();
+turma.getAlunos()[<span class="num">0</span>] = <span class="str">"Fraude"</span>; <span class="com">// muda o estado interno de "turma" SEM passar por nenhum método dela!</span></pre>
+      <p>Marcar o campo <code>private</code> não protege nada se um método devolver a <strong>própria referência</strong> de um array (ou de qualquer objeto mutável) guardado internamente — o código externo consegue alterar posições sem nunca chamar um método de <code>Turma</code>, contornando qualquer regra que ela devesse impor. Isso é encapsulamento de fachada disfarçado: o campo é <code>private</code>, mas o objeto continua totalmente controlável de fora, só que indiretamente.</p>
+      <pre class="code"><span class="com">// ✅ opção 1: devolver uma cópia -- quem recebe pode ler, mas alterar não afeta o original</span>
+<span class="kw">public String</span>[] <span class="fn">getAlunos</span>() { <span class="kw">return</span> Arrays.copyOf(alunos, quantidade); }
+
+<span class="com">// ✅ opção 2 (a melhor quando possível): não devolver o array -- expor só a operação que faz sentido</span>
+<span class="kw">public boolean</span> <span class="fn">contemAluno</span>(<span class="kw">String</span> nome) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; quantidade; i++) <span class="kw">if</span> (alunos[i].equals(nome)) <span class="kw">return true</span>;
+    <span class="kw">return false</span>;
+}</pre>
+      <p>A mesma regra vale ao <strong>receber</strong> um array ou outro objeto mutável de fora, no construtor ou em um setter: guardar a referência recebida diretamente permite que quem chamou continue mutando o array depois de "entregá-lo", surpreendendo o objeto que achava ter uma cópia própria. Uma <strong>cópia defensiva</strong> (<code>Arrays.copyOf(recebido, recebido.length)</code>) na entrada e na saída é o mesmo princípio de proteção de estado, aplicado nas duas direções — o mesmo princípio se aplica depois a coleções (<code>ArrayList</code>, <code>List</code>), quando você as conhecer no módulo de Java Core.</p>
+
       <div class="exercise">
         <div class="exercise-head"><h4>Exercício 4.1 — Encapsulando Livro</h4><span class="exercise-tag f">fácil</span></div>
         <p>Torne <code>Livro</code> totalmente encapsulado: atributos <code>private</code>, construtor com os três valores, getters para todos, e um setter apenas para <code>paginas</code> que rejeite valores ≤ 0.</p>

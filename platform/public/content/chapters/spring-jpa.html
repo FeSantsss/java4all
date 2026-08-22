@@ -3,7 +3,7 @@
       <div class="topic-meta">
         <span class="tech-badge tech-spring">Spring</span>
         <div class="meta-item">Dificuldade: <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></span> <b>Avançado</b></div>
-        <div class="time-est">⏱ <b>~3h</b> de estudo + prática</div>
+        <div class="time-est">⏱ <b>~4h</b> de estudo + prática</div>
         <div class="meta-item">Pré-requisitos: <a class="prereq-tag" href="#jdbc">24 · JDBC</a>, <a class="prereq-tag" href="#padroes">23 · Padrões de projeto</a>, <a class="prereq-tag" href="#sql">33 · SQL fundamentos</a>, <a class="prereq-tag" href="#migrations">35 · Migrations</a></div>
       </div>
 
@@ -30,10 +30,12 @@
     // getters e setters...</span>
 }</pre>
 
-      <h3>JpaRepository — a interface que se implementa sozinha</h3>
+      <h3>JpaRepository — implementação gerada por proxy, não mágica</h3>
+      <p>Você declara só a assinatura da interface abaixo. É o Spring Data JPA quem gera a implementação inteira em runtime:</p>
       <pre class="code"><span class="kw">public interface</span> <span class="cls">LivroRepository</span> <span class="kw">extends</span> JpaRepository&lt;<span class="cls">Livro</span>, <span class="kw">Long</span>&gt; {
-    <span class="com">// isso é TUDO. O Spring Data JPA gera a implementação inteira em runtime,
-    // via um Dynamic Proxy (capítulo 20!) que traduz cada chamada em SQL.</span>
+    <span class="com">// Dynamic Proxy (capítulo 20!) gera a implementação em runtime. Cada
+    // chamada vira uma query que o EntityManager -- a API real do Hibernate --
+    // executa de verdade.</span>
 
     List&lt;<span class="cls">Livro</span>&gt; <span class="fn">findByAutorNome</span>(<span class="kw">String</span> nome);        <span class="com">// vira: WHERE autor.nome = ?</span>
     List&lt;<span class="cls">Livro</span>&gt; <span class="fn">findByPaginasGreaterThan</span>(<span class="kw">int</span> minimo); <span class="com">// vira: WHERE paginas &gt; ?</span>
@@ -48,6 +50,19 @@ livroRepository.deleteById(5L);    <span class="com">// DELETE ... WHERE id = ?<
 
       <div class="analogy">O <strong>Query Method</strong> (<code>findByAutorNome</code>) funciona porque o Spring lê o <em>nome do método</em> via reflection e monta a query correspondente automaticamente — é como se o método fosse escrito em uma "mini-linguagem" que descreve a consulta, e o Spring traduzisse isso para SQL na hora de rodar. É exatamente o mesmo espírito do seu <code>@NaoNulo</code> do capítulo 20: uma convenção lida via reflection, virando comportamento automático.</div>
 
+      <h3>@Query: quando o nome do método não basta</h3>
+      <p>Query Methods derivados do nome ficam ilegíveis rápido para joins complexos, agregações ou queries com múltiplas condições opcionais — <code>@Query</code> é a válvula de escape, sem abandonar o Repository:</p>
+      <pre class="code"><span class="annotation">@Query</span>(<span class="str">"SELECT l FROM Livro l WHERE l.paginas &gt; :minimo ORDER BY l.titulo"</span>) <span class="com">// JPQL usa entidades e campos, não tabelas e colunas</span>
+List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarLivrosLongos</span>(<span class="annotation">@Param</span>(<span class="str">"minimo"</span>) <span class="kw">int</span> minimo);
+
+<span class="annotation">@Query</span>(value = <span class="str">"SELECT * FROM livros WHERE titulo ILIKE %:termo%"</span>, nativeQuery = <span class="kw">true</span>) <span class="com">// SQL de verdade, específico do Postgres</span>
+List&lt;<span class="cls">Livro</span>&gt; <span class="fn">buscarPorTituloParcial</span>(<span class="annotation">@Param</span>(<span class="str">"termo"</span>) <span class="kw">String</span> termo);
+
+<span class="com">// projeção: traz só os campos escolhidos, sem carregar a entidade inteira</span>
+<span class="annotation">@Query</span>(<span class="str">"SELECT new biblioteca.dto.LivroResumoDTO(l.id, l.titulo) FROM Livro l"</span>)
+List&lt;<span class="cls">LivroResumoDTO</span>&gt; <span class="fn">buscarResumos</span>();</pre>
+      <p>JPQL opera sobre <strong>entidades e seus campos</strong> (<code>Livro l WHERE l.paginas</code>), não sobre nomes de tabela/coluna do banco — é por isso que funciona igual em qualquer banco suportado. <code>nativeQuery = true</code> abre mão dessa portabilidade em troca de recursos específicos do banco (como <code>ILIKE</code> do Postgres). A projeção via <em>constructor expression</em> (<code>new pacote.DTO(...)</code>) evita carregar a entidade completa quando só alguns campos importam — útil para listagens grandes.</p>
+
       <h3>Relacionamentos: @OneToMany, @ManyToOne, @ManyToMany</h3>
       <pre class="code"><span class="annotation">@Entity</span>
 <span class="kw">public class</span> <span class="cls">Autor</span> {
@@ -57,7 +72,19 @@ livroRepository.deleteById(5L);    <span class="com">// DELETE ... WHERE id = ?<
 
     <span class="annotation">@OneToMany</span>(mappedBy = <span class="str">"autor"</span>, cascade = CascadeType.ALL)
     <span class="kw">private</span> List&lt;<span class="cls">Livro</span>&gt; livros = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+    <span class="com">// método auxiliar -- mantém os dois lados do relacionamento consistentes juntos</span>
+    <span class="kw">public void</span> <span class="fn">adicionarLivro</span>(<span class="cls">Livro</span> livro) {
+        livros.add(livro);
+        livro.setAutor(<span class="kw">this</span>); <span class="com">// sem isso, o lado "dono" (Livro.autor) fica desatualizado em memória</span>
+    }
+
+    <span class="kw">public void</span> <span class="fn">removerLivro</span>(<span class="cls">Livro</span> livro) {
+        livros.remove(livro);
+        livro.setAutor(<span class="kw">null</span>);
+    }
 }</pre>
+      <div class="warn">Chamar só <code>autor.getLivros().add(livro)</code> sem também setar <code>livro.setAutor(autor)</code> deixa a relação <strong>inconsistente em memória</strong> — o lado "dono" da relação (<code>@ManyToOne</code>, quem tem a chave estrangeira) é quem o Hibernate realmente persiste; o lado <code>mappedBy</code> (<code>@OneToMany</code>) é só leitura em termos de persistência. Métodos auxiliares como <code>adicionarLivro</code>/<code>removerLivro</code> existem justamente para nunca esquecer de atualizar os dois lados — chame sempre eles, nunca manipule a coleção diretamente de fora da entidade.</div>
 
       <table class="cmp">
         <tbody><tr><th>Anotação</th><th>Relação</th><th>Exemplo</th></tr>
@@ -66,6 +93,15 @@ livroRepository.deleteById(5L);    <span class="com">// DELETE ... WHERE id = ?<
         <tr><td><code>@OneToOne</code></td><td>Um para um</td><td>Um usuário → um perfil</td></tr>
         <tr><td><code>@ManyToMany</code></td><td>Vários para vários</td><td>Livros ↔ categorias, via tabela de junção</td></tr>
       </tbody></table>
+
+      <h3>Igualdade de entidade: por que equals/hashCode aqui é traiçoeiro</h3>
+      <p>Três armadilhas específicas de <code>@Entity</code> que não existem em objetos comuns:</p>
+      <ul style="color:var(--ink-dim)">
+        <li><strong>Nunca use <code>@Data</code> do Lombok numa entidade</strong> (já visto no capítulo de Lombok) — ele gera <code>equals</code>/<code>hashCode</code> sobre <em>todos</em> os campos, inclusive coleções <code>@OneToMany</code>; numa relação bidirecional isso causa recursão infinita (<code>Autor.equals</code> chama <code>Livro.equals</code> que chama <code>Autor.equals</code>...) e força carregar coleções lazy só para comparar objetos.</li>
+        <li><strong>Igualdade baseada só no <code>id</code> gerado quebra antes de persistir</strong>: enquanto o <code>id</code> ainda é <code>null</code> (objeto recém-criado, antes do <code>save</code>), um <code>equals</code> ingênuo baseado em <code>id</code> torna <em>todo</em> objeto transiente "igual" a qualquer outro — colocar dois livros novos, ainda não salvos, no mesmo <code>Set</code> pode descartar um deles silenciosamente.</li>
+        <li><strong>Proxies do Hibernate quebram <code>getClass() != o.getClass()</code></strong>: uma associação carregada lazy vem como um <em>proxy</em> gerado pelo Hibernate (subclasse dinâmica, mesmo mecanismo do CGLIB visto no capítulo de Spring AOP), não a classe exata da entidade — comparar com <code>getClass()</code> falha entre a entidade real e seu proxy. Prefira <code>instanceof</code>.</li>
+      </ul>
+      <p>Uma alternativa comum: implementar <code>equals</code>/<code>hashCode</code> baseados numa <em>business key</em> estável (campo que nunca muda e identifica a entidade no domínio, como um ISBN), quando ela existir — evita depender do momento exato em que o <code>id</code> gerado pelo banco passa a existir.</p>
 
       <div class="rules-box">
         <h4>Regras de ouro</h4>

@@ -504,7 +504,8 @@ const chapters = legacyChapters.map((chapter, order) => {
     blocks: blocksFrom(section, chapter.id, authored),
     resources: authored.resources ?? resourcesFor(chapter, moduleId),
     englishActivity: englishActivity(chapter, section, module.englishLevel),
-    audit: authored.audit ?? { status: 'pending', sourceKind: 'legacy-html' }
+    audit: authored.audit ?? { status: 'pending', sourceKind: 'legacy-html' },
+    ...(authored.editorialReview ? { editorialReview: authored.editorialReview } : {})
   };
 });
 
